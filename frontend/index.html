@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Omnora — luxury handcrafted bath bombs for modern self-care." />
+  <title>Omnora</title>
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://omnora.com/" />
+  <meta property="og:title" content="Omnora - Luxury Bath Bombs" />
+  <meta property="og:description" content="Handcrafted luxury bath bombs for modern self-care." />
+  <meta property="og:image" content="https://omnora.com/images/og-image.jpg" />
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image" />
+  <meta property="twitter:url" content="https://omnora.com/" />
+  <meta property="twitter:title" content="Omnora - Luxury Bath Bombs" />
+  <meta property="twitter:description" content="Handcrafted luxury bath bombs for modern self-care." />
+  <meta property="twitter:image" content="https://omnora.com/images/og-image.jpg" />
+
+  <style>
+    :root {
+      --bg-color: #0e0f12;
+      --dark-bg-color: #0b0c0f;
+      --surface-color: #14161b;
+      --text-color: #f5f7fa;
+      --light-text-color: #aeb5c0;
+      --border-color: rgba(255, 255, 255, 0.08);
+      --shadow-color: rgba(0, 0, 0, 0.25);
+      --accent-1: #9b87f5;
+      /* lavender */
+      --accent-2: #7ee7d8;
+      /* mint */
+      --accent-3: #f7b267;
+      /* apricot */
+      --accent-4: #f76da8;
+      /* rose */
+    }
+
+    html,
+    body,
+    #root {
+      height: 100%;
+      background: var(--bg-color);
+      color: var(--text-color);
+    }
+
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+    }
+
+    .luxury-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, var(--accent-1), var(--accent-4));
+      color: #0e0f12;
+      font-weight: 700;
+      padding: 0.65rem 1rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      text-decoration: none;
+      box-shadow: 0 10px 30px rgba(155, 135, 245, 0.25);
+      cursor: pointer;
+    }
+
+    .luxury-button:hover {
+      filter: brightness(1.05);
+    }
+
+    .form-input {
+      background: var(--surface-color);
+      color: var(--text-color);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0.65rem 0.75rem;
+      outline: none;
+    }
+
+    .form-input:focus {
+      border-color: var(--accent-1);
+      box-shadow: 0 0 0 3px rgba(155, 135, 245, 0.2);
+    }
+
+    .nav-link {
+      color: var(--text-color);
+      text-decoration: none;
+      opacity: 0.8;
+    }
+
+    .nav-link.active,
+    .nav-link:hover {
+      opacity: 1;
+    }
+
+    .page-title {
+      font-size: 1.75rem;
+      letter-spacing: 0.5px;
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    a {
+      color: var(--accent-2);
+    }
+  </style>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+
+</html>

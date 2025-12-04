@@ -1,0 +1,153 @@
+/* Global Responsive Fixes - Mobile First */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+
+/* Prevent horizontal scroll */
+img,
+video,
+iframe {
+    max-width: 100%;
+    height: auto;
+}
+
+@media (hover: hover) {
+    .hover-lift:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+}
+
+.hover-scale {
+    transition: all 0.3s ease;
+}
+
+@media (hover: hover) {
+    .hover-scale:hover {
+        transform: scale(1.05);
+    }
+}
+
+/* Form Elements - Responsive */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    width: 100%;
+}
+
+.form-group label {
+    font-weight: 500;
+    color: var(--text-primary);
+    font-size: clamp(0.85rem, 2vw, 0.9rem);
+}
+
+.form-input {
+    padding: clamp(0.7rem, 2vw, 0.875rem) 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    font-size: clamp(0.9rem, 2vw, 1rem);
+    transition: all 0.3s ease;
+    background: white;
+    font-family: inherit;
+    width: 100%;
+    max-width: 100%;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+/* Loading State */
+.loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 50vh;
+    font-size: clamp(1rem, 2.5vw, 1.125rem);
+    color: var(--text-secondary);
+    padding: 1rem;
+}
+
+/* Mobile Navigation Improvements */
+@media (max-width: 768px) {
+    .nav-links {
+        gap: 0.5rem;
+        font-size: 0.8rem;
+        justify-content: center;
+    }
+
+    .nav-link {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .nav-links {
+        gap: 0.25rem;
+    }
+
+    .nav-link {
+        padding: 0.3rem 0.4rem;
+        font-size: 0.7rem;
+    }
+}
+
+/* Tablet Breakpoint */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .container {
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+    }
+}
+
+/* Desktop Breakpoint */
+@media (min-width: 1025px) {
+    .container {
+        padding-left: 2rem;
+        padding-right: 2rem;
+    }
+}
+
+/* Accessibility - Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+
+    .nav-link,
+    .luxury-button,
+    .form-input {
+        border-width: 3px;
+    }
+}
+
+/* Print Styles */
+@media print {
+
+    .nav-links,
+    .luxury-button,
+    .hover-lift,
+    .hover-scale {
+        display: none !important;
+    }
+}

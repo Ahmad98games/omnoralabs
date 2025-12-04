@@ -1,0 +1,121 @@
+{
+    "home": {
+        "heroBanner": {
+            "enabled": true,
+            "type": "video",
+            "videoUrl": "/videos/video main.mp4",
+            "posterImage": "",
+            "title": "Hero Video Banner",
+            "description": "Add your promotional video URL here"
+        },
+        "midPageBanner": {
+            "enabled": true,
+            "type": "image",
+            "imageUrl": "./main/gift sets.png",
+            "link": "",
+            "alt": "Promotional Banner"
+        },
+        "videoShowcase": {
+            "enabled": true,
+            "videoUrl": "/videos/video main.mp4",
+            "title": "Video Ad Animation",
+            "description": "Featuring our Bath Bomb"
+        },
+        "sidebarAd": {
+            "enabled": true,
+            "imageUrl": "/images/main/Aromatherapy.png",
+            "link": "",
+            "alt": "Sidebar Advertisement"
+        },
+        "footerBanner": {
+            "enabled": true,
+            "imageUrl": "/images/main/unvind.png",
+            "link": "",
+            "alt": "Footer Promotional Banner"
+        }
+    },
+    "collection": {
+        "topBanner": {
+            "enabled": true,
+            "imageUrl": "/images/main/calm lavender.png",
+            "link": "",
+            "alt": "Collection Page Banner"
+        },
+        "sidebarAd": {
+            "enabled": true,
+            "imageUrl": "/images/main/green tea.png",
+            "link": "",
+            "alt": "Sidebar Ad"
+        },
+        "midContentBanner": {
+            "enabled": true,
+            "imageUrl": "/imas/main/rose.png",
+            "link": "",
+            "alt": "Mid-Content Banner"
+        }
+    },
+    "product": {
+        "videoZone": {
+            "enabled": true,
+            "videoUrl": "/videos/video main.mp4",
+            "title": "Product Video",
+            "description": "Add product demonstration video"
+        },
+        "sidebarAd": {
+            "enabled": true,
+            "imageUrl": "/images/main/Glow Citrus Bath Bomb.png",
+            "link": "",
+            "alt": "Product Page Sidebar Ad"
+        },
+        "belowProductBanner": {
+            "enabled": true,
+            "imageUrl": "/images/main/breath bath.png",
+            "link": "",
+            "alt": "Below Product Banner"
+        }
+    },
+    "about": {
+        "brandVideo": {
+            "enabled": true,
+            "videoUrl": "/videos/video main.mp4",
+            "title": "Our Story",
+            "description": "Share your brand story video"
+        },
+        "certificationBanner": {
+            "enabled": true,
+            "imageUrl": "/images/main/Aromatherapy.png",
+            "alt": "Certifications & Partnerships"
+        }
+    },
+    "contact": {
+        "topBanner": {
+            "enabled": true,
+            "imageUrl": "/images/main/unvind.png",
+            "link": "",
+            "alt": "Contact Page Banner"
+        }
+    },
+    "cart": {
+        "upsellBanner": {
+            "enabled": true,
+            "imageUrl": "/images/main/gift sets.png",
+            "link": "",
+            "alt": "Upsell Banner"
+        },
+        "promoCodeBanner": {
+            "enabled": true,
+            "imageUrl": "/images/main/green tea.png",
+            "link": "",
+            "alt": "Promotional Code Banner"
+        }
+    },
+    "googleAds": {
+        "enabled": false,
+        "clientId": "",
+        "slots": {
+            "homeSidebar": "",
+            "collectionTop": "",
+            "productSidebar": ""
+        }
+    }
+}

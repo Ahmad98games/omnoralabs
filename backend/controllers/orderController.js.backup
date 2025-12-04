@@ -1,0 +1,600 @@
+const logger = require('../services/logger');
+const Order = require('../models/Order');
+const AdminActionLog = require('../models/AdminActionLog');
+const path = require('path');
+const fs = require('fs');
+const {
+  sendOrderCreatedNotification,
+  sendPaymentApprovedNotification,
+  sendOrderShippedNotification,
+  sendOrderDeliveredNotification,
+  sendOrderCancelledNotification
+} = require('../utils/whatsappService');
+const { sendOrderEmail } = require('../services/mailblusterService');
+const { generateApprovalToken, verifyApprovalToken } = require('../utils/tokenService');
+
+// @desc    Create new order
+// @route   POST /api/orders
+// @access  Public (guest checkout allowed)
+exports.createOrder = async (req, res) => {
+  try {
+    const {
+      items,
+      shippingAddress,
+      billingAddress,
+      paymentMethod,
+      totalAmount,
+      customerInfo
+    } = req.body;
+
+    // Validation
+    if (!items || items.length === 0) {
+      return res.status(400).json({ error: 'Order must contain items' });
+    }
+
+    if (!shippingAddress) {
+      return res.status(400).json({ error: 'Shipping address is required' });
+    }
+
+    if (!paymentMethod) {
+      return res.status(400).json({ error: 'Payment method is required' });
+    }
+
+    // Determine initial status
+    let initialStatus = 'pending';
+    let paymentStatus = 'unpaid';
+    let isApproved = false;
+
+    if (paymentMethod === 'cod') {
+      initialStatus = 'approved'; // Auto-approve COD
+      paymentStatus = 'pending';
+      isApproved = true;
+    } else {
+      initialStatus = 'pending_admin_approval'; // Require approval for others
+    }
+
+    // Create order object
+    const orderData = {
+      items,
+      shippingAddress,
+      billingAddress: billingAddress || shippingAddress,
+      paymentMethod,
+      totalAmount,
+      status: initialStatus,
+      paymentStatus: paymentStatus,
+      isApproved: isApproved
+    };
+
+    // Add user ID if authenticated, otherwise use customer info
+    if (req.user) {
+      orderData.user = req.user.id;
+    } else if (customerInfo) {
+      orderData.guestCustomer = {
+        name: customerInfo.name,
+        email: customerInfo.email,
+        phone: customerInfo.phone
+      };
+    }
+
+    const order = await Order.create(orderData);
+
+    logger.info('Order created', { orderId: order._id, status: initialStatus });
+
+    // Handle Notifications based on Payment Method
+    if (paymentMethod === 'cod') {
+      // COD Flow: Send confirmation immediately
+      try {
+        const emailService = require('../services/emailService');
+        await emailService.sendOrderConfirmation(order);
+      } catch (emailError) {
+        logger.error('Failed to send COD confirmation email', { error: emailError.message });
+      }
+
+      // Send Mailbluster Email
+      try {
+        await sendOrderEmail(order, 'OrderPlaced');
+      });
+    } catch (error) {
+      logger.error('Create order error', { error: error.message });
+      res.status(500).json({ error: 'Failed to create order' });
+    }
+  };
+
+  // @desc    Get user's orders
+  // @route   GET /api/orders
+  // @access  Private
+  exports.getUserOrders = async (req, res) => {
+    try {
+      const orders = await Order.find({ user: req.user.id })
+        .sort({ createdAt: -1 })
+        .select('-__v');
+
+      res.json({
+        success: true,
+        orders
+      });
+    } catch (error) {
+      logger.error('Get orders error', { error: error.message });
+      res.status(500).json({ error: 'Failed to fetch orders' });
+    }
+  };
+
+  // @desc    Get order by ID
+  // @route   GET /api/orders/:id
+  // @access  Private
+  exports.getOrderById = async (req, res) => {
+    try {
+      const order = await Order.findById(req.params.id);
+
+      if (!order) {
+        return res.status(404).json({ error: 'Order not found' });
+      }
+
+      // Check if order belongs to user (or user is admin)
+      if (order.user.toString() !== req.user.id && req.user.role !== 'admin') {
+        return res.status(403).json({ error: 'Not authorized' });
+      }
+
+      res.json({
+        success: true,
+        order
+      });
+    } catch (error) {
+      logger.error('Get order error', { error: error.message });
+      res.status(500).json({ error: 'Failed to fetch order' });
+    }
+  };
+
+  // @desc    Cancel order
+  // @route   PUT /api/orders/:id/cancel
+  // @access  Private
+  exports.cancelOrder = async (req, res) => {
+    try {
+      const order = await Order.findById(req.params.id);
+
+      if (!order) {
+        return res.status(404).json({ error: 'Order not found' });
+      }
+
+      if (order.user.toString() !== req.user.id) {
+        return res.status(403).json({ error: 'Not authorized' });
+      }
+
+      if (order.status === 'delivered' || order.status === 'cancelled') {
+        return res.status(400).json({ error: 'Cannot cancel this order' });
+      }
+
+      order.status = 'cancelled';
+      order.cancelledAt = new Date();
+      order.cancelReason = req.body.reason || 'Customer requested cancellation';
+
+      await order.save();
+
+      // Send WhatsApp notification
+      try {
+        const customerName = order.guestCustomer?.name || (req.user ? req.user.name : 'Customer');
+        const phone = order.guestCustomer?.phone || (req.user ? req.user.phone : '');
+
+        if (phone) {
+          await sendOrderCancelledNotification(
+            phone,
+            customerName,
+            order.orderNumber || order._id
+          );
+        }
+      } catch (waError) {
+        logger.error('Failed to send WhatsApp cancellation notification', { error: waError.message });
+      }
+
+      // Send Mailbluster Email
+      try {
+        await sendOrderEmail(order, 'OrderCancelled');
+      } catch (mbError) {
+        logger.error('Failed to send Mailbluster cancellation email', { error: mbError.message });
+      }
+
+      res.json({
+        success: true,
+        message: 'Order cancelled successfully',
+        order
+      });
+    } catch (error) {
+      logger.error('Cancel order error', { error: error.message });
+      res.status(500).json({ error: 'Failed to cancel order' });
+    }
+  };
+
+  // @desc    Update order status (Admin only)
+  // @route   PUT /api/orders/:id/status
+  // @access  Private/Admin
+  exports.updateOrderStatus = async (req, res) => {
+    try {
+      const { status, trackingNumber } = req.body;
+
+      const order = await Order.findById(req.params.id);
+
+      if (!order) {
+        return res.status(404).json({ error: 'Order not found' });
+      }
+
+      order.status = status;
+      if (trackingNumber) {
+        order.trackingNumber = trackingNumber;
+      }
+      if (status === 'delivered') {
+        order.deliveredAt = new Date();
+      }
+
+      await order.save();
+
+      // Send WhatsApp notification for status changes
+      try {
+        const customerName = order.guestCustomer?.name || 'Customer';
+        const phone = order.guestCustomer?.phone || '';
+
+        if (phone) {
+          if (status === 'shipped' && trackingNumber) {
+            await sendOrderShippedNotification(
+              phone,
+              customerName,
+              order.orderNumber || order._id,
+              trackingNumber
+            );
+          } else if (status === 'delivered') {
+            await sendOrderDeliveredNotification(
+              phone,
+              customerName,
+              order.orderNumber || order._id
+            );
+          }
+        }
+      } catch (waError) {
+        logger.error('Failed to send WhatsApp status notification', { error: waError.message });
+      }
+
+      // Send Mailbluster Email
+      try {
+        if (status === 'shipped') {
+          await sendOrderEmail(order, 'OrderShipped');
+        } else if (status === 'delivered') {
+          await sendOrderEmail(order, 'OrderDelivered');
+        }
+      } catch (mbError) {
+        logger.error('Failed to send Mailbluster status email', { error: mbError.message });
+      }
+
+      res.json({
+        success: true,
+        message: 'Order status updated',
+        order
+      });
+    } catch (error) {
+      logger.error('Update status error', { error: error.message });
+      res.status(500).json({ error: 'Failed to update status' });
+    }
+  };
+
+  // @desc    Get all orders (Admin only)
+  // @route   GET /api/orders/admin/all
+  // @access  Private/Admin
+  exports.getAllOrders = async (req, res) => {
+    try {
+      const orders = await Order.find()
+        .populate('user', 'name email')
+        .sort({ createdAt: -1 });
+
+      res.json({
+        success: true,
+        orders
+      });
+    } catch (error) {
+      logger.error('Get all orders error', { error: error.message });
+      res.status(500).json({ error: 'Failed to fetch orders' });
+    }
+  };
+
+  // @desc    Upload payment proof with magic byte validation
+  // @route   POST /api/orders/:id/receipt
+  // @access  Public (rate limited)
+  exports.uploadPaymentProof = async (req, res) => {
+    try {
+      const order = await Order.findById(req.params.id);
+
+      if (!order) {
+        return res.status(404).json({ error: 'Order not found' });
+      }
+
+      // Prevent duplicate uploads - CRITICAL SECURITY CHECK
+      if (order.status === 'receipt_submitted' || order.status === 'approved' || order.isApproved) {
+        return res.status(400).json({ error: 'Receipt already submitted or order approved' });
+      }
+
+      // Check if a file was uploaded
+      if (!req.file) {
+        return res.status(400).json({ error: 'No payment proof file uploaded' });
+      }
+
+      // Magic byte validation is done in the route middleware
+      // File is already validated and saved to disk with proper permissions
+
+      // Update order with receipt path
+      order.paymentProof = req.file.path;
+      order.paymentProofFilename = req.file.filename;
+      order.status = 'receipt_submitted';
+
+      // Generate secure approval token (24 char random string)
+      order.approvalToken = generateApprovalToken(order._id, 'approve');
+      order.approvalTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+      await order.save();
+
+      // Send email to admin for approval
+      const emailService = require('../services/emailService');
+      const approvalLink = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/admin/approve-order/${order._id}?token=${order.approvalToken}`;
+      await emailService.sendApprovalRequest(order, req.file.path, approvalLink);
+
+      logger.info('Receipt uploaded', { orderId: order._id, filename: req.file.filename });
+
+      res.json({
+        success: true,
+        message: 'Receipt uploaded successfully. Please wait for approval.',
+        paymentProof: order.paymentProof
+      });
+    } catch (error) {
+      logger.error('Upload payment proof error', { error: error.message });
+      res.status(500).json({ error: 'Failed to upload payment proof' });
+    }
+  };
+
+  // @desc    Approve order with secure token cleanup and audit logging
+  // @route   GET /api/orders/:id/approve
+  // @access  Public (rate limited, token protected)
+  exports.approveOrder = async (req, res) => {
+    try {
+      const { token } = req.query;
+
+      // Verify JWT token
+      const decoded = verifyApprovalToken(token);
+      if (!decoded || decoded.orderId !== req.params.id) {
+        logger.warn('Invalid JWT approval token attempt', {
+          orderId: req.params.id,
+          ip: req.ip
+        });
+        return res.status(400).send('<h1>Invalid or expired approval token</h1>');
+      }
+
+      // Atomic update to prevent race conditions (Idempotency)
+      const order = await Order.findOneAndUpdate(
+        {
+          _id: req.params.id,
+          approvalToken: token,
+          isApproved: false
+        },
+        {
+          $set: {
+            isApproved: true,
+            status: 'approved',
+            paymentStatus: 'paid',
+            approvalLog: {
+              approvedAt: new Date(),
+              ip: req.ip,
+              userAgent: req.get('User-Agent')
+            }
+          },
+          $unset: {
+            approvalToken: "",
+            approvalTokenExpires: ""
+          }
+        },
+        { new: true }
+      );
+
+      if (!order) {
+        // Check why it failed
+        const existingOrder = await Order.findById(req.params.id);
+        if (!existingOrder) {
+          return res.status(404).send('<h1>Order not found</h1>');
+        }
+        if (existingOrder.isApproved) {
+          return res.status(409).send('<h1>Order already approved</h1>');
+        }
+        return res.status(400).send('<h1>Unable to approve order</h1>');
+      }
+
+      // Create audit log
+      try {
+        await AdminActionLog.create({
+          action: 'approve',
+          orderId: order._id,
+          adminEmail: process.env.ADMIN_EMAIL || 'admin@omnora.com',
+          ip: req.ip,
+          userAgent: req.get('User-Agent'),
+          details: {
+            orderNumber: order.orderNumber,
+            totalAmount: order.totalAmount
+          }
+        });
+      } catch (logError) {
+        logger.error('Failed to create audit log', { error: logError.message });
+      }
+
+      logger.info('Order approved', {
+        orderId: order._id,
+        ip: req.ip,
+        approvedAt: new Date()
+      });
+
+      // Send confirmation email to customer
+      const emailService = require('../services/emailService');
+      try {
+        await emailService.sendOrderConfirmation(order);
+      } catch (emailError) {
+        logger.error('Failed to send order confirmation email', { error: emailError.message });
+      }
+
+      // Send Payment Approved Email
+      try {
+        await emailService.sendOrderApproved(order);
+      } catch (emailError) {
+        logger.error('Failed to send payment approved email', { error: emailError.message });
+      }
+
+      // Send WhatsApp Notification (Template: order_approved)
+      try {
+        const customerName = order.guestCustomer?.name || 'Customer';
+        const phone = order.guestCustomer?.phone || '';
+
+        if (phone) {
+          const whatsappService = require('../utils/whatsappService');
+          await whatsappService.sendTemplateMessage(
+            phone,
+            "order_approved",
+            "en_US",
+            [
+              {
+                type: "body",
+                parameters: [
+                  { type: "text", text: customerName },
+                  { type: "text", text: order.orderNumber || order._id.toString() },
+                  { type: "text", text: order.totalAmount.toLocaleString() },
+                  { type: "text", text: "3-5 business days" }
+                ]
+              }
+            ]
+          );
+        }
+      } catch (waError) {
+        logger.error('Failed to send WhatsApp approval notification', { error: waError.message });
+      }
+
+      // Send Mailbluster Email
+      try {
+        await sendOrderEmail(order, 'PaymentApproved');
+      } catch (mbError) {
+        logger.error('Failed to send Mailbluster approval email', { error: mbError.message });
+      }
+
+      res.send('<h1>Order Approved Successfully!</h1><p>The customer has been notified.</p>');
+    } catch (error) {
+      logger.error('Approve order error', { error: error.message });
+      res.status(500).send('<h1>Failed to approve order</h1>');
+    }
+  };
+
+  // @desc    Reject order with audit logging
+  // @route   GET /api/orders/:id/reject
+  // @access  Public (rate limited, token protected)
+  exports.rejectOrder = async (req, res) => {
+    try {
+      const { token } = req.query;
+
+      // Verify JWT token
+      const decoded = verifyApprovalToken(token);
+      if (!decoded || decoded.orderId !== req.params.id) {
+        logger.warn('Invalid JWT rejection token attempt', {
+          orderId: req.params.id,
+          ip: req.ip
+        });
+        return res.status(400).send('<h1>Invalid or expired token</h1>');
+      }
+
+      const order = await Order.findById(req.params.id);
+
+      if (!order) {
+        return res.status(404).send('<h1>Order not found</h1>');
+      }
+
+      // Validate token
+      if (!order.approvalToken || order.approvalToken !== token) {
+        return res.status(403).send('<h1>Invalid or expired token</h1>');
+      }
+
+      // Update status to rejected
+      await Order.updateOne(
+        { _id: order._id },
+        {
+          $set: {
+            status: 'rejected',
+            isApproved: false
+          },
+          $unset: {
+            approvalToken: "",
+            approvalTokenExpires: ""
+          }
+        }
+      );
+
+      // Create audit log
+      try {
+        await AdminActionLog.create({
+          action: 'reject',
+          orderId: order._id,
+          adminEmail: process.env.ADMIN_EMAIL || 'admin@omnora.com',
+          ip: req.ip,
+          userAgent: req.get('User-Agent'),
+          details: {
+            orderNumber: order.orderNumber,
+            totalAmount: order.totalAmount
+          }
+        });
+      } catch (logError) {
+        logger.error('Failed to create audit log', { error: logError.message });
+      }
+
+      logger.info('Order rejected', { orderId: order._id });
+
+      res.send('<h1>Order Rejected</h1><p>The order status has been updated to rejected.</p>');
+    } catch (error) {
+      logger.error('Reject order error', { error: error.message });
+      res.status(500).send('<h1>Failed to reject order</h1>');
+    }
+  };
+
+  // @desc    Get receipt file securely (private file serving)
+  // @route   GET /api/orders/:id/receipt
+  // @access  Private (Admin or Order Owner only)
+  exports.getReceipt = async (req, res) => {
+    try {
+      const order = await Order.findById(req.params.id);
+
+      if (!order || !order.paymentProof) {
+        return res.status(404).json({ error: 'Receipt not found' });
+      }
+
+      // Authorization check: Only admin or order owner can access
+      if (order.user && req.user && order.user.toString() !== req.user.id && req.user.role !== 'admin') {
+        logger.warn('Unauthorized receipt access attempt', {
+          orderId: order._id,
+          attemptedBy: req.user.id,
+          ip: req.ip
+        });
+        return res.status(403).json({ error: 'Not authorized to access this receipt' });
+      }
+
+      // Resolve absolute path and verify file exists
+      const absolutePath = path.resolve(order.paymentProof);
+
+      if (!fs.existsSync(absolutePath)) {
+        logger.error('Receipt file not found on disk', {
+          orderId: order._id,
+          path: absolutePath
+        });
+        return res.status(404).json({ error: 'Receipt file not found' });
+      }
+
+      // Set content disposition for download with original filename
+      const filename = order.paymentProofFilename || path.basename(absolutePath);
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+
+      logger.info('Receipt accessed', {
+        orderId: order._id,
+        accessedBy: req.user?.id || 'unknown',
+        ip: req.ip
+      });
+
+      res.sendFile(absolutePath);
+    } catch (error) {
+      logger.error('Get receipt error', { error: error.message });
+      res.status(500).json({ error: 'Failed to get receipt' });
+    }
+  };

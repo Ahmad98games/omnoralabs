@@ -1,0 +1,731 @@
+/* ========================================
+  ENHANCED LUXURY SPA THEME
+  (Based on client vision: Ethereal, Rich, Polished)
+  ======================================== */
+
+:root {
+    /* ========================================
+     COLOR SYSTEM - Deep & Luxurious
+     ======================================== */
+    /* Primary (Accent) Colors - Rich & Ethereal */
+    --accent-primary: #9d174d;      /* Deep Rose/Berry for main CTA */
+    --accent-secondary: #0c4a6e;    /* Deep Sapphire Blue for secondary accents */
+    /* ENHANCED metallic gold/bronze effect for polish - More subdued, richer tone */
+    --accent-gold: #a16207;         /* Deeper Gold */
+    --accent-gradient: linear-gradient(145deg, var(--accent-primary) 0%, #d8799b 100%);
+    
+    /* Neutrals - Creamy & Sophisticated */
+    --bg-solid: #fefcfb;            /* Creamy, off-white background */
+    --surface-color: #ffffff;      /* Pure White for polished containers */
+    --text-color: #171717;          /* Near-Black for elegance */
+    --text-secondary: #44403c;      /* Muted Dark Brown/Gray for body */
+    --text-muted: #a8a29e;          /* Stone Gray for placeholders */
+
+    /* Glass Effects (Frosted & Watery) - More defined blur */
+    --glass-bg: rgba(255, 255, 255, 0.4); /* Slightly more transparent */
+    --glass-border: rgba(157, 23, 77, 0.3); /* Softer border */
+    --border-color: #f0ebe8; /* Lighter, warmer separator */
+    
+    /* Shadows (Deep, Soft, Layered) */
+    --shadow-soft: 0 5px 20px rgba(0, 0, 0, 0.04);
+    --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.08); /* New intermediate shadow */
+    --shadow-lg: 0 15px 40px rgba(0, 0, 0, 0.1);
+    /* Ethereal glow on interactive elements - Increased saturation */
+    --shadow-glow: 0 0 50px rgba(157, 23, 77, 0.5); 
+    /* Metallic glow - Adjusted color for richer shimmer */
+    --shadow-metallic: 0 0 15px rgba(161, 98, 7, 0.7); 
+
+    /* ========================================
+     TYPOGRAPHY
+     ======================================== */
+    --font-family: 'Georgia', 'Times New Roman', serif; /* Elegant, classic font */
+    --font-alt: 'Inter', sans-serif; /* For clean, crisp elements like buttons */
+    
+    --text-base: 16px;
+    --font-normal: 400;
+    --font-medium: 500;
+    --font-semibold: 600;
+    --font-bold: 700;
+
+    /* ========================================
+     SPACING SYSTEM (FOR PROFESSIONAL CONSISTENCY)
+     ======================================== */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 12px;
+    --spacing-lg: 20px;
+    --spacing-xl: 32px;
+    --spacing-2xl: 48px;
+    --spacing-3xl: 72px;
+    --spacing-4xl: 96px;
+
+    /* ========================================
+     VISUAL ELEMENTS
+     ======================================== */
+    /* Border Radius (Soft & Round) */
+    --radius-sm: 8px;
+    --radius-md: 12px; /* Slightly tighter radius */
+    --radius-lg: 18px;
+    --radius-xl: 36px;
+    --radius-full: 9999px;
+    
+    /* Transitions (Smooth & Calm) - Faster, more punchy animations */
+    --transition-fast: 250ms ease-out;
+    --transition-base: 400ms cubic-bezier(0.4, 0, 0.2, 1); /* Tailwind-like cubic-bezier */
+}
+
+/* ========================================
+  GLOBAL RESETS & BASE STYLES
+  ======================================== */
+
+* {
+    box-sizing: border-box;
+    /* Add a subtle global transition for a fluid feel */
+    transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    /* Use 'system-ui' as a robust first choice for fast loading */
+    font-family: var(--font-alt), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+    color: var(--text-color);
+    background-color: var(--bg-solid);
+    line-height: 1.65; /* Slightly increased line height for readability */
+}
+
+/* Base Link/Anchor Styles */
+a {
+    color: var(--accent-primary);
+    text-decoration: none;
+    transition: all var(--transition-fast);
+}
+
+a:hover {
+    color: var(--accent-gold); /* Gold highlight on hover */
+    text-decoration: underline;
+}
+
+.container {
+    max-width: 1300px; /* Slightly wider max-width */
+    margin: 0 auto;
+    padding: 0 var(--spacing-xl); /* Use variable for padding */
+}
+
+/* ========================================
+  SECTIONS & TYPOGRAPHY
+  ======================================== */
+.values-section, .categories-section, .bestsellers-section, .newsletter-section {
+    padding: var(--spacing-3xl) 0; /* Consistent large padding */
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-2xl); /* Increased margin */
+}
+
+/* Section Titles - Use the Elegant Serif Font */
+.section-title {
+    font-family: var(--font-family);
+    font-weight: var(--font-bold);
+    color: var(--text-color);
+    font-size: 3rem; /* Larger and more imposing */
+    position: relative;
+    padding-bottom: var(--spacing-md);
+    margin: 0;
+    line-height: 1.1;
+}
+
+.section-title::after {
+    /* Gold underline for luxury */
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    background: var(--accent-gold);
+    height: 3px; /* Slightly thinner for elegance */
+    width: 80px; /* Slightly longer */
+    border-radius: var(--radius-sm);
+    /* Subtle shadow for depth */
+    box-shadow: 0 2px 5px rgba(161, 98, 7, 0.4);
+}
+
+.view-all-link {
+    color: var(--accent-secondary); /* Sapphire link */
+    font-weight: var(--font-semibold);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
+}
+
+.view-all-link:hover {
+    color: var(--accent-primary); /* Rose highlight on hover */
+    text-decoration: none;
+    transform: translateX(4px); /* Subtle slide effect on hover */
+}
+
+
+/* ========================================
+  HERO SECTION - Ethereal & Elevated
+  ======================================== */
+.hero-section {
+    /* Enhanced background gradient for depth */
+    background: linear-gradient(160deg, #fefcfb 0%, #f7f3f2 100%);
+    height: 90vh;
+    min-height: 700px;
+    display: flex;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    padding: 0;
+}
+
+.hero-content {
+    animation: fadeInUp 1.5s cubic-bezier(0.23, 1, 0.32, 1); /* Smoother, more professional curve */
+    position: relative;
+    z-index: 2;
+    padding: var(--spacing-2xl) 0;
+}
+
+.hero-title {
+    font-family: var(--font-family);
+    font-size: clamp(4rem, 8vw, 8rem); /* Increased max size for impact */
+    font-weight: 700;
+    line-height: 0.95; /* Tighter line height for large text */
+    margin-bottom: var(--spacing-lg);
+    /* Richer, deeper gradient text */
+    background: linear-gradient(90deg, var(--accent-primary) 10%, var(--accent-secondary) 90%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    /* Enhanced text shadow for depth */
+    text-shadow: 0 8px 30px rgba(0, 0, 0, 0.15); 
+}
+
+.hero-subtitle {
+    font-family: var(--font-alt);
+    font-size: clamp(1.1rem, 2vw, 1.4rem);
+    color: var(--text-secondary);
+    line-height: 1.8;
+    max-width: 650px;
+    margin-bottom: var(--spacing-3xl);
+    font-weight: var(--font-medium);
+}
+
+/* Keyframe for a smooth, upscale load-in */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ========================================
+  PREMIUM BUTTONS - Polished Jewels
+  ======================================== */
+.cta-button {
+    font-family: var(--font-alt);
+    font-weight: var(--font-bold);
+    padding: 1rem 2.8rem;
+    border-radius: var(--radius-full);
+    transition: all var(--transition-base);
+    letter-spacing: 1px; /* Slightly more distinguished spacing */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    text-transform: uppercase;
+    text-decoration: none;
+    position: relative;
+    overflow: hidden;
+    z-index: 10;
+}
+
+.cta-button.primary {
+    background: var(--accent-gradient);
+    color: var(--surface-color);
+    /* Stronger, more luxurious shadow */
+    box-shadow: var(--shadow-md), 0 10px 40px rgba(157, 23, 77, 0.4); 
+    border: none;
+}
+
+.cta-button.primary:hover {
+    transform: translateY(-4px) scale(1.01); /* Deeper lift */
+    /* Hover brings out the glow */
+    box-shadow: var(--shadow-lg), var(--shadow-glow); 
+}
+
+/* Subtle Shimmer effect on CTA for extra polish */
+.cta-button.primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -75%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.5) 100%);
+    transform: skewX(-20deg);
+    transition: transform 0.6s ease;
+}
+
+.cta-button.primary:hover::before {
+    transform: skewX(-20deg) translateX(200%);
+}
+
+/* ========================================
+  VALUE PROPS - Frosted Glass Cards
+  ======================================== */
+.values-section .container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--spacing-xl);
+}
+
+.value-card {
+    padding: var(--spacing-xl);
+    border-radius: var(--radius-lg);
+    position: relative;
+    overflow: hidden;
+    /* Frosted Glass Effect - stronger blur */
+    background: var(--glass-bg); 
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(10px); /* Increased blur */
+    box-shadow: var(--shadow-soft);
+    transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1); /* Smoother bounce transition */
+    text-align: center;
+}
+
+.value-card:hover {
+    transform: translateY(-10px); /* Deeper lift */
+    background: var(--surface-color);
+    border-color: var(--accent-primary);
+    /* Subtle metallic glow on hover */
+    box-shadow: var(--shadow-lg), var(--shadow-metallic); 
+}
+
+.value-icon {
+    display: inline-flex;
+    padding: var(--spacing-md);
+    border-radius: var(--radius-full);
+    /* Accent background that reflects the luxurious theme */
+    background: linear-gradient(45deg, rgba(157, 23, 77, 0.15) 0%, rgba(12, 74, 110, 0.15) 100%); /* Stronger tint */
+    color: var(--accent-primary);
+    margin-bottom: var(--spacing-md);
+    transition: all 0.4s ease;
+    position: relative;
+    z-index: 1;
+}
+
+.value-card:hover .value-icon {
+    transform: scale(1.15) rotate(5deg); /* More dynamic scale and rotation */
+    box-shadow: 0 0 20px rgba(157, 23, 77, 0.6);
+}
+
+.value-card h3 {
+    font-family: var(--font-alt);
+    color: var(--text-color);
+    font-weight: var(--font-semibold);
+    font-size: 1.5rem; /* Slightly larger heading */
+    margin-top: 0;
+    margin-bottom: var(--spacing-xs);
+}
+
+.value-card p {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    margin: 0;
+}
+
+/* ========================================
+  CATEGORIES - Elegant Focus
+  ======================================== */
+.categories-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Slightly tighter grid for mobile */
+    gap: var(--spacing-xl);
+}
+
+.category-card {
+    height: 480px; /* Slightly taller cards */
+    border-radius: var(--radius-xl); /* Softer, larger radius */
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    box-shadow: var(--shadow-lg);
+    cursor: pointer;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.4s ease;
+}
+
+.category-card::before {
+    /* Deeper, more effective overlay for text readability */
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.75) 0%, rgba(0, 0, 0, 0.1) 50%, transparent 100%);
+    transition: background 0.4s ease;
+    z-index: 1;
+}
+
+.category-card:hover::before {
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, transparent 70%);
+}
+
+.category-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25), var(--shadow-glow);
+}
+
+.category-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.category-card:hover .category-image {
+    transform: scale(1.1); /* Slightly stronger zoom */
+}
+
+.category-content {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    color: var(--surface-color);
+    padding: var(--spacing-lg) var(--spacing-xl);
+    transform: translateY(0);
+    transition: transform 0.4s ease;
+}
+
+.category-card:hover .category-content {
+    transform: translateY(-5px); /* Subtle content lift */
+}
+
+.category-content h3 {
+    font-family: var(--font-family);
+    font-size: 2rem;
+    margin-bottom: var(--spacing-xs);
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.7);
+}
+
+.category-content span {
+    font-weight: var(--font-medium);
+    color: #f7e6f0; /* Lighter, more ethereal rose hue */
+    display: block;
+    font-size: 1.05rem;
+    letter-spacing: 0.2px;
+}
+
+/* ========================================
+  BEST SELLERS - Product Grid
+  ======================================== */
+.bestsellers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--spacing-xl);
+}
+
+.product-card {
+    background: var(--surface-color);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-soft);
+    border: 1px solid var(--border-color);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.product-card:hover {
+    transform: translateY(-8px); /* Deeper lift */
+    box-shadow: var(--shadow-lg), var(--shadow-metallic);
+    border-color: var(--accent-primary);
+}
+
+.product-image-container {
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.product-image {
+    height: 350px; /* Slightly taller image container */
+    width: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.product-card:hover .product-image {
+    transform: scale(1.05);
+}
+
+/* Quick Add Button - Hidden by default, appears on hover */
+.quick-add-btn {
+    position: absolute;
+    bottom: var(--spacing-xl); /* Positioned relative to the container for better visibility */
+    left: 50%;
+    transform: translateX(-50%) translateY(150%); /* Start position: hidden below */
+    opacity: 0;
+    
+    /* More depth on the button */
+    background: var(--accent-gradient);
+    color: var(--surface-color);
+    padding: 0.85rem 1.75rem;
+    font-weight: var(--font-bold);
+    box-shadow: 0 4px 20px rgba(157, 23, 77, 0.5);
+    border-radius: var(--radius-full);
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
+    
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s ease; /* Springy transition */
+}
+
+.product-card:hover .quick-add-btn {
+    transform: translateX(-50%) translateY(0); /* Final position: fully visible */
+    opacity: 1;
+}
+
+.quick-add-btn:hover {
+    box-shadow: 0 8px 30px rgba(157, 23, 77, 0.8);
+    transform: translateX(-50%) translateY(-2px) scale(1.03);
+}
+
+.product-info {
+    padding: var(--spacing-md) var(--spacing-lg) var(--spacing-lg);
+    text-align: center;
+}
+
+.product-name {
+    font-weight: var(--font-semibold);
+    font-size: 1.3rem;
+    margin-top: var(--spacing-sm);
+    margin-bottom: var(--spacing-xs);
+    line-height: 1.3;
+}
+
+.product-price {
+    color: var(--accent-gold); /* Gold color for price */
+    font-family: var(--font-family);
+    font-weight: var(--font-bold);
+    font-size: 1.5rem; /* Larger price for emphasis */
+    margin: var(--spacing-xs) 0;
+}
+
+.loading-spinner {
+    padding: var(--spacing-3xl);
+    color: var(--accent-secondary);
+    font-size: 1.5rem;
+    text-align: center;
+}
+
+/* ========================================
+  NEWSLETTER - Polished Footer CTA
+  ======================================== */
+.newsletter-section {
+    border-top: 1px solid var(--border-color);
+    background-color: #f7f3f2; /* Subtle change for definition */
+    padding: var(--spacing-4xl) 0;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.newsletter-section::before {
+    /* Ethereal glow pattern */
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at 10% 80%, rgba(12, 74, 110, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 90% 20%, rgba(157, 23, 77, 0.08) 0%, transparent 40%);
+    opacity: 0.8;
+    z-index: 1;
+}
+
+.newsletter-content {
+    position: relative;
+    z-index: 2;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.newsletter-content h2 {
+    font-family: var(--font-family);
+    /* Gradient for depth */
+    background: linear-gradient(135deg, var(--accent-secondary) 10%, var(--accent-primary) 90%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-size: 3.5rem;
+    font-weight: var(--font-bold);
+    margin-bottom: var(--spacing-md);
+    line-height: 1.1;
+}
+
+.newsletter-content p {
+    color: var(--text-secondary);
+    font-size: 1.3rem;
+    margin-bottom: var(--spacing-xl);
+}
+
+.newsletter-form {
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-md);
+}
+
+.newsletter-form input {
+    /* Creamy, elevated input field */
+    flex-grow: 1;
+    max-width: 400px;
+    padding: 1rem 1.5rem;
+    border: 1px solid var(--glass-border);
+    background: var(--surface-color);
+    box-shadow: var(--shadow-soft); /* Outset shadow for elevation */
+    border-radius: var(--radius-full);
+    font-size: 1.05rem;
+    color: var(--text-color);
+    transition: all var(--transition-fast);
+}
+
+.newsletter-form input:focus {
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 4px rgba(157, 23, 77, 0.15), var(--shadow-md); /* Stronger focus ring */
+    outline: none;
+}
+
+.newsletter-form .cta-button {
+    flex-shrink: 0;
+}
+
+
+/* ========================================
+  RESPONSIVE DESIGN (Highly Polished Mobile View)
+  ======================================== */
+@media (max-width: 1024px) {
+    .container {
+        padding: 0 var(--spacing-lg);
+    }
+    
+    .hero-section {
+        height: auto;
+        min-height: 600px;
+        padding: var(--spacing-3xl) 0;
+    }
+    
+    .hero-title {
+        font-size: clamp(3.5rem, 8vw, 6rem);
+    }
+    
+    .section-title {
+        font-size: 2.5rem;
+    }
+    
+    .newsletter-content h2 {
+        font-size: 3rem;
+    }
+    
+    .bestsellers-grid {
+        gap: var(--spacing-lg);
+    }
+    
+    .product-image {
+        height: 300px;
+    }
+}
+
+@media (max-width: 768px) {
+    /* Mobile-first adjustments */
+    
+    .values-section, .categories-section, .bestsellers-section, .newsletter-section {
+        padding: var(--spacing-2xl) 0; /* Reduced vertical padding */
+    }
+    
+    .hero-section {
+        min-height: 550px;
+        padding: var(--spacing-2xl) 0;
+    }
+    
+    .hero-title {
+        font-size: 3rem; /* Adjusted for smaller mobile screens */
+        text-align: center;
+    }
+
+    .hero-subtitle {
+        text-align: center;
+        font-size: 1.1rem;
+        margin-bottom: var(--spacing-xl);
+    }
+
+    .hero-content .cta-button {
+        display: block; /* Full width button on mobile */
+        width: 80%;
+        margin: 0 auto;
+    }
+    
+    .section-header {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        margin-bottom: var(--spacing-xl);
+    }
+    
+    .section-title {
+        font-size: 2rem;
+        margin-bottom: var(--spacing-lg);
+    }
+    
+    .section-title::after {
+        left: 50%;
+        transform: translateX(-50%); /* Centered underline */
+    }
+    
+    .view-all-link {
+        margin-top: var(--spacing-sm);
+    }
+
+    .categories-grid {
+        grid-template-columns: 1fr; /* Single column stacking */
+    }
+
+    .category-card {
+        height: 350px;
+    }
+    
+    .newsletter-content h2 {
+        font-size: 2.25rem;
+    }
+
+    .newsletter-content p {
+        font-size: 1rem;
+    }
+
+    .newsletter-form {
+        flex-direction: column;
+        align-items: center;
+        gap: var(--spacing-sm);
+    }
+
+    .newsletter-form input, .newsletter-form .cta-button {
+        width: 90%;
+        max-width: none;
+    }
+    
+    .product-image {
+        height: 250px;
+    }
+}

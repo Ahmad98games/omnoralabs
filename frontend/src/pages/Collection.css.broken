@@ -1,0 +1,849 @@
+﻿:root {
+    --bg-solid: #111827;
+    /* Dark background */
+    --surface-color: #1f2937;
+    /* Slightly lighter surface for contrast */
+    --text-color: #f3f4f6;
+    --text-secondary: #9ca3af;
+    --accent-primary: #7ee7d8;
+    /* Teal/Mint */
+    --accent-secondary: #c7b8ea;
+    /* Lavender */
+    --gradient-primary: linear-gradient(135deg, #7ee7d8 0%, #a2e8f1 100%);
+
+    /* Glassmorphism Variables */
+    --glass-bg: rgba(31, 41, 55, 0.6);
+    /* 60% opaque surface color */
+    --glass-border: rgba(156, 163, 175, 0.15);
+    /* Light grey border */
+
+    /* Spacing & Radius */
+    --spacing-xs: 0.5rem;
+    --spacing-sm: 0.75rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2.5rem;
+    --spacing-2xl: 4rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 1rem;
+    --radius-full: 9999px;
+
+    /* Shadows */
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5), 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-glow: 0 0 20px rgba(126, 231, 216, 0.2);
+}
+
+.collection-page {
+    min-height: 100vh;
+    background: var(--bg-solid);
+    width: 100%;
+}
+
+/* ========================================
+   HERO HEADER
+   ======================================== */
+.collection-hero {
+    position: relative;
+    padding: 6rem 0 4rem;
+    /* Increased padding */
+    background: var(--bg-solid);
+    text-align: center;
+    overflow: hidden;
+}
+
+.collection-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    /* Enhanced ambient glow */
+    background:
+        radial-gradient(circle at 20% 50%, rgba(126, 231, 216, 0.15) 0%, transparent 40%),
+        radial-gradient(circle at 80% 50%, rgba(199, 184, 234, 0.15) 0%, transparent 40%),
+        /* Subtle grid pattern for texture */
+        repeating-linear-gradient(0deg,
+            transparent,
+            transparent 95px,
+            rgba(255, 255, 255, 0.03) 96px,
+            rgba(255, 255, 255, 0.03) 97px),
+        repeating-linear-gradient(90deg,
+            transparent,
+            transparent 95px,
+            rgba(255, 255, 255, 0.03) 96px,
+            rgba(255, 255, 255, 0.03) 97px);
+    pointer-events: none;
+    opacity: 0.8;
+}
+
+.collection-hero-content {
+    position: relative;
+    z-index: 1;
+    animation: fadeInUp 1s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.collection-title {
+    font-size: clamp(2.8rem, 5vw, 4rem);
+    /* Slightly larger title */
+    font-weight: 900;
+    margin-bottom: var(--spacing-md);
+    background: linear-gradient(135deg, #ffffff 10%, var(--accent-primary) 60%, var(--accent-secondary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.05em;
+    /* Tighter spacing for drama */
+    text-shadow: 0 0 10px rgba(126, 231, 216, 0.3);
+    /* Subtle text glow */
+}
+
+.collection-subtitle {
+    font-size: 1.25rem;
+    /* Slightly larger subtitle */
+    color: var(--text-secondary);
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    max-width: 800px;
+    margin: 0 auto;
+    line-height: 1.7;
+}
+
+/* ========================================
+   CONTAINER & LAYOUT
+   ======================================== */
+.collection-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: var(--spacing-xl) var(--spacing-lg) var(--spacing-2xl);
+}
+
+/* Breadcrumbs */
+.breadcrumbs {
+    margin-bottom: var(--spacing-lg);
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    animation: fadeIn 0.6s ease-out;
+    padding-left: var(--spacing-md);
+}
+
+.breadcrumbs a {
+    color: var(--accent-primary);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.breadcrumbs a:hover {
+    color: var(--text-color);
+    text-decoration: none;
+    /* Removed underline on hover, cleaner */
+}
+
+.breadcrumbs span {
+    color: var(--text-secondary);
+}
+
+/* ========================================
+   TOOLBAR & FILTERS
+   ======================================== */
+.collection-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-xl);
+    padding: 1rem var(--spacing-lg);
+    /* Increased vertical padding */
+    background: var(--glass-bg);
+    backdrop-filter: blur(15px);
+    /* Increased blur */
+    border-radius: var(--radius-lg);
+    border: 2px solid var(--glass-border);
+    /* Thicker, more defined border */
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    /* Deeper shadow */
+    animation: fadeIn 0.8s ease-out;
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+}
+
+.collection-toolbar p {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-color);
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.filter-group label {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.sort-select {
+    padding: 0.85rem 3.2rem 0.85rem 1.4rem;
+    /* Adjusted padding */
+    background: var(--surface-color);
+    color: var(--text-color);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    /* Slightly larger text */
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    appearance: none;
+    /* Custom SVG Down Arrow (Match accent color) */
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237ee7d8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 1.25rem;
+}
+
+.sort-select:hover {
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 3px rgba(126, 231, 216, 0.15);
+    /* More prominent glow */
+}
+
+.sort-select:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 4px rgba(126, 231, 216, 0.3);
+}
+
+/* ========================================
+   PRODUCT GRID
+   ======================================== */
+.product-display-section {
+    margin-bottom: var(--spacing-2xl);
+}
+
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--spacing-xl);
+    /* Increased gap for visual breathing room */
+    animation: fadeIn 1s ease-out;
+}
+
+/* ========================================
+   PRODUCT CARDS
+   ======================================== */
+.product-card {
+    background: var(--glass-bg);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(10px);
+    transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.2);
+    position: relative;
+}
+
+.product-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    /* Slightly thicker accent line */
+    background: var(--gradient-primary);
+    transform: scaleX(0);
+    transform-origin: center;
+    /* Changed origin to center for better effect */
+    transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+    z-index: 10;
+}
+
+.product-card:hover::before {
+    transform: scaleX(1);
+}
+
+.product-card:hover {
+    transform: translateY(-15px);
+    /* Deeper lift on hover */
+    border-color: rgba(126, 231, 216, 0.5);
+}
+
+/* Product Info */
+.product-info {
+    padding: var(--spacing-lg) var(--spacing-xl);
+    /* Increased horizontal padding */
+    position: relative;
+    z-index: 2;
+}
+
+.product-title {
+    font-size: 1.25rem;
+    /* More prominent title */
+    font-weight: 800;
+    color: var(--text-color);
+    margin-bottom: var(--spacing-sm);
+    transition: color 0.3s ease;
+    display: block;
+    text-decoration: none;
+    line-height: 1.3;
+}
+
+.product-card:hover .product-title {
+    color: var(--accent-primary);
+}
+
+.product-description {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: var(--spacing-md);
+    /* Increased margin */
+    min-height: 3em;
+    /* Ensure description line consistency */
+}
+
+.product-price {
+    font-size: 1.4rem;
+    /* More prominent price */
+    font-weight: 900;
+    color: var(--accent-primary);
+    margin-bottom: var(--spacing-xl);
+    /* Increased margin before button */
+    letter-spacing: 1px;
+}
+
+/* Add to Cart Button */
+.add-to-cart-btn {
+    width: 100%;
+    padding: 1rem 1.75rem;
+    /* Larger button */
+    background: var(--gradient-primary);
+    color: var(--bg-solid);
+    border: none;
+    border-radius: var(--radius-full);
+    font-size: 1.05rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 6px 20px rgba(126, 231, 216, 0.4);
+    /* Deeper shadow */
+    position: relative;
+    overflow: hidden;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.add-to-cart-btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.4);
+    /* Brighter hover ripple */
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+    z-index: 0;
+}
+
+.add-to-cart-btn span {
+    position: relative;
+    z-index: 1;
+}
+
+.add-to-cart-btn:hover::before {
+    width: 350px;
+    height: 350px;
+}
+
+.add-to-cart-btn:hover {
+    transform: translateY(-4px);
+    /* Deeper lift on hover */
+    box-shadow: 0 10px 30px rgba(126, 231, 216, 0.7);
+}
+
+.add-to-cart-btn:active {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(126, 231, 216, 0.3);
+}
+
+/* ========================================
+   PAGINATION
+   ======================================== */
+.pagination-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-2xl);
+    padding: var(--spacing-lg) 0;
+    animation: fadeIn 1.2s ease-out;
+}
+
+.pagination-btn {
+    padding: 0.75rem 1.25rem;
+    background: var(--surface-color);
+    color: var(--text-secondary);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.pagination-btn:hover:not(.active) {
+    background: var(--glass-bg);
+    color: var(--text-color);
+    border-color: var(--accent-primary);
+}
+
+.pagination-btn.active {
+    background: var(--gradient-primary);
+    color: var(--bg-solid);
+    border-color: var(--accent-primary);
+    box-shadow: 0 2px 10px rgba(126, 231, 216, 0.5);
+    transform: scale(1.05);
+}
+
+/* ========================================
+   LOADING & EMPTY STATES
+   ======================================== */
+/* (Kept as is, they are well-defined) */
+.loading-state {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 6rem 2rem;
+    color: var(--accent-primary);
+    font-size: 1.1rem;
+    min-height: 400px;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 3px solid rgba(126, 231, 216, 0.3);
+    border-radius: 50%;
+    border-top-color: var(--accent-primary);
+    animation: spin 1s ease-in-out infinite;
+    margin-bottom: var(--spacing-md);
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--text-secondary);
+}
+
+.empty-state h3 {
+    font-size: 2rem;
+    color: var(--text-color);
+    margin-bottom: var(--spacing-md);
+    font-weight: 700;
+}
+
+/* ========================================
+   LAYOUT ADJUSTMENTS
+   ======================================== */
+.collection-main-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--spacing-lg);
+}
+
+@media (min-width: 1024px) {
+    .collection-main-layout {
+        grid-template-columns: 1fr 300px;
+        gap: var(--spacing-2xl);
+        /* Larger gap for desktop layout */
+    }
+}
+
+.collection-products-section {
+    width: 100%;
+    min-width: 0;
+}
+
+/* Sidebar Ad - Made more appealing */
+.sidebar-ad-desktop {
+    display: none;
+    padding: var(--spacing-xl);
+    background: linear-gradient(160deg, var(--surface-color) 0%, rgba(199, 184, 234, 0.05) 100%);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-lg);
+    text-align: center;
+}
+
+.sidebar-ad-desktop h3 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--accent-secondary);
+    margin-bottom: var(--spacing-sm);
+}
+
+.sidebar-ad-desktop p {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-lg);
+}
+
+.sidebar-ad-btn {
+    padding: 0.75rem 1.5rem;
+    background: var(--accent-secondary);
+    color: var(--bg-solid);
+    border-radius: var(--radius-md);
+    font-weight: 700;
+    display: inline-block;
+    transition: background 0.3s;
+}
+
+.sidebar-ad-btn:hover {
+    background: #e2dcf4;
+}
+
+@media (min-width: 1024px) {
+    .sidebar-ad-desktop {
+        display: block;
+        animation: fadeInUp 1.2s ease-out;
+    }
+}
+
+/* ========================================
+   ANIMATIONS
+   ======================================== */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.8s ease-out;
+}
+
+.animate-fade-in-up {
+    animation: fadeInUp 1s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* ========================================
+   RESPONSIVE DESIGN
+   ======================================== */
+@media (max-width: 1024px) {
+    .product-grid {
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: var(--spacing-lg);
+    }
+}
+
+@media (max-width: 768px) {
+    .collection-hero {
+        padding: 4rem 0 2rem;
+    }
+
+    .collection-title {
+        font-size: 2.5rem;
+    }
+
+    .collection-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filter-group {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .sort-select {
+        flex: 1;
+    }
+
+    .product-grid {
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: var(--spacing-lg);
+    }
+}
+
+@media (max-width: 640px) {
+    .collection-container {
+        padding: var(--spacing-lg) var(--spacing-sm) var(--spacing-xl);
+    }
+
+    .collection-title {
+        font-size: 2rem;
+    }
+
+    box-shadow: 0 2px 10px rgba(126, 231, 216, 0.5);
+    transform: scale(1.05);
+}
+
+/* ========================================
+   LOADING & EMPTY STATES
+   ======================================== */
+/* (Kept as is, they are well-defined) */
+.loading-state {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 6rem 2rem;
+    color: var(--accent-primary);
+    font-size: 1.1rem;
+    min-height: 400px;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 3px solid rgba(126, 231, 216, 0.3);
+    border-radius: 50%;
+    border-top-color: var(--accent-primary);
+    animation: spin 1s ease-in-out infinite;
+    margin-bottom: var(--spacing-md);
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--text-secondary);
+}
+
+.empty-state h3 {
+    font-size: 2rem;
+    color: var(--text-color);
+    margin-bottom: var(--spacing-md);
+    font-weight: 700;
+}
+
+/* ========================================
+   LAYOUT ADJUSTMENTS
+   ======================================== */
+.collection-main-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--spacing-lg);
+}
+
+@media (min-width: 1024px) {
+    .collection-main-layout {
+        grid-template-columns: 1fr 300px;
+        gap: var(--spacing-2xl);
+        /* Larger gap for desktop layout */
+    }
+}
+
+.collection-products-section {
+    width: 100%;
+    min-width: 0;
+}
+
+/* Sidebar Ad - Made more appealing */
+.sidebar-ad-desktop {
+    display: none;
+    padding: var(--spacing-xl);
+    background: linear-gradient(160deg, var(--surface-color) 0%, rgba(199, 184, 234, 0.05) 100%);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-lg);
+    text-align: center;
+}
+
+.sidebar-ad-desktop h3 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--accent-secondary);
+    margin-bottom: var(--spacing-sm);
+}
+
+.sidebar-ad-desktop p {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-lg);
+}
+
+.sidebar-ad-btn {
+    padding: 0.75rem 1.5rem;
+    background: var(--accent-secondary);
+    color: var(--bg-solid);
+    border-radius: var(--radius-md);
+    font-weight: 700;
+    display: inline-block;
+    transition: background 0.3s;
+}
+
+.sidebar-ad-btn:hover {
+    background: #e2dcf4;
+}
+
+@media (min-width: 1024px) {
+    .sidebar-ad-desktop {
+        display: block;
+        animation: fadeInUp 1.2s ease-out;
+    }
+}
+
+/* ========================================
+   ANIMATIONS
+   ======================================== */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.8s ease-out;
+}
+
+.animate-fade-in-up {
+    animation: fadeInUp 1s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* ========================================
+   RESPONSIVE DESIGN
+   ======================================== */
+@media (max-width: 1024px) {
+    .product-grid {
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: var(--spacing-lg);
+    }
+}
+
+@media (max-width: 768px) {
+    .collection-hero {
+        padding: 4rem 0 2rem;
+    }
+
+    .collection-title {
+        font-size: 2.5rem;
+    }
+
+    .collection-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filter-group {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .sort-select {
+        flex: 1;
+    }
+
+    .product-grid {
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: var(--spacing-lg);
+    }
+}
+
+@media (max-width: 640px) {
+    .collection-container {
+        padding: var(--spacing-lg) var(--spacing-sm) var(--spacing-xl);
+    }
+
+    .collection-title {
+        font-size: 2rem;
+    }
+
+    .collection-subtitle {
+        font-size: 1rem;
+    }
+
+    .product-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
+    }
+
+    /* Image sizing handled by aspect-ratio - fully responsive */
+
+    .product-info {
+        padding: var(--spacing-md) var(--spacing-lg);
+    }
+
+    .product-title {
+        font-size: 1.15rem;
+    }
+
+    .product-price {
+        font-size: 1.25rem;
+    }
+
+    .add-to-cart-btn {
+        padding: 0.85rem 1.25rem;
+        font-size: 1rem;
+    }
+}
+
+/* ========================================
+   PRODUCT IMAGE PLACEHOLDER (RESPONSIVE)
+   ======================================== */
+.product-image-placeholder {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    /* 4:5 portrait ratio - optimal for product cards */
+    overflow: hidden;
+    background: var(--surface-color);
+    position: relative;
+}
+
+.product-image-placeholder img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
