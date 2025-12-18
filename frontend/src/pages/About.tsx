@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { ChevronLeft, Gamepad, Bot, Laptop, Brush, Sprout, Lightbulb, BookOpen, Handshake, Globe, UserCircle } from 'lucide-react';
 import './About.css';
+import { Link } from 'react-router-dom';
 
 interface AboutComponentProps {
   onBack: () => void;
@@ -140,10 +141,8 @@ const AboutComponent: React.FC<AboutComponentProps> = ({ onBack }) => {
           </p>
         </div>
       </section>
-      <a href="resume.pdf" className="btn-custom-about">Download</a>
       
       <footer>
-        <p>&copy; {new Date().getFullYear()} Omnora. All rights reserved.</p>
       </footer>
     </div>
   );

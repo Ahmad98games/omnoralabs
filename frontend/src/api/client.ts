@@ -1,12 +1,12 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios'
 
-// Retry configuration
-const MAX_RETRIES = 3
-const RETRY_DELAY = 1000 // 1 second base delay
+// Retry configuration - Optimized for instant fallback when backend unavailable
+const MAX_RETRIES = 0  // No retries for instant fallback to local data
+const RETRY_DELAY = 300  // Not used when MAX_RETRIES = 0
 
 const client = axios.create({
   baseURL: import.meta.env.VITE_API_URL || '/api',
-  timeout: 15000,
+  timeout: 500,  // 500ms for instant failure detection
   headers: {
     'Content-Type': 'application/json'
   }

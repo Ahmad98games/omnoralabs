@@ -184,6 +184,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/webhook', require('./routes/webhookRoutes'));
 app.use('/api/admin', require('./routes/adminRoutes'));
+app.use('/api/newsletter', newsletterRoutes);
 
 // Global error handler
 app.use((err, req, res, _next) => {
@@ -201,7 +202,9 @@ app.use((err, req, res, _next) => {
   });
 });
 
+console.log('Attempting to start server on port ' + PORT);
 app.listen(PORT, () => {
+  console.log('Server is listening!');
   logger.info(`Server running on port ${PORT}`);
   logger.info(`API URL: http://localhost:${PORT}${API_PREFIX}`);
 }).on('error', (err) => {

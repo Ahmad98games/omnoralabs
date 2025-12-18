@@ -1,30 +1,36 @@
-import { useState, useEffect, Fragment } from 'react' // 🚨 FIX: Added Fragment here for JSX shorthand <> keys
-import { Link, useSearchParams } from 'react-router-dom'
-import client, { trackEvent } from '../api/client'
-import './Collection.css'
-import { useScrollReveal } from '../hooks/useScrollReveal'
-import { useToast } from '../context/ToastContext'
-import AdPlacementZone from '../components/AdPlacementZone'
-import adConfig from '../config/adConfig.json'
-import SkeletonProductCard from '../components/SkeletonProductCard'
-import { FALLBACK_IMAGE } from '../constants'
-import SmartImage from '../components/SmartImage'
+import { useState, useEffect } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
+import client, { trackEvent } from '../api/client';
+import { useScrollReveal } from '../hooks/useScrollReveal';
+import { useToast } from '../context/ToastContext';
+import AdPlacementZone from '../components/AdPlacementZone';
+import SkeletonProductCard from '../components/SkeletonProductCard';
+import SmartImage from '../components/SmartImage';
+import adConfig from '../config/adConfig.json';
+import './Collection.css';
 
-// Define the guaranteed minimum loading time in milliseconds (5 seconds)
-const MINIMUM_LOAD_TIME = 5000;
+// ============================================================================
+// CONSTANTS
+// ============================================================================
 
-type Product = {
-    _id: string
-    name: string
-    price: number
-    image: string
-    category: string
-    description?: string
-    isFeatured?: boolean
-    isNew?: boolean
+const SKELETON_COUNT = 4;
+
+// ============================================================================
+// TYPE DEFINITIONS
+// ============================================================================
+
+interface Product {
+    _id: string;
+    name: string;
+    price: number;
+    image: string;
+    category: string;
+    description?: string;
+    isFeatured?: boolean;
+    isNew?: boolean;
 }
 
-interface CartItem { // Added missing CartItem interface for consistency with addToCart logic
+interface CartItem {
     id: string;
     name: string;
     price: number;
@@ -32,333 +38,312 @@ interface CartItem { // Added missing CartItem interface for consistency with ad
     quantity: number;
 }
 
-// ----------------------------------------------------
-// 1. DEFINE FOOTER COMPONENT
-// ----------------------------------------------------
-const Footer = () => (
-    <footer className="footer">
-        <div className="container">
-            <div className="footer-bottom" style={{ textAlign: 'center' }}>
-                &copy; {new Date().getFullYear()} Omnora. All rights reserved. | Operated and Developed By Ahmad Mahboob
+type PriceRange = 'all' | 'under-500' | '500-1000' | 'over-1000';
+type SortOption = 'default' | 'new' | 'price-low' | 'price-high' | 'name-asc' | 'name-desc' | 'featured';
+
+// ============================================================================
+// CHILD COMPONENTS
+// ============================================================================
+
+interface ProductCardProps {
+    product: Product;
+    onAddToCart: (product: Product) => void;
+}
+
+const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => (
+    <article className="product-card">
+        <Link to={`/product/${product._id}`} className="product-card__image-link">
+            <div className="product-card__image-wrapper">
+                <SmartImage
+                    src={product.image}
+                    alt={product.name}
+                    className="product-card__image"
+                    priority={true}
+                />
             </div>
+        </Link>
+
+        <div className="product-card__content">
+            <Link to={`/product/${product._id}`} className="product-card__title-link">
+                <h3 className="product-card__title">
+                    {product.name}
+                    {product.isNew && <span className="product-card__badge product-card__badge--new">NEW</span>}
+                    {product.isFeatured && <span className="product-card__badge product-card__badge--featured">★</span>}
+                </h3>
+            </Link>
+
+            {product.description && (
+                <p className="product-card__description">{product.description}</p>
+            )}
+
+            <p className="product-card__price">PKR {product.price.toLocaleString()}</p>
+
+            <button
+                onClick={() => onAddToCart(product)}
+                className="product-card__add-btn"
+                aria-label={`Add ${product.name} to cart`}
+            >
+                Add to Bag
+            </button>
         </div>
-    </footer>
+    </article>
 );
 
+interface EmptyStateProps {
+    type: 'error' | 'no-results';
+    message?: string;
+    onRetry?: () => void;
+}
+
+const EmptyState: React.FC<EmptyStateProps> = ({ type, message, onRetry }) => (
+    <div className="empty-state">
+        {type === 'error' ? (
+            <>
+                <h3 className="empty-state__title">Oops! Something went wrong</h3>
+                <p className="empty-state__message">{message || 'Failed to load products'}</p>
+                {onRetry && (
+                    <button onClick={onRetry} className="empty-state__button">
+                        Try Again
+                    </button>
+                )}
+            </>
+        ) : (
+            <>
+                <h3 className="empty-state__title">No products found 🛁</h3>
+                <p className="empty-state__message">
+                    Try adjusting your filters, clearing your search query, or check back later for new arrivals.
+                </p>
+            </>
+        )}
+    </div>
+);
+
+// ============================================================================
+// MAIN COMPONENT
+// ============================================================================
 
 export default function Collection() {
-    const [searchParams, setSearchParams] = useSearchParams()
-    const [products, setProducts] = useState<Product[]>([])
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState<string | null>(null)
-    const [sortBy, setSortBy] = useState('default')
-    const [priceRange, setPriceRange] = useState<'all' | 'under-500' | '500-1000' | 'over-1000'>('all')
+    const [searchParams] = useSearchParams();
+    const [products, setProducts] = useState<Product[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [sortBy, setSortBy] = useState<SortOption>('default');
+    const [priceRange, setPriceRange] = useState<PriceRange>('all');
 
-    const { showToast } = useToast()
-    // 🚨 FIX: useScrollReveal must be called without a ref object argument if it expects a number (as per previous errors). 
-    // Assuming it's meant to be called without args, or it returns a ref, but to fix the type errors, 
-    // we'll assume the hook handles the element internally or takes a numeric parameter.
-    // However, the original code assigned its return value to two refs. Since ref is often an object, 
-    // let's simplify and assume the hook takes a number (delay) for now.
-    const headerRef = useScrollReveal(100); // Assuming 100ms delay for header reveal
-    const gridRef = useScrollReveal(200);  // Assuming 200ms delay for grid reveal
-
-    // Define how many skeleton cards to show during load
-    const SKELETON_COUNT = 8;
+    const { showToast } = useToast();
+    useScrollReveal(100); // Trigger hooks if they internally use refs or side effects
+    useScrollReveal(200);
 
     useEffect(() => {
         let isMounted = true;
-        
-        // Record the start time for the minimum load check
-        const startTime = Date.now();
 
-        async function load() {
+        async function fetchProducts() {
             let fetchedData: Product[] = [];
             let fetchError: string | null = null;
-            
+
             try {
                 setLoading(true);
                 setError(null);
-                const q = searchParams.get('q');
-                const cat = searchParams.get('category');
-                let res;
 
-                // --- Product Fetching Logic with Fallback ---
+                const query = searchParams.get('q');
+                const category = searchParams.get('category');
+                let response;
+
                 try {
-                    if (q) {
-                        res = await client.get(`/products/search`, { params: { q } });
-                    } else if (cat) {
-                        res = await client.get(`/products/category/${encodeURIComponent(cat)}`);
+                    if (query) {
+                        response = await client.get('/products/search', { params: { q: query } });
+                    } else if (category) {
+                        response = await client.get(`/products/category/${encodeURIComponent(category)}`);
                     } else {
-                        res = await client.get(`/products`);
+                        response = await client.get('/products');
                     }
                 } catch (apiError) {
                     console.warn('API connection failed, using fallback data:', apiError);
-                    // Fallback data is loaded silently - no toast needed
                     const { fallbackProducts } = await import('../data/fallbackProducts');
-                    res = { data: { success: true, data: fallbackProducts } };
+                    response = { data: { success: true, data: fallbackProducts } };
                 }
 
                 if (!isMounted) return;
 
-                let data = res.data || [];
-                // Normalize data structure
+                let data = response.data || [];
                 if (data.data && Array.isArray(data.data)) {
                     data = data.data;
-                } else if (Array.isArray(res.data)) {
-                    data = res.data;
+                } else if (Array.isArray(response.data)) {
+                    data = response.data;
                 }
 
-                if (!Array.isArray(data)) {
-                    data = [];
-                }
-
-                fetchedData = data;
+                fetchedData = Array.isArray(data) ? data : [];
 
             } catch (e: any) {
                 console.error('Critical error loading products:', e);
                 fetchError = 'Failed to load products. Please check your connection.';
 
-                // Final fallback if even the dynamic import fails (highly unlikely)
                 try {
                     const { fallbackProducts } = await import('../data/fallbackProducts');
                     fetchedData = fallbackProducts;
-                } catch (fallbackError) {
-                    fetchedData = []; // Set to empty array on total failure
+                } catch {
+                    fetchedData = [];
                 }
             }
 
-            // --- Guaranteed Minimum Load Time Delay ---
-            const timeElapsed = Date.now() - startTime;
-            const delayRemaining = MINIMUM_LOAD_TIME - timeElapsed;
-            
-            // This promise resolves only after the minimum load time has passed
-            await new Promise(resolve => setTimeout(resolve, Math.max(0, delayRemaining)));
-
             if (!isMounted) return;
-            
-            // --- Filtering & Sorting Applied After Delay ---
 
-            // Apply price filter
-            let filteredData = fetchedData.filter((p: Product) => {
-                if (priceRange === 'under-500') return p.price < 500
-                if (priceRange === '500-1000') return p.price >= 500 && p.price <= 1000
-                if (priceRange === 'over-1000') return p.price > 1000
-                return true
-            })
-
-            // Client-side sorting
-            if (sortBy === 'price-low') {
-                filteredData.sort((a: Product, b: Product) => a.price - b.price)
-            } else if (sortBy === 'price-high') {
-                filteredData.sort((a: Product, b: Product) => b.price - a.price)
-            } else if (sortBy === 'name-asc') {
-                filteredData.sort((a: Product, b: Product) => a.name.localeCompare(b.name))
-            } else if (sortBy === 'name-desc') {
-                filteredData.sort((a: Product, b: Product) => b.name.localeCompare(a.name))
-            } else if (sortBy === 'featured') {
-                filteredData.sort((a: Product, b: Product) => (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0))
-            } else if (sortBy === 'new') {
-                filteredData.sort((a: Product, b: Product) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0))
-            }
-
-            setProducts(filteredData);
+            const filteredAndSorted = filterAndSortProducts(fetchedData, priceRange, sortBy);
+            setProducts(filteredAndSorted);
             setError(fetchError);
             setLoading(false);
         }
-        
-        load();
-        
-        return () => { isMounted = false }
-    }, [searchParams, sortBy, priceRange])
 
-    const addToCart = (p: Product) => {
+        fetchProducts();
+        return () => { isMounted = false; };
+    }, [searchParams, sortBy, priceRange]);
+
+    const filterAndSortProducts = (data: Product[], range: PriceRange, sort: SortOption): Product[] => {
+        let filtered = data.filter((p) => {
+            if (range === 'under-500') return p.price < 500;
+            if (range === '500-1000') return p.price >= 500 && p.price <= 1000;
+            if (range === 'over-1000') return p.price > 1000;
+            return true;
+        });
+
+        const sorted = [...filtered];
+        switch (sort) {
+            case 'price-low': sorted.sort((a, b) => a.price - b.price); break;
+            case 'price-high': sorted.sort((a, b) => b.price - a.price); break;
+            case 'name-asc': sorted.sort((a, b) => a.name.localeCompare(b.name)); break;
+            case 'name-desc': sorted.sort((a, b) => b.name.localeCompare(a.name)); break;
+            case 'featured': sorted.sort((a, b) => (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0)); break;
+            case 'new': sorted.sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0)); break;
+        }
+        return sorted;
+    };
+
+    const handleAddToCart = (product: Product) => {
         const cart: CartItem[] = JSON.parse(localStorage.getItem('cart') || '[]');
-        const existing = cart.find((i: CartItem) => i.id === p._id);
-        
+        const existing = cart.find((item) => item.id === product._id);
+
         if (existing) {
             existing.quantity++;
         } else {
-            cart.push({ id: p._id, name: p.name, price: p.price, image: p.image, quantity: 1 });
+            cart.push({
+                id: product._id,
+                name: product.name,
+                price: product.price,
+                image: product.image,
+                quantity: 1,
+            });
         }
 
         localStorage.setItem('cart', JSON.stringify(cart));
         window.dispatchEvent(new Event('cart-updated'));
-        trackEvent({ 
-            type: 'add_to_cart', 
-            sessionId: localStorage.getItem('sid') || '', 
-            payload: { productId: p._id, price: p.price } 
+        trackEvent({
+            type: 'add_to_cart',
+            sessionId: localStorage.getItem('sid') || '',
+            payload: { productId: product._id, price: product.price },
         });
-        showToast(`Added ${p.name} to bag`, 'success');
-    }
 
-    const displayedProducts = products
-    const adInsertIndex = 4;
+        showToast(`Added ${product.name} to bag`, 'success');
+    };
 
     return (
-        <>
-            <div className="collection-page">
-                {/* Ref usage corrected to pass the numeric return value of the hook */}
-                <header className="collection-hero" style={{ transitionDelay: `${headerRef}ms` }}>
-                    <div className="collection-hero-content animate-fade-in-up">
-                        <h1 className="collection-title">Bath Bomb Collection</h1>
-                        <p className="collection-subtitle">Immerse yourself in luxury with our handcrafted bath bombs. Each one is carefully formulated with premium ingredients for the ultimate relaxation experience.</p>
-                    </div>
-                </header>
+        <div className="collection">
+            <header className="collection__hero">
+                <div className="collection__hero-content container">
+                    <h1 className="collection__title">Bath Bomb Collection</h1>
+                    <p className="collection__subtitle">
+                        Immerse yourself in luxury with our handcrafted bath bombs.
+                    </p>
+                </div>
+            </header>
 
-                <div className="collection-container">
-                    <div className="breadcrumbs animate-fade-in">
-                        <Link to="/">Home</Link> / <span>Bath Bombs</span>
-                    </div>
+            <div className="collection__container container">
+                <nav className="breadcrumbs" aria-label="Breadcrumb">
+                    <Link to="/" className="breadcrumbs__link">Home</Link>
+                    <span className="breadcrumbs__separator">/</span>
+                    <span className="breadcrumbs__current">Bath Bombs</span>
+                </nav>
 
-                    {/* Top Banner Ad Zone */}
-                    <AdPlacementZone
-                        type="banner"
-                        config={adConfig.collection.topBanner}
-                        zoneName="Collection Top Banner"
-                    />
+                <AdPlacementZone
+                    type="banner"
+                    config={adConfig.collection.topBanner}
+                    zoneName="Collection Top Banner"
+                />
 
-                    <div className="collection-toolbar animate-fade-in">
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-                            <p>Showing **{displayedProducts.length}** {displayedProducts.length === 1 ? 'product' : 'products'}</p>
-
-                            {/* Price Filter */}
-                            <div className="filter-group">
-                                <label htmlFor="priceFilter">Price:</label>
-                                <select
-                                    id="priceFilter"
-                                    className="sort-select"
-                                    value={priceRange}
-                                    onChange={(e) => setPriceRange(e.target.value as any)}
-                                >
-                                    <option value="all">All Prices</option>
-                                    <option value="under-500">Under PKR 500</option>
-                                    <option value="500-1000">PKR 500 - 1000</option>
-                                    <option value="over-1000">Over PKR 1000</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div className="filter-group">
-                            <label htmlFor="sortBy">Sort By:</label>
+                <div className="toolbar">
+                    <div className="toolbar__info">
+                        <p className="toolbar__count">
+                            Showing <strong>{products.length}</strong> {products.length === 1 ? 'product' : 'products'}
+                        </p>
+                        <div className="toolbar__filter">
+                            <label htmlFor="priceFilter" className="toolbar__label">Price:</label>
                             <select
-                                id="sortBy"
-                                className="sort-select"
-                                value={sortBy}
-                                onChange={(e) => setSortBy(e.target.value)}
+                                id="priceFilter"
+                                className="toolbar__select"
+                                value={priceRange}
+                                onChange={(e) => setPriceRange(e.target.value as PriceRange)}
                             >
-                                <option value="default">Featured</option>
-                                <option value="new">New Arrivals</option>
-                                <option value="price-low">Price: Low to High</option>
-                                <option value="price-high">Price: High to Low</option>
-                                <option value="name-asc">Name: A-Z</option>
-                                <option value="name-desc">Name: Z-A</option>
+                                <option value="all">All Prices</option>
+                                <option value="under-500">Under PKR 500</option>
+                                <option value="500-1000">PKR 500 - 1000</option>
+                                <option value="over-1000">Over PKR 1000</option>
                             </select>
                         </div>
                     </div>
 
-                    <div className="product-display-section">
-                        {/* 1. SKELETON LOADING STATE (5-second minimum) */}
-                        {loading ? (
-                            // Note: gridRef is now a number (delay) as per the fix, not a RefObject. 
-                            // If useScrollReveal handles animation based on this number, its usage should be reviewed 
-                            // in the CSS/JSX, but for now, we remove the ref={gridRef} to avoid TypeScript errors.
-                            <div className="product-grid"> 
-                                {/* Render multiple SkeletonProductCard components */}
-                                {Array(SKELETON_COUNT).fill(0).map((_, index) => (
-                                    <SkeletonProductCard key={index} />
-                                ))}
-                            </div>
-                        ) : error ? (
-                            <div className="empty-state">
-                                <h3>Oops! Something went wrong</h3>
-                                <p style={{ color: 'var(--color-text-secondary)', marginBottom: '2rem' }}>{error}</p>
-                                <button
-                                    onClick={() => window.location.reload()}
-                                    className="add-to-cart-btn"
-                                    style={{ maxWidth: '300px', margin: '0 auto' }}
-                                >
-                                    Try Again
-                                </button>
-                            </div>
-                        ) : displayedProducts.length === 0 ? (
-                            <div className="empty-state">
-                                <h3>No products found 🛁</h3>
-                                <p>Try adjusting your filters, clearing your search query, or check back later for new arrivals.</p>
-                            </div>
-                        ) : (
-                            <div className="product-grid" style={{ transitionDelay: `${gridRef}ms` }}> 
-                                {/* 2. CONSOLIDATED PRODUCT RENDERING WITH AD INJECTION */}
-                                {displayedProducts.map((p, index) => (
-                                    // 🚨 FIX: Using the imported 'Fragment' component for the map key.
-                                    <Fragment key={p._id}> 
-                                        {/* Inject Ad after 'adInsertIndex' products (e.g., after the 4th card) */}
-                                        {index === adInsertIndex && (
-                                            <div key="mid-ad-banner" style={{ gridColumn: '1 / -1', margin: '2rem 0' }}>
-                                                <AdPlacementZone
-                                                    type="banner"
-                                                    config={adConfig.collection.midContentBanner}
-                                                    zoneName="Mid-Content Banner"
-                                                />
-                                            </div>
-                                        )}
-
-                                        <div className="product-card hover-lift">
-                                            <Link to={`/product/${p._id}`} className="product-image-link">
-                                                <div className="product-image-placeholder"><img src={p.image} alt={p.name} loading="lazy" /></div>
-                                            </Link>
-                                            <div className="product-info">
-                                                <Link to={`/product/${p._id}`} className="product-title">
-                                                    {p.name}
-                                                    {p.isNew && <span style={{
-                                                        marginLeft: '0.5rem',
-                                                        fontSize: '0.75rem',
-                                                        padding: '0.25rem 0.5rem',
-                                                        background: 'var(--color-aqua)',
-                                                        color: 'var(--color-bg-dark)',
-                                                        borderRadius: '0.25rem',
-                                                        fontWeight: 700
-                                                    }}>NEW</span>}
-                                                    {p.isFeatured && <span style={{
-                                                        marginLeft: '0.5rem',
-                                                        fontSize: '0.75rem',
-                                                        padding: '0.25rem 0.5rem',
-                                                        background: 'var(--color-silver)',
-                                                        color: 'var(--color-bg-dark)',
-                                                        borderRadius: '0.25rem',
-                                                        fontWeight: 700
-                                                    }}>★</span>}
-                                                </Link>
-                                                {p.description && (
-                                                    <p className="product-description">{p.description}</p>
-                                                )}
-                                                <p className="product-price">PKR **{p.price.toLocaleString()}**</p>
-                                                <button
-                                                    onClick={() => addToCart(p)}
-                                                    className="add-to-cart-btn hover-scale"
-                                                >
-                                                    Add to Bag
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </Fragment> // 🚨 FIX: Closing Fragment tag
-                                ))}
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Sidebar Ad Zone - Hidden on mobile */}
-                    <div style={{ display: 'none' }} className="sidebar-ad-desktop">
-                        <AdPlacementZone
-                            type="sidebar"
-                            config={adConfig.collection.sidebarAd}
-                            zoneName="Collection Sidebar Ad"
-                        />
+                    <div className="toolbar__filter">
+                        <label htmlFor="sortBy" className="toolbar__label">Sort By:</label>
+                        <select
+                            id="sortBy"
+                            className="toolbar__select"
+                            value={sortBy}
+                            onChange={(e) => setSortBy(e.target.value as SortOption)}
+                        >
+                            <option value="default">Featured</option>
+                            <option value="new">New Arrivals</option>
+                            <option value="price-low">Price: Low to High</option>
+                            <option value="price-high">Price: High to Low</option>
+                            <option value="name-asc">Name: A-Z</option>
+                            <option value="name-desc">Name: Z-A</option>
+                        </select>
                     </div>
                 </div>
-            </div>
 
-            <Footer />
-        </>
-    )
+                <section className="collection__products">
+                    {loading ? (
+                        <div className="product-grid">
+                            {Array.from({ length: SKELETON_COUNT }).map((_, index) => (
+                                <SkeletonProductCard key={index} />
+                            ))}
+                        </div>
+                    ) : error ? (
+                        <EmptyState
+                            type="error"
+                            message={error}
+                            onRetry={() => window.location.reload()}
+                        />
+                    ) : products.length === 0 ? (
+                        <EmptyState type="no-results" />
+                    ) : (
+                        <div className="product-grid">
+                            {products.map((product) => (
+                                <ProductCard 
+                                    key={product._id} 
+                                    product={product} 
+                                    onAddToCart={handleAddToCart} 
+                                />
+                            ))}
+                        </div>
+                    )}
+                </section>
+
+                <aside className="collection__sidebar">
+                    <AdPlacementZone
+                        type="sidebar"
+                        config={adConfig.collection.sidebarAd}
+                        zoneName="Collection Sidebar Ad"
+                    />
+                </aside>
+            </div>
+        </div>
+    );
 }

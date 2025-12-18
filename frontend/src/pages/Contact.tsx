@@ -9,7 +9,6 @@ const Footer = () => (
   <footer className="footer">
     <div className="container">
       <div className="footer-bottom" style={{ textAlign: 'center' }}> {/* Added inline style for centering */}
-        &copy; {new Date().getFullYear()} Omnora. All rights reserved. |Operated and Developed By Ahmad Mahboob
       </div>
     </div>
   </footer>

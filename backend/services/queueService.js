@@ -3,29 +3,37 @@ const IORedis = require('ioredis');
 const logger = require('./logger');
 
 // Redis connection
+// Redis connection
 let connection;
 try {
-    connection = new IORedis({
+    const redisOptions = {
         host: process.env.REDIS_HOST || 'localhost',
         port: process.env.REDIS_PORT || 6379,
         password: process.env.REDIS_PASSWORD || undefined,
         maxRetriesPerRequest: null,
         enableReadyCheck: false,
         retryStrategy: (times) => {
-            // Stop retrying after 3 attempts if initial connection fails
             if (times > 3) {
+                console.warn('Redis retry limit reached, giving up.');
                 return null;
             }
             return Math.min(times * 50, 2000);
-        }
+        },
+        lazyConnect: true // Fail silently if not connected, don't crash on boot
+    };
+
+    connection = new IORedis(redisOptions);
+
+    // Silent error handler
+    connection.on('error', (err) => {
+        // Log but don't crash
+        // logger may not be initialized if circular dep, use console
+        console.warn('Redis connection silent error:', err.message);
     });
 
-    connection.on('error', (err) => {
-        // Suppress unhandled error events to prevent crash
-        logger.warn('Redis connection error (queues disabled):', err.message);
-    });
 } catch (error) {
-    logger.warn('Failed to initialize Redis connection:', error.message);
+    console.error('Failed to initialize Redis connection:', error.message);
+    connection = null;
 }
 
 // Queue configurations
@@ -49,25 +57,25 @@ const defaultJobOptions = {
 // ============================================
 
 let emailQueue, emailDLQ;
-if (connection) {
-    try {
-        emailQueue = new Queue('email-notifications', {
-            connection,
-            defaultJobOptions
-        });
-
-        emailDLQ = new Queue('email-dlq', {
-            connection,
-            defaultJobOptions: {
-                attempts: 1, // DLQ doesn't retry
-                removeOnComplete: false,
-                removeOnFail: false
-            }
-        });
-    } catch (e) {
-        logger.warn('Failed to create email queues:', e.message);
-    }
-}
+// if (connection) {
+//     try {
+//         emailQueue = new Queue('email-notifications', {
+//             connection,
+//             defaultJobOptions
+//         });
+//
+//         emailDLQ = new Queue('email-dlq', {
+//             connection,
+//             defaultJobOptions: {
+//                 attempts: 1, // DLQ doesn't retry
+//                 removeOnComplete: false,
+//                 removeOnFail: false
+//             }
+//         });
+//     } catch (e) {
+//         logger.warn('Failed to create email queues:', e.message);
+//     }
+// }
 
 /**
  * Add email job to queue
@@ -104,25 +112,25 @@ async function queueEmail(type, data) {
 // ============================================
 
 let whatsappQueue, whatsappDLQ;
-if (connection) {
-    try {
-        whatsappQueue = new Queue('whatsapp-notifications', {
-            connection,
-            defaultJobOptions
-        });
-
-        whatsappDLQ = new Queue('whatsapp-dlq', {
-            connection,
-            defaultJobOptions: {
-                attempts: 1,
-                removeOnComplete: false,
-                removeOnFail: false
-            }
-        });
-    } catch (e) {
-        logger.warn('Failed to create WhatsApp queues:', e.message);
-    }
-}
+// if (connection) {
+//     try {
+//         whatsappQueue = new Queue('whatsapp-notifications', {
+//             connection,
+//             defaultJobOptions
+//         });
+//
+//         whatsappDLQ = new Queue('whatsapp-dlq', {
+//             connection,
+//             defaultJobOptions: {
+//                 attempts: 1,
+//                 removeOnComplete: false,
+//                 removeOnFail: false
+//             }
+//         });
+//     } catch (e) {
+//         logger.warn('Failed to create WhatsApp queues:', e.message);
+//     }
+// }
 
 /**
  * Add WhatsApp job to queue

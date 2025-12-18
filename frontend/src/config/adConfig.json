@@ -46,14 +46,9 @@
             "imageUrl": "/images/main/green tea.png",
             "link": "",
             "alt": "Sidebar Ad"
-        },
-        "midContentBanner": {
-            "enabled": true,
-            "imageUrl": "/imas/main/rose.png",
-            "link": "",
-            "alt": "Mid-Content Banner"
-        }
+        
     },
+
     "product": {
         "videoZone": {
             "enabled": true,
@@ -117,5 +112,6 @@
             "collectionTop": "",
             "productSidebar": ""
         }
+    }
     }
 }

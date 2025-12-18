@@ -13,7 +13,7 @@ export default function Newsletter() {
 
         setStatus('loading');
         try {
-            await client.post('/newsletter', { email });
+            await client.post('/newsletter/subscribe', { email });
             setStatus('success');
             setMessage('Thank you for subscribing!');
             setEmail('');
