@@ -7,9 +7,17 @@ let stateService;
 let constants;
 
 module.exports = async (req, res) => {
+    // Helper to allow CORS for diagnostic messages
+    const enableCors = () => {
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+        res.setHeader('Access-Control-Allow-Headers', 'X-Api-Version, Content-Type');
+    };
+
     // 0. DIAGNOSTIC PING
     // Access /api/any-route?ping=1 to verify the function is actually running
     if (req.query && req.query.ping) {
+        enableCors();
         return res.status(200).json({
             status: 'pong',
             env: {
@@ -52,6 +60,9 @@ module.exports = async (req, res) => {
 
     } catch (e) {
         console.error('Server Initialization Crash:', e);
+        // Enable CORS so the frontend can actually see the error
+        enableCors();
+
         // Return simple JSON to avoid any formatting issues
         // Use .send() with stringified JSON to ensure Content-Type handling doesn't interfere
         res.setHeader('Content-Type', 'application/json');
