@@ -5,8 +5,10 @@ const MAX_RETRIES = 3
 const RETRY_DELAY = 1000 // 1 second base delay
 
 const client = axios.create({
-  // Use VITE_API_URL if defined, otherwise relative '/api' for Prod (Vercel) or localhost for Dev
-  baseURL: import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'http://localhost:5000/api'),
+  // Always use relative path. 
+  // Dev: handled by Vite Proxy (vite.config.ts) -> localhost:5000
+  // Prod: handled by Vercel Rewrites (vercel.json) -> Serverless Function
+  baseURL: '/api',
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
