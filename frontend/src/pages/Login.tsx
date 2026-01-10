@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import { useAuth } from '../context/AuthContext';
+import client from '../api/client';
 
 import './Login.css';
 
@@ -109,7 +110,7 @@ const Login: React.FC = () => {
                     // The previous useEffect handled this but caused loops.
                     // Let's modify AuthContext to return user on login.
                     // Since I can't modify AuthContext right this second in this tool call, I'll rely on a manual check.
-                    const { data } = await import('../api/client').then(m => m.default.get('/auth/me'));
+                    const { data } = await client.get('/auth/me');
                     if (data?.user?.role === 'admin') {
                         navigate('/admin/dashboard');
                     } else {
