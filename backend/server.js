@@ -112,10 +112,8 @@ app.use((err, req, res, _next) => {
     method: req.method,
   });
   res.status(err.status || 500).json({
-    error:
-      process.env.NODE_ENV === 'development'
-        ? `Error: ${err.message}`
-        : 'Internal server error occurred',
+    error: `Error: ${err.message}`,
+    stack: err.stack // Temporarily exposing stack for debugging
   });
 });
 

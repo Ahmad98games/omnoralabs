@@ -7,7 +7,10 @@ module.exports = async (req, res) => {
         await dbConnect();
     } catch (e) {
         console.error('Database connection failed in serverless function:', e);
-        return res.status(500).json({ error: 'Database connection failed' });
+        return res.status(500).json({
+            error: `Database connection failed: ${e.message}`,
+            stack: e.stack
+        });
     }
 
     // 2. Forward request to Express
