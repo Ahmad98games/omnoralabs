@@ -89,8 +89,21 @@ client.interceptors.response.use(
       // The request was made and the server responded with a status code
       // that falls out of the range of 2xx
       // Return the error message from the server if available, otherwise generic
-      const data = error.response.data as { error?: string, message?: string }
-      const errorMessage = data?.error || data?.message || 'An internal server error occurred'
+      const data = error.response.data as { error?: any, message?: any, reason?: string }
+
+      let errorMessage = 'An internal server error occurred';
+
+      if (data) {
+        if (typeof data === 'string') {
+          errorMessage = data;
+        } else if (data.message) {
+          errorMessage = typeof data.message === 'object' ? JSON.stringify(data.message) : data.message;
+        } else if (data.error) {
+          errorMessage = typeof data.error === 'object' ? JSON.stringify(data.error) : data.error;
+        } else if (data.reason) {
+          errorMessage = data.reason;
+        }
+      }
       return Promise.reject(new Error(errorMessage))
     } else if (error.request) {
       // The request was made but no response was received
