@@ -11,13 +11,13 @@ import Footer from './Footer';
 interface CartItem {
     quantity: number;
 }
-        
+
 export default function Layout() {
     const [cartCount, setCartCount] = useState(0);
     const [menuOpen, setMenuOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
 
-    const { user, logout } = useAuth();
+    const { user, logout, isAdmin } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -113,7 +113,7 @@ export default function Layout() {
                         {/* User Profile / Login */}
                         {user ? (
                             <>
-                                {user.role === 'admin' && (
+                                {isAdmin && (
                                     <Link to="/admin" className="action-btn" title="Dashboard">
                                         <LayoutDashboard size={22} />
                                     </Link>
@@ -162,7 +162,7 @@ export default function Layout() {
 
             {/* === FOOTER === */}
             <Footer /> {/* Enhanced Footer */}
-            
+
         </div>
     );
 }

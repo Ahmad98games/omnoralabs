@@ -10,7 +10,6 @@
     "dev": "set NODE_ENV=development && npm run cleanup && node --watch server.js",
     "worker": "node workers/notificationWorker.js",
     "worker:dev": "nodemon workers/notificationWorker.js",
-    "migrate:products": "node scripts/migrateProducts.js",
     "lint:env": "node scripts/check-env-leaks.js",
     "test": "jest --verbose --detectOpenHandles",
     "test:boundaries": "node test-boundaries.js",
