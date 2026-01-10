@@ -96,7 +96,7 @@ function validateEnv() {
     if (validatedConfig) return validatedConfig;
 
     // Only validate critical stuff for startup
-    const criticalSecrets = ['jwt.secret', 'mongo.uri'];
+    const criticalSecrets = ['jwt.secret'];
     const criticalRuntime = ['port'];
 
     for (const path of criticalSecrets) {

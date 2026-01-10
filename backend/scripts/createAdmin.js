@@ -18,9 +18,14 @@ const ADMIN_CREDENTIALS = {
 
 async function createAdmin() {
     try {
-        console.log('🔌 Connecting to MongoDB...');
-        await mongoose.connect(process.env.MONGODB_URI);
-        console.log('✅ Connected to MongoDB\n');
+        if (User.prototype instanceof mongoose.Model) {
+            console.log('🔌 Connecting to MongoDB...');
+            if (!process.env.MONGODB_URI) throw new Error('MONGODB_URI missing for Mongoose mode');
+            await mongoose.connect(process.env.MONGODB_URI);
+            console.log('✅ Connected to MongoDB\n');
+        } else {
+            console.log('📂 Using LocalDB (File-based persistence)\n');
+        }
 
         // Check if admin already exists
         const existingAdmin = await User.findOne({ email: ADMIN_CREDENTIALS.email });

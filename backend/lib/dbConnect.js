@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { validateEnv } = require('./env');
+const { validateEnv } = require('../config/env');
 
 const config = validateEnv();
 const MONGODB_URI = config.mongo.uri;
@@ -18,6 +18,11 @@ if (!cached) {
 async function dbConnect() {
     if (cached.conn) {
         return cached.conn;
+    }
+
+    if (!MONGODB_URI) {
+        console.warn('WARN: MONGODB_URI not found in env, skipping connection (LocalDB Mode)');
+        return null;
     }
 
     if (!cached.promise) {
