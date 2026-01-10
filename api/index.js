@@ -37,7 +37,7 @@ module.exports = async (req, res) => {
         }
         if (!process.env.MONGODB_URI) {
             console.warn('WARN: Using Hardcoded MONGODB_URI');
-            process.env.MONGODB_URI = 'mongodb+srv://mahboobrubani2384_db_user:98158302384@cluster0.mnp2buu.mongodb.net/?appName=Cluster0';
+            process.env.MONGODB_URI = 'mongodb+srv://ahmad_omnora:98158302384@cluster0.mnp2buu.mongodb.net/?appName=Cluster0';
         }
 
         // 2. Lazy Load Modules
