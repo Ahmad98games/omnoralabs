@@ -1,15 +1,14 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import './OmnoraCarousel.css';
 
-// Import assets
+// Import assets (Keep your imports)
 import slide3 from '../assets/bathbomb/3.png';
 import slide2 from '../assets/bathbomb/2.png';
 import slide1 from '../assets/bathbomb/1.png';
 import slide4 from '../assets/bathbomb/4.png';
 import slide5 from '../assets/bathbomb/5.png';
 
-// 1. Enhanced Data Structure for "Editorial" feel
 const slides = [
     { 
         src: slide3, 
@@ -43,53 +42,34 @@ const slides = [
     }
 ];
 
-const AUTOPLAY_DURATION = 5000; // 5 seconds
+const AUTOPLAY_DURATION = 5000;
 
-const Carousel: React.FC = () => {
+const Carousel = () => {
     const [current, setCurrent] = useState(0);
-    const [progress, setProgress] = useState(0);
-    const progressInterval = useRef<NodeJS.Timeout | null>(null);
 
-    // Reset progress bar animation
-    const resetProgress = () => {
-        setProgress(0);
-        if (progressInterval.current) clearInterval(progressInterval.current);
-        
-        const step = 100 / (AUTOPLAY_DURATION / 50); // Calculate step for 50ms updates
-        
-        progressInterval.current = setInterval(() => {
-            setProgress((prev) => {
-                if (prev >= 100) return 100;
-                return prev + step;
-            });
-        }, 50);
-    };
-
+    // Simplified Logic: No complex intervals for progress bar
     const nextSlide = () => {
         setCurrent((prev) => (prev + 1) % slides.length);
-        resetProgress();
     };
 
     const prevSlide = () => {
         setCurrent((prev) => (prev === 0 ? slides.length - 1 : prev - 1));
-        resetProgress();
     };
 
-    // Autoplay Logic
+    // AutoPlay Logic
     useEffect(() => {
-        resetProgress();
-        const autoPlay = setInterval(() => {
+        const timer = setInterval(() => {
             nextSlide();
         }, AUTOPLAY_DURATION);
 
-        return () => {
-            clearInterval(autoPlay);
-            if (progressInterval.current) clearInterval(progressInterval.current);
-        };
+        return () => clearInterval(timer);
     }, [current]);
 
     return (
         <div className="carousel-magnum">
+            {/* Cinematic Grain Overlay (Texture) */}
+            <div className="film-grain"></div>
+
             {/* Slides Layer */}
             {slides.map((slide, idx) => (
                 <div 
@@ -123,11 +103,15 @@ const Carousel: React.FC = () => {
                 </button>
             </div>
 
-            {/* Progress Bar */}
+            {/* Progress Bar - CSS Driven */}
             <div className="magnum-progress-container">
+                {/* TRICK: adding 'key={current}' forces React to destroy and recreate 
+                   this div every time the slide changes. This resets the CSS animation automatically.
+                */}
                 <div 
+                    key={current} 
                     className="magnum-progress-bar" 
-                    style={{ width: `${progress}%` }} 
+                    style={{ animationDuration: `${AUTOPLAY_DURATION}ms` }}
                 />
             </div>
         </div>

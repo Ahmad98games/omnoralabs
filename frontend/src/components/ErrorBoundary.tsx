@@ -1,4 +1,6 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
+import { AlertTriangle, RotateCcw, Home } from 'lucide-react';
+import './ErrorBoundary.css';
 
 interface Props {
     children: ReactNode;
@@ -20,58 +22,63 @@ class ErrorBoundary extends Component<Props, State> {
     }
 
     public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-        console.error('Uncaught error:', error, errorInfo);
+        // In production, you would send this to Sentry/LogRocket
+        console.error('CRITICAL SYSTEM FAILURE:', error, errorInfo);
     }
 
     public render() {
         if (this.state.hasError) {
             return (
-                <div style={{
-                    padding: '2rem',
-                    textAlign: 'center',
-                    minHeight: '100vh',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    background: 'var(--background-color, #fff)',
-                    color: 'var(--text-color, #000)'
-                }}>
-                    <h1 style={{ marginBottom: '1rem' }}>Something went wrong</h1>
-                    <p style={{ marginBottom: '2rem', maxWidth: '600px' }}>
-                        We're sorry, but an unexpected error occurred. Please try refreshing the page.
-                    </p>
-                    <button
-                        onClick={() => window.location.reload()}
-                        style={{
-                            padding: '0.75rem 1.5rem',
-                            background: '#000',
-                            color: '#fff',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
-                            fontSize: '1rem'
-                        }}
-                    >
-                        Refresh Page
-                    </button>
-                    {process.env.NODE_ENV === 'development' && this.state.error && (
-                        <pre style={{
-                            marginTop: '2rem',
-                            textAlign: 'left',
-                            background: '#f5f5f5',
-                            padding: '1rem',
-                            borderRadius: '4px',
-                            overflow: 'auto',
-                            maxWidth: '100%'
-                        }}>
-                            {this.state.error.toString()}
-                        </pre>
-                    )}
+                <div className="error-boundary-container">
+                    <div className="error-content">
+                        
+                        {/* Animated Error Icon */}
+                        <div className="error-icon-wrapper">
+                            <AlertTriangle size={64} strokeWidth={1.5} />
+                        </div>
+
+                        <h1>System Malfunction</h1>
+                        
+                        <p className="error-message">
+                            An unexpected anomaly has occurred within the Omnora interface.
+                            <br />
+                            Our engineers have been notified.
+                        </p>
+
+                        <div className="error-actions">
+                            <button 
+                                onClick={() => window.location.reload()} 
+                                className="error-btn primary"
+                            >
+                                <RotateCcw size={18} />
+                                <span>Reboot System</span>
+                            </button>
+
+                            <button 
+                                onClick={() => window.location.href = '/'} 
+                                className="error-btn secondary"
+                            >
+                                <Home size={18} />
+                                <span>Return to Base</span>
+                            </button>
+                        </div>
+
+                        {/* Developer Debug Terminal */}
+                        {process.env.NODE_ENV === 'development' && this.state.error && (
+                            <div className="debug-terminal">
+                                <div className="terminal-header">
+                                    <span>DEBUG_LOG.txt</span>
+                                </div>
+                                <pre>
+                                    {this.state.error.toString()}
+                                </pre>
+                            </div>
+                        )}
+                    </div>
                 </div>
             );
         }
-    
+
         return this.props.children;
     }
 }

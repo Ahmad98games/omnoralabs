@@ -24,29 +24,53 @@ export default function Newsletter() {
     };
 
     return (
-        <section className="newsletter">
+        <section className="newsletter-section">
+             {/* Decorative Background Elements */}
+            <div className="newsletter-glow"></div>
+            
             <div className="container">
-                <div className="newsletter-content">
-                    <h2>Join the Omnora Family</h2>
-                    <p>Subscribe to get exclusive offers, new launch alerts, and self-care tips.</p>
+                <div className="newsletter-wrapper">
+                    <div className="newsletter-header">
+                        <span className="badge">Exclusive Access</span>
+                        <h2>Join the Omnora Family</h2>
+                        <p>Unlock early access to our ethereal collections and self-care rituals.</p>
+                    </div>
 
                     {status === 'success' ? (
-                        <div className="newsletter-success">{message}</div>
+                        <div className="newsletter-success-card">
+                            <div className="success-icon">✨</div>
+                            <h3>Welcome Aboard</h3>
+                            <p>{message}</p>
+                        </div>
                     ) : (
                         <form className="newsletter-form" onSubmit={handleSubmit}>
-                            <input
-                                type="email"
-                                placeholder="Enter your email address"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                required
-                            />
-                            <button type="submit" className="btn btn-primary" disabled={status === 'loading'}>
-                                {status === 'loading' ? 'Subscribing...' : 'Subscribe'}
+                            <div className="input-group">
+                                <input
+                                    type="email"
+                                    placeholder="Enter your email address"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    required
+                                    className="newsletter-input"
+                                />
+                                <div className="input-line"></div>
+                            </div>
+                            
+                            <button 
+                                type="submit" 
+                                className={`btn-gold ${status === 'loading' ? 'loading' : ''}`} 
+                                disabled={status === 'loading'}
+                            >
+                                {status === 'loading' ? 'Processing...' : 'Subscribe'}
                             </button>
                         </form>
                     )}
-                    {status === 'error' && <div style={{ color: '#ff6b6b', marginTop: '1rem' }}>{message}</div>}
+
+                    {status === 'error' && (
+                        <div className="newsletter-error">
+                            ⚠️ {message}
+                        </div>
+                    )}
                 </div>
             </div>
         </section>

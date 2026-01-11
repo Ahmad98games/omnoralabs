@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { MapPin, Mail, Phone, Send, Globe, MessageSquare } from 'lucide-react';
+import { MapPin, Mail, Phone, Send, Globe, MessageSquare, ArrowLeft } from 'lucide-react';
 import './OmnoraContact.css';
 
 // ----------------------------------------------------
@@ -9,8 +9,8 @@ import './OmnoraContact.css';
 const Footer = () => (
   <footer className="footer-magnum">
     <div className="container">
-      &copy; {new Date().getFullYear()} Omnora Labs. All rights reserved. <br/>
-      <span style={{ opacity: 0.5, fontSize: '0.7em' }}>Operated and Developed By Ahmad Mahboob</span>
+      © {new Date().getFullYear()} Omnora Labs. All rights reserved. <br/>
+      <span className="footer-credit">Operated and Developed By Ahmad Mahboob</span>
     </div>
   </footer>
 );
@@ -40,9 +40,7 @@ export default function Contact() {
     try {
       const response = await fetch('https://formspree.io/f/xvgzkpee', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form)
       });
 
@@ -81,16 +79,16 @@ export default function Contact() {
         <div className="contact-info-col">
           
           <div className="info-block">
-            <h3 className="info-label"><MapPin size={20} color="var(--neon-gold)"/> Coordinates</h3>
+            <h3 className="info-label"><MapPin size={20} className="icon-gold"/> Coordinates</h3>
             <div className="data-row">
                <div className="data-key">Base of Operations</div>
                <div className="data-val">New Shad Bagh, Lahore</div>
-               <div className="data-val" style={{color: 'var(--text-muted)', fontSize: '0.9rem'}}>Pakistan</div>
+               <div className="data-val-sub">Pakistan</div>
             </div>
           </div>
 
           <div className="info-block">
-            <h3 className="info-label"><Globe size={20} color="var(--neon-cyan)"/> Comms Channels</h3>
+            <h3 className="info-label"><Globe size={20} className="icon-cyan"/> Comms Channels</h3>
             
             <div className="data-row">
                <div className="data-key">Direct Line</div>
@@ -104,7 +102,7 @@ export default function Contact() {
 
             <div className="data-row">
                <div className="data-key">Availability</div>
-               <div className="data-val" style={{fontSize: '0.9rem', color: 'var(--text-muted)'}}>
+               <div className="data-val-sub">
                  Flexible Hours. <br/>
                  Sun: 1200h - 1800h
                </div>
@@ -123,8 +121,8 @@ export default function Contact() {
           </div>
 
           {/* Breadcrumbs */}
-          <div style={{ marginTop: '4rem', fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-             <Link to="/" style={{color: 'inherit', textDecoration: 'none'}}>Home</Link> <span style={{margin:'0 0.5rem'}}>/</span> Contact
+          <div className="breadcrumbs-nav">
+             <Link to="/" className="breadcrumb-link">Home</Link> <span className="separator">/</span> Contact
           </div>
 
         </div>
@@ -132,7 +130,7 @@ export default function Contact() {
         {/* RIGHT COLUMN: FORM TERMINAL */}
         <div className="contact-form-col">
           <div className="form-terminal">
-            <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '2rem', marginBottom: '2rem' }}>Transmission Uplink</h2>
+            <h2 className="terminal-title">Transmission Uplink</h2>
             
             <form onSubmit={handleSubmit}>
               <div className="form-group">
@@ -207,12 +205,13 @@ export default function Contact() {
 
       </div>
 
-      {/* MAP SECTION (Full Width) */}
+      {/* MAP SECTION */}
       <div className="container map-section">
         <h2 className="map-overlay-text">Tactical View</h2>
+        {/* Valid Google Maps Embed for Lahore */}
         <iframe
           className="map-frame"
-          src="https://maps.google.com/maps?q=Shadbagh%20Lahore&t=&z=13&ie=UTF8&iwloc=&output=embed"
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d54415.82527236526!2d74.3000!3d31.5800!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39191c71360c7a5f%3A0xc39722393226759c!2sShadbagh%2C%20Lahore%2C%20Punjab%2C%20Pakistan!5e0!3m2!1sen!2s!4v1700000000000!5m2!1sen!2s"
           allowFullScreen
           loading="lazy"
           title="Omnora HQ Location"

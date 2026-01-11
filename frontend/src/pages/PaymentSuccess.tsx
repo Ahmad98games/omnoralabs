@@ -1,53 +1,59 @@
 import { useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import { CheckCircle, ArrowRight, ShoppingBag, Eye } from 'lucide-react';
 import './PaymentSuccess.css';
 
 export default function PaymentSuccess() {
     const [searchParams] = useSearchParams();
-    const orderNumber = searchParams.get('order') || 'N/A';
+    const orderNumber = searchParams.get('order') || 'UNKNOWN';
 
     useEffect(() => {
-        // Clear cart after successful payment
+        // Clear cart logic remains the same
         localStorage.removeItem('cart');
         window.dispatchEvent(new Event('cart-updated'));
     }, []);
 
     return (
         <div className="payment-success-page">
-            <div className="success-container animate-fade-in">
-                <div className="success-icon">
-                    <svg width="80" height="80" viewBox="0 0 24 24" fill="none">
-                        <circle cx="12" cy="12" r="10" stroke="#00D924" strokeWidth="2" />
-                        <path d="M8 12L11 15L16 9" stroke="#00D924" strokeWidth="2" strokeLinecap="round" />
-                    </svg>
+            <div className="noise-layer" />
+            
+            <div className="success-container animate-scale-up">
+                
+                {/* Success Icon Animation */}
+                <div className="success-icon-wrapper">
+                    <div className="pulse-ring"></div>
+                    <CheckCircle size={48} className="success-icon" strokeWidth={2.5} />
                 </div>
 
-                <h1>Payment Successful!</h1>
+                <h1 className="success-title">Transaction Verified</h1>
                 <p className="success-message">
-                    Your order has been placed successfully.
+                    Your acquisition has been secured. <br />
+                    Welcome to the sanctuary.
                 </p>
 
-                <div className="order-info">
-                    <div className="info-row">
-                        <span>Order Number:</span>
-                        <strong>#{orderNumber}</strong>
+                {/* Ticket / Order Info */}
+                <div className="order-ticket">
+                    <div className="ticket-row">
+                        <span className="ticket-label">Order Reference</span>
+                        <span className="ticket-value mono-text">#{orderNumber}</span>
                     </div>
-                    <div className="info-row">
-                        <span>Status:</span>
-                        <strong className="status-badge">Processing</strong>
+                    <div className="ticket-divider"></div>
+                    <div className="ticket-row">
+                        <span className="ticket-label">Status</span>
+                        <span className="status-badge-success">PROCESSING</span>
                     </div>
                 </div>
 
-                <p className="confirmation-text">
-                    A confirmation email has been sent to your email address with order details.
+                <p className="email-note">
+                    A digital receipt has been transmitted to your inbox.
                 </p>
 
                 <div className="action-buttons">
-                    <Link to={`/orders/${orderNumber}`} className="luxury-button">
-                        View Order Details
+                    <Link to={`/orders/${orderNumber}`} className="btn-primary-glow">
+                        <Eye size={18} /> View Order Details
                     </Link>
-                    <Link to="/collection" className="luxury-button-outline">
-                        Continue Shopping
+                    <Link to="/collection" className="btn-ghost">
+                        <ShoppingBag size={18} /> Continue Shopping
                     </Link>
                 </div>
             </div>

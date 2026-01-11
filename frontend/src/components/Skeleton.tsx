@@ -2,58 +2,83 @@ import React, { memo } from 'react';
 import './Skeleton.css';
 
 /**
- * 🧱 SkeletonCard Component
- * Represents a placeholder for a generic item card (e.g., in a product list).
- * Uses React.memo for performance optimization since the content is static.
+ * 🧱 SkeletonCard
+ * Placeholder for the Product Card.
+ * matches: aspect-[4/5] for image, title, price.
  */
-export const SkeletonCard: React.FC = memo(() => (
-    <div className="skeleton-card skeleton-pulse-group">
-        {/* Image Placeholder (e.g., 100% width, fixed height) */}
-        <div className="skeleton-image" />
+export const SkeletonCard = memo(() => (
+    <div className="skeleton-card">
+        {/* Image Area with Shimmer */}
+        <div className="skeleton-block image-ratio" />
         
-        {/* Title Placeholder (e.g., 80% width) */}
-        <div className="skeleton-text" />
-        
-        {/* Price/Short Detail Placeholder (e.g., 40% width) */}
-        <div className="skeleton-text short" />
+        <div className="skeleton-content">
+            {/* Title Line */}
+            <div className="skeleton-block text-title" />
+            
+            {/* Price Line (shorter) */}
+            <div className="skeleton-block text-price" />
+        </div>
     </div>
 ));
-
-// ---
 
 /**
- * 📄 SkeletonProductDetail Component
- * Represents a complex placeholder for a product detail page.
- * Mimics the two-column layout (Image & Info) common in detail views.
- * Uses React.memo for performance optimization since the content is static.
+ * 📄 SkeletonProductDetail
+ * Placeholder for the Product Detail Page.
+ * Layout: 2 Columns (Image Left, Info Right)
  */
-export const SkeletonProductDetail: React.FC = memo(() => (
-    <div className="product-detail-container skeleton-detail skeleton-pulse-group">
+export const SkeletonProductDetail = memo(() => (
+    <div className="skeleton-detail-container">
         
-        {/* Left Column: Image Section */}
-        <div className="product-image-section">
-            <div className="skeleton-image large" />
+        {/* Left Column: Big Image */}
+        <div className="skeleton-detail-image">
+            <div className="skeleton-block full-height" />
         </div>
         
-        {/* Right Column: Info Section */}
-        <div className="product-info-section">
-            {/* Title Placeholder */}
-            <div className="skeleton-text title" />
+        {/* Right Column: Info */}
+        <div className="skeleton-detail-info">
+            {/* Breadcrumb */}
+            <div className="skeleton-block text-short" style={{ width: '20%' }} />
             
-            {/* Price/Badge Placeholder */}
-            <div className="skeleton-text price" />
+            {/* Big Title */}
+            <div className="skeleton-block text-h1" />
             
-            {/* Description Paragraphs Placeholder */}
-            <div className="skeleton-text paragraph" />
-            <div className="skeleton-text paragraph" />
-            <div className="skeleton-text paragraph short" /> {/* Shortened line for visual variety */}
+            {/* Price */}
+            <div className="skeleton-block text-price-lg" />
             
-            {/* Action Button Placeholder */}
-            <div className="skeleton-text button" />
+            {/* Divider Gap */}
+            <div style={{ height: '2rem' }} />
+
+            {/* Description Lines */}
+            <div className="skeleton-block text-line" />
+            <div className="skeleton-block text-line" />
+            <div className="skeleton-block text-line" style={{ width: '80%' }} />
+            
+            {/* Divider Gap */}
+            <div style={{ height: '2rem' }} />
+
+            {/* Add to Cart Button */}
+            <div className="skeleton-block button-lg" />
         </div>
     </div>
 ));
 
-// Add display names for better debugging
+/**
+ * 🔢 SkeletonGrid
+ * Helper to render X number of cards.
+ * Usage: <SkeletonGrid count={8} />
+ */
+interface GridProps {
+    count?: number;
+}
+
+export const SkeletonGrid = memo(({ count = 4 }: GridProps) => (
+    <div className="skeleton-grid">
+        {Array.from({ length: count }).map((_, i) => (
+            <SkeletonCard key={i} />
+        ))}
+    </div>
+));
+
 SkeletonCard.displayName = 'SkeletonCard';
 SkeletonProductDetail.displayName = 'SkeletonProductDetail';
+SkeletonGrid.displayName = 'SkeletonGrid';

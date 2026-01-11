@@ -1,42 +1,37 @@
 /* ============================================================================
-   OMNORA POSTER GALLERY - "THE ARCHIVE" ENGINE
+   OMNORA POSTER GALLERY - "THE ARCHIVE"
+   Refined for Performance & Layout Stability
    ============================================================================ */
 @import url('https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,900;1,6..96,400&family=Space+Grotesk:wght@300;400;500;700&display=swap');
 
 :root {
-  /* -- Palette -- */
   --void: #050505;
   --void-depth: #0e0e0e;
   --text-primary: #F2F2F2;
   --text-muted: #888888;
   --neon-cyan: #00F0FF;
   --neon-gold: #FFD600;
-
-  /* -- Fonts -- */
   --font-serif: 'Bodoni Moda', serif;
   --font-sans: 'Space Grotesk', sans-serif;
-
-  /* -- UI Physics -- */
   --ease-elastic: cubic-bezier(0.23, 1, 0.32, 1);
-  --glass-border: 1px solid rgba(255, 255, 255, 0.1);
+  --glass-border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .gallery-magnum {
-  padding: 8rem 0;
+  padding: 6rem 0 8rem;
   background: var(--void);
   color: var(--text-primary);
   font-family: var(--font-sans);
   position: relative;
   overflow: hidden;
   border-top: 1px solid rgba(255, 255, 255, 0.05);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-/* --- Noise Texture --- */
+/* Noise Texture */
 .gallery-noise {
   position: absolute;
   inset: 0;
-  background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E");
+  background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
   pointer-events: none;
   z-index: 0;
 }
@@ -49,11 +44,9 @@
   z-index: 2;
 }
 
-/* ============================================================================
-   HEADER SECTION
-   ============================================================================ */
+/* --- HEADER --- */
 .gallery-header-magnum {
-  margin-bottom: 5rem;
+  margin-bottom: 4rem;
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
@@ -74,63 +67,59 @@
   font-family: var(--font-sans);
   font-size: 0.25em;
   color: var(--neon-cyan);
-  letter-spacing: 0.2em;
+  letter-spacing: 0.3em;
   margin-bottom: 0.5rem;
 }
 
 .gallery-meta {
   text-align: right;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   color: var(--text-muted);
-  max-width: 300px;
+  max-width: 350px;
+  line-height: 1.6;
 }
 
-/* ============================================================================
-   GRID LAYOUT
-   ============================================================================ */
+/* --- GRID LAYOUT --- */
 .gallery-grid-magnum {
   display: grid;
   grid-template-columns: 1fr;
   gap: 2rem;
 }
 
+/* Desktop: Hero + 2x2 Grid */
 @media (min-width: 1024px) {
   .gallery-grid-magnum {
     grid-template-columns: 1.2fr 1fr;
-    /* Hero Left, Grid Right */
-    height: 800px;
-    /* Fixed height for desktop to create structure */
+    height: 800px; /* Locked height for perfect alignment */
   }
 }
 
-/* --- Sub Grid (Right Side) --- */
 .gallery-sub-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   grid-template-rows: repeat(2, 1fr);
   gap: 1.5rem;
+  height: 100%;
 }
 
-/* ============================================================================
-   POSTER CARD (The Artifact)
-   ============================================================================ */
+/* --- ARTIFACT CARD --- */
 .poster-artifact {
   position: relative;
   background: var(--void-depth);
   border: var(--glass-border);
   overflow: hidden;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.4s var(--ease-elastic);
   height: 100%;
 }
 
 .poster-artifact:hover {
-  border-color: var(--neon-gold);
-  box-shadow: 0 0 30px rgba(255, 214, 0, 0.1);
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 30px rgba(0, 240, 255, 0.1);
   z-index: 10;
+  transform: scale(1.005);
 }
 
-/* Image Handling */
 .artifact-img-wrapper {
   width: 100%;
   height: 100%;
@@ -141,32 +130,25 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.7s var(--ease-elastic), filter 0.3s;
-  filter: grayscale(40%) contrast(1.1);
-}
-
-@media (max-width: 768px) {
-  .artifact-img {
-    object-fit: fill !important;
-    /* Force full visibility as per user request */
-  }
+  transition: transform 0.8s var(--ease-elastic), filter 0.3s;
+  filter: grayscale(20%) contrast(1.1);
 }
 
 .poster-artifact:hover .artifact-img {
-  transform: scale(1.05);
+  transform: scale(1.1);
   filter: grayscale(0%) contrast(1.2);
 }
 
-/* Overlay & HUD */
+/* --- OVERLAY & HUD --- */
 .artifact-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.95), transparent 60%);
   opacity: 0;
-  transition: opacity 0.3s;
+  transition: opacity 0.4s;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
+  justify-content: space-between;
   padding: 1.5rem;
 }
 
@@ -174,13 +156,20 @@
   opacity: 1;
 }
 
-/* Labels */
+/* Top Labels */
+.overlay-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    transform: translateY(-10px);
+    transition: transform 0.4s var(--ease-elastic);
+}
+
+.poster-artifact:hover .overlay-header { transform: translateY(0); }
+
 .artifact-id {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
   font-family: var(--font-sans);
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: var(--neon-cyan);
   border: 1px solid var(--neon-cyan);
   padding: 0.2rem 0.5rem;
@@ -188,48 +177,96 @@
   backdrop-filter: blur(4px);
 }
 
+.artifact-cat {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+/* Bottom Labels */
+.overlay-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    transform: translateY(20px);
+    transition: transform 0.4s var(--ease-elastic);
+}
+
+.poster-artifact:hover .overlay-footer { transform: translateY(0); }
+
 .artifact-title {
   font-family: var(--font-serif);
   color: #fff;
-  font-size: 1.5rem;
+  font-size: 2rem;
   margin: 0;
-  transform: translateY(20px);
-  transition: transform 0.4s var(--ease-elastic);
+  line-height: 1;
 }
 
-.poster-artifact:hover .artifact-title {
-  transform: translateY(0);
+.artifact-title.small {
+    font-size: 1.2rem;
 }
 
-/* --- Hero Card Specifics --- */
-.poster-hero {
-  /* Takes full height of container */
-  height: 100%;
+/* Action Button */
+.artifact-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #fff;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #000;
+    cursor: pointer;
+    transition: transform 0.2s;
 }
 
+.artifact-btn:hover {
+    background: var(--neon-cyan);
+    transform: rotate(45deg);
+}
+
+
+/* --- ANIMATION: ENTRY --- */
+.animate-entry {
+    animation: slideUpFade 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+@keyframes slideUpFade {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- RESPONSIVE --- */
 @media (max-width: 1024px) {
   .poster-hero {
-    aspect-ratio: 3/4;
+    min-height: 500px;
   }
-
   .gallery-sub-grid {
-    grid-template-columns: repeat(2, 1fr);
     height: auto;
+    aspect-ratio: 16/9; /* Maintain a nice ratio for the grid block */
   }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
   .gallery-header-magnum {
     flex-direction: column;
     align-items: flex-start;
-    gap: 1rem;
+    gap: 1.5rem;
   }
-
+  
   .gallery-meta {
     text-align: left;
+    max-width: 100%;
   }
 
   .gallery-sub-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr; /* Stack images on mobile */
+    aspect-ratio: auto;
+  }
+  
+  .poster-artifact {
+      min-height: 300px;
   }
 }

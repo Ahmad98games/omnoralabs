@@ -3,6 +3,16 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { Link } from 'react-router-dom';
 import client from '../api/client';
+import { 
+    User, 
+    Package, 
+    MapPin, 
+    Key, 
+    LogOut, 
+    ChevronRight, 
+    Clock, 
+    Loader2 
+} from 'lucide-react';
 import './Profile.css';
 
 type Order = {
@@ -14,26 +24,14 @@ type Order = {
     items: any[];
 };
 
-type Address = {
-    _id?: string;
-    name: string;
-    phone: string;
-    address: string;
-    city: string;
-    state: string;
-    postalCode: string;
-    country: string;
-    isDefault: boolean;
-};
-
 export default function Profile() {
     const { user, logout } = useAuth();
     const { showToast } = useToast();
     const [activeTab, setActiveTab] = useState('account');
     const [loading, setLoading] = useState(false);
     const [orders, setOrders] = useState<Order[]>([]);
-    const [addresses, setAddresses] = useState<Address[]>([]);
-
+    
+    // Form States
     const [formData, setFormData] = useState({
         name: user?.name || '',
         email: user?.email || ''
@@ -53,10 +51,13 @@ export default function Profile() {
 
     const fetchOrders = async () => {
         try {
+            setLoading(true);
             const res = await client.get('/orders');
             setOrders(res.data);
         } catch (error) {
             console.error('Failed to fetch orders');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -65,9 +66,9 @@ export default function Profile() {
         setLoading(true);
         try {
             await client.put('/users/profile', formData);
-            showToast('Profile updated successfully', 'success');
+            showToast('Profile data updated', 'success');
         } catch (error: any) {
-            showToast(error.response?.data?.error || 'Failed to update profile', 'error');
+            showToast(error.response?.data?.error || 'Update failed', 'error');
         } finally {
             setLoading(false);
         }
@@ -75,172 +76,223 @@ export default function Profile() {
 
     const handleChangePassword = async (e: React.FormEvent) => {
         e.preventDefault();
-
         if (passwordData.newPassword !== passwordData.confirmPassword) {
-            showToast('Passwords do not match', 'error');
+            showToast('Password mismatch', 'error');
             return;
         }
-
         setLoading(true);
         try {
             await client.put('/users/password', {
                 currentPassword: passwordData.currentPassword,
                 newPassword: passwordData.newPassword
             });
-            showToast('Password changed successfully', 'success');
+            showToast('Security protocols updated', 'success');
             setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
         } catch (error: any) {
-            showToast(error.response?.data?.error || 'Failed to change password', 'error');
+            showToast(error.response?.data?.error || 'Password update failed', 'error');
         } finally {
             setLoading(false);
         }
     };
 
+    const getInitials = (name: string) => name.substring(0, 2).toUpperCase();
+
     return (
         <div className="profile-page">
-            <div className="profile-container">
-                <div className="profile-header">
-       <h1>My Account</h1>
-       <p>Manage your profile and orders</p>
-   </div>
-   <div className="profile-tabs">
-       <button
-           className={`tab-btn ${activeTab === 'account' ? 'active' : ''}`}
-           onClick={() => setActiveTab('account')}
-       >
-           Account
-       </button>
-       <button
-           className={`tab-btn ${activeTab === 'orders' ? 'active' : ''}`}
-           onClick={() => setActiveTab('orders')}
-       >
-           Orders
-       </button>
-       <button
-           className={`tab-btn ${activeTab === 'addresses' ? 'active' : ''}`}
-           onClick={() => setActiveTab('addresses')}
-       >
-           Addresses
-       </button>
-       <button
-           className={`tab-btn ${activeTab === 'password' ? 'active' : ''}`}
-           onClick={() => setActiveTab('password')}
-       >
-           Password
-       </button>
-   </div>
-   <div className="profile-content">
-       {activeTab === 'account' && (
-           <div className="tab-panel animate-fade-in">
-               <h2>Account Information</h2>
-               <form onSubmit={handleUpdateProfile} className="profile-form">
-                   <div className="form-group">
-                       <label>Full Name</label>
-                       <input
-                           type="text"
-                           value={formData.name}
-                           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                           className="form-input"
-                       />
-                   </div>
-                   <div className="form-group">
-                       <label>Email Address</label>
-                       <input
-                           type="email"
-                           value={formData.email}
-                           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                           className="form-input"
-                       />
-                   </div>
-                   <button type="submit" className="luxury-button" disabled={loading}>
-                       {loading ? 'Updating...' : 'Update Profile'}
-                   </button>
-               </form>
-               <button onClick={logout} className="logout-btn">
-                   Sign Out
-               </button>
-           </div>
-       )}
-       {activeTab === 'orders' && (
-           <div className="tab-panel animate-fade-in">
-               <h2>Order History</h2>
-               {orders.length === 0 ? (
-                   <div className="empty-state">
-                       <p>No orders yet</p>
-                       <Link to="/collection" className="luxury-button">
-                           Start Shopping
-                       </Link>
-                   </div>
-               ) : (
-                   <div className="orders-list">
-                       {orders.map((order) => (
-                           <div key={order._id} className="order-card">
-                               <div className="order-header">
-                                   <span className="order-number">#{order.orderNumber}</span>
-                                   <span className={`order-status ${order.status.toLowerCase()}`}>
-                                       {order.status}
-                                   </span>
-                               </div>
-                               <div className="order-details">
-                                   <p>Total: PKR {order.total.toLocaleString()}</p>
-                                   <p>Date: {new Date(order.createdAt).toLocaleDateString()}</p>
-                               </div>
-                               <Link to={`/orders/${order._id}`} className="view-order-btn">
-                                   View Details →
-                               </Link>
-                           </div>
-                       ))}
-                   </div>
-               )}
-           </div>
-       )}
-       {activeTab === 'addresses' && (
-           <div className="tab-panel animate-fade-in">
-               <h2>Saved Addresses</h2>
-               <p>Address management coming soon</p>
+            <div className="noise-layer" />
+            
+            <div className="container">
+                <div className="profile-layout">
+                    
+                    {/* SIDEBAR NAVIGATION */}
+                    <aside className="profile-sidebar">
+                        <div className="user-card">
+                            <div className="avatar-circle">
+                                {getInitials(user?.name || 'User')}
+                            </div>
+                            <div className="user-details">
+                                <h3>{user?.name}</h3>
+                                {/* FIX: Cast user to any to bypass strict type check on isAdmin */}
+                                <span className="user-role">{(user as any)?.isAdmin ? 'COMMANDER' : 'CITIZEN'}</span>
+                            </div>
                         </div>
-                    )}
 
-                    {activeTab === 'password' && (
-                        <div className="tab-panel animate-fade-in">
-                            <h2>Change Password</h2>
-                            <form onSubmit={handleChangePassword} className="profile-form">
-                                <div className="form-group">
-                                    <label>Current Password</label>
-                                    <input
-                                        type="password"
-                                        value={passwordData.currentPassword}
-                                        onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
-                                        className="form-input"
-                                        required
-                                    />
+                        <nav className="sidebar-nav">
+                            <button 
+                                className={`nav-btn ${activeTab === 'account' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('account')}
+                            >
+                                <User size={18} /> Account Settings
+                            </button>
+                            <button 
+                                className={`nav-btn ${activeTab === 'orders' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('orders')}
+                            >
+                                <Package size={18} /> Order History
+                            </button>
+                            <button 
+                                className={`nav-btn ${activeTab === 'addresses' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('addresses')}
+                            >
+                                <MapPin size={18} /> Locations
+                            </button>
+                            <button 
+                                className={`nav-btn ${activeTab === 'password' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('password')}
+                            >
+                                <Key size={18} /> Security
+                            </button>
+                        </nav>
+
+                        <button onClick={logout} className="logout-btn">
+                            <LogOut size={18} /> Disconnect
+                        </button>
+                    </aside>
+
+                    {/* MAIN CONTENT AREA */}
+                    <main className="profile-content">
+                        
+                        {/* ACCOUNT TAB */}
+                        {activeTab === 'account' && (
+                            <div className="panel-animate">
+                                <div className="panel-header">
+                                    <h2>Identity Configuration</h2>
+                                    <p>Manage your personal data parameters.</p>
                                 </div>
-                                <div className="form-group">
-                                    <label>New Password</label>
-                                    <input
-                                        type="password"
-                                        value={passwordData.newPassword}
-                                        onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
-                                        className="form-input"
-                                        required
-                                    />
+                                <form onSubmit={handleUpdateProfile} className="profile-form">
+                                    <div className="form-group">
+                                        <label>Display Name</label>
+                                        <input 
+                                            type="text" 
+                                            value={formData.name} 
+                                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                            className="glass-input"
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Comms Link (Email)</label>
+                                        <input 
+                                            type="email" 
+                                            value={formData.email} 
+                                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                            className="glass-input"
+                                            disabled // Email usually shouldn't change easily
+                                        />
+                                    </div>
+                                    <button type="submit" className="btn-primary" disabled={loading}>
+                                        {loading ? 'Processing...' : 'Save Changes'}
+                                    </button>
+                                </form>
+                            </div>
+                        )}
+
+                        {/* ORDERS TAB */}
+                        {activeTab === 'orders' && (
+                            <div className="panel-animate">
+                                <div className="panel-header">
+                                    <h2>Acquisition Log</h2>
+                                    <p>Track your past and current shipments.</p>
                                 </div>
-                                <div className="form-group">
-                                    <label>Confirm New Password</label>
-                                    <input
-                                        type="password"
-                                        value={passwordData.confirmPassword}
-                                        onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
-                                        className="form-input"
-                                        required
-                                    />
+                                
+                                {loading ? (
+                                    <div className="loading-state"><Loader2 className="animate-spin" /> Retrieving data...</div>
+                                ) : orders.length === 0 ? (
+                                    <div className="empty-state">
+                                        <Package size={48} />
+                                        <p>No acquisition records found.</p>
+                                        <Link to="/collection" className="btn-secondary">Initiate Shopping Protocol</Link>
+                                    </div>
+                                ) : (
+                                    <div className="orders-grid">
+                                        {orders.map((order) => (
+                                            <div key={order._id} className="order-ticket">
+                                                <div className="ticket-header">
+                                                    <span className="order-id">#{order.orderNumber || order._id.slice(-6)}</span>
+                                                    <span className={`status-badge ${order.status.toLowerCase()}`}>
+                                                        {order.status}
+                                                    </span>
+                                                </div>
+                                                <div className="ticket-body">
+                                                    <div className="ticket-row">
+                                                        <Clock size={14} /> 
+                                                        {new Date(order.createdAt).toLocaleDateString()}
+                                                    </div>
+                                                    <div className="ticket-row highlight">
+                                                        PKR {order.total.toLocaleString()}
+                                                    </div>
+                                                </div>
+                                                <Link to={`/orders/${order._id}`} className="ticket-action">
+                                                    View Manifest <ChevronRight size={16} />
+                                                </Link>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* ADDRESSES TAB */}
+                        {activeTab === 'addresses' && (
+                            <div className="panel-animate">
+                                <div className="panel-header">
+                                    <h2>Drop Coordinates</h2>
+                                    <p>Manage shipping destinations.</p>
                                 </div>
-                                <button type="submit" className="luxury-button" disabled={loading}>
-                                    {loading ? 'Changing...' : 'Change Password'}
-                                </button>
-                            </form>
-                        </div>
-                    )}
+                                <div className="empty-state">
+                                    <MapPin size={48} />
+                                    <p>Address management module coming in Omnora v2.1.</p>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* PASSWORD TAB */}
+                        {activeTab === 'password' && (
+                            <div className="panel-animate">
+                                <div className="panel-header">
+                                    <h2>Security Protocol</h2>
+                                    <p>Update your access credentials.</p>
+                                </div>
+                                <form onSubmit={handleChangePassword} className="profile-form">
+                                    <div className="form-group">
+                                        <label>Current Key</label>
+                                        <input 
+                                            type="password" 
+                                            value={passwordData.currentPassword}
+                                            onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
+                                            className="glass-input"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="form-row">
+                                        <div className="form-group">
+                                            <label>New Key</label>
+                                            <input 
+                                                type="password" 
+                                                value={passwordData.newPassword}
+                                                onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                                                className="glass-input"
+                                                required
+                                            />
+                                        </div>
+                                        <div className="form-group">
+                                            <label>Confirm Key</label>
+                                            <input 
+                                                type="password" 
+                                                value={passwordData.confirmPassword}
+                                                onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                                                className="glass-input"
+                                                required
+                                            />
+                                        </div>
+                                    </div>
+                                    <button type="submit" className="btn-primary" disabled={loading}>
+                                        {loading ? 'Encrypting...' : 'Update Password'}
+                                    </button>
+                                </form>
+                            </div>
+                        )}
+
+                    </main>
                 </div>
             </div>
         </div>

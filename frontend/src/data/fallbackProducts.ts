@@ -1,5 +1,16 @@
+export interface Product {
+    _id: string;
+    name: string;
+    description: string;
+    price: number;
+    image: string;
+    category: string;
+    isFeatured: boolean;
+    isNew: boolean;
+}
+
 // Fallback product data for offline mode
-export const fallbackProducts = [
+export const fallbackProducts: Product[] = [
     {
         _id: '1',
         name: 'Calm Lavender Bath Bomb',

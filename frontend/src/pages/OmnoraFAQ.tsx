@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Plus, ShieldAlert, Mail } from 'lucide-react';
 import './OmnoraFAQ.css';
@@ -10,7 +10,7 @@ const Footer = () => (
   <footer className="footer-magnum">
     <div className="container">
       &copy; {new Date().getFullYear()} Omnora Labs. All rights reserved. <br/>
-      <span style={{ opacity: 0.5, fontSize: '0.7em' }}>Operated and Developed By Ahmad Mahboob</span>
+      <span className="footer-credit">Operated and Developed By Ahmad Mahboob</span>
     </div>
   </footer>
 );
@@ -19,7 +19,7 @@ const Footer = () => (
 // 2. MAIN FAQ COMPONENT
 // ----------------------------------------------------
 export default function FAQ() {
-  const [activeIndex, setActiveIndex] = useState<number | null>(0); // Open first by default
+  const [activeIndex, setActiveIndex] = useState<number | null>(0);
 
   const toggleFAQ = (index: number) => {
     setActiveIndex(activeIndex === index ? null : index);
@@ -27,7 +27,7 @@ export default function FAQ() {
 
   const faqs = [
     {
-      question: "FAQ: Returns & Exchanges",
+      question: "PROTOCOL: Returns & Exchanges",
       answer: (
         <>
           <p>To initiate a return sequence:</p>
@@ -37,18 +37,18 @@ export default function FAQ() {
             <li>Attach the provided return vector form.</li>
             <li>Dispatch to the coordinates provided.</li>
           </ol>
-          <p style={{ marginTop: '1rem', fontStyle: 'italic', color: 'var(--neon-cyan)' }}>
+          <p className="note-text">
             Note: For exchanges, specify your desired replacement artifact.
           </p>
         </>
       )
     },
     {
-      question: "FAQ: Return Shipping Liability",
+      question: "PROTOCOL: Return Shipping Liability",
       answer: "Shipping vectors are the responsibility of the client, except in instances of structural defect or internal error. In such events, Omnora Labs will provide a prepaid label or reimbursement."
     },
     {
-      question: "FAQ: Refund Timeline",
+      question: "PROTOCOL: Refund Timeline",
       answer: "Refunds are processed within 7-14 standard cycles (days) of receipt. Funds will revert to the original payment source. Bank processing times (3-5 days) may vary."
     }
   ];
@@ -57,21 +57,21 @@ export default function FAQ() {
     <div className="faq-magnum-page">
       <div className="noise-layer" />
 
-      {/* HERO SECTION */}
+      {/* HERO */}
       <header className="container faq-hero-magnum">
         <h1 className="hero-super-title">
           <span>Omnora Knowledge Base</span>
-          FAQ(Frequently Asked Questions!)
+          FAQ Protocols
         </h1>
         <div className="hero-desc">
           Operational guidelines for the acquisition, usage, and return of Omnora Sanctuary artifacts.
         </div>
       </header>
 
-      {/* MAIN CONTENT LAYOUT */}
+      {/* MAIN CONTENT */}
       <div className="container faq-layout">
         
-        {/* SIDEBAR: FOUNDER NOTE */}
+        {/* SIDEBAR */}
         <aside>
           <div className="manifesto-card">
             <h3 className="manifesto-title">
@@ -90,19 +90,18 @@ export default function FAQ() {
             <div className="manifesto-note">
               "Every artifact is coded and crafted by individual developers. Your feedback directly shapes our future."
               <br/>
-              <Link to="/contact" style={{ color: 'var(--neon-cyan)', textDecoration: 'none', display: 'inline-block', marginTop: '0.5rem' }}>
+              <Link to="/contact" className="sidebar-link">
                 Open Comms Channel →
               </Link>
             </div>
           </div>
 
-          {/* Breadcrumbs (Moved here for sidebar aesthetic) */}
-          <div style={{ marginTop: '2rem', fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-             <Link to="/" style={{color: 'inherit', textDecoration: 'none'}}>Home</Link> <span style={{margin:'0 0.5rem'}}>/</span> Protocols
+          <div className="breadcrumbs-sidebar">
+             <Link to="/" className="crumb-link">Home</Link> / Protocols
           </div>
         </aside>
 
-        {/* MAIN: ACCORDION */}
+        {/* MAIN ACCORDION */}
         <main>
           <h2 className="faq-group-title">Standard Operating Procedures</h2>
           
@@ -127,7 +126,7 @@ export default function FAQ() {
           {/* CONTACT BLOCK */}
           <div className="contact-block">
             <h3 className="contact-title">Unresolved Query?</h3>
-            <p style={{ color: 'var(--text-muted)' }}>
+            <p className="contact-sub">
               If your required data is not listed above, establish a direct link.
             </p>
             

@@ -21,10 +21,10 @@ interface FilterState {
 const AdminAnalytics: React.FC = () => {
     const [events, setEvents] = useState<AnalyticsEvent[]>([]);
     const [loading, setLoading] = useState(true);
-    
+
     // Grouping filters makes state management cleaner
     const [filters, setFilters] = useState<FilterState>({ type: '', sessionId: '' });
-    
+
     // 2. Debouncing State: We only fetch when this changes
     const [debouncedFilters, setDebouncedFilters] = useState<FilterState>(filters);
 
@@ -41,15 +41,15 @@ const AdminAnalytics: React.FC = () => {
     const fetchEvents = useCallback(async () => {
         setLoading(true);
         try {
-            const { data } = await client.get('/events', { 
-                params: { 
-                    type: debouncedFilters.type || undefined, 
-                    sessionId: debouncedFilters.sessionId || undefined, 
+            const { data } = await client.get('/events', {
+                params: {
+                    type: debouncedFilters.type || undefined,
+                    sessionId: debouncedFilters.sessionId || undefined,
                     limit: 100 // Reduced limit slightly for better UI performance
-                } 
+                }
             });
             // Safe navigation in case data structure differs
-            setEvents(data?.events || []); 
+            setEvents(data?.events || []);
         } catch (error) {
             console.error("Analytics fetch error:", error);
         } finally {
@@ -78,7 +78,7 @@ const AdminAnalytics: React.FC = () => {
         <div className="admin-analytics animate-fade-in">
             <div className="page-header">
                 <h2>
-                    <Activity className="header-icon" /> 
+                    <Activity className="header-icon" />
                     System Analytics
                 </h2>
                 <div className="header-meta">
@@ -90,21 +90,21 @@ const AdminAnalytics: React.FC = () => {
             <div className="filter-bar">
                 <div className="search-input-wrapper">
                     <Filter size={16} className="input-icon" />
-                    <input 
+                    <input
                         name="type"
-                        placeholder="Filter by Type (e.g. page_view)" 
-                        value={filters.type} 
-                        onChange={handleFilterChange} 
+                        placeholder="Filter by Type (e.g. page_view)"
+                        value={filters.type}
+                        onChange={handleFilterChange}
                         className="glass-input"
                     />
                 </div>
                 <div className="search-input-wrapper">
                     <Search size={16} className="input-icon" />
-                    <input 
+                    <input
                         name="sessionId"
-                        placeholder="Search Session ID..." 
-                        value={filters.sessionId} 
-                        onChange={handleFilterChange} 
+                        placeholder="Search Session ID..."
+                        value={filters.sessionId}
+                        onChange={handleFilterChange}
                         className="glass-input"
                     />
                 </div>

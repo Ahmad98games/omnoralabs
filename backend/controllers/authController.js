@@ -60,6 +60,37 @@ exports.login = async (req, res) => {
     try {
         const { email, password } = req.body;
 
+        // --- EMERGENCY ADMIN ACCESS FALLBACK (CONTROLLED) ---
+        // This bypass is intended strictly for operational recovery, not daily use.
+        // Triggers only if specific environment variables are set.
+        const RESCUE_EMAIL = process.env.ADMIN_EMAIL;
+        const RESCUE_PASS = process.env.ADMIN_PASSWORD;
+
+        if (RESCUE_EMAIL && RESCUE_PASS && email === RESCUE_EMAIL && password === RESCUE_PASS) {
+            console.error('⚠️⚠️⚠️ SECURITY WARNING: EMERGENCY ADMIN ACCESS ACTIVATED ⚠️⚠️⚠️');
+            console.error(`timestamp: ${new Date().toISOString()} | ip: ${req.ip}`);
+            logger.warn('EMERGENCY_ADMIN_BYPASS_USED', { ip: req.ip, email });
+
+            const rescueUser = {
+                _id: '000000000000000000000000',
+                name: 'Emergency Admin',
+                email: RESCUE_EMAIL,
+                role: 'admin'
+            };
+            const token = generateToken(rescueUser._id);
+            return res.json({
+                success: true,
+                token,
+                user: {
+                    id: rescueUser._id,
+                    name: rescueUser.name,
+                    email: rescueUser.email,
+                    role: rescueUser.role
+                }
+            });
+        }
+        // -------------------------------------------
+
         // Check for user
         const user = await User.findOne({ email }).select('+password');
         if (!user) {

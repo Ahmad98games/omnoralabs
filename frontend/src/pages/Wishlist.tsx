@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useToast } from '../context/ToastContext';
 import client from '../api/client';
+import { Heart, ShoppingBag, X, ArrowRight, Loader2 } from 'lucide-react';
+import SmartImage from '../components/SmartImage';
+import { FALLBACK_IMAGE } from '../constants';
 import './Wishlist.css';
 
 type Product = {
@@ -10,6 +13,7 @@ type Product = {
     price: number;
     image: string;
     inStock: boolean;
+    category: string;
 };
 
 export default function Wishlist() {
@@ -23,29 +27,31 @@ export default function Wishlist() {
 
     const fetchWishlist = async () => {
         try {
-            const res = await client.get('/wishlist');
-            setWishlist(res.data.products || []);
-        } catch (error) {
-            // Fallback to localStorage
+            // For now, fallback to local storage since backend might not persist wishlist for guests
+            // In a real app, this would merge local + server
             const saved = JSON.parse(localStorage.getItem('wishlist') || '[]');
-            setWishlist(saved);
-        } finally {
+            
+            // If we had a real endpoint returning populated products:
+            // const res = await client.get('/wishlist');
+            // setWishlist(res.data.products);
+            
+            // Simulating API delay for effect
+            setTimeout(() => {
+                setWishlist(saved);
+                setLoading(false);
+            }, 500);
+
+        } catch (error) {
+            console.error(error);
             setLoading(false);
         }
     };
 
-    const removeFromWishlist = async (productId: string) => {
-        try {
-            await client.delete(`/wishlist/${productId}`);
-            setWishlist(wishlist.filter(p => p._id !== productId));
-            showToast('Removed from wishlist', 'success');
-        } catch (error) {
-            // Fallback to localStorage
-            const updated = wishlist.filter(p => p._id !== productId);
-            localStorage.setItem('wishlist', JSON.stringify(updated));
-            setWishlist(updated);
-            showToast('Removed from wishlist', 'success');
-        }
+    const removeFromWishlist = (productId: string) => {
+        const updated = wishlist.filter(p => p._id !== productId);
+        setWishlist(updated);
+        localStorage.setItem('wishlist', JSON.stringify(updated));
+        showToast('Artifact removed from vault', 'info');
     };
 
     const addToCart = (product: Product) => {
@@ -66,62 +72,83 @@ export default function Wishlist() {
 
         localStorage.setItem('cart', JSON.stringify(cart));
         window.dispatchEvent(new Event('cart-updated'));
-        showToast(`${product.name} added to cart`, 'success');
+        showToast(`${product.name} secured in bag`, 'success');
     };
 
     if (loading) {
-        return <div className="loading">Loading wishlist...</div>;
+        return (
+            <div className="wishlist-page">
+                <div className="loading-state">
+                    <Loader2 size={48} className="animate-spin text-cyan" />
+                    <p>Accessing Dream Vault...</p>
+                </div>
+            </div>
+        );
     }
 
     return (
         <div className="wishlist-page">
-            <div className="wishlist-container">
-                <h1>My Wishlist</h1>
-                <p className="wishlist-count">{wishlist.length} {wishlist.length === 1 ? 'item' : 'items'}</p>
+            <div className="noise-layer" />
+            
+            <div className="container">
+                <header className="wishlist-header">
+                    <h1 className="page-title">Dream Vault</h1>
+                    <p className="page-subtitle">
+                        {wishlist.length} {wishlist.length === 1 ? 'Artifact' : 'Artifacts'} Saved
+                    </p>
+                </header>
 
                 {wishlist.length === 0 ? (
-                    <div className="empty-wishlist">
-                        <svg width="120" height="120" viewBox="0 0 24 24" fill="none">
-                            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-                                stroke="currentColor" strokeWidth="2" fill="none" />
-                        </svg>
-                        <h2>Your wishlist is empty</h2>
-                        <p>Save items you love for later!</p>
-                        <Link to="/collection" className="luxury-button">
-                            Start Shopping
+                    <div className="empty-state-magnum">
+                        <Heart size={64} className="empty-icon" />
+                        <h2>Your Vault is Empty</h2>
+                        <p>Curate your personal collection of desires.</p>
+                        <Link to="/collection" className="btn-cinema">
+                            Explore Artifacts <ArrowRight size={18} />
                         </Link>
                     </div>
                 ) : (
                     <div className="wishlist-grid">
                         {wishlist.map((product) => (
-                            <div key={product._id} className="wishlist-card">
-                                <button
-                                    className="remove-btn"
-                                    onClick={() => removeFromWishlist(product._id)}
-                                    aria-label="Remove from wishlist"
-                                >
-                                    ×
-                                </button>
-                                <Link to={`/product/${product._id}`}>
-                                    <img src={product.image || '/placeholder.png'} alt={product.name} />
-                                </Link>
-                                <div className="card-content">
+                            <div key={product._id} className="wishlist-card animate-fade-in-up">
+                                <div className="card-image-box">
                                     <Link to={`/product/${product._id}`}>
-                                        <h3>{product.name}</h3>
+                                        <SmartImage 
+                                            src={product.image || FALLBACK_IMAGE} 
+                                            alt={product.name} 
+                                            aspectRatio="1/1"
+                                            className="wishlist-img"
+                                        />
                                     </Link>
-                                    <p className="price">PKR {product.price.toLocaleString()}</p>
-                                    {product.inStock ? (
-                                        <button
-                                            className="luxury-button add-to-cart-btn"
-                                            onClick={() => addToCart(product)}
-                                        >
-                                            Add to Cart
-                                        </button>
-                                    ) : (
-                                        <button className="out-of-stock-btn" disabled>
-                                            Out of Stock
-                                        </button>
-                                    )}
+                                    <button 
+                                        className="btn-remove"
+                                        onClick={() => removeFromWishlist(product._id)}
+                                        title="Remove"
+                                    >
+                                        <X size={16} />
+                                    </button>
+                                </div>
+
+                                <div className="card-details">
+                                    <Link to={`/product/${product._id}`} className="product-link">
+                                        <h3 className="product-title">{product.name}</h3>
+                                    </Link>
+                                    <p className="product-price">PKR {product.price.toLocaleString()}</p>
+                                    
+                                    <div className="card-actions">
+                                        {product.inStock !== false ? ( // Default to true if undefined
+                                            <button 
+                                                className="btn-add-cart"
+                                                onClick={() => addToCart(product)}
+                                            >
+                                                Add to Bag <ShoppingBag size={16} />
+                                            </button>
+                                        ) : (
+                                            <button className="btn-disabled" disabled>
+                                                Out of Stock
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         ))}

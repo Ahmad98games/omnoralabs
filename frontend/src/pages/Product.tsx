@@ -1,28 +1,28 @@
-import { useState, useEffect } from 'react'
-import { useParams, Link, useNavigate } from 'react-router-dom'
-import client, { trackEvent } from '../api/client'
-import './Product.css'
-import { useToast } from '../context/ToastContext'
-import { FALLBACK_IMAGE } from '../constants'
-import { SkeletonProductDetail } from '../components/Skeleton'
-import '../components/Skeleton.css'
+import { useState, useEffect } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import client, { trackEvent } from '../api/client';
+import { useToast } from '../context/ToastContext';
+import { FALLBACK_IMAGE } from '../constants';
+import SmartImage from '../components/SmartImage'; // Utilizing our custom component
+import { SkeletonProductDetail } from '../components/Skeleton';
+import { ShoppingBag, Minus, Plus, ArrowLeft, ShieldCheck, Truck } from 'lucide-react';
+import './Product.css';
 
-// Define the guaranteed minimum loading time in milliseconds (3 seconds)
-const MINIMUM_LOAD_TIME = 3000; 
+// Guaranteed "Cinematic" load time
+const MINIMUM_LOAD_TIME = 800; 
 
 type Product = {
-    _id: string
-    name: string
-    price: number
-    image: string
-    category: string
-    description?: string
-    isFeatured?: boolean
-    isNew?: boolean
-    stock?: number
+    _id: string;
+    name: string;
+    price: number;
+    image: string;
+    category: string;
+    description?: string;
+    isFeatured?: boolean;
+    isNew?: boolean;
+    stock?: number; // Optional on frontend if backend doesn't always send it
 }
 
-// Define the structure of an item stored in the local storage cart
 type CartItem = {
     id: string;
     name: string;
@@ -31,19 +31,18 @@ type CartItem = {
     quantity: number;
 }
 
-
 export default function Product() {
-    const { id } = useParams()
-    const navigate = useNavigate()
-    const [product, setProduct] = useState<Product | null>(null)
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState<string | null>(null)
-    const [quantity, setQuantity] = useState(1)
-    const { showToast } = useToast()
+    const { id } = useParams();
+    const navigate = useNavigate();
+    const { showToast } = useToast();
+
+    const [product, setProduct] = useState<Product | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [quantity, setQuantity] = useState(1);
 
     useEffect(() => {
         let isMounted = true;
-        // 1. Record the start time for the minimum load check
         const startTime = Date.now();
         
         async function load() {
@@ -52,234 +51,199 @@ export default function Product() {
 
             try {
                 setLoading(true);
-                setError(null);
-                
-                // --- API Fetch ---
                 const res = await client.get(`/products/${id}`);
-                
-                let data = res.data;
-                if (data.data) {
-                    data = data.data;
-                }
-                
-                fetchedProduct = data;
-
+                // Handle different API response structures
+                fetchedProduct = res.data.data || res.data; 
             } catch (e: any) {
-                fetchError = e?.message || 'Failed to load product. Check your connection.';
+                fetchError = e?.message || 'Access Denied: Product data unavailable.';
             }
 
             if (!isMounted) return;
 
-            // 2. Enforce Minimum Load Time
+            // Enforce minimum cinematic delay
             const timeElapsed = Date.now() - startTime;
             const delayRemaining = MINIMUM_LOAD_TIME - timeElapsed;
-            
-            // Wait for the remaining time (or 0 if MINIMUM_LOAD_TIME already passed)
             await new Promise(resolve => setTimeout(resolve, Math.max(0, delayRemaining)));
             
             if (!isMounted) return;
 
-            // 3. Update state after the minimum time is guaranteed
             setProduct(fetchedProduct);
             setError(fetchError);
             setLoading(false);
         }
 
         load();
-        return () => { isMounted = false }
-    }, [id])
+        return () => { isMounted = false };
+    }, [id]);
+
+    const handleQuantityUpdate = (delta: number) => {
+        const maxStock = product?.stock ?? 100; // Default high if unknown
+        let newQty = quantity + delta;
+        newQty = Math.max(1, Math.min(newQty, maxStock));
+        setQuantity(newQty);
+    };
 
     const addToCart = () => {
-        if (!product) {
-            showToast('Cannot add product: data unavailable.', 'error');
-            return;
-        }
+        if (!product) return;
 
-        // Use the defined CartItem type
         const cart: CartItem[] = JSON.parse(localStorage.getItem('cart') || '[]');
-        const existing = cart.find((i: CartItem) => i.id === product._id);
+        const existing = cart.find((i) => i.id === product._id);
+        const currentStock = product.stock ?? 100;
         
-        // Ensure quantity doesn't exceed available stock if stock is known
-        const currentStock = product.stock;
-        let finalQuantity = quantity;
+        let finalQtyToAdd = quantity;
 
         if (existing) {
-            // Check stock limit for the combined quantity
-            if (currentStock !== undefined && (existing.quantity + quantity) > currentStock) {
-                showToast(`Cannot add ${quantity}: only ${currentStock - existing.quantity} available.`, 'warning');
-                finalQuantity = currentStock - existing.quantity;
+            if ((existing.quantity + quantity) > currentStock) {
+                showToast(`Stock limit reached. Only ${Math.max(0, currentStock - existing.quantity)} more available.`, 'warning');
+                return;
             }
-            existing.quantity += finalQuantity;
+            existing.quantity += quantity;
         } else {
-            // Check stock limit for the initial quantity
-            if (currentStock !== undefined && quantity > currentStock) {
-                showToast(`Cannot add ${quantity}: only ${currentStock} available.`, 'warning');
-                finalQuantity = currentStock;
+            if (quantity > currentStock) {
+                showToast(`Insufficient stock. Only ${currentStock} available.`, 'warning');
+                return;
             }
             cart.push({
                 id: product._id,
                 name: product.name,
                 price: product.price,
                 image: product.image,
-                quantity: finalQuantity
+                quantity: quantity
             });
         }
-        
-        // Only update if we are adding at least 1 item
-        if (finalQuantity > 0) {
-            localStorage.setItem('cart', JSON.stringify(cart));
-            window.dispatchEvent(new Event('cart-updated'));
-            trackEvent({
-                type: 'add_to_cart',
-                sessionId: localStorage.getItem('sid') || '',
-                payload: { productId: product._id, price: product.price, quantity: finalQuantity }
-            });
-            showToast(`Added ${finalQuantity} x ${product.name} to bag`, 'success');
-        } else if (finalQuantity <= 0 && currentStock !== undefined) {
-            showToast(`Cannot add to cart. Maximum stock reached or item out of stock.`, 'warning');
-        }
-    }
 
-    // --- Quantity Selector Logic Refined ---
-    const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = parseInt(e.target.value);
-        const maxStock = product?.stock !== undefined ? product.stock : Infinity;
+        localStorage.setItem('cart', JSON.stringify(cart));
+        window.dispatchEvent(new Event('cart-updated')); // Update Navbar
         
-        let newQuantity = value || 1;
-        newQuantity = Math.max(1, newQuantity); // Minimum of 1
-        
-        if (newQuantity > maxStock) {
-            newQuantity = maxStock;
-        }
+        trackEvent({
+            type: 'add_to_cart',
+            sessionId: localStorage.getItem('sid') || 'guest',
+            payload: { productId: product._id, price: product.price, quantity }
+        });
 
-        setQuantity(newQuantity);
+        showToast(`Added ${quantity} x ${product.name} to bag`, 'success');
     };
 
-    const handleQuantityUpdate = (delta: number) => {
-        const maxStock = product?.stock !== undefined ? product.stock : Infinity;
-        let newQuantity = quantity + delta;
-        
-        newQuantity = Math.max(1, newQuantity); // Minimum of 1
-        
-        if (newQuantity > maxStock) {
-            newQuantity = maxStock;
-        }
-        
-        setQuantity(newQuantity);
-    }
-    
-    const maxQuantityReached = product?.stock !== undefined && quantity >= product.stock;
-    const isOutOfStock = product?.stock === 0;
-
-    // ------------------------------------
-    // --- RENDERING ---
-    // ------------------------------------
-
-    if (loading) {
-        return (
-            <div className="product-page">
-                <SkeletonProductDetail />
-            </div>
-        )
-    }
+    if (loading) return <div className="product-page"><SkeletonProductDetail /></div>;
 
     if (error || !product) {
         return (
             <div className="product-page">
-                <div className="empty-state">
-                    <h3>Product Not Found 😟</h3>
-                    <p>{error || 'The product you are looking for does not exist.'}</p>
-                    <button onClick={() => navigate('/collection')} className="add-to-cart-btn">
-                        Browse Collection
+                <div className="empty-state-magnum">
+                    <h3>404: Asset Not Found</h3>
+                    <p>The product you are looking for has been decommissioned or moved.</p>
+                    <button onClick={() => navigate('/collection')} className="btn-action">
+                        Return to Collection
                     </button>
                 </div>
             </div>
-        )
+        );
     }
+
+    const isOutOfStock = product.stock === 0;
 
     return (
         <div className="product-page">
-            <div className="breadcrumbs">
-                <Link to="/">Home</Link> / <Link to="/collection">Collection</Link> / <span>{product.name}</span>
-            </div>
+            <div className="noise-layer" />
+            
+            <div className="container">
+                {/* Breadcrumbs */}
+                <nav className="breadcrumbs-nav">
+                    <Link to="/" className="crumb-link">Home</Link> / 
+                    <Link to="/collection" className="crumb-link">Collection</Link> / 
+                    <span className="crumb-active">{product.name}</span>
+                </nav>
 
-            <div className="product-detail-container">
-                <div className="product-image-section">
-                    <img 
-                        src={product.image || FALLBACK_IMAGE} 
-                        alt={product.name} 
-                        onError={(e) => {
-                            e.currentTarget.onerror = null;
-                            e.currentTarget.src = FALLBACK_IMAGE;
-                        }}
-                    />
-                </div>
-
-                <div className="product-info-section">
-                    <h1 className="product-name">{product.name}</h1>
-
-                    {product.isNew && (
-                        <span className="badge badge-new">NEW</span>
-                    )}
-                    {product.isFeatured && (
-                        <span className="badge badge-featured">★ FEATURED</span>
-                    )}
-
-                    <p className="product-price">PKR **{product.price.toLocaleString()}**</p>
-
-                    {product.description && (
-                        <div className="product-description">
-                            <h3>Description</h3>
-                            <p>{product.description}</p>
+                <div className="product-grid-layout">
+                    {/* Left: Image */}
+                    <div className="product-visual">
+                        <div className="image-frame">
+                            <SmartImage 
+                                src={product.image || FALLBACK_IMAGE} 
+                                alt={product.name}
+                                aspectRatio="1/1"
+                                className="main-product-img"
+                                priority={true}
+                            />
+                            {product.isNew && <span className="corner-badge">NEW ARRIVAL</span>}
                         </div>
-                    )}
+                    </div>
 
-                    <div className="product-actions">
-                        <div className="quantity-selector">
-                            <label htmlFor="quantity">Quantity:</label>
-                            <div className="quantity-controls">
-                                <button
-                                    onClick={() => handleQuantityUpdate(-1)}
-                                    disabled={quantity <= 1 || isOutOfStock}
-                                >
-                                    -
-                                </button>
-                                <input
-                                    type="number"
-                                    id="quantity"
-                                    value={quantity}
-                                    onChange={handleQuantityChange}
-                                    min="1"
-                                    // Set max attribute based on stock for better mobile keyboard UX
-                                    max={product.stock !== undefined ? product.stock : undefined} 
-                                    disabled={isOutOfStock}
-                                />
-                                <button 
-                                    onClick={() => handleQuantityUpdate(1)}
-                                    disabled={maxQuantityReached || isOutOfStock}
-                                >
-                                    +
-                                </button>
+                    {/* Right: Info */}
+                    <div className="product-intel">
+                        <h1 className="p-title">{product.name}</h1>
+                        
+                        <div className="p-meta">
+                            <span className="p-price">PKR {product.price.toLocaleString()}</span>
+                            {product.isFeatured && <span className="p-tag">FEATURED</span>}
+                        </div>
+
+                        <div className="p-divider"></div>
+
+                        <div className="p-description">
+                            <h3>Specifications</h3>
+                            <p>{product.description || "No description data available for this asset."}</p>
+                        </div>
+
+                        {/* Controls */}
+                        <div className="p-controls">
+                            <div className="qty-wrapper">
+                                <label>QUANTITY</label>
+                                <div className="qty-dial">
+                                    <button 
+                                        onClick={() => handleQuantityUpdate(-1)} 
+                                        disabled={quantity <= 1 || isOutOfStock}
+                                        className="qty-btn"
+                                    >
+                                        <Minus size={16} />
+                                    </button>
+                                    <span className="qty-val">{quantity}</span>
+                                    <button 
+                                        onClick={() => handleQuantityUpdate(1)} 
+                                        disabled={product.stock !== undefined && quantity >= product.stock}
+                                        className="qty-btn"
+                                    >
+                                        <Plus size={16} />
+                                    </button>
+                                </div>
+                            </div>
+
+                            <button 
+                                onClick={addToCart} 
+                                className="btn-add-cart"
+                                disabled={isOutOfStock}
+                            >
+                                {isOutOfStock ? 'OUT OF STOCK' : (
+                                    <>
+                                        ADD TO BAG <ShoppingBag size={18} />
+                                    </>
+                                )}
+                            </button>
+                        </div>
+
+                        {product.stock !== undefined && (
+                            <p className={`stock-indicator ${product.stock < 5 ? 'low' : ''}`}>
+                                {isOutOfStock 
+                                    ? 'Stock Depleted.' 
+                                    : `Inventory Level: ${product.stock} Units`}
+                            </p>
+                        )}
+
+                        {/* Trust Signals */}
+                        <div className="trust-grid">
+                            <div className="trust-item">
+                                <ShieldCheck size={20} className="trust-icon" />
+                                <span>Quality Assured</span>
+                            </div>
+                            <div className="trust-item">
+                                <Truck size={20} className="trust-icon" />
+                                <span>Secure Shipping</span>
                             </div>
                         </div>
 
-                        <button 
-                            onClick={addToCart} 
-                            className="add-to-cart-btn"
-                            disabled={isOutOfStock || quantity <= 0}
-                        >
-                            {isOutOfStock ? 'Out of Stock' : 'Add to Bag'}
-                        </button>
                     </div>
-
-                    {product.stock !== undefined && (
-                        <p className={`stock-info ${isOutOfStock ? 'out-of-stock' : ''}`}>
-                            {isOutOfStock ? 'Out of Stock 😥' : `${product.stock} in stock`}
-                            {product.stock > 0 && product.stock <= 5 && <span className='low-stock-warning'> (Low Stock!)</span>}
-                        </p>
-                    )}
                 </div>
             </div>
         </div>
-    )
+    );
 }

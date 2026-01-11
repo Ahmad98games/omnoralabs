@@ -1,19 +1,21 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import client from '../api/client';
+import { isAxiosError } from 'axios';
 
+// Define the User Shape clearly
 export interface User {
     id: string;
     email: string;
     name: string;
     role: 'customer' | 'admin';
-    photoURL?: string; // Kept for interface compatibility
+    photoURL?: string;
 }
 
 interface AuthContextType {
     user: User | null;
     loading: boolean;
     login: (email: string, password: string) => Promise<void>;
-    loginWithGoogle: () => Promise<void>; // Kept but will throw error or be disabled
+    loginWithGoogle: () => Promise<void>;
     register: (name: string, email: string, password: string) => Promise<void>;
     logout: () => Promise<void>;
     resetPassword: (email: string) => Promise<void>;
@@ -23,96 +25,128 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Helper to set Axios Header dynamically
+const setAuthHeader = (token: string | null) => {
+    if (token) {
+        client.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    } else {
+        delete client.defaults.headers.common['Authorization'];
+    }
+};
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
 
-    // Initial session check
+    // 1. INITIAL SESSION CHECK
     useEffect(() => {
-        const checkAuth = async () => {
+        const initAuth = async () => {
             const token = localStorage.getItem('token');
+
             if (!token) {
                 setLoading(false);
                 return;
             }
 
+            // Critical: Sync header before making the request
+            setAuthHeader(token);
+
             try {
-                const { data } = await client.get('/auth/me');
+                // Add timeout to prevent hanging on mobile
+                const { data } = await client.get('/auth/me', { timeout: 10000 });
                 if (data.success && data.user) {
                     setUser(data.user);
                 } else {
-                    localStorage.removeItem('token');
-                    setUser(null);
+                    throw new Error('Invalid session');
                 }
             } catch (error) {
-                console.error('Session restoration failed:', error);
-                localStorage.removeItem('token');
-                setUser(null);
+                console.error('Session validation failed:', error);
+                // On mobile, if network fails, we might still want to keep the token 
+                // but default to 'not verified' state or just log out safety.
+                // For admin stability, it is safer to LOGOUT if we can't verify identity.
+                handleLogoutCleanup();
             } finally {
                 setLoading(false);
             }
         };
 
-        checkAuth();
+        initAuth();
     }, []);
 
+    // Helper function to clean up local state
+    const handleLogoutCleanup = () => {
+        localStorage.removeItem('token');
+        setAuthHeader(null); // Clear axios header
+        setUser(null);
+    };
+
+    // 2. LOGIN
     const login = async (email: string, password: string) => {
         try {
             const { data } = await client.post('/auth/login', { email, password });
+
             if (data.success && data.token) {
                 localStorage.setItem('token', data.token);
-                // The user object is usually returned with login, but let's be consistent with type
-                // Backend returns { success: true, token, user: { ... } }
+                setAuthHeader(data.token); // Sync Immediately
                 setUser(data.user);
             } else {
                 throw new Error(data.message || 'Login failed');
             }
-        } catch (error: any) {
-            // Extract error message from backend response
-            const msg = error.response?.data?.error || error.message || 'Login failed';
-            throw new Error(msg);
+        } catch (error) {
+            if (isAxiosError(error)) {
+                throw new Error(error.response?.data?.error || 'Server connection failed');
+            }
+            throw error;
         }
     };
 
+    // 3. REGISTER
     const register = async (name: string, email: string, password: string) => {
         try {
             const { data } = await client.post('/auth/register', { name, email, password });
+
             if (data.success && data.token) {
                 localStorage.setItem('token', data.token);
+                setAuthHeader(data.token); // Sync Immediately
                 setUser(data.user);
             } else {
                 throw new Error(data.message || 'Registration failed');
             }
-        } catch (error: any) {
-            const msg = error.response?.data?.error || error.message || 'Registration failed';
-            throw new Error(msg);
+        } catch (error) {
+            if (isAxiosError(error)) {
+                throw new Error(error.response?.data?.error || 'Registration failed');
+            }
+            throw error;
         }
     };
 
+    // 4. LOGOUT
     const logout = async () => {
         try {
-            // Optional: call backend to invalidate token if blacklist is implemented
             await client.post('/auth/logout');
         } catch (e) {
-            // Ignore logout errors
+            // Logout error doesn't matter, we still clear local state
         } finally {
-            localStorage.removeItem('token');
-            setUser(null);
-            // Redirect to login is handled by protected routes or calling component
+            handleLogoutCleanup();
+            // Optional: Hard reload to clear any memory states/caches
             window.location.href = '/login';
         }
     };
 
+    // 5. GOOGLE LOGIN (Stub)
     const loginWithGoogle = async () => {
-        throw new Error('Google Login is momentarily unavailable in Local Mode. Please use email/password.');
+        throw new Error('Google Login is momentarily unavailable via API. Please use email.');
     };
 
+    // 6. PASSWORD RESET
     const resetPassword = async (email: string) => {
         try {
             await client.post('/auth/forgot-password', { email });
-        } catch (error: any) {
-            const msg = error.response?.data?.error || error.message || 'Failed to send reset email';
-            throw new Error(msg);
+        } catch (error) {
+            if (isAxiosError(error)) {
+                throw new Error(error.response?.data?.error || 'Failed to send reset email');
+            }
+            throw error;
         }
     };
 

@@ -1,6 +1,6 @@
 /**
- * WhatsApp Order Service
- * Formats order details into WhatsApp message and generates WhatsApp Web API URL
+ * OMNORA WHATSAPP UPLINK
+ * Handles message generation and API redirects.
  */
 
 interface OrderItem {
@@ -10,19 +10,12 @@ interface OrderItem {
     quantity: number;
 }
 
-interface OrderData {
-    orderNumber: string;
-    orderHash?: string;
-    customerInfo?: {
-        name: string;
-        email: string;
-        phone: string;
-    };
-    guestCustomer?: {
-        name: string;
-        email: string;
-        phone: string;
-    };
+// Flexible interface to handle both Backend Response and Local State
+export interface OrderData {
+    _id?: string;
+    orderNumber: string; // Required now
+    customerInfo?: { name: string; email: string; phone: string; };
+    guestCustomer?: { name: string; email: string; phone: string; };
     shippingAddress?: {
         address: string;
         city: string;
@@ -32,132 +25,124 @@ interface OrderData {
     };
     items?: OrderItem[];
     paymentMethod?: string;
-    subtotal?: number;
-    tax?: number;
-    shipping?: number;
-    total?: number;
-    totalAmount?: number; // Added to support backend response structure
+    total?: number;       // Frontend State
+    totalAmount?: number; // Backend DB
     notes?: string;
 }
 
-const WHATSAPP_BUSINESS_NUMBER = '+923097613611'; // Updated Automation Number
+const WHATSAPP_BUSINESS_NUMBER = '923097613611'; // Omnora Official Line
 
 /**
- * Format payment method name
+ * Format Currency
+ */
+const formatPrice = (amount: number) => `PKR ${amount.toLocaleString()}`;
+
+/**
+ * Format Payment Method for Human Reading
  */
 function formatPaymentMethod(method?: string): string {
-    if (!method) return 'Pending';
+    if (!method) return 'Pending Selection';
     const methods: Record<string, string> = {
-        cod: 'Cash on Delivery',
+        cod: 'Cash on Delivery (COD)',
         meezan: 'Meezan Bank Transfer',
-        jazzcash: 'JazzCash',
-        easypaisa: 'EasyPaisa',
-        payoneer: 'Payoneer'
+        jazzcash: 'JazzCash Mobile',
+        easypaisa: 'EasyPaisa Mobile',
+        payoneer: 'Payoneer / Wise'
     };
-    return methods[method] || method;
+    return methods[method] || method.toUpperCase();
 }
 
 /**
- * Helper to safely get total amount
+ * Get Total Amount Safely
  */
 function getOrderTotal(orderData: OrderData): string {
-    const amount = orderData.totalAmount !== undefined ? orderData.totalAmount : orderData.total;
-    return amount !== undefined ? amount.toLocaleString() : '0';
+    const amount = orderData.totalAmount ?? orderData.total ?? 0;
+    return formatPrice(amount);
 }
 
 /**
- * Helper to format full order details
+ * Generate Core Message Body
  */
 function formatOrderDetailsBody(orderData: OrderData): string {
     const { orderNumber, customerInfo, guestCustomer, shippingAddress, items, paymentMethod, notes } = orderData;
-    const totalDisplay = getOrderTotal(orderData);
-
-    const customerName = customerInfo?.name || guestCustomer?.name || 'N/A';
+    
+    // Fallbacks
+    const name = customerInfo?.name || guestCustomer?.name || 'Guest';
     const phone = customerInfo?.phone || guestCustomer?.phone || 'N/A';
-    const email = customerInfo?.email || guestCustomer?.email || 'N/A';
+    const city = shippingAddress?.city || 'Unknown City';
+    const address = shippingAddress?.address || '';
 
-    const address = shippingAddress?.address || 'N/A';
-    const city = shippingAddress?.city || 'N/A';
-    const country = shippingAddress?.country || 'Pakistan';
-    const postal = shippingAddress?.postalCode ? `(${shippingAddress.postalCode})` : '';
+    // Items List
+    const itemsList = items?.map(i => `• ${i.name} (x${i.quantity})`).join('\n') || 'No items listed';
 
-    const itemsList = items?.map(i => `- ${i.name} x${i.quantity}`).join('\n') || 'No items';
+    return `*ORDER ID:* ${orderNumber}
+*AMOUNT:* ${getOrderTotal(orderData)}
+--------------------------------
+*STATUS:* 🟡 Pending Confirmation
+*DATE:* ${new Date().toLocaleString()}
+--------------------------------
+*CUSTOMER DATA*
+👤 Name: ${name}
+📞 Contact: ${phone}
+📍 Location: ${city}
+🏠 Address: ${address}
 
-    return `*Order ID:* ${orderNumber}
-*Total Amount:* PKR ${totalDisplay}
-
-*Customer Details:*
-Name: ${customerName}
-Phone: ${phone}
-Email: ${email}
-
-*Shipping Address:*
-${address}
-${city}, ${country} ${postal}
-
-*Order Items:*
+*MANIFEST*
 ${itemsList}
 
-*Payment Method:* ${formatPaymentMethod(paymentMethod)}
-${notes ? `\n*Notes:* ${notes}` : ''}`;
+*PAYMENT CHANNEL*
+💳 Method: ${formatPaymentMethod(paymentMethod)}
+${notes ? `\n📝 *NOTES:* ${notes}` : ''}`;
 }
 
 /**
- * Option 1: "I've Paid" Message
- * "I have completed payment... [Full Details] ... Attaching payment receipt."
+ * SCENARIO A: User clicks "I've Paid"
  */
 export function generatePaymentReceiptMessage(orderData: OrderData): string {
-    return `I have completed payment.
+    return `✅ *PAYMENT NOTIFICATION*
+    
+I have completed the transfer for this order.
+Please verify and process.
 
 ${formatOrderDetailsBody(orderData)}
 
-Attaching payment receipt.`;
+*ATTACHMENT:* [Sending Receipt Image...]`;
 }
 
 /**
- * Option 2: "Continue on WhatsApp" Message (Full Automation)
- * Includes ALL user input fields
+ * SCENARIO B: User clicks "Continue on WhatsApp" (Automation)
  */
 export function generateNewOrderMessage(orderData: OrderData): string {
-    return `Hello, I have placed an order.
+    return `🚀 *NEW ORDER REQUEST*
+
+I would like to finalize this order via WhatsApp.
 
 ${formatOrderDetailsBody(orderData)}
 
-I want to complete payment via WhatsApp.`;
+Please confirm availability and shipping timeline.`;
 }
 
 /**
- * @deprecated Use generateNewOrderMessage or generatePaymentReceiptMessage
+ * Build the URL
  */
-export function generateWhatsAppMessage(orderData: OrderData): string {
-    return generateNewOrderMessage(orderData);
+export function generateWhatsAppURL(message: string): string {
+    return `https://wa.me/${WHATSAPP_BUSINESS_NUMBER}?text=${encodeURIComponent(message)}`;
 }
 
 /**
- * Generate WhatsApp URL for a specific message
- */
-export function generateWhatsAppURL(message: string, number: string = WHATSAPP_BUSINESS_NUMBER): string {
-    const encodedMessage = encodeURIComponent(message);
-    return `https://wa.me/${number.replace(/[^0-9]/g, '')}?text=${encodedMessage}`;
-}
-
-/**
- * Open WhatsApp with specific message type
+ * Execute Redirect
  */
 export function openWhatsApp(orderData: OrderData, type: 'payment' | 'automation' = 'automation'): boolean {
     try {
-        let message = '';
-        if (type === 'payment') {
-            message = generatePaymentReceiptMessage(orderData);
-        } else {
-            message = generateNewOrderMessage(orderData);
-        }
+        const message = type === 'payment' 
+            ? generatePaymentReceiptMessage(orderData) 
+            : generateNewOrderMessage(orderData);
 
         const url = generateWhatsAppURL(message);
         window.open(url, '_blank');
         return true;
     } catch (error) {
-        console.error('Failed to open WhatsApp:', error);
+        console.error('WhatsApp Uplink Failed:', error);
         return false;
     }
 }

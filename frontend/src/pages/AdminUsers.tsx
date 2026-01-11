@@ -1,17 +1,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import client from '../api/client';
 import { useToast } from '../context/ToastContext';
-import { Users, Search, Shield, ShieldAlert, Trash2, Mail, Calendar } from 'lucide-react';
+import { Users, Search, Shield, ShieldAlert, Trash2, Mail, Calendar, UserCheck, ShieldCheck } from 'lucide-react';
 import './AdminUsers.css';
 
-// 1. Strict Typing
 interface User {
     _id: string;
     name: string;
     email: string;
     isAdmin: boolean;
     createdAt: string;
-    avatar?: string; // Optional if you have profile pics
 }
 
 const AdminUsers: React.FC = () => {
@@ -20,15 +18,13 @@ const AdminUsers: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const { showToast } = useToast();
 
-    // 2. Fetch Logic
     const fetchUsers = useCallback(async () => {
         setLoading(true);
         try {
-            const { data } = await client.get('/users'); // Assuming endpoint returns all users
-            // Safety check for data structure
+            const { data } = await client.get('/users');
             setUsers(Array.isArray(data) ? data : data.users || []);
         } catch (error) {
-            showToast('Failed to load user database', 'error');
+            showToast('Failed to load personnel database', 'error');
         } finally {
             setLoading(false);
         }
@@ -38,80 +34,62 @@ const AdminUsers: React.FC = () => {
         fetchUsers();
     }, [fetchUsers]);
 
-    // 3. Handlers
     const handleDelete = async (id: string) => {
-        if (!window.confirm('CRITICAL: Are you sure you want to ban/delete this user? This cannot be undone.')) return;
-
+        if (!window.confirm('CRITICAL: Confirm termination of user account?')) return;
         try {
             await client.delete(`/users/${id}`);
-            showToast('User removed from database', 'success');
-            // Optimistic Update
+            showToast('User record purged', 'success');
             setUsers(prev => prev.filter(u => u._id !== id));
         } catch (error) {
-            showToast('Failed to delete user', 'error');
+            showToast('Termination failed', 'error');
         }
     };
 
     const toggleAdminStatus = async (user: User) => {
         const newStatus = !user.isAdmin;
-        const confirmMsg = newStatus 
-            ? `Promote ${user.name} to ADMIN? They will have full system access.`
-            : `Revoke ADMIN access for ${user.name}?`;
+        const confirmMsg = newStatus
+            ? `Grant COMMAND ACCESS to ${user.name}?`
+            : `Revoke COMMAND ACCESS from ${user.name}?`;
 
         if (!window.confirm(confirmMsg)) return;
 
         try {
-            // Assuming your backend accepts a generic update or specific role toggle
             await client.put(`/users/${user._id}`, { isAdmin: newStatus });
-            
-            showToast(`User ${newStatus ? 'promoted' : 'demoted'} successfully`, 'success');
-            
-            // Optimistic Update
-            setUsers(prev => prev.map(u => 
-                u._id === user._id ? { ...u, isAdmin: newStatus } : u
-            ));
+            showToast(`Clearance level updated: ${newStatus ? 'COMMANDER' : 'CIVILIAN'}`, 'success');
+            setUsers(prev => prev.map(u => u._id === user._id ? { ...u, isAdmin: newStatus } : u));
         } catch (error) {
-            showToast('Failed to update permissions', 'error');
+            showToast('Clearance update failed', 'error');
         }
     };
 
-    // 4. Client-side Filtering (Fast for < 5000 users)
-    const filteredUsers = users.filter(user => 
-        user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchTerm.toLowerCase())
+    const filteredUsers = users.filter(user =>
+        (user.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (user.email || '').toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    // Helper to generate initials for avatar
-    const getInitials = (name: string) => {
-        return name
-            .split(' ')
-            .map(n => n[0])
-            .slice(0, 2)
-            .join('')
-            .toUpperCase();
+    const getInitials = (name?: string) => {
+        if (!name) return '??';
+        return name.slice(0, 2).toUpperCase();
     };
 
-    if (loading) return <div className="loading-container">Accessing User Database...</div>;
+    if (loading) return <div className="loading-container">Scanning Personnel Database...</div>;
 
     return (
         <div className="admin-users animate-fade-in">
             <div className="page-header">
-                <h2>
-                    <Users className="header-icon" /> 
-                    User Management
-                </h2>
+                <h2>PERSONNEL DATABASE</h2>
                 <div className="user-count-badge">
-                    {users.length} Registered Users
+                    <UserCheck size={14} />
+                    {users.length} ACTIVE RECORDS
                 </div>
             </div>
 
-            {/* Search Bar */}
             <div className="controls-bar">
                 <div className="search-wrapper">
                     <Search size={18} className="search-icon" />
-                    <input 
-                        type="text" 
-                        placeholder="Search by name or email..." 
+                    <input
+                        type="text"
+                        placeholder="SEARCH BY IDENTITY OR EMAIL..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="glass-input"
@@ -123,59 +101,61 @@ const AdminUsers: React.FC = () => {
                 <table className="users-table">
                     <thead>
                         <tr>
-                            <th>User Profile</th>
-                            <th>Role / Access</th>
-                            <th>Joined Date</th>
-                            <th>Actions</th>
+                            <th>PROFILE</th>
+                            <th>CLEARANCE</th>
+                            <th>REGISTRY DATE</th>
+                            <th className="text-right">PROTOCOL</th>
                         </tr>
                     </thead>
                     <tbody>
                         {filteredUsers.map(user => (
-                            <tr key={user._id}>
+                            <tr key={user._id} className={user.isAdmin ? 'row-admin' : ''}>
                                 <td>
                                     <div className="user-profile-cell">
                                         <div className={`avatar-circle ${user.isAdmin ? 'admin-glow' : ''}`}>
                                             {getInitials(user.name)}
                                         </div>
                                         <div className="user-info">
-                                            <span className="user-name">{user.name}</span>
+                                            <span className="user-name">{user.name || 'Unknown User'}</span>
                                             <span className="user-email">
-                                                <Mail size={12} /> {user.email}
+                                                <Mail size={10} /> {user.email}
                                             </span>
                                         </div>
                                     </div>
                                 </td>
                                 <td>
-                                    <button 
+                                    <button
                                         className={`role-badge ${user.isAdmin ? 'role-admin' : 'role-user'}`}
                                         onClick={() => toggleAdminStatus(user)}
-                                        title="Click to Toggle Role"
+                                        title="Modify Clearance Level"
                                     >
-                                        {user.isAdmin ? <ShieldAlert size={12} /> : <Shield size={12} />}
-                                        {user.isAdmin ? 'ADMIN' : 'Customer'}
+                                        {user.isAdmin ? <ShieldCheck size={12} /> : <Shield size={12} />}
+                                        {user.isAdmin ? 'COMMAND' : 'CIVILIAN'}
                                     </button>
                                 </td>
                                 <td>
                                     <div className="date-cell">
-                                        <Calendar size={14} />
+                                        <Calendar size={12} />
                                         {new Date(user.createdAt).toLocaleDateString()}
                                     </div>
                                 </td>
                                 <td>
-                                    <button 
-                                        className="icon-btn-danger" 
-                                        onClick={() => handleDelete(user._id)}
-                                        title="Delete User"
-                                    >
-                                        <Trash2 size={18} />
-                                    </button>
+                                    <div className="action-buttons">
+                                        <button
+                                            className="icon-btn delete-btn"
+                                            onClick={() => handleDelete(user._id)}
+                                            title="Terminate Record"
+                                        >
+                                            <Trash2 size={16} />
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         ))}
                         {filteredUsers.length === 0 && (
                             <tr>
                                 <td colSpan={4} className="empty-state">
-                                    No users found matching "{searchTerm}"
+                                    NO MATCHING RECORDS FOUND
                                 </td>
                             </tr>
                         )}

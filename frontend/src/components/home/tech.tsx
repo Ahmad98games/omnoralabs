@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
-import { Terminal, Sparkles, ArrowRight, Circle, Zap, Code2, Database, Cloud, Cpu, Layers } from 'lucide-react';
+import React from 'react'; // Removed unnecessary useState
+import { Terminal, Sparkles, ArrowRight, Zap, Code2, Database, Cloud, Cpu, Layers } from 'lucide-react';
 import './TechStack.css';
 
 const TechStackShowcase = () => {
-    const [hoveredTech, setHoveredTech] = useState<number | null>(null);
+    // LOGIC UPDATE: Removed 'hoveredTech' state. 
+    // We let CSS handle the hover effects for zero-js overhead on animations.
 
     const technologies = [
         {
@@ -68,21 +69,22 @@ const TechStackShowcase = () => {
                     </div>
 
                     <h1 className="tech-title">
-                        <span>Engineering and development</span>
+                        <span>Engineering & Development</span>
                         <span className="highlight" data-text="Excellence">Excellence</span>
                     </h1>
 
+                    {/* COPYWRITING UPDATE: Professional, High-End Tone */}
                     <p className="tech-subtitle">
-                       See How we Built this. As this is Built and managed in custom way Every Single Component is built with care and attention to detail. This stack is chosen not for hype, but for
-                        reliability, scalability, and developer experience.
+                        See how we built this. Every single component is crafted with intention and attention to detail. This stack was not chosen for hype, but for 
+                        <span style={{color: '#fff'}}> reliability, scalability, and developer experience.</span>
                     </p>
-                    <p className="tech-subtitle">
-                        We have Clarify Twice Of times By Seeing Other Stores .And By keeping In mind to make it fully diffrent In the way so The customer can have a unique experience.
+                    <p className="tech-subtitle" style={{marginTop: '1rem'}}>
+                        We studied the market leaders and re-engineered the process to ensure a unique, seamless customer journey.
                     </p>
+                    
                     <br />
-                    <span className="tech-subtitle">
-
-                        For Education Purposes Only
+                    <span className="tech-subtitle" style={{fontSize: '0.8rem', opacity: 0.6}}>
+                        // FOR EDUCATIONAL PURPOSES
                     </span>
                     
                 </header>
@@ -105,12 +107,7 @@ const TechStackShowcase = () => {
                     {technologies.map((tech) => {
                         const Icon = tech.icon;
                         return (
-                            <div
-                                key={tech.id}
-                                className="tech-card"
-                                onMouseEnter={() => setHoveredTech(tech.id)}
-                                onMouseLeave={() => setHoveredTech(null)}
-                            >
+                            <div key={tech.id} className="tech-card">
                                 <div className="card-header">
                                     <div className="tech-icon-box">
                                         <Icon size={24} strokeWidth={1.5} />
@@ -147,7 +144,7 @@ const TechStackShowcase = () => {
                         ].map((step, i) => (
                             <div key={i} className="flow-step">
                                 <span className="step-label">{step.from}</span>
-                                <ArrowRight className="step-arrow" size={16} />
+                                <ArrowRight className="step-arrow animated-arrow" size={16} />
                                 <span className="step-content">{step.to}</span>
                             </div>
                         ))}

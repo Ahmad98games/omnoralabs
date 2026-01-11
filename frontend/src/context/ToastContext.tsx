@@ -1,101 +1,87 @@
-import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react'
-import '../styles/Animations.css'
+import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import { CheckCircle, AlertOctagon, Info, AlertTriangle, X } from 'lucide-react';
+import './Toast.css';
 
-type ToastType = 'success' | 'error' | 'info' | 'warning'
+type ToastType = 'success' | 'error' | 'info' | 'warning';
 
 interface Toast {
-    id: number
-    message: string
-    type: ToastType
+    id: number;
+    message: string;
+    type: ToastType;
 }
 
 interface ToastContextType {
-    showToast: (message: string, type?: ToastType) => void
+    showToast: (message: string, type?: ToastType) => void;
 }
 
-const ToastContext = createContext<ToastContextType | undefined>(undefined)
+const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
 export function ToastProvider({ children }: { children: ReactNode }) {
-    const [toasts, setToasts] = useState<Toast[]>([])
+    const [toasts, setToasts] = useState<Toast[]>([]);
 
     const showToast = useCallback((message: string, type: ToastType = 'info') => {
-        const id = Date.now()
-        setToasts(prev => [...prev, { id, message, type }])
+        const id = Date.now();
+        setToasts(prev => [...prev, { id, message, type }]);
 
+        // Auto-remove after 4 seconds
         setTimeout(() => {
-            setToasts(prev => prev.filter(t => t.id !== id))
-        }, 3000)
-    }, [])
+            setToasts(prev => prev.filter(t => t.id !== id));
+        }, 4000);
+    }, []);
 
     const removeToast = (id: number) => {
-        setToasts(prev => prev.filter(t => t.id !== id))
-    }
+        setToasts(prev => prev.filter(t => t.id !== id));
+    };
+
+    // Icon Mapping
+    const getIcon = (type: ToastType) => {
+        switch (type) {
+            case 'success': return <CheckCircle size={20} />;
+            case 'error': return <AlertOctagon size={20} />;
+            case 'warning': return <AlertTriangle size={20} />;
+            case 'info': return <Info size={20} />;
+        }
+    };
 
     return (
         <ToastContext.Provider value={{ showToast }}>
             {children}
-            <div className="toast-container">
+            <div className="toast-viewport">
                 {toasts.map(toast => (
                     <div
                         key={toast.id}
-                        className={`toast toast-${toast.type} animate-slide-in-right`}
+                        className={`omnora-toast ${toast.type}`}
                         onClick={() => removeToast(toast.id)}
                     >
-                        <div className="toast-icon">
-                            {toast.type === 'success' && '✓'}
-                            {toast.type === 'error' && '✕'}
-                            {toast.type === 'info' && 'ℹ'}
-                            {toast.type === 'warning' && '⚠'}
+                        <div className="toast-icon-box">
+                            {getIcon(toast.type)}
                         </div>
-                        <div className="toast-message">{toast.message}</div>
+                        
+                        <div className="toast-content">
+                            <span className="toast-title">{toast.type.toUpperCase()}</span>
+                            <span className="toast-message">{toast.message}</span>
+                        </div>
+
+                        <button className="toast-close" onClick={(e) => {
+                            e.stopPropagation();
+                            removeToast(toast.id);
+                        }}>
+                            <X size={14} />
+                        </button>
+
+                        {/* Visual Timer Bar */}
+                        <div className="toast-progress"></div>
                     </div>
                 ))}
             </div>
-            <style>{`
-        .toast-container {
-          position: fixed;
-          bottom: 20px;
-          right: 20px;
-          z-index: 9999;
-          display: flex;
-          flex-direction: column;
-          gap: 10px;
-        }
-        .toast {
-          min-width: 300px;
-          padding: 16px;
-          border-radius: 8px;
-          background: rgba(255, 255, 255, 0.95);
-          backdrop-filter: blur(10px);
-          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          cursor: pointer;
-          border-left: 4px solid #333;
-          font-family: 'Inter', sans-serif;
-        }
-        .toast-success { border-left-color: #2e7d32; }
-        .toast-error { border-left-color: #d32f2f; }
-        .toast-info { border-left-color: #0288d1; }
-        .toast-warning { border-left-color: #ed6c02; }
-        .toast-icon {
-          font-weight: bold;
-          font-size: 1.2rem;
-        }
-        .toast-success .toast-icon { color: #2e7d32; }
-        .toast-error .toast-icon { color: #d32f2f; }
-        .toast-info .toast-icon { color: #0288d1; }
-        .toast-warning .toast-icon { color: #ed6c02; }
-      `}</style>
         </ToastContext.Provider>
-    )
+    );
 }
 
 export function useToast() {
-    const context = useContext(ToastContext)
+    const context = useContext(ToastContext);
     if (context === undefined) {
-        throw new Error('useToast must be used within a ToastProvider')
+        throw new Error('useToast must be used within a ToastProvider');
     }
-    return context
+    return context;
 }

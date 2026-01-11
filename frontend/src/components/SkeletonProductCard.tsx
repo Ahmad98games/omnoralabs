@@ -15,7 +15,6 @@ const SkeletonBlock: React.FC<{ style?: CSSProperties, className?: string }> = (
         <div 
             className={`skeleton-pulse ${className}`} 
             style={{ 
-                // Default skeleton styling can be defined here if not entirely in CSS
                 borderRadius: '4px',
                 ...style 
             }}

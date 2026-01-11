@@ -1,16 +1,17 @@
 /* ============================================================================
-   OMNORA CAROUSEL - "CINEMATIC" ENGINE
+   OMNORA CAROUSEL - "CINEMATIC ENGINE"
+   Refined for Performance & Texture
    ============================================================================ */
 @import url('https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,900;1,6..96,400&family=Space+Grotesk:wght@300;400;500;700&display=swap');
 
 :root {
-  --carousel-height: 80vh; /* Immersive height */
+  --carousel-height: 85vh;
   --c-void: #050505;
   --c-neon-cyan: #00F0FF;
   --c-neon-gold: #FFD600;
   --font-serif: 'Bodoni Moda', serif;
   --font-sans: 'Space Grotesk', sans-serif;
-  --ease-cinema: cubic-bezier(0.4, 0.0, 0.2, 1);
+  --ease-cinema: cubic-bezier(0.25, 1, 0.5, 1); /* Smoother stop */
 }
 
 .carousel-magnum {
@@ -19,7 +20,17 @@
   height: var(--carousel-height);
   overflow: hidden;
   background: var(--c-void);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* --- Film Grain Overlay (The Ethereal Touch) --- */
+.film-grain {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 5;
+    opacity: 0.05;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
 }
 
 /* --- The Slide Layer --- */
@@ -31,7 +42,7 @@
   height: 100%;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 1.2s var(--ease-cinema), visibility 1.2s;
+  transition: opacity 1.4s var(--ease-cinema), visibility 1.4s;
   z-index: 1;
 }
 
@@ -41,7 +52,7 @@
   z-index: 2;
 }
 
-/* Image with "Ken Burns" Zoom Effect */
+/* Image Layer */
 .magnum-image-wrapper {
   position: absolute;
   inset: 0;
@@ -49,11 +60,11 @@
 }
 
 .magnum-image-wrapper::after {
-  /* Gradient Overlay for Text Readability */
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(5,5,5,0.9) 0%, rgba(5,5,5,0.2) 50%, rgba(5,5,5,0.3) 100%);
+  /* Darker gradient at bottom for better text contrast */
+  background: linear-gradient(to top, rgba(5,5,5,0.95) 0%, rgba(5,5,5,0.1) 60%);
   z-index: 2;
 }
 
@@ -61,25 +72,25 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transform: scale(1.1);
-  transition: transform 6s ease-out;
+  transform: scale(1.15);
+  transition: transform 6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .magnum-slide.active .magnum-img {
-  transform: scale(1); /* Zooms out slowly when active */
+  transform: scale(1);
 }
 
-/* --- Text Content (Glassmorphism) --- */
+/* --- Text Content --- */
 .magnum-content {
   position: absolute;
-  bottom: 15%;
+  bottom: 12%;
   left: 5%;
   z-index: 10;
-  max-width: 600px;
+  max-width: 650px;
   opacity: 0;
-  transform: translateY(30px);
+  transform: translateY(40px);
   transition: all 1s var(--ease-cinema);
-  transition-delay: 0.3s; /* Text appears after image fade */
+  transition-delay: 0.2s;
 }
 
 .magnum-slide.active .magnum-content {
@@ -89,88 +100,94 @@
 
 .magnum-badge {
   display: inline-block;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border: 1px solid var(--c-neon-cyan);
+  background: rgba(0, 240, 255, 0.05); /* Very subtle cyan tint */
+  border: 1px solid rgba(0, 240, 255, 0.3);
   color: var(--c-neon-cyan);
   font-family: var(--font-sans);
-  font-size: 0.75rem;
+  font-size: 0.7rem;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.2em;
-  padding: 0.5rem 1rem;
-  margin-bottom: 1.5rem;
+  padding: 0.6rem 1.2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 0 20px rgba(0, 240, 255, 0.1);
 }
 
 .magnum-title {
   font-family: var(--font-serif);
-  font-size: clamp(3rem, 8vw, 5rem);
+  font-size: clamp(3.5rem, 8vw, 6rem);
   line-height: 0.9;
   color: #fff;
-  margin: 0 0 1rem;
+  margin: 0 0 1.5rem;
   text-transform: uppercase;
+  letter-spacing: -0.03em;
+  text-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
 
 .magnum-desc {
   font-family: var(--font-sans);
-  color: rgba(255, 255, 255, 0.8);
+  color: #ccc;
   font-size: 1.1rem;
-  line-height: 1.6;
+  line-height: 1.7;
   border-left: 2px solid var(--c-neon-gold);
   padding-left: 1.5rem;
+  max-width: 80%;
 }
 
 /* --- Controls Interface --- */
 .magnum-controls {
   position: absolute;
-  bottom: 2rem;
-  right: 2rem;
+  bottom: 2.5rem;
+  right: 3rem;
   z-index: 20;
   display: flex;
   align-items: center;
-  gap: 2rem;
+  gap: 1.5rem;
 }
 
 .magnum-counter {
   font-family: var(--font-sans);
   color: #fff;
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   font-weight: 700;
   letter-spacing: 0.1em;
+  margin-right: 1rem;
 }
 
 .magnum-counter span {
   color: rgba(255, 255, 255, 0.3);
-  font-size: 1rem;
-  margin-left: 0.5rem;
 }
 
 .nav-btn {
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   color: #fff;
-  width: 50px;
-  height: 50px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  backdrop-filter: blur(5px);
 }
 
 .nav-btn:hover {
   border-color: var(--c-neon-cyan);
-  color: var(--c-neon-cyan);
+  color: #000;
+  background: var(--c-neon-cyan);
   transform: scale(1.1);
+  box-shadow: 0 0 20px var(--c-neon-cyan);
 }
 
-/* --- Progress Bar --- */
+/* --- GPU Accelerated Progress Bar --- */
 .magnum-progress-container {
   position: absolute;
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 4px;
+  height: 3px;
   background: rgba(255, 255, 255, 0.1);
   z-index: 30;
 }
@@ -179,17 +196,28 @@
   height: 100%;
   background: var(--c-neon-gold);
   width: 0%;
-  transition: width 0.1s linear; /* Smooth fill updated via JS or CSS animation */
+  /* This animation does the heavy lifting now */
+  animation: loadProgress linear forwards; 
+  box-shadow: 0 0 10px var(--c-neon-gold);
+}
+
+@keyframes loadProgress {
+  from { width: 0%; }
+  to { width: 100%; }
 }
 
 /* Mobile Adjustments */
 @media (max-width: 768px) {
-  :root { --carousel-height: 65vh; }
+  :root { --carousel-height: 70vh; }
   
   .magnum-content {
-    bottom: 5rem;
+    bottom: 6rem;
     left: 1.5rem;
     right: 1.5rem;
+  }
+  
+  .magnum-title {
+      font-size: 3rem;
   }
   
   .magnum-controls {
@@ -198,5 +226,10 @@
     gap: 1rem;
   }
   
-  .magnum-desc { font-size: 0.9rem; max-width: 100%; }
+  .magnum-desc { font-size: 0.95rem; max-width: 100%; }
+  
+  .nav-btn {
+      width: 45px;
+      height: 45px;
+  }
 }

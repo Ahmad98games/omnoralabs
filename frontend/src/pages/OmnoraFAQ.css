@@ -1,304 +1,281 @@
 /* ============================================================================
-   OMNORA FAQ - "THE PROTOCOLS" ENGINE
+   OMNORA FAQ - "THE PROTOCOLS"
+   Status: Optimized
    ============================================================================ */
-@import url('https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,900;1,6..96,400&family=Space+Grotesk:wght@300;400;500;700&display=swap');
 
-:root {
-  /* -- Palette -- */
-  --void: #050505;
-  --void-depth: #0e0e0e;
-  --text-primary: #F2F2F2;
-  --text-muted: #888888;
-  --neon-cyan: #00F0FF;
-  --neon-gold: #FFD600;
-  
-  /* -- Fonts -- */
-  --font-serif: 'Bodoni Moda', serif;
-  --font-sans: 'Space Grotesk', sans-serif;
-  
-  /* -- UI Physics -- */
-  --glass: rgba(255, 255, 255, 0.03);
-  --glass-border: 1px solid rgba(255, 255, 255, 0.1);
-  --ease-elastic: cubic-bezier(0.23, 1, 0.32, 1);
-}
-
-* { box-sizing: border-box; }
+/* ... Inherits Fonts & Vars from App.css ... */
 
 .faq-magnum-page {
-  background-color: var(--void);
-  color: var(--text-primary);
-  font-family: var(--font-sans);
-  min-height: 100vh;
-  position: relative;
+    background-color: var(--void);
+    color: var(--text-primary);
+    min-height: 100vh;
+    position: relative;
+    padding-bottom: 4rem;
 }
 
-/* --- Noise Texture --- */
-.noise-layer {
-  position: fixed;
-  inset: 0;
-  background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E");
-  pointer-events: none;
-  z-index: 0;
-}
-
-.container {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 0 1.5rem;
-  position: relative;
-  z-index: 1;
-}
-
-/* ============================================================================
-   HERO SECTION
-   ============================================================================ */
+/* --- Hero --- */
 .faq-hero-magnum {
-  padding: 8rem 0 4rem;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
+    padding: 8rem 0 4rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .hero-super-title {
-  font-family: var(--font-serif);
-  font-size: clamp(4rem, 12vw, 10rem);
-  line-height: 0.8;
-  text-transform: uppercase;
-  color: var(--text-primary);
-  margin: 0;
-  letter-spacing: -0.04em;
+    font-family: var(--font-serif);
+    font-size: clamp(4rem, 10vw, 8rem);
+    line-height: 0.9;
+    text-transform: uppercase;
+    color: #fff;
+    margin: 0;
 }
 
 .hero-super-title span {
-  display: block;
-  font-family: var(--font-sans);
-  font-size: 0.15em;
-  letter-spacing: 0.2em;
-  color: var(--neon-cyan);
-  margin-bottom: 1rem;
+    display: block;
+    font-family: var(--font-sans);
+    font-size: 0.2em;
+    letter-spacing: 0.2em;
+    color: var(--neon-cyan);
+    margin-bottom: 1rem;
 }
 
 .hero-desc {
-  font-size: 1.1rem;
-  color: var(--text-muted);
-  max-width: 600px;
-  margin-top: 2rem;
-  border-left: 2px solid var(--neon-gold);
-  padding-left: 1.5rem;
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    max-width: 600px;
+    margin-top: 2rem;
+    border-left: 2px solid var(--neon-gold);
+    padding-left: 1.5rem;
 }
 
-/* ============================================================================
-   LAYOUT GRID
-   ============================================================================ */
+/* --- Layout --- */
 .faq-layout {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 4rem;
-  padding: 4rem 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 4rem;
+    padding: 4rem 1.5rem;
+    max-width: 1400px;
+    margin: 0 auto;
 }
 
 @media (min-width: 1024px) {
-  .faq-layout {
-    grid-template-columns: 350px 1fr; /* Sidebar | Main Content */
-    align-items: start;
-  }
+    .faq-layout {
+        grid-template-columns: 350px 1fr;
+        align-items: start;
+    }
 }
 
-/* ============================================================================
-   SIDEBAR: FOUNDER NOTE (The Manifesto Card)
-   ============================================================================ */
+/* --- Sidebar --- */
 .manifesto-card {
-  background: var(--void-depth);
-  border: 1px solid var(--neon-gold);
-  padding: 2rem;
-  position: relative;
-  overflow: hidden;
+    background: #0a0a0a;
+    border: 1px solid var(--neon-gold);
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
 }
 
 .manifesto-card::before {
-  content: '';
-  position: absolute;
-  top: -10%;
-  right: -10%;
-  width: 150px;
-  height: 150px;
-  background: radial-gradient(circle, rgba(255, 214, 0, 0.15) 0%, transparent 70%);
-  filter: blur(20px);
+    content: '';
+    position: absolute;
+    top: -20px;
+    right: -20px;
+    width: 100px;
+    height: 100px;
+    background: radial-gradient(circle, rgba(255, 214, 0, 0.2) 0%, transparent 70%);
+    filter: blur(20px);
 }
 
 .manifesto-title {
-  font-family: var(--font-serif);
-  color: var(--neon-gold);
-  font-size: 1.5rem;
-  margin: 0 0 1rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+    font-family: var(--font-serif);
+    color: var(--neon-gold);
+    font-size: 1.5rem;
+    margin: 0 0 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 .manifesto-text {
-  color: var(--text-muted);
-  font-size: 0.95rem;
-  line-height: 1.6;
-  margin-bottom: 1rem;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    margin-bottom: 1rem;
 }
 
 .manifesto-note {
-  font-size: 0.85rem;
-  font-style: italic;
-  color: #fff;
-  opacity: 0.7;
-  border-top: 1px solid rgba(255,255,255,0.1);
-  padding-top: 1rem;
-  margin-top: 1.5rem;
+    font-size: 0.85rem;
+    font-style: italic;
+    color: #fff;
+    opacity: 0.8;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 1rem;
+    margin-top: 1.5rem;
 }
 
-/* ============================================================================
-   MAIN CONTENT: ACCORDION
-   ============================================================================ */
+.sidebar-link {
+    color: var(--neon-cyan);
+    text-decoration: none;
+    display: inline-block;
+    margin-top: 0.5rem;
+    font-weight: 600;
+}
+
+.breadcrumbs-sidebar {
+    margin-top: 2rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.crumb-link {
+    color: inherit;
+    text-decoration: none;
+}
+
+/* --- Accordion --- */
 .faq-group-title {
-  font-family: var(--font-serif);
-  font-size: 2.5rem;
-  margin: 0 0 2rem;
-  color: #fff;
+    font-family: var(--font-serif);
+    font-size: 2rem;
+    margin: 0 0 2rem;
+    color: #fff;
 }
 
 .faq-item-magnum {
-  border-bottom: 1px solid rgba(255,255,255,0.1);
-  transition: background 0.3s;
-}
-
-.faq-item-magnum:hover {
-  background: rgba(255,255,255,0.02);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .faq-trigger {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 2rem 0;
-  background: none;
-  border: none;
-  text-align: left;
-  cursor: pointer;
-  color: var(--text-primary);
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 0;
+    background: none;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    color: #fff;
 }
 
 .faq-q-text {
-  font-family: var(--font-sans);
-  font-size: 1.25rem;
-  font-weight: 500;
-  transition: color 0.3s;
+    font-family: var(--font-sans);
+    font-size: 1.1rem;
+    font-weight: 500;
+    transition: color 0.3s;
 }
 
 .faq-item-magnum.active .faq-q-text {
-  color: var(--neon-cyan);
+    color: var(--neon-cyan);
 }
 
 .faq-icon-box {
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid rgba(255,255,255,0.2);
-  color: var(--text-muted);
-  transition: all 0.3s var(--ease-elastic);
-  flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--text-muted);
+    transition: all 0.3s;
+    border-radius: 50%;
 }
 
 .faq-item-magnum.active .faq-icon-box {
-  border-color: var(--neon-cyan);
-  color: var(--neon-cyan);
-  transform: rotate(45deg); /* Turns + to x */
+    border-color: var(--neon-cyan);
+    color: var(--neon-cyan);
+    transform: rotate(45deg);
 }
 
 .faq-content {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.5s var(--ease-elastic);
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 .faq-item-magnum.active .faq-content {
-  max-height: 500px; /* Arbitrary limit */
+    max-height: 500px;
 }
 
 .faq-inner {
-  padding: 0 0 2rem;
-  color: var(--text-muted);
-  line-height: 1.7;
-  font-size: 1rem;
-  max-width: 90%;
+    padding: 0 0 2rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+    font-size: 0.95rem;
+    max-width: 90%;
 }
 
-.faq-inner ol {
-  padding-left: 1.5rem;
-  margin-top: 1rem;
+.note-text {
+    margin-top: 1rem;
+    font-style: italic;
+    color: var(--neon-cyan);
 }
 
-.faq-inner li {
-  margin-bottom: 0.5rem;
-}
-
-/* ============================================================================
-   CONTACT SECTION
-   ============================================================================ */
+/* --- Contact Block --- */
 .contact-block {
-  margin-top: 4rem;
-  padding: 3rem;
-  background: var(--glass);
-  border: var(--glass-border);
-  text-align: center;
+    margin-top: 4rem;
+    padding: 3rem;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
 }
 
 .contact-title {
-  font-family: var(--font-serif);
-  font-size: 2rem;
-  margin-bottom: 1rem;
+    font-family: var(--font-serif);
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+    color: #fff;
+}
+
+.contact-sub {
+    color: var(--text-muted);
 }
 
 .btn-contact {
-  display: inline-flex;
-  margin-top: 1.5rem;
-  padding: 1rem 2rem;
-  background: #fff;
-  color: #000;
-  text-decoration: none;
-  text-transform: uppercase;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  transition: transform 0.2s;
+    display: inline-flex;
+    align-items: center;
+    margin-top: 1.5rem;
+    padding: 1rem 2rem;
+    background: #fff;
+    color: #000;
+    text-decoration: none;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    transition: all 0.2s;
 }
 
 .btn-contact:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(255,255,255,0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 255, 255, 0.2);
 }
 
 .contact-meta {
-  margin-top: 1rem;
-  font-size: 0.9rem;
-  color: var(--text-muted);
+    margin-top: 1.5rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.5;
 }
-.contact-meta a { color: var(--neon-cyan); text-decoration: none; }
 
-/* ============================================================================
-   FOOTER (Magnum Style)
-   ============================================================================ */
+/* --- Footer --- */
 .footer-magnum {
-  border-top: 1px solid rgba(255,255,255,0.1);
-  padding: 3rem 0;
-  margin-top: 4rem;
-  text-align: center;
-  color: var(--text-muted);
-  font-size: 0.85rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 3rem 0;
+    margin-top: 4rem;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    letter-spacing: 0.05em;
 }
 
-/* Mobile Optimizations */
+.footer-credit {
+    opacity: 0.5;
+    font-size: 0.8em;
+    display: block;
+    margin-top: 0.5rem;
+}
+
+/* Mobile */
 @media (max-width: 768px) {
-  .hero-super-title { font-size: 15vw; }
-  .faq-layout { padding: 2rem 0; gap: 3rem; }
-  .faq-q-text { font-size: 1.1rem; }
-  .manifesto-card { padding: 1.5rem; }
+    .faq-layout { gap: 3rem; }
+    .hero-super-title { font-size: 3.5rem; }
+    .faq-q-text { font-size: 1rem; }
 }

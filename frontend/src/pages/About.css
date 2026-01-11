@@ -525,3 +525,63 @@
   .mission-quote { font-size: 1.2rem; }
   .btn-neon { padding: 1rem 2rem; }
 }
+/* ... Keep your existing CSS ... */
+
+/* --- New Helper Classes (To replace inline styles) --- */
+
+.mt-section {
+    margin-top: 8rem;
+}
+
+.mission-header {
+    font-family: var(--font-serif);
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: #fff;
+    text-transform: uppercase;
+}
+
+.founder-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.cta-section {
+    margin-top: 8rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.center-text {
+    margin: 0 auto 2rem auto;
+    text-align: center;
+}
+
+.contact-sub {
+    margin-top: 2rem;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.copyright {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    letter-spacing: 0.05em;
+    margin-top: 1rem;
+}
+
+/* Fix for the Founder Avatar Background */
+.founder-avatar {
+    /* Ensure the background logic works */
+    background-color: var(--void-depth);
+    overflow: hidden;
+}
+
+/* Mobile Adjustments for margins */
+@media (max-width: 768px) {
+    .mt-section {
+        margin-top: 5rem;
+    }
+}

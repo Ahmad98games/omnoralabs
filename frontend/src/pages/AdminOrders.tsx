@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import client from '../api/client';
 import { useToast } from '../context/ToastContext';
-import { Package, Truck, CheckCircle, XCircle, Clock, RefreshCw, ShoppingBag } from 'lucide-react';
+import { Package, Truck, CheckCircle, XCircle, Clock, RefreshCw, ShoppingBag, ArrowRight } from 'lucide-react';
 import './AdminOrders.css';
 
-// 1. Strict Typing
 interface OrderItem {
     name: string;
     quantity: number;
@@ -22,17 +21,15 @@ interface Order {
     createdAt: string;
 }
 
-// 2. Configuration Object (The "Clean Code" Way)
-// This keeps your render method clean. Change colors/icons here centrally.
 const STATUS_CONFIG: Record<string, { label: string; colorClass: string; icon: any }> = {
-    INITIATED:         { label: 'Initiated', colorClass: 'status-gray', icon: Clock },
-    pending:           { label: 'Pending Payment', colorClass: 'status-yellow', icon: Clock },
+    INITIATED: { label: 'Initiated', colorClass: 'status-gray', icon: Clock },
+    pending: { label: 'Pending Payment', colorClass: 'status-yellow', icon: Clock },
     receipt_submitted: { label: 'Receipt Review', colorClass: 'status-blue', icon: CheckCircle },
-    approved:          { label: 'Approved', colorClass: 'status-emerald', icon: CheckCircle },
-    processing:        { label: 'Processing', colorClass: 'status-indigo', icon: Package },
-    shipped:           { label: 'Shipped', colorClass: 'status-purple', icon: Truck },
-    delivered:         { label: 'Delivered', colorClass: 'status-green', icon: CheckCircle },
-    cancelled:         { label: 'Cancelled', colorClass: 'status-red', icon: XCircle },
+    approved: { label: 'Approved', colorClass: 'status-emerald', icon: CheckCircle },
+    processing: { label: 'Processing', colorClass: 'status-indigo', icon: Package },
+    shipped: { label: 'Shipped', colorClass: 'status-purple', icon: Truck },
+    delivered: { label: 'Delivered', colorClass: 'status-green', icon: CheckCircle },
+    cancelled: { label: 'Cancelled', colorClass: 'status-red', icon: XCircle },
 };
 
 export default function AdminOrders() {
@@ -56,61 +53,82 @@ export default function AdminOrders() {
         fetchOrders();
     }, [fetchOrders]);
 
+    const [processingId, setProcessingId] = useState<string | null>(null);
+
     const updateStatus = async (orderId: string, newStatus: string) => {
+        if (processingId) return; // Prevent double-tap
+        setProcessingId(orderId);
         try {
             await client.put(`/orders/${orderId}/status`, { status: newStatus });
             showToast(`Order updated to ${newStatus}`, 'success');
-            // Optimistic Update: Update local state immediately for speed
             setOrders(prev => prev.map(o => o._id === orderId ? { ...o, status: newStatus as any } : o));
         } catch (error: any) {
             showToast(error.response?.data?.error || 'Update failed', 'error');
-            fetchOrders(); // Revert on fail
+            fetchOrders();
+        } finally {
+            setProcessingId(null);
         }
     };
 
-    // 3. Logic Extraction: Determine the "Next Step" button dynamically
     const renderActionButtons = (order: Order) => {
         const s = order.status;
-        
-        // Group 1: Approval Phase
+        const isProcessing = processingId === order._id;
+
         if (['INITIATED', 'pending', 'receipt_submitted'].includes(s)) {
             return (
-                <button onClick={() => updateStatus(order._id, 'approved')} className="btn-action btn-approve">
-                    <CheckCircle size={14} /> Approve
+                <button
+                    onClick={() => updateStatus(order._id, 'approved')}
+                    className="btn-action btn-approve"
+                    disabled={!!processingId}
+                >
+                    {isProcessing ? <RefreshCw size={14} className="spin" /> : <CheckCircle size={14} />}
+                    {isProcessing ? 'Saving...' : 'Approve'}
                 </button>
             );
         }
-        // Group 2: Fulfillment Phase
         if (s === 'approved') return (
-            <button onClick={() => updateStatus(order._id, 'processing')} className="btn-action btn-process">
-                <Package size={14} /> Process
+            <button
+                onClick={() => updateStatus(order._id, 'processing')}
+                className="btn-action btn-process"
+                disabled={!!processingId}
+            >
+                {isProcessing ? <RefreshCw size={14} className="spin" /> : <Package size={14} />}
+                {isProcessing ? '...' : 'Process'}
             </button>
         );
         if (s === 'processing') return (
-            <button onClick={() => updateStatus(order._id, 'shipped')} className="btn-action btn-ship">
-                <Truck size={14} /> Ship
+            <button
+                onClick={() => updateStatus(order._id, 'shipped')}
+                className="btn-action btn-ship"
+                disabled={!!processingId}
+            >
+                {isProcessing ? <RefreshCw size={14} className="spin" /> : <Truck size={14} />}
+                {isProcessing ? '...' : 'Ship'}
             </button>
         );
         if (s === 'shipped') return (
-            <button onClick={() => updateStatus(order._id, 'delivered')} className="btn-action btn-deliver">
-                <CheckCircle size={14} /> Complete
+            <button
+                onClick={() => updateStatus(order._id, 'delivered')}
+                className="btn-action btn-deliver"
+                disabled={!!processingId}
+            >
+                {isProcessing ? <RefreshCw size={14} className="spin" /> : <CheckCircle size={14} />}
+                {isProcessing ? '...' : 'Complete'}
             </button>
         );
-        
-        return null; // No actions for delivered/cancelled
-    };
 
-    if (loading) return <div className="loading-container">Syncing Orders...</div>;
+        return null;
+    };
 
     return (
         <div className="admin-orders-page animate-fade-in">
             <div className="page-header">
                 <h2>
-                    <ShoppingBag className="header-icon" /> 
+                    <ShoppingBag className="header-icon" />
                     Order Management
                 </h2>
-                <button className="refresh-btn" onClick={fetchOrders} title="Refresh Orders">
-                    <RefreshCw size={18} />
+                <button className="refresh-btn" onClick={fetchOrders} title="Refresh Orders" disabled={loading}>
+                    <RefreshCw size={18} className={loading ? "spin" : ""} />
                 </button>
             </div>
 
@@ -142,16 +160,16 @@ export default function AdminOrders() {
                                                 {order.user?.name || order.guestCustomer?.name || 'Guest'}
                                             </div>
                                             <div className="customer-email">
-                                                {order.user?.email || order.guestCustomer?.email}
+                                                {order.user?.email || order.guestCustomer?.email || 'N/A'}
                                             </div>
                                         </div>
                                     </td>
                                     <td>
                                         <div className="items-cell">
-                                            <span className="item-count">{order.items.length} Items</span>
+                                            <span className="item-count">{(order.items || []).length} Items</span>
                                             <span className="item-detail">
-                                                {order.items[0]?.name} 
-                                                {order.items.length > 1 && ` +${order.items.length - 1} more`}
+                                                {order.items?.[0]?.name || 'Unknown Item'}
+                                                {(order.items || []).length > 1 && ` +${order.items.length - 1} more`}
                                             </span>
                                         </div>
                                     </td>
@@ -168,11 +186,10 @@ export default function AdminOrders() {
                                         <div className="action-buttons-group">
                                             {renderActionButtons(order)}
 
-                                            {/* Cancel Button (Always visible unless final) */}
                                             {!['delivered', 'cancelled', 'rejected'].includes(order.status) && (
-                                                <button 
+                                                <button
                                                     onClick={() => {
-                                                        if(window.confirm('Cancel this order?')) updateStatus(order._id, 'cancelled');
+                                                        if (window.confirm('Cancel this order?')) updateStatus(order._id, 'cancelled');
                                                     }}
                                                     className="icon-btn-danger"
                                                     title="Cancel Order"
@@ -185,9 +202,14 @@ export default function AdminOrders() {
                                 </tr>
                             );
                         })}
-                        {orders.length === 0 && (
+                        {orders.length === 0 && !loading && (
                             <tr>
                                 <td colSpan={6} className="empty-state">No active orders found.</td>
+                            </tr>
+                        )}
+                        {loading && (
+                            <tr>
+                                <td colSpan={6} className="empty-state">Syncing Data Stream...</td>
                             </tr>
                         )}
                     </tbody>
