@@ -53,7 +53,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
             try {
                 // Add timeout to prevent hanging on mobile
-                const { data } = await client.get('/auth/me', { timeout: 10000 });
+                const { data } = await client.get('/auth/me', { timeout: 3000 });
                 if (data.success && data.user) {
                     setUser(data.user);
                 } else {

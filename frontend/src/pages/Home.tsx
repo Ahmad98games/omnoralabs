@@ -50,14 +50,14 @@ const ValueCard: React.FC<ValueCardProps> = ({ icon, title, description }) => (
 const CategoryCard: React.FC<CategoryCardProps> = ({ to, title, subtitle, bgImage }) => (
   <Link to={to} className="cat-card-magnum">
     <div className="cat-bg">
-      <div 
-        style={{ 
-          width: '100%', 
-          height: '100%', 
+      <div
+        style={{
+          width: '100%',
+          height: '100%',
           backgroundImage: `url(${bgImage})`,
-          backgroundSize: 'cover', 
-          backgroundPosition: 'center' 
-        }} 
+          backgroundSize: 'cover',
+          backgroundPosition: 'center'
+        }}
       />
     </div>
     <div className="cat-content">
@@ -107,15 +107,31 @@ export default function Home() {
       {/* 1. HERO SECTION */}
       <section className="hero-magnum">
         <div className="hero-backdrop">
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="hero-video"
-          >
-            <source src={heroVideo} type="video/mp4" />
-          </video>
+          {/* Desktop Video - Only load if width > 768px */}
+          <div className="desktop-only-video">
+            <video
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="hero-video"
+              poster="https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?q=80&w=1920&auto=format&fit=crop"
+            >
+              <source src={heroVideo} type="video/mp4" />
+            </video>
+          </div>
+
+          {/* Mobile Fallback Image - Always visible on mobile */}
+          <div className="mobile-hero-fallback"
+            style={{
+              backgroundImage: `url(https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?q=60&w=800&auto=format&fit=crop)`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              position: 'absolute',
+              inset: 0,
+              zIndex: -1
+            }}
+          />
           {/* Overlay gradient is handled in CSS */}
         </div>
 
@@ -155,7 +171,7 @@ export default function Home() {
 
         <div className="cat-scroll-container">
           <div className="spacer-start" />
-          
+
           <CategoryCard
             to="/collection?category=Relaxation"
             title="Unwind"
@@ -174,7 +190,7 @@ export default function Home() {
             subtitle="Oatmeal & Shea Butter"
             bgImage="https://images.unsplash.com/photo-1556228720-195a672e8a03?w=800"
           />
-          
+
           <div className="spacer-end" />
         </div>
       </section>
@@ -222,7 +238,7 @@ export default function Home() {
             <MessageSquare size={32} className="review-icon" />
             <h3>Client Feedback Module</h3>
             <p>
-              We are currently aggregating reviews from our early adopters. 
+              We are currently aggregating reviews from our early adopters.
               <br />
               <span className="highlight">Transparency is key.</span> Real screenshots and verified testimonials will be deployed here soon.
             </p>

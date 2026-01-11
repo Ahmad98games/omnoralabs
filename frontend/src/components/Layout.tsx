@@ -94,6 +94,8 @@ export default function Layout() {
                         <Link to="/collection" className={`nav-link ${isActive('/collection')}`}>Collection</Link>
                         <Link to="/about" className={`nav-link ${isActive('/about')}`}>About</Link>
                         <Link to="/tech" className={`nav-link ${isActive('/tech')}`}>Tech</Link>
+                        <Link to="/contact" className={`nav-link ${isActive('/contact')}`}>Contact</Link>
+                        <Link to="/faq" className={`nav-link ${isActive('/faq')}`}>FAQ</Link>
                     </nav>
 
                     {/* ACTIONS MODULE */}
@@ -155,6 +157,7 @@ export default function Layout() {
                     <Link to="/about" className="mobile-link" onClick={handleNavAction}>About</Link>
                     <Link to="/tech" className="mobile-link" onClick={handleNavAction}>Technology</Link>
                     <Link to="/contact" className="mobile-link" onClick={handleNavAction}>Support</Link>
+                    <Link to="/faq" className="mobile-link" onClick={handleNavAction}>FAQ</Link>
 
                     {/* Mobile Search Input */}
                     <div className="mobile-search-wrapper">

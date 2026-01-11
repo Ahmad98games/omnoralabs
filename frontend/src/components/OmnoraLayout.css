@@ -408,3 +408,20 @@ body {
 
   /* Show only symbol on small mobile */
 }
+
+/* --- Mobile Performance Optimization (Video) --- */
+@media (max-width: 768px) {
+  .desktop-only-video {
+    display: none;
+  }
+
+  .mobile-hero-fallback {
+    display: block !important;
+  }
+}
+
+@media (min-width: 769px) {
+  .mobile-hero-fallback {
+    display: none !important;
+  }
+}
