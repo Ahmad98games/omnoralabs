@@ -52,6 +52,28 @@ const getSortOrder = (sort) => {
  */
 exports.getProducts = async (req, res) => {
   try {
+    // Use in-memory fallback if MongoDB is not connected
+    if (!isMongoDBConnected()) {
+      const page = parseInt(req.query.page, 10) || 1;
+      const limit = Math.min(parseInt(req.query.limit, 10) || 12, 100);
+      const startIndex = (page - 1) * limit;
+      const endIndex = page * limit;
+
+      const results = defaultProducts.slice(startIndex, endIndex);
+
+      return res.json({
+        success: true,
+        data: results,
+        pagination: {
+          page,
+          limit,
+          total: defaultProducts.length,
+          pages: Math.ceil(defaultProducts.length / limit)
+        },
+        fallback: true
+      });
+    }
+
     // Check if database is empty and seed it
     const count = await Product.countDocuments();
     if (count === 0) {
@@ -102,10 +124,17 @@ exports.getProducts = async (req, res) => {
       query: req.query
     });
 
-    res.status(500).json({
-      success: false,
-      error: 'Server Error',
-      data: []
+    // Fallback on error
+    res.json({
+      success: true,
+      data: defaultProducts,
+      pagination: {
+        page: 1,
+        limit: defaultProducts.length,
+        total: defaultProducts.length,
+        pages: 1
+      },
+      fallback: true
     });
   }
 };
