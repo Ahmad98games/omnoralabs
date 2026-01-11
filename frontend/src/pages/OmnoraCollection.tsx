@@ -68,7 +68,7 @@ const ProductCard = ({ product, onAddToCart }: { product: Product, onAddToCart: 
         </Link>
         <span className="card-price">PKR {product.price.toLocaleString()}</span>
       </div>
-      
+
       {product.description && (
         <p className="card-desc">{product.description}</p>
       )}
@@ -76,9 +76,9 @@ const ProductCard = ({ product, onAddToCart }: { product: Product, onAddToCart: 
 
     {/* Mobile Action */}
     <div className="mobile-action">
-        <button onClick={() => onAddToCart(product)} className="btn-mobile-add">
-            <ShoppingBag size={16} /> ADD
-        </button>
+      <button onClick={() => onAddToCart(product)} className="btn-mobile-add">
+        <ShoppingBag size={16} /> ADD
+      </button>
     </div>
   </article>
 );
@@ -86,13 +86,13 @@ const ProductCard = ({ product, onAddToCart }: { product: Product, onAddToCart: 
 // --- SUB-COMPONENT: Skeleton Loader ---
 // Matches the ProductCard structure for seamless loading transition
 const CollectionSkeleton = () => (
-    <div className="card-magnum skeleton-card">
-        <div className="skeleton-box img-ratio"></div>
-        <div className="card-details">
-            <div className="skeleton-box text-line"></div>
-            <div className="skeleton-box text-line short"></div>
-        </div>
+  <div className="card-magnum skeleton-card">
+    <div className="skeleton-box img-ratio"></div>
+    <div className="card-details">
+      <div className="skeleton-box text-line"></div>
+      <div className="skeleton-box text-line short"></div>
     </div>
+  </div>
 );
 
 // ============================================================================
@@ -104,7 +104,7 @@ export default function Collection() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Filters State
   const [sortBy, setSortBy] = useState<SortOption>('default');
   const [priceRange, setPriceRange] = useState<PriceRange>('all');
@@ -118,7 +118,7 @@ export default function Collection() {
     async function fetchProducts() {
       setLoading(true);
       setError(null);
-      
+
       try {
         const query = searchParams.get('q');
         const category = searchParams.get('category');
@@ -139,26 +139,26 @@ export default function Collection() {
         let data = response.data || [];
         if (data.data && Array.isArray(data.data)) data = data.data;
         else if (data.products && Array.isArray(data.products)) data = data.products; // Handle { products: [...] } format
-        
+
         const fetchedData: Product[] = Array.isArray(data) ? data : [];
 
         // --- Client-Side Processing ---
         // 1. Filtering
         const filtered = fetchedData.filter((p) => {
-            if (priceRange === 'under-500') return p.price < 500;
-            if (priceRange === '500-1000') return p.price >= 500 && p.price <= 1000;
-            if (priceRange === 'over-1000') return p.price > 1000;
-            return true;
+          if (priceRange === 'under-500') return p.price < 500;
+          if (priceRange === '500-1000') return p.price >= 500 && p.price <= 1000;
+          if (priceRange === 'over-1000') return p.price > 1000;
+          return true;
         });
 
         // 2. Sorting
         const sorted = [...filtered];
         switch (sortBy) {
-            case 'price-low': sorted.sort((a, b) => a.price - b.price); break;
-            case 'price-high': sorted.sort((a, b) => b.price - a.price); break;
-            case 'name-asc': sorted.sort((a, b) => a.name.localeCompare(b.name)); break;
-            case 'new': sorted.sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0)); break;
-            default: break; // Default (Featured logic typically handled by backend or default order)
+          case 'price-low': sorted.sort((a, b) => a.price - b.price); break;
+          case 'price-high': sorted.sort((a, b) => b.price - a.price); break;
+          case 'name-asc': sorted.sort((a, b) => a.name.localeCompare(b.name)); break;
+          case 'new': sorted.sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0)); break;
+          default: break; // Default (Featured logic typically handled by backend or default order)
         }
 
         setProducts(sorted);
@@ -207,8 +207,8 @@ export default function Collection() {
     }
   };
 
-  const activeFilterLabel = searchParams.get('q') 
-    ? `Results for "${searchParams.get('q')}"` 
+  const activeFilterLabel = searchParams.get('q')
+    ? `Results for "${searchParams.get('q')}"`
     : searchParams.get('category') || 'Full Collection';
 
   return (
@@ -219,7 +219,19 @@ export default function Collection() {
       <header className="collection-hero">
         <div className="hero-bg">
           {/* Use a high-res texture or product shot here */}
-          <img src="https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?q=80&w=2940&auto=format&fit=crop" alt="Omnora Collection" />
+          <img
+            src="https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?q=80&w=1920&auto=format&fit=crop"
+            srcSet={`
+              https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?q=60&w=480&auto=format&fit=crop 480w,
+              https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?q=70&w=800&auto=format&fit=crop 800w,
+              https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?q=80&w=1200&auto=format&fit=crop 1200w,
+              https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?q=80&w=1920&auto=format&fit=crop 1920w
+            `}
+            sizes="(max-width: 600px) 100vw, (max-width: 1200px) 100vw, 1920px"
+            alt="Omnora Collection"
+            loading="eager"
+            fetchPriority="high"
+          />
         </div>
         <div className="hero-content">
           <h1 className="hero-title">
@@ -233,7 +245,7 @@ export default function Collection() {
       </header>
 
       <div className="container">
-        
+
         {/* 2. TOOLBAR */}
         <div className="toolbar-sticky">
           <div className="toolbar-inner">
@@ -244,10 +256,10 @@ export default function Collection() {
             <div className="toolbar-controls">
               <div className="select-wrapper">
                 <Filter size={14} className="select-icon" />
-                <select 
-                    value={priceRange} 
-                    onChange={(e) => setPriceRange(e.target.value as PriceRange)}
-                    className="magnum-select"
+                <select
+                  value={priceRange}
+                  onChange={(e) => setPriceRange(e.target.value as PriceRange)}
+                  className="magnum-select"
                 >
                   <option value="all">FILTER: ALL PRICES</option>
                   <option value="under-500">UNDER PKR 500</option>
@@ -258,10 +270,10 @@ export default function Collection() {
               </div>
 
               <div className="select-wrapper">
-                <select 
-                    value={sortBy} 
-                    onChange={(e) => setSortBy(e.target.value as SortOption)}
-                    className="magnum-select"
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as SortOption)}
+                  className="magnum-select"
                 >
                   <option value="default">SORT: FEATURED</option>
                   <option value="new">NEW ARRIVALS</option>
