@@ -3,9 +3,13 @@ const Event = require('../models/Event');
 exports.track = async (req, res) => {
   try {
     const { type, path, sessionId, userId, referrer, userAgent, screen, payload } = req.body || {};
+    console.log('Tracking attempt:', { type, path });
+
     if (!type) {
       return res.status(400).json({ error: 'type is required' });
     }
+
+    const Event = require('../models/Event');
     const event = new Event({
       type,
       path,
@@ -17,11 +21,15 @@ exports.track = async (req, res) => {
       payload,
       ip: req.ip
     });
+
+    console.log('Event instance created, saving...');
     await event.save();
+    console.log('Event saved successfully');
+
     res.json({ success: true });
   } catch (err) {
-    console.error('Error tracking event:', err);
-    res.status(500).json({ error: 'Server error' });
+    console.error('CRITICAL: Error tracking event:', err);
+    res.status(500).json({ error: 'Server error', message: err.message });
   }
 };
 

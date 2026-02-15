@@ -2,14 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link, useLocation } from 'react-router-dom';
 import client from '../api/client';
 import { openWhatsApp } from '../utils/whatsappOrderService';
-import { 
-    CheckCircle, 
-    MessageCircle, 
-    Copy, 
-    ArrowLeft, 
-    Loader2, 
-    ShieldCheck, 
-    Smartphone 
+import {
+    CheckCircle,
+    MessageCircle,
+    Copy,
+    ArrowLeft,
+    Loader2,
+    ShieldCheck,
+    Smartphone
 } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
 import './OrderConfirmation.css';
@@ -80,10 +80,10 @@ export default function OrderConfirmation() {
 
     if (loading) {
         return (
-            <div className="confirmation-page">
-                <div className="loading-state">
-                    <Loader2 size={48} className="animate-spin text-cyan" />
-                    <p>Securing Transaction Data...</p>
+            <div className="confirmation-luxury">
+                <div className="loading-luxury">
+                    <Loader2 size={32} className="animate-spin text-gold" />
+                    <p className="font-serif italic text-muted">Awaiting Order Confirmation...</p>
                 </div>
             </div>
         );
@@ -93,62 +93,55 @@ export default function OrderConfirmation() {
     const displayTotal = order?.totalAmount || order?.total || 0;
 
     return (
-        <div className="confirmation-page">
-            <div className="noise-layer" />
-            
-            <div className="confirmation-card animate-scale-up">
-                
+        <div className="confirmation-luxury reveal">
+            <div className="confirmation-card-luxury animate-scale-up">
+
                 {/* SUCCESS HEADER */}
-                <div className="success-header">
+                <div className="success-header-lux">
                     <div className="icon-pulse-wrapper">
-                        <div className="icon-pulse-ring"></div>
-                        <div className="success-icon">
-                            <CheckCircle size={40} strokeWidth={3} />
+                        <div className="icon-pulse-ring-gold"></div>
+                        <div className="success-icon-gold">
+                            <CheckCircle size={40} strokeWidth={1} />
                         </div>
                     </div>
-                    <h1 className="success-title">Order Confirmed!</h1>
-                    <p className="success-sub">
-                        Thank you for choosing Omnora. <br />
-                        Your sanctuary awaits.
+                    <h1 className="subtitle-serif">Placed Under Craftsmanship</h1>
+                    <p className="success-sub-lux italic">
+                        Thank you for choosing GSG. <br />
+                        Your boutique pieces are now being prepared.
                     </p>
                 </div>
 
                 {/* ORDER DETAILS GRID */}
-                <div className="order-details-grid">
-                    <div className="detail-item">
-                        <span className="detail-label">Order Reference</span>
-                        <div className="detail-value-row" onClick={copyOrderId}>
-                            <span className="mono-text">{displayId}</span>
-                            <Copy size={14} className="copy-icon" />
+                <div className="details-grid-luxury">
+                    <div className="detail-row-lux">
+                        <span className="detail-label-lux">ORDER REFERENCE</span>
+                        <div className="detail-value-lux" onClick={copyOrderId}>
+                            <span>#{displayId}</span>
+                            <Copy size={12} className="copy-icon-lux" />
                         </div>
                     </div>
-                    <div className="detail-item">
-                        <span className="detail-label">Total Amount</span>
-                        <span className="detail-value text-green">
+                    <div className="detail-row-lux">
+                        <span className="detail-label-lux">TOTAL AMOUNT</span>
+                        <span className="detail-value-lux text-gold">
                             PKR {displayTotal.toLocaleString()}
                         </span>
                     </div>
                 </div>
 
                 {/* WHATSAPP ACTION */}
-                <div className="whatsapp-section">
-                    <div className="wa-header">
-                        <h3>Finalize Your Order</h3>
-                        <span className="badge-recommended">RECOMMENDED</span>
+                <div className="whatsapp-section-luxury">
+                    <div className="wa-header-lux">
+                        <h3 className="font-serif">Finalize Your Order</h3>
+                        <span className="badge-luxury">RECOMMENDED</span>
                     </div>
-                    <p className="wa-desc">
-                        To speed up processing and receive your payment receipt instantly, connect with us on WhatsApp.
+                    <p className="wa-desc-lux">
+                        To prioritize your order craftsmanship and receive instant updates, connect with our concierge on WhatsApp.
                     </p>
-                    
-                    <button onClick={handleWhatsAppClick} className="btn-whatsapp">
-                        <MessageCircle size={20} />
-                        <span>Confirm on WhatsApp</span>
-                    </button>
 
-                    <div className="wa-footer">
-                        <Smartphone size={14} />
-                        <span>Direct line to our support team</span>
-                    </div>
+                    <button onClick={handleWhatsAppClick} className="btn-luxury-wa">
+                        <MessageCircle size={18} />
+                        <span>CONFIRM ON WHATSAPP</span>
+                    </button>
                 </div>
 
                 {/* SECURITY BADGE */}
@@ -158,8 +151,8 @@ export default function OrderConfirmation() {
                 </div>
 
                 {/* HOME LINK */}
-                <Link to="/" className="back-home-link">
-                    <ArrowLeft size={16} /> Return to Collection
+                <Link to="/" className="back-link-luxury">
+                    <ArrowLeft size={16} /> RETURN TO COLLECTION
                 </Link>
 
             </div>

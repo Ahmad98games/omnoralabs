@@ -48,65 +48,76 @@ export default function Footer() {
                 <div className="footer-brand-col">
                     <Link to="/" className="footer-logo">
                         <div className="logo-icon-box">
-                            <img src="/images/omnora store.png" alt="Omnora Store" style={{ height: '32px', objectFit: 'contain' }} />
+                            <span style={{
+                                fontFamily: 'var(--font-serif)',
+                                fontSize: '1.25rem',
+                                fontWeight: '700',
+                                color: 'var(--royal-blue)',
+                                textTransform: 'uppercase'
+                            }}>
+                                Gold She
+                            </span>
                         </div>
                     </Link>
                     <p className="footer-desc">
-                        Curating artifacts for the modern sanctuary. Where precision meets cyberpunk aesthetics.
+                        Premium Pakistani fashion for the modern woman.
+                        Blending traditional craftsmanship with contemporary elegance.
                         <br />
-                        <span style={{ opacity: 0.5, fontSize: '0.85rem' }}>// HANDCRAFTED IN LAHORE</span>
+                        <span style={{ opacity: 0.5, fontSize: '0.85rem' }}>MADE WITH PRIDE IN PAKISTAN</span>
                     </p>
 
                     <div className="subsidiary-badge">
-                        <span className="badge-label">OPERATED BY</span>
-                        <span className="badge-value">OMNORA LABS INC.</span>
+                        <span className="badge-label">BRAND BY</span>
+                        <span className="badge-value">GOLD SHE GARMENTS</span>
                     </div>
                 </div>
 
                 {/* 2. EXPLORE COLUMN */}
                 <div className="footer-links-col">
-                    <h4>Navigation</h4>
+                    <h4>Collections</h4>
                     <nav>
-                        <Link to="/collection" className="footer-link">Shop Collection</Link>
-                        <Link to="/about" className="footer-link">About Us</Link>
-                        <Link to="/contact" className="footer-link">Support Hub</Link>
-                        <Link to="/tech" className="footer-link">Tech Architecture</Link>
+                        <Link to="/collection" className="footer-link">New Arrivals</Link>
+                        <Link to="/collection?category=unstitched" className="footer-link">Unstitched</Link>
+                        <Link to="/collection?category=stitched" className="footer-link">Ready-to-Wear</Link>
+                        <Link to="/collection?category=formal" className="footer-link">Formal Wear</Link>
+                        <Link to="/about" className="footer-link">Our Story</Link>
                     </nav>
                 </div>
 
                 {/* 3. LEGAL COLUMN */}
                 <div className="footer-links-col">
-                    <h4>Legal Protocols</h4>
+                    <h4>Customer Care</h4>
                     <nav>
-                        <Link to="/terms" className="footer-link">Terms of Service</Link>
+                        <Link to="/contact" className="footer-link">Contact Us</Link>
+                        <Link to="/shipping" className="footer-link">Shipping Information</Link>
+                        <Link to="/size-guide" className="footer-link">Size Guide</Link>
+                        <Link to="/returns" className="footer-link">Returns & Exchange</Link>
                         <Link to="/privacy" className="footer-link">Privacy Policy</Link>
-                        <Link to="/shipping" className="footer-link">Shipping & Returns</Link>
-                        <Link to="/refunds" className="footer-link">Refund Policy</Link>
                     </nav>
                 </div>
 
                 {/* 4. NEWSLETTER & CONNECT */}
                 <div className="footer-newsletter-col">
-                    <h4>Stay Connected</h4>
-                    <p className="newsletter-text">Join the inner circle. Exclusive drops and system updates.</p>
+                    <h4>Join the Community</h4>
+                    <p className="newsletter-text">Subscribe for exclusive collection launches and style updates.</p>
 
                     <form onSubmit={handleSubscribe} className="footer-subscribe-form">
                         <div className={`input-group ${status}`}>
                             <input
                                 type="email"
-                                placeholder="ENTER YOUR EMAIL"
+                                placeholder="Email Address"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 disabled={status === 'loading' || status === 'success'}
                             />
                             <button type="submit" disabled={status === 'loading' || status === 'success'}>
                                 {status === 'loading' ? <Loader2 className="animate-spin" size={18} /> :
-                                    status === 'success' ? <span style={{ color: '#00ff88' }}>✓</span> :
+                                    status === 'success' ? <span style={{ color: 'var(--success)' }}>✓</span> :
                                         <ArrowRight size={18} />}
                             </button>
                         </div>
                         {status === 'error' && <span className="status-msg error">{message}</span>}
-                        {status === 'success' && <span className="status-msg success">Signal Received. Welcome aboard.</span>}
+                        {status === 'success' && <span className="status-msg success">Welcome to Gold She Garments!</span>}
                     </form>
 
                     <div className="social-links">
@@ -121,10 +132,10 @@ export default function Footer() {
             <div className="footer-bottom-bar">
                 <div className="footer-container bottom-flex">
                     <div className="copyright">
-                        © {new Date().getFullYear()} OMNORA LABS. ALL RIGHTS RESERVED.
+                        © {new Date().getFullYear()} GOLD SHE GARMENTS. ALL RIGHTS RESERVED.
                     </div>
                     <div className="credits">
-                        ENGINEERED BY <span className="dev-name">AHMAD MAHBOOB</span>
+                        POWERED BY <span className="dev-name">GSG DIGITAL</span>
                     </div>
                 </div>
             </div>

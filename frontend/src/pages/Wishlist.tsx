@@ -30,11 +30,11 @@ export default function Wishlist() {
             // For now, fallback to local storage since backend might not persist wishlist for guests
             // In a real app, this would merge local + server
             const saved = JSON.parse(localStorage.getItem('wishlist') || '[]');
-            
+
             // If we had a real endpoint returning populated products:
             // const res = await client.get('/wishlist');
             // setWishlist(res.data.products);
-            
+
             // Simulating API delay for effect
             setTimeout(() => {
                 setWishlist(saved);
@@ -51,7 +51,7 @@ export default function Wishlist() {
         const updated = wishlist.filter(p => p._id !== productId);
         setWishlist(updated);
         localStorage.setItem('wishlist', JSON.stringify(updated));
-        showToast('Artifact removed from vault', 'info');
+        showToast('Piece removed from selection', 'info');
     };
 
     const addToCart = (product: Product) => {
@@ -77,34 +77,38 @@ export default function Wishlist() {
 
     if (loading) {
         return (
-            <div className="wishlist-page">
-                <div className="loading-state">
-                    <Loader2 size={48} className="animate-spin text-cyan" />
-                    <p>Accessing Dream Vault...</p>
+            <div className="wishlist-luxury">
+                <div className="loading-luxury">
+                    <Loader2 size={32} className="animate-spin text-gold" />
+                    <p className="font-serif italic">Accessing your selection...</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="wishlist-page">
-            <div className="noise-layer" />
-            
+        <div className="wishlist-luxury reveal">
+            <div className="luxury-hero-small">
+                <div className="container">
+                    <header className="wishlist-header-lux">
+                        <span className="eyebrow">YOUR SELECTION</span>
+                        <h1 className="subtitle-serif">Saved Pieces</h1>
+                        <p className="description-small italic">
+                            {wishlist.length} {wishlist.length === 1 ? 'Piece' : 'Pieces'} in your boutique collection
+                        </p>
+                    </header>
+                </div>
+            </div>
+
             <div className="container">
-                <header className="wishlist-header">
-                    <h1 className="page-title">Dream Vault</h1>
-                    <p className="page-subtitle">
-                        {wishlist.length} {wishlist.length === 1 ? 'Artifact' : 'Artifacts'} Saved
-                    </p>
-                </header>
 
                 {wishlist.length === 0 ? (
-                    <div className="empty-state-magnum">
-                        <Heart size={64} className="empty-icon" />
-                        <h2>Your Vault is Empty</h2>
-                        <p>Curate your personal collection of desires.</p>
-                        <Link to="/collection" className="btn-cinema">
-                            Explore Artifacts <ArrowRight size={18} />
+                    <div className="empty-state-luxury">
+                        <Heart size={64} strokeWidth={1} className="text-gold mb-4" />
+                        <h2 className="subtitle-serif">Your Boutique is Empty</h2>
+                        <p>Curate your personal collection of luxury craftsmanship.</p>
+                        <Link to="/collection" className="btn-luxury-outline mt-4">
+                            Explore the Collection
                         </Link>
                     </div>
                 ) : (
@@ -113,14 +117,14 @@ export default function Wishlist() {
                             <div key={product._id} className="wishlist-card animate-fade-in-up">
                                 <div className="card-image-box">
                                     <Link to={`/product/${product._id}`}>
-                                        <SmartImage 
-                                            src={product.image || FALLBACK_IMAGE} 
-                                            alt={product.name} 
+                                        <SmartImage
+                                            src={product.image || FALLBACK_IMAGE}
+                                            alt={product.name}
                                             aspectRatio="1/1"
                                             className="wishlist-img"
                                         />
                                     </Link>
-                                    <button 
+                                    <button
                                         className="btn-remove"
                                         onClick={() => removeFromWishlist(product._id)}
                                         title="Remove"
@@ -134,18 +138,18 @@ export default function Wishlist() {
                                         <h3 className="product-title">{product.name}</h3>
                                     </Link>
                                     <p className="product-price">PKR {product.price.toLocaleString()}</p>
-                                    
-                                    <div className="card-actions">
-                                        {product.inStock !== false ? ( // Default to true if undefined
-                                            <button 
-                                                className="btn-add-cart"
+
+                                    <div className="card-actions-lux">
+                                        {product.inStock !== false ? (
+                                            <button
+                                                className="btn-lux-bag"
                                                 onClick={() => addToCart(product)}
                                             >
-                                                Add to Bag <ShoppingBag size={16} />
+                                                ADD TO BAG <ShoppingBag size={14} />
                                             </button>
                                         ) : (
-                                            <button className="btn-disabled" disabled>
-                                                Out of Stock
+                                            <button className="btn-lux-disabled" disabled>
+                                                OUT OF STOCK
                                             </button>
                                         )}
                                     </div>

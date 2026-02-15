@@ -1,6 +1,6 @@
-const mongoose = require('mongoose');
+const { createModel } = require('../utils/modelFactory');
 
-const ContactSchema = new mongoose.Schema({
+const schema = {
   name: {
     type: String,
     required: true,
@@ -25,11 +25,7 @@ const ContactSchema = new mongoose.Schema({
     type: String,
     enum: ['new', 'read', 'replied'],
     default: 'new'
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
   }
-});
+};
 
-module.exports = mongoose.model('Contact', ContactSchema); 
+module.exports = createModel('Contact', schema);

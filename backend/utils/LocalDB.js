@@ -23,8 +23,9 @@ class LocalDB {
     _load() {
         try {
             if (fs.existsSync(this.filePath)) {
-                this.data = JSON.parse(fs.readFileSync(this.filePath, 'utf8'));
-                // Convert date strings back to Date objects if needed
+                const raw = fs.readFileSync(this.filePath, 'utf8');
+                this.data = JSON.parse(raw || '[]');
+                // Convert date strings back to Date objects
                 this.data = this.data.map(item => this._deserialize(item));
             }
         } catch (error) {
@@ -42,9 +43,12 @@ class LocalDB {
     }
 
     _deserialize(item) {
-        // Basic date restoration for common fields
-        ['createdAt', 'updatedAt', 'deliveredAt', 'cancelledAt', 'whatsappSentAt'].forEach(field => {
-            if (item[field]) item[field] = new Date(item[field]);
+        // Broad date restoration for any field ending in "At" or "Date"
+        Object.keys(item).forEach(key => {
+            if ((key.endsWith('At') || key.endsWith('Date')) && item[key]) {
+                const d = new Date(item[key]);
+                if (!isNaN(d.getTime())) item[key] = d;
+            }
         });
         return item;
     }
@@ -52,50 +56,42 @@ class LocalDB {
     // --- Mongoose-like API ---
 
     async create(doc) {
-        // Run pre-save hooks
-        const context = { ...doc, constructor: this };
-        if (this.hooks.pre['save']) {
-            await this.hooks.pre['save'].call(context, () => { });
-        }
-
-        // Remove constructor from document to be saved
-        const { constructor, ...docData } = context;
+        const docData = { ...doc };
 
         // Apply Schema Defaults
         if (this.schema) {
             for (const [key, config] of Object.entries(this.schema)) {
                 if (docData[key] === undefined && config.default !== undefined) {
-                    docData[key] = config.default;
+                    docData[key] = typeof config.default === 'function' ? config.default() : config.default;
                 }
             }
         }
 
         const newDoc = {
-            _id: docData._id || Math.random().toString(36).substr(2, 9), // Use provided ID or generate one
+            _id: docData._id || Math.random().toString(36).substr(2, 9),
             ...docData,
-            createdAt: new Date(),
-            updatedAt: new Date(),
+            createdAt: docData.createdAt || new Date(),
+            updatedAt: docData.updatedAt || new Date(),
             __v: 0
         };
+
+        // Run pre-save hooks
+        if (this.hooks.pre['save']) {
+            await this.hooks.pre['save'].call(newDoc, () => { });
+        }
 
         this.data.push(newDoc);
         this._save();
         return this._wrapDocument(newDoc);
     }
 
-    // Helper to create Mongoose-like query chain
     _chain(resultOrPromise) {
         const chain = {
-            // If it's already a promise/result, we hold it
             promise: Promise.resolve(resultOrPromise),
-
-            // Chainable methods
             populate: () => chain,
             select: () => chain,
             lean: () => chain,
-            sort: () => chain, // For single docs, sort is no-op
-
-            // Promise interface
+            sort: () => chain,
             then: (resolve, reject) => chain.promise.then(resolve, reject),
             catch: (reject) => chain.promise.catch(reject),
             finally: (cb) => chain.promise.finally(cb)
@@ -103,14 +99,17 @@ class LocalDB {
         return chain;
     }
 
-    // Return chain for find (array)
     find(query = {}) {
         let results = this.data.filter(item => this._matches(item, query));
 
         const chain = {
             results,
             sort: (criteria) => {
-                const [field, order] = Object.entries(criteria)[0];
+                if (!criteria) return chain;
+                const entries = Object.entries(criteria);
+                if (entries.length === 0) return chain;
+
+                const [field, order] = entries[0];
                 chain.results.sort((a, b) => {
                     const valA = a[field];
                     const valB = b[field];
@@ -132,17 +131,18 @@ class LocalDB {
             select: () => chain,
             lean: () => chain,
             then: (resolve, reject) => {
-                let finalResults = chain.results;
+                let finalResults = [...chain.results];
                 if (chain.skipCount) finalResults = finalResults.slice(chain.skipCount);
                 if (chain.limitCount) finalResults = finalResults.slice(0, chain.limitCount);
-                resolve(finalResults);
+                // Return wrapped documents to allow .save()
+                resolve(finalResults.map(d => this._wrapDocument(d)));
             }
         };
         return chain;
     }
 
     findById(id) {
-        const doc = this.data.find(item => item._id === id);
+        const doc = this.data.find(item => String(item._id) === String(id));
         return this._chain(doc ? this._wrapDocument(doc) : null);
     }
 
@@ -174,36 +174,36 @@ class LocalDB {
     }
 
     findByIdAndDelete(id) {
-        const index = this.data.findIndex(item => item._id === id);
+        const index = this.data.findIndex(item => String(item._id) === String(id));
         if (index === -1) return this._chain(null);
 
         const [deletedDoc] = this.data.splice(index, 1);
         this._save();
-        return this._chain(deletedDoc);
+        return this._chain(this._wrapDocument(deletedDoc));
     }
 
-    countDocuments(query = {}) {
-        return Promise.resolve(this.data.filter(item => this._matches(item, query)).length);
+    async countDocuments(query = {}) {
+        return this.data.filter(item => this._matches(item, query)).length;
     }
 
     // --- Helpers ---
 
     _matches(item, query) {
         for (const [key, value] of Object.entries(query)) {
+            if (key.startsWith('$')) continue; // Skip complex operators for now
             if (item[key] !== value) return false;
         }
         return true;
     }
 
     _applyUpdate(doc, update) {
-        // Check for MongoDB atomic operators
         const hasOperators = Object.keys(update).some(k => k.startsWith('$'));
 
         if (hasOperators) {
             if (update.$set) Object.assign(doc, update.$set);
             if (update.$inc) {
                 for (const [key, val] of Object.entries(update.$inc)) {
-                    doc[key] = (doc[key] || 0) + val;
+                    doc[key] = (Number(doc[key]) || 0) + val;
                 }
             }
             if (update.$unset) {
@@ -212,32 +212,53 @@ class LocalDB {
                 }
             }
         } else {
-            // Mongoose behavior: if no operators, treat top-level keys as updates
             Object.assign(doc, update);
         }
-
         doc.updatedAt = new Date();
     }
 
     _wrapDocument(doc) {
-        // Add .save() method to document
+        if (!doc) return null;
         const self = this;
-        return {
-            ...doc,
-            save: async function () {
-                // Find and update in array
-                const index = self.data.findIndex(i => i._id === this._id);
-                if (index !== -1) {
-                    self.data[index] = { ...this, updatedAt: new Date() };
-                    self._save();
-                }
-                return this;
-            },
-            toObject: () => ({ ...doc })
+        // Keep it as a plain object but add methods
+        const wrapped = { ...doc };
+
+        wrapped.save = async function () {
+            // Run pre-save hooks on 'this'
+            if (self.hooks.pre['save']) {
+                await self.hooks.pre['save'].call(this, () => { });
+            }
+
+            // Find and update in array
+            const index = self.data.findIndex(i => String(i._id) === String(this._id));
+
+            if (index !== -1) {
+                self.data[index] = { ...this, updatedAt: new Date() };
+            } else {
+                const newDoc = { ...this, createdAt: new Date(), updatedAt: new Date() };
+                self.data.push(newDoc);
+            }
+            self._save();
+            return this;
         };
+
+        wrapped.toObject = function () {
+            const { save, toObject, ...rest } = this;
+            return rest;
+        };
+
+        wrapped.toJSON = function () {
+            return this.toObject();
+        };
+
+        // Add instance methods if any were registered
+        if (this.instanceMethods) {
+            Object.assign(wrapped, this.instanceMethods);
+        }
+
+        return wrapped;
     }
 
-    // --- Hooks ---
     pre(event, fn) {
         this.hooks.pre[event] = fn;
     }

@@ -1,6 +1,6 @@
-const mongoose = require('mongoose');
+const { createModel } = require('../utils/modelFactory');
 
-const NewsletterSchema = new mongoose.Schema({
+const schema = {
   email: {
     type: String,
     required: true,
@@ -11,11 +11,7 @@ const NewsletterSchema = new mongoose.Schema({
   isActive: {
     type: Boolean,
     default: true
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
   }
-});
+};
 
-module.exports = mongoose.model('Newsletter', NewsletterSchema); 
+module.exports = createModel('Newsletter', schema);

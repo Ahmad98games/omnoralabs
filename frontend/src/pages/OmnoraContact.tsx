@@ -1,23 +1,17 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { MapPin, Mail, Phone, Send, Globe, MessageSquare, ArrowLeft } from 'lucide-react';
+import { MapPin, Mail, Phone, Send, Globe, MessageSquare, ArrowRight } from 'lucide-react';
 import './OmnoraContact.css';
 
-// ----------------------------------------------------
-// 1. FOOTER COMPONENT
-// ----------------------------------------------------
 const Footer = () => (
-  <footer className="footer-magnum">
-    <div className="container">
-      © {new Date().getFullYear()} Omnora Labs. All rights reserved. <br/>
-      <span className="footer-credit">Operated and Developed By Ahmad Mahboob</span>
+  <footer className="footer-luxury section-padding">
+    <div className="container text-center">
+      <span className="footer-logo">GOLD SHE GARMENTS</span>
+      <p className="copyright">&copy; {new Date().getFullYear()} GSG Atelier. All rights reserved.</p>
     </div>
   </footer>
 );
 
-// ----------------------------------------------------
-// 2. MAIN CONTACT COMPONENT
-// ----------------------------------------------------
 export default function Contact() {
   const [form, setForm] = useState({
     name: '',
@@ -58,165 +52,134 @@ export default function Contact() {
   };
 
   return (
-    <div className="contact-magnum-page">
-      <div className="noise-layer" />
-
+    <div className="contact-luxury-page">
       {/* HERO */}
-      <header className="container contact-hero-magnum">
-        <h1 className="hero-super-title">
-          <span>Secure Channel</span>
-          Establish<br/>Connection
-        </h1>
-        <div className="hero-desc">
-          Whether for collaboration, inquiries, or feedback—our frequencies are open. Transmit your message below.
+      <header className="contact-hero-section">
+        <div className="container hero-content">
+          <span className="eyebrow">CONCIERGE</span>
+          <h1 className="h1 editorial-title">
+            At Your <br />
+            <span className="font-serif italic text-gold">Service</span>
+          </h1>
+          <p className="description">
+            Whether you are inquiring about a custom piece, seeking style advice, or tracking an atelier shipment—our specialists are here to assist you.
+          </p>
         </div>
       </header>
 
-      {/* MAIN GRID */}
-      <div className="container contact-layout">
-        
-        {/* LEFT COLUMN: INFO */}
-        <div className="contact-info-col">
-          
-          <div className="info-block">
-            <h3 className="info-label"><MapPin size={20} className="icon-gold"/> Coordinates</h3>
-            <div className="data-row">
-               <div className="data-key">Base of Operations</div>
-               <div className="data-val">New Shad Bagh, Lahore</div>
-               <div className="data-val-sub">Pakistan</div>
+      {/* MAIN CONTENT */}
+      <div className="container section-padding">
+        <div className="contact-layout-grid">
+
+          {/* LEFT: INFO */}
+          <div className="contact-details-col">
+            <div className="detail-block">
+              <h3 className="subtitle-serif-small mb-4">The Atelier HQ</h3>
+              <div className="detail-item">
+                <MapPin size={18} className="text-gold" />
+                <span>New Shad Bagh, Lahore, Pakistan</span>
+              </div>
+              <div className="detail-item">
+                <Phone size={18} className="text-gold" />
+                <span>+92 333 4355475</span>
+              </div>
+              <div className="detail-item">
+                <Mail size={18} className="text-gold" />
+                <span>omnorainfo28@gmail.com</span>
+              </div>
+            </div>
+
+            <div className="detail-block mt-12">
+              <h3 className="subtitle-serif-small mb-4">Digital Presence</h3>
+              <div className="social-links-luxury">
+                <a href="https://www.instagram.com/omnora_official/?__pwa=1" target="_blank" rel="noreferrer">Instagram</a>
+                <a href="#">Facebook</a>
+                <a href="#">Pinterest</a>
+              </div>
+            </div>
+
+            <div className="breadcrumbs-luxury mt-12">
+              <Link to="/" className="breadcrumb-link-luxury">Home</Link>
+              <span className="sep-gold">/</span>
+              <span>Contact</span>
             </div>
           </div>
 
-          <div className="info-block">
-            <h3 className="info-label"><Globe size={20} className="icon-cyan"/> Comms Channels</h3>
-            
-            <div className="data-row">
-               <div className="data-key">Direct Line</div>
-               <div className="data-val">+92 333 4355475</div>
-            </div>
-
-            <div className="data-row">
-               <div className="data-key">Digital Mail</div>
-               <div className="data-val">OmnoraInfo28@gmail.com</div>
-            </div>
-
-            <div className="data-row">
-               <div className="data-key">Availability</div>
-               <div className="data-val-sub">
-                 Flexible Hours. <br/>
-                 Sun: 1200h - 1800h
-               </div>
-            </div>
-          </div>
-
-          <div className="info-block">
-             <h3 className="info-label"><MessageSquare size={20} /> Network Nodes</h3>
-             <div className="social-grid">
-               <a href="https://www.instagram.com/omnora_official/?__pwa=1" target="_blank" rel="noreferrer" className="social-node">
-                 Instagram
-               </a>
-               <a href="#" className="social-node">Facebook</a>
-               <a href="#" className="social-node">Pinterest</a>
-             </div>
-          </div>
-
-          {/* Breadcrumbs */}
-          <div className="breadcrumbs-nav">
-             <Link to="/" className="breadcrumb-link">Home</Link> <span className="separator">/</span> Contact
-          </div>
-
-        </div>
-
-        {/* RIGHT COLUMN: FORM TERMINAL */}
-        <div className="contact-form-col">
-          <div className="form-terminal">
-            <h2 className="terminal-title">Transmission Uplink</h2>
-            
-            <form onSubmit={handleSubmit}>
-              <div className="form-group">
-                <label className="form-label" htmlFor="name">Identifier (Name)</label>
-                <input 
-                  type="text" 
-                  id="name" 
-                  name="name" 
-                  className="form-input" 
-                  value={form.name} 
-                  onChange={handleChange} 
-                  required 
-                  placeholder="_"
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label" htmlFor="email">Return Vector (Email)</label>
-                <input 
-                  type="email" 
-                  id="email" 
-                  name="email" 
-                  className="form-input" 
-                  value={form.email} 
-                  onChange={handleChange} 
-                  required 
-                  placeholder="_"
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label" htmlFor="subject">Topic</label>
-                <input 
-                  type="text" 
-                  id="subject" 
-                  name="subject" 
-                  className="form-input" 
-                  value={form.subject} 
-                  onChange={handleChange} 
-                  required 
-                  placeholder="_"
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label" htmlFor="message">Data Payload (Message)</label>
-                <textarea 
-                  id="message" 
-                  name="message" 
-                  className="form-input" 
-                  rows={5} 
-                  value={form.message} 
-                  onChange={handleChange} 
-                  required 
-                  placeholder="..."
-                />
-              </div>
-
-              <button type="submit" className="btn-transmit" disabled={submitting}>
-                 {submitting ? 'Transmitting...' : 'Send Signal'} <Send size={18} />
-              </button>
-
-              {success && (
-                <div className="success-msg">
-                  Signal Received. Stand by for response.
+          {/* RIGHT: FORM */}
+          <div className="contact-form-wrapper">
+            <div className="form-card-luxury">
+              <h2 className="subtitle-serif mb-8">Send an Inquiry</h2>
+              <form onSubmit={handleSubmit} className="luxury-form-box">
+                <div className="form-group-luxury">
+                  <label>YOUR NAME</label>
+                  <input
+                    type="text"
+                    name="name"
+                    className="lux-input"
+                    value={form.name}
+                    onChange={handleChange}
+                    required
+                    placeholder="Jane Doe"
+                  />
                 </div>
-              )}
 
-            </form>
+                <div className="form-group-luxury">
+                  <label>EMAIL ADDRESS</label>
+                  <input
+                    type="email"
+                    name="email"
+                    className="lux-input"
+                    value={form.email}
+                    onChange={handleChange}
+                    required
+                    placeholder="jane@example.com"
+                  />
+                </div>
+
+                <div className="form-group-luxury">
+                  <label>MESSAGE</label>
+                  <textarea
+                    name="message"
+                    className="lux-input lux-textarea"
+                    rows={4}
+                    value={form.message}
+                    onChange={handleChange}
+                    required
+                    placeholder="Tell us about your requirements..."
+                  />
+                </div>
+
+                <button type="submit" className="btn-luxury-full" disabled={submitting}>
+                  {submitting ? 'SENDING...' : 'SUBMIT INQUIRY'} <ArrowRight size={18} />
+                </button>
+
+                {success && (
+                  <div className="success-banner-gold">
+                    Your message has been received by the atelier. We will respond shortly.
+                  </div>
+                )}
+              </form>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      {/* MAP */}
+      <section className="map-luxury-section">
+        <div className="container">
+          <span className="eyebrow text-center mb-8">LOCATION</span>
+          <div className="map-frame-wrapper">
+            <iframe
+              className="map-frame-luxury"
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d54415.82527236526!2d74.3000!3d31.5800!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39191c71360c7a5f%3A0xc39722393226759c!2sShadbagh%2C%20Lahore%2C%20Punjab%2C%20Pakistan!5e0!3m2!1sen!2s!4v1700000000000!5m2!1sen!2s"
+              allowFullScreen
+              loading="lazy"
+              title="GSG Atelier Location"
+            />
           </div>
         </div>
-
-      </div>
-
-      {/* MAP SECTION */}
-      <div className="container map-section">
-        <h2 className="map-overlay-text">Tactical View</h2>
-        {/* Valid Google Maps Embed for Lahore */}
-        <iframe
-          className="map-frame"
-          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d54415.82527236526!2d74.3000!3d31.5800!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39191c71360c7a5f%3A0xc39722393226759c!2sShadbagh%2C%20Lahore%2C%20Punjab%2C%20Pakistan!5e0!3m2!1sen!2s!4v1700000000000!5m2!1sen!2s"
-          allowFullScreen
-          loading="lazy"
-          title="Omnora HQ Location"
-        />
-      </div>
+      </section>
 
       <Footer />
     </div>

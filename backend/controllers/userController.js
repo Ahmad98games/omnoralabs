@@ -73,12 +73,21 @@ exports.loginUser = async (req, res) => {
     const { email, password } = req.body;
     const user = await User.findOne({ email }).select('+password +refreshToken');
 
+    logger.info(`Auth check: ${email}`, {
+      hasUser: !!user,
+      hasPassword: !!user?.password,
+      passwordType: typeof user?.password,
+      passwordStart: user?.password?.substring(0, 5)
+    });
+
     if (!user) {
+      logger.warn(`Auth failed: User not found - ${email}`);
       return res.status(400).json({ error: 'Invalid credentials.' });
     }
 
-    const isMatch = await user.comparePassword(password);
+    const isMatch = await user.matchPassword(password);
     if (!isMatch) {
+      logger.warn(`Auth failed: Invalid password for ${email}`);
       return res.status(400).json({ error: 'Invalid credentials.' });
     }
 

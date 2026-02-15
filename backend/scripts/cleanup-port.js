@@ -8,18 +8,30 @@ console.log(`[Cleaner] Checking for processes on port ${PORT}...`);
 try {
     if (process.platform === 'win32') {
         // Windows: Find process and kill it
-        const output = execSync(`netstat -ano | findstr :${PORT}`).toString();
-        const lines = output.split('\n').filter(line => line.includes('LISTENING'));
+        try {
+            const output = execSync(`netstat -ano`).toString();
+            const lines = output.split('\n').filter(line => line.includes(`:${PORT}`) && line.includes('LISTENING'));
 
-        if (lines.length > 0) {
-            const pid = lines[0].trim().split(/\s+/).pop();
-            if (pid && parseInt(pid) > 0) {
-                console.log(`[Cleaner] Killing process ${pid} on port ${PORT}...`);
-                execSync(`taskkill /F /PID ${pid}`);
+            if (lines.length > 0) {
+                for (const line of lines) {
+                    const parts = line.trim().split(/\s+/);
+                    const pid = parts[parts.length - 1];
+                    if (pid && parseInt(pid) > 0 && pid !== '0') {
+                        console.log(`[Cleaner] Killing process ${pid} on port ${PORT}...`);
+                        try {
+                            execSync(`taskkill /F /PID ${pid}`);
+                            console.log(`[Cleaner] Process ${pid} killed.`);
+                        } catch (killError) {
+                            console.log(`[Cleaner] Could not kill ${pid} (might already be dead)`);
+                        }
+                    }
+                }
                 console.log('[Cleaner] Port cleared.');
+            } else {
+                console.log('[Cleaner] Port is free.');
             }
-        } else {
-            console.log('[Cleaner] Port is free.');
+        } catch (error) {
+            console.log('[Cleaner] Port is free (or check failed).');
         }
     } else {
         // Linux/Mac: lsof

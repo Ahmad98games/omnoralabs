@@ -3,15 +3,15 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { Link } from 'react-router-dom';
 import client from '../api/client';
-import { 
-    User, 
-    Package, 
-    MapPin, 
-    Key, 
-    LogOut, 
-    ChevronRight, 
-    Clock, 
-    Loader2 
+import {
+    User,
+    Package,
+    MapPin,
+    Key,
+    LogOut,
+    ChevronRight,
+    Clock,
+    Loader2
 } from 'lucide-react';
 import './Profile.css';
 
@@ -30,7 +30,7 @@ export default function Profile() {
     const [activeTab, setActiveTab] = useState('account');
     const [loading, setLoading] = useState(false);
     const [orders, setOrders] = useState<Order[]>([]);
-    
+
     // Form States
     const [formData, setFormData] = useState({
         name: user?.name || '',
@@ -100,43 +100,42 @@ export default function Profile() {
     return (
         <div className="profile-page">
             <div className="noise-layer" />
-            
+
             <div className="container">
                 <div className="profile-layout">
-                    
+
                     {/* SIDEBAR NAVIGATION */}
-                    <aside className="profile-sidebar">
-                        <div className="user-card">
-                            <div className="avatar-circle">
+                    <aside className="profile-sidebar-luxury">
+                        <div className="user-profile-card">
+                            <div className="avatar-gold">
                                 {getInitials(user?.name || 'User')}
                             </div>
-                            <div className="user-details">
-                                <h3>{user?.name}</h3>
-                                {/* FIX: Cast user to any to bypass strict type check on isAdmin */}
-                                <span className="user-role">{(user as any)?.isAdmin ? 'COMMANDER' : 'CITIZEN'}</span>
+                            <div className="user-info">
+                                <h3 className="font-serif">{user?.name}</h3>
+                                <span className="user-rank">{(user as any)?.isAdmin ? 'ATELIER ADMIN' : 'VALUED CLIENT'}</span>
                             </div>
                         </div>
 
                         <nav className="sidebar-nav">
-                            <button 
+                            <button
                                 className={`nav-btn ${activeTab === 'account' ? 'active' : ''}`}
                                 onClick={() => setActiveTab('account')}
                             >
                                 <User size={18} /> Account Settings
                             </button>
-                            <button 
+                            <button
                                 className={`nav-btn ${activeTab === 'orders' ? 'active' : ''}`}
                                 onClick={() => setActiveTab('orders')}
                             >
                                 <Package size={18} /> Order History
                             </button>
-                            <button 
+                            <button
                                 className={`nav-btn ${activeTab === 'addresses' ? 'active' : ''}`}
                                 onClick={() => setActiveTab('addresses')}
                             >
                                 <MapPin size={18} /> Locations
                             </button>
-                            <button 
+                            <button
                                 className={`nav-btn ${activeTab === 'password' ? 'active' : ''}`}
                                 onClick={() => setActiveTab('password')}
                             >
@@ -151,36 +150,36 @@ export default function Profile() {
 
                     {/* MAIN CONTENT AREA */}
                     <main className="profile-content">
-                        
+
                         {/* ACCOUNT TAB */}
                         {activeTab === 'account' && (
-                            <div className="panel-animate">
-                                <div className="panel-header">
-                                    <h2>Identity Configuration</h2>
-                                    <p>Manage your personal data parameters.</p>
+                            <div className="panel-luxury reveal">
+                                <div className="panel-header-luxury">
+                                    <h2 className="subtitle-serif">Client Profile</h2>
+                                    <p className="description-small italic">Manage your personal atelier preferences.</p>
                                 </div>
-                                <form onSubmit={handleUpdateProfile} className="profile-form">
-                                    <div className="form-group">
-                                        <label>Display Name</label>
-                                        <input 
-                                            type="text" 
-                                            value={formData.name} 
+                                <form onSubmit={handleUpdateProfile} className="luxury-profile-form">
+                                    <div className="form-group-lux">
+                                        <label>FULL NAME</label>
+                                        <input
+                                            type="text"
+                                            value={formData.name}
                                             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                            className="glass-input"
+                                            className="lux-form-input"
                                         />
                                     </div>
-                                    <div className="form-group">
-                                        <label>Comms Link (Email)</label>
-                                        <input 
-                                            type="email" 
-                                            value={formData.email} 
+                                    <div className="form-group-lux">
+                                        <label>EMAIL ADDRESS</label>
+                                        <input
+                                            type="email"
+                                            value={formData.email}
                                             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                            className="glass-input"
-                                            disabled // Email usually shouldn't change easily
+                                            className="lux-form-input"
+                                            disabled
                                         />
                                     </div>
-                                    <button type="submit" className="btn-primary" disabled={loading}>
-                                        {loading ? 'Processing...' : 'Save Changes'}
+                                    <button type="submit" className="btn-luxury-action" disabled={loading}>
+                                        {loading ? 'SAVING...' : 'SAVE CHANGES'}
                                     </button>
                                 </form>
                             </div>
@@ -188,41 +187,36 @@ export default function Profile() {
 
                         {/* ORDERS TAB */}
                         {activeTab === 'orders' && (
-                            <div className="panel-animate">
-                                <div className="panel-header">
-                                    <h2>Acquisition Log</h2>
-                                    <p>Track your past and current shipments.</p>
+                            <div className="panel-luxury reveal">
+                                <div className="panel-header-luxury">
+                                    <h2 className="subtitle-serif">Order History</h2>
+                                    <p className="description-small italic">Refining your past atelier acquisitions.</p>
                                 </div>
-                                
+
                                 {loading ? (
-                                    <div className="loading-state"><Loader2 className="animate-spin" /> Retrieving data...</div>
+                                    <div className="loading-luxury">Refining data...</div>
                                 ) : orders.length === 0 ? (
-                                    <div className="empty-state">
-                                        <Package size={48} />
-                                        <p>No acquisition records found.</p>
-                                        <Link to="/collection" className="btn-secondary">Initiate Shopping Protocol</Link>
+                                    <div className="empty-state-luxury">
+                                        <Package size={48} strokeWidth={1} className="text-gold mb-4" />
+                                        <p>No boutique records found.</p>
+                                        <Link to="/collection" className="btn-luxury-outline">Shop the Collection</Link>
                                     </div>
                                 ) : (
-                                    <div className="orders-grid">
+                                    <div className="orders-list-luxury">
                                         {orders.map((order) => (
-                                            <div key={order._id} className="order-ticket">
-                                                <div className="ticket-header">
-                                                    <span className="order-id">#{order.orderNumber || order._id.slice(-6)}</span>
-                                                    <span className={`status-badge ${order.status.toLowerCase()}`}>
+                                            <div key={order._id} className="order-row-luxury">
+                                                <div className="ord-info">
+                                                    <span className="ord-id">#{order.orderNumber || order._id.slice(-6)}</span>
+                                                    <span className="ord-date">{new Date(order.createdAt).toLocaleDateString()}</span>
+                                                </div>
+                                                <div className="ord-amount">PKR {order.total.toLocaleString()}</div>
+                                                <div className="ord-status">
+                                                    <span className={`status-pill ${order.status.toLowerCase()}`}>
                                                         {order.status}
                                                     </span>
                                                 </div>
-                                                <div className="ticket-body">
-                                                    <div className="ticket-row">
-                                                        <Clock size={14} /> 
-                                                        {new Date(order.createdAt).toLocaleDateString()}
-                                                    </div>
-                                                    <div className="ticket-row highlight">
-                                                        PKR {order.total.toLocaleString()}
-                                                    </div>
-                                                </div>
-                                                <Link to={`/orders/${order._id}`} className="ticket-action">
-                                                    View Manifest <ChevronRight size={16} />
+                                                <Link to={`/orders/${order._id}`} className="view-link-lux">
+                                                    DETAILS <ChevronRight size={14} />
                                                 </Link>
                                             </div>
                                         ))}
@@ -247,46 +241,46 @@ export default function Profile() {
 
                         {/* PASSWORD TAB */}
                         {activeTab === 'password' && (
-                            <div className="panel-animate">
-                                <div className="panel-header">
-                                    <h2>Security Protocol</h2>
-                                    <p>Update your access credentials.</p>
+                            <div className="panel-luxury reveal">
+                                <div className="panel-header-luxury">
+                                    <h2 className="subtitle-serif">Security Settings</h2>
+                                    <p className="description-small italic">Secure your atelier access.</p>
                                 </div>
-                                <form onSubmit={handleChangePassword} className="profile-form">
-                                    <div className="form-group">
-                                        <label>Current Key</label>
-                                        <input 
-                                            type="password" 
+                                <form onSubmit={handleChangePassword} className="luxury-profile-form">
+                                    <div className="form-group-lux">
+                                        <label>CURRENT PASSWORD</label>
+                                        <input
+                                            type="password"
                                             value={passwordData.currentPassword}
                                             onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
-                                            className="glass-input"
+                                            className="lux-form-input"
                                             required
                                         />
                                     </div>
                                     <div className="form-row">
-                                        <div className="form-group">
-                                            <label>New Key</label>
-                                            <input 
-                                                type="password" 
+                                        <div className="form-group-lux">
+                                            <label>NEW PASSWORD</label>
+                                            <input
+                                                type="password"
                                                 value={passwordData.newPassword}
                                                 onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
-                                                className="glass-input"
+                                                className="lux-form-input"
                                                 required
                                             />
                                         </div>
-                                        <div className="form-group">
-                                            <label>Confirm Key</label>
-                                            <input 
-                                                type="password" 
+                                        <div className="form-group-lux">
+                                            <label>CONFIRM PASSWORD</label>
+                                            <input
+                                                type="password"
                                                 value={passwordData.confirmPassword}
                                                 onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
-                                                className="glass-input"
+                                                className="lux-form-input"
                                                 required
                                             />
                                         </div>
                                     </div>
-                                    <button type="submit" className="btn-primary" disabled={loading}>
-                                        {loading ? 'Encrypting...' : 'Update Password'}
+                                    <button type="submit" className="btn-luxury-action" disabled={loading}>
+                                        {loading ? 'UPDATING...' : 'UPDATE PASSWORD'}
                                     </button>
                                 </form>
                             </div>

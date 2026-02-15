@@ -19,20 +19,27 @@ export default function Checkout() {
     const formRef = useScrollReveal()
     const summaryRef = useScrollReveal()
 
-    const [form, setForm] = useState({
-        firstName: '',
-        lastName: '',
-        email: '',
-        phone: '',
-        address: '',
-        city: '',
-        state: '',
-        postalCode: '',
-        country: 'Pakistan',
-        notes: ''
+    const [form, setForm] = useState(() => {
+        const saved = localStorage.getItem('checkout_form')
+        return saved ? JSON.parse(saved) : {
+            firstName: '',
+            lastName: '',
+            email: '',
+            phone: '',
+            address: '',
+            city: '',
+            state: '',
+            postalCode: '',
+            country: 'Pakistan',
+            notes: ''
+        }
     })
 
     const navigate = useNavigate()
+
+    useEffect(() => {
+        localStorage.setItem('checkout_form', JSON.stringify(form))
+    }, [form])
 
     useEffect(() => {
         const data = JSON.parse(localStorage.getItem('cart') || '[]') as CartItem[]
@@ -52,15 +59,32 @@ export default function Checkout() {
     }
 
     const validateForm = () => {
-        if (!form.firstName.trim()) return 'First name is required'
-        if (!form.lastName.trim()) return 'Last name is required'
-        if (!form.email.trim()) return 'Email is required'
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) return 'Invalid email format'
-        if (!form.phone.trim()) return 'Phone number is required'
-        if (!form.address.trim()) return 'Address is required'
-        if (!form.city.trim()) return 'City is required'
+        const errors: string[] = []
+        if (!form.firstName?.trim()) errors.push('First name is required')
+        if (!form.lastName?.trim()) errors.push('Last name is required')
 
-        return null
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+        if (!form.email?.trim()) {
+            errors.push('Email is required')
+        } else if (!emailRegex.test(form.email)) {
+            errors.push('Invalid email format')
+        }
+
+        const phoneRegex = /^(\+92|0|92)[0-9]{10}$/
+        if (!form.phone?.trim()) {
+            errors.push('Phone number is required')
+        } else if (form.country === 'Pakistan' && !phoneRegex.test(form.phone.replace(/[\s-]/g, ''))) {
+            errors.push('Invalid Pakistani phone format (e.g., 03001234567)')
+        }
+
+        if (!form.address?.trim()) errors.push('Street address is required')
+        if (!form.city?.trim()) errors.push('City is required')
+
+        if (form.country === 'International' && !form.postalCode?.trim()) {
+            errors.push('Postal code is required for international shipping')
+        }
+
+        return errors.length > 0 ? errors[0] : null
     }
 
     /* --- Instant Feedback & Safety Lock --- */
@@ -166,10 +190,13 @@ export default function Checkout() {
     }
 
     return (
-        <div className="checkout-page">
-            <header className="page-header">
-                <h1 className="page-title">CHECKOUT</h1>
-                <p className="page-subtitle">Complete your purchase securely</p>
+        <div className="checkout-luxury">
+            <header className="checkout-hero-mini">
+                <div className="container">
+                    <span className="eyebrow">FINAL STEP</span>
+                    <h1 className="h1 subtitle-serif">Secure Checkout</h1>
+                    <p className="text-muted italic">Complete your selection from the Gold She Atelier</p>
+                </div>
             </header>
 
             <div className="checkout-container">
@@ -405,10 +432,10 @@ export default function Checkout() {
                                         <div className="bank-details" style={{ textAlign: 'center', padding: '2rem' }}>
                                             <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🔒</div>
                                             <p style={{ fontSize: '1.1rem', marginBottom: '0.5rem' }}>
-                                                You have selected <strong style={{ color: 'var(--neon-cyan)' }}>{getPaymentMethodName()}</strong>.
+                                                You have selected <strong style={{ color: 'var(--royal-blue)' }}>{getPaymentMethodName()}</strong>.
                                             </p>
                                             <p style={{ color: 'var(--text-muted)' }}>
-                                                Complete your order securely now. You will receive precise payment details and a receipt submission link on the next page.
+                                                Complete your order securely now. You will receive precise payment details (Account Number/IBAN) and a receipt submission link on the order confirmation page.
                                             </p>
                                         </div>
                                     </div>
@@ -472,13 +499,13 @@ export default function Checkout() {
                         <div style={{
                             marginTop: '1.5rem',
                             padding: '1rem',
-                            background: 'rgba(0, 240, 255, 0.05)',
-                            border: '1px solid rgba(0, 240, 255, 0.2)',
+                            background: 'rgba(27, 54, 93, 0.05)',
+                            border: '1px solid rgba(27, 54, 93, 0.2)',
                             fontSize: '0.85rem',
                             color: 'var(--text-muted)'
                         }}>
                             <p style={{ margin: 0 }}>
-                                <strong style={{ color: 'var(--neon-cyan)' }}>Payment Method:</strong> {getPaymentMethodName()}
+                                <strong style={{ color: 'var(--royal-blue)' }}>Payment Method:</strong> {getPaymentMethodName()}
                             </p>
                         </div>
                     </div>

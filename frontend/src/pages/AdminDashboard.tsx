@@ -107,7 +107,7 @@ export default function AdminDashboard() {
             {/* Header */}
             <header className="dashboard-header">
                 <div className="header-left">
-                    <h1>COMMAND CENTER</h1>
+                    <h1>ADMIN DASHBOARD</h1>
                     <div className="live-badge">
                         <span className="pulse-dot"></span>
                         LIVE FEED • {lastUpdated.toLocaleTimeString()}
@@ -171,7 +171,7 @@ export default function AdminDashboard() {
                 {/* Funnel Panel */}
                 <div className="panel funnel-panel">
                     <div className="panel-header">
-                        <h3>CONVERSION PIPELINE</h3>
+                        <h3>ORDER PIPELINE</h3>
                         <Activity size={16} className="panel-icon" />
                     </div>
                     <div className="funnel-container">
@@ -197,17 +197,17 @@ export default function AdminDashboard() {
                 {/* Recent Orders Panel */}
                 <div className="panel activity-panel">
                     <div className="panel-header">
-                        <h3>RECENT TRANSMISSIONS</h3>
+                        <h3>RECENT ORDERS</h3>
                         <ArrowUpRight size={16} className="panel-icon" />
                     </div>
                     <div className="table-wrapper">
                         <table className="dashboard-table">
                             <thead>
                                 <tr>
-                                    <th>ID</th>
-                                    <th>ENTITY</th>
+                                    <th>ORDER ID</th>
+                                    <th>CUSTOMER</th>
                                     <th>STATUS</th>
-                                    <th className="text-right">VALUE</th>
+                                    <th className="text-right">TOTAL (PKR)</th>
                                 </tr>
                             </thead>
                             <tbody>

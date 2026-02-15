@@ -1,185 +1,157 @@
 import React, { useEffect, useRef } from 'react';
-import { 
-  Gamepad, 
-  Bot, 
-  Laptop, 
-  Brush, 
-  Sprout, 
-  Lightbulb, 
-  BookOpen, 
-  Handshake, 
-  Globe, 
-  ArrowLeft, 
-  UserCircle // <--- Added this
-} from 'lucide-react';import './About.css';
-
-// Import the image directly if it's in src/assets
-// If it's in public, use "/images/me.png"
-import founderImg from '../assets/ingredients/me.png'; 
+import {
+  Heart,
+  Feather,
+  Clock,
+  ShieldCheck,
+  Globe,
+  ArrowRight
+} from 'lucide-react';
+import './About.css';
 
 interface AboutComponentProps {
   onBack: () => void;
 }
 
 const AboutComponent: React.FC<AboutComponentProps> = ({ onBack }) => {
-  const revealRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const revealRefs = useRef<(HTMLElement | null)[]>([]);
 
   useEffect(() => {
+    // Defensive IntersectionObserver
+    if (!window.IntersectionObserver) return;
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            entry.target.classList.add('active');
+            entry.target.classList.add('reveal-active');
+            observer.unobserve(entry.target);
           }
         });
       },
       { threshold: 0.15 }
     );
 
-    revealRefs.current.forEach((ref) => {
+    const currentRefs = revealRefs.current;
+    currentRefs.forEach((ref) => {
       if (ref) observer.observe(ref);
     });
 
-    return () => observer.disconnect();
+    return () => {
+      currentRefs.forEach(ref => { if (ref) observer.unobserve(ref); });
+      observer.disconnect();
+    };
   }, []);
 
-  const addToRefs = (el: HTMLDivElement | null) => {
+  const addToRefs = (el: HTMLElement | null) => {
     if (el && !revealRefs.current.includes(el)) {
       revealRefs.current.push(el);
     }
   };
 
   return (
-    <div className="about-page">
-      <div className="noise-layer"></div>
-
-      {/* Optional: Back Button Integration */}
-      {/* <button onClick={onBack} className="back-btn-absolute"><ArrowLeft size={24} /></button> */}
-
-      <div className="about-container">
-        
-        {/* --- HERO SECTION --- */}
-        <section className="about-hero">
-          <div className="hero-super-title">OMNORA</div>
-          <h1 className="section-header-magnum">
-            We Are The <br />
-            <span className="highlight-cyan">Revolution.</span>
+    <div className="about-luxury">
+      {/* --- HERO --- */}
+      <section className="about-hero-section">
+        <div className="container hero-content reveal" ref={addToRefs}>
+          <span className="eyebrow">OUR STORY</span>
+          <h1 className="h1 editorial-title">
+            The Art of <br />
+            <span className="font-serif italic text-gold">Pakistani Elegance</span>
           </h1>
-          <p className="text-editorial">
-            Fueled by ethical AI, cinematic creativity, and a relentless passion for the future.
-            We don't just follow trends; we engineer the void.
-          </p>
-        </section>
-
-        {/* --- THE VISION (Animated) --- */}
-        <div ref={addToRefs} className="reveal-block">
-          <h2 className="section-header-magnum">The Vision</h2>
-          <p className="text-editorial">
-            Omnora Store is a digital powerhouse born from the mind of <span className="highlight-gold">Ahmad Mahboob</span>.
-            We merge the tactile world of luxury with the boundless potential of Game Dev and AI.
+          <p className="description">
+            Born from a legacy of fine craftsmanship, Gold She Garments is more than a fashion house.
+            It is a celebration of the modern woman—confident, timeless, and gracefully rooted in heritage.
           </p>
         </div>
+      </section>
 
-        {/* --- MISSION STATEMENT --- */}
-        <div ref={addToRefs} className="reveal-block mt-section">
-          <div className="mission-blockquote">
-            <h2 className="mission-header">Our Mission</h2>
-            <p className="mission-quote">
-              "To generate revenue through <span className="highlight-cyan">ethical, high-impact ventures</span>—mastering AI innovation and game development—while proving that age is merely a number, not a limit."
+      {/* --- VISION --- */}
+      <section className="section-padding container">
+        <div className="vision-grid reveal" ref={addToRefs}>
+          <div className="vision-image-wrapper">
+            <img src="/images/home/formal.png" alt="Atelier" className="vision-img" />
+            <div className="img-overlay-gold" />
+          </div>
+          <div className="vision-text">
+            <h2 className="h2 subtitle-serif">The Atelier Vision</h2>
+            <div className="accent-bar" />
+            <p className="text-muted">
+              Founded with the goal of redefining Pakistani ready-to-wear, we merge traditional artisanal techniques
+              with contemporary silhouettes. Every thread is chosen for its quality, every stitch placed with intention.
+            </p>
+            <p className="text-muted mt-4">
+              From the bustling looms of Faisalabad to the intricate embroidery of Multan, we bring you the finest
+              fabrics that Pakistan has to offer, tailored for the global stage.
             </p>
           </div>
         </div>
+      </section>
 
-        {/* --- CAPABILITIES (Tech Grid) --- */}
-        <div ref={addToRefs} className="reveal-block mt-section">
-          <h2 className="section-header-magnum">Capabilities</h2>
-          <div className="tech-grid">
+      {/* --- VALUES --- */}
+      <section className="section-padding bg-blush">
+        <div className="container">
+          <div className="section-header reveal" ref={addToRefs}>
+            <h2 className="h2 subtitle-serif">Our Core Philosophies</h2>
+            <p className="text-gold italic">Excellence in every detail</p>
+          </div>
+
+          <div className="values-grid">
             {[
-              { icon: Gamepad, title: 'Game Development', desc: 'Immersive 3D worlds and mechanics built in Unity & Unreal Engine.' },
-              { icon: Bot, title: 'AI Solutions', desc: 'Automation tools and intelligent systems that solve real-world friction.' },
-              { icon: Laptop, title: 'Web Architecture', desc: 'High-performance React & Next.js applications with cinematic UI.' },
-              { icon: Brush, title: 'Visual Design', desc: 'Cyberpunk aesthetics, high-fidelity branding, and digital art.' }
+              { icon: Heart, title: 'Passion for Craft', desc: 'Hand-dyed fabrics and hand-finished embroidery that tells a story.' },
+              { icon: Feather, title: 'Uncompromised Comfort', desc: 'Lightweight, breathable premium cottons and chiffons designed for seasonal ease.' },
+              { icon: Clock, title: 'Timeless Design', desc: 'Aesthetic pieces that transcend trends and celebrate longevity.' },
+              { icon: ShieldCheck, title: 'Ethical Production', desc: 'Fair wages and safe environments for our master artisans.' }
             ].map((item, idx) => (
-              <div key={idx} className="tech-card">
-                <item.icon className="tech-icon" size={32} />
-                <h3 className="tech-title">{item.title}</h3>
-                <p className="tech-desc">{item.desc}</p>
+              <div key={idx} className="value-card reveal-up" ref={addToRefs}>
+                <item.icon className="text-gold mb-4" size={32} strokeWidth={1} />
+                <h3 className="font-bold uppercase xsmall letter-spacing-wide mb-2">{item.title}</h3>
+                <p className="text-muted xsmall">{item.desc}</p>
               </div>
             ))}
           </div>
         </div>
+      </section>
 
-        {/* --- FOUNDER SPOTLIGHT --- */}
-        <div ref={addToRefs} className="reveal-block mt-section">
-          <div className="founder-section">
-            <div className="founder-header">
-              <div 
-                className="founder-avatar" 
-                style={{ 
-                  backgroundImage: `url(${founderImg})`,
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center'
-                }}
-              >
-                {/* Fallback if image fails or generic icon needed */}
-                {!founderImg && <UserCircle size={40} />} 
-              </div>
-              <div className="founder-info">
-                <h3 className="founder-name">Ahmad Mahboob</h3>
-                <span className="founder-role">Founder & Digital Architect • 20 Years Old</span>
-              </div>
-            </div>
-            
-            <p className="text-editorial">
-              I am the Founder of Omnora. A 20-year-old entrepreneur, developer, and digital media specialist with over 5 years of experience. 
-              <br /><br />
-              My goal is simple: To build systems that matter. From self-care products to software architecture, I believe in quality, ethics, and <span className="highlight-gold">absolute excellence.</span>
+      {/* --- THE FOUNDER --- */}
+      <section className="section-padding container">
+        <div className="founder-editorial reveal" ref={addToRefs}>
+          <div className="founder-text">
+            <span className="eyebrow text-gold">LEADERSHIP</span>
+            <h2 className="h2 subtitle-serif">Ahmad Mahboob</h2>
+            <span className="role-tag">Founder & Creative Director</span>
+            <p className="text-muted mt-6">
+              "I believe that fashion is the most intimate form of self-expression. With Gold She Garments,
+              I wanted to create a space where luxury is accessible, and tradition is celebrated through a modern lens."
             </p>
           </div>
-        </div>
-
-        {/* --- CORE VALUES --- */}
-        <div ref={addToRefs} className="reveal-block mt-section">
-          <h2 className="section-header-magnum">The Core Code</h2>
-          <div className="values-list">
-            {[
-              { icon: Sprout, text: 'Growth through mastery, not just degrees.' },
-              { icon: Lightbulb, text: 'Simplicity and clarity in every creation.' },
-              { icon: BookOpen, text: 'Relentless learning, constant evolution.' },
-              { icon: Handshake, text: 'Uncompromised ethics in business.' },
-              { icon: Globe, text: 'Building a legacy that inspires.' }
-            ].map((item, idx) => (
-              <div key={idx} className="value-row">
-                <item.icon className="highlight-cyan value-icon" size={24} />
-                <span className="value-text">{item.text}</span>
-              </div>
-            ))}
+          <div className="founder-image">
+            <img src="/assets/ingredients/me.png" alt="Ahmad Mahboob" className="founder-portrait" />
           </div>
         </div>
+      </section>
 
-        {/* --- CTA --- */}
-        <div ref={addToRefs} className="reveal-block cta-section">
-          <h2 className="section-header-magnum">Shape The Future</h2>
-          <p className="text-editorial center-text">
-            Whether you're a creator, a visionary, or just curious—join us to build something extraordinary.
+      {/* --- FOOTER CTA --- */}
+      <section className="section-padding text-center border-t">
+        <div className="container reveal" ref={addToRefs}>
+          <h3 className="h3 subtitle-serif mb-8">Join the Gold She Circle</h3>
+          <p className="text-muted mb-12 max-w-md mx-auto small">
+            Stay updated with our latest seasonal collections and exclusive atelier previews.
           </p>
-          
-          <a href="mailto:pakahmad9815@gmail.com" className="btn-neon">
-            Initiate Contact
-          </a>
-          
-          <div className="contact-sub">
-            For inquiries: <a href="mailto:omnorainfo28@gmail.com" className="contact-link-neon">omnorainfo28@gmail.com</a>
+          <div className="cta-actions">
+            <a href="mailto:omnorainfo28@gmail.com" className="btn btn-luxury inline-flex items-center">
+              Inquire Now <ArrowRight size={16} className="ml-2" />
+            </a>
           </div>
         </div>
+      </section>
 
-        {/* --- FOOTER --- */}
-        <footer className="footer-magnum">
-          <img src="/images/omnora labs.png" alt="Omnora Labs" />
-          <p className="copyright">&copy; 2025 Omnora Labs. All Rights Reserved.</p>
-        </footer>
-
-      </div>
+      <footer className="footer-luxury section-padding">
+        <div className="container text-center">
+          <span className="footer-logo">GOLD SHE GARMENTS</span>
+          <p className="copyright">&copy; 2025 GSG Atelier. All Rights Reserved.</p>
+        </div>
+      </footer>
     </div>
   );
 };

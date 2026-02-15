@@ -100,7 +100,13 @@ app.use('/api/users', userRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/webhook', require('./routes/webhookRoutes'));
 app.use('/api/admin', gatekeeper(CAPABILITIES.STATE_MUTATING), require('./routes/adminRoutes'));
-// Add Health Route Explicitly if not covered
+app.use('/api/contact', contactRoutes);
+app.use('/api/newsletter', newsletterRoutes);
+app.use('/api/analytics', analyticsRoutes);
+app.post('/api/track', require('./controllers/analyticsController').track); // Direct alias for frontend
+app.use('/api/phase1', phase1Routes);
+app.use('/api/phase2', phase2Routes);
+app.use('/api/phase3', phase3Routes);
 app.use('/api/health', healthRoutes);
 
 // Global error handler
@@ -122,8 +128,8 @@ if (require.main === module) {
   const bootstrap = require('./bootstrap');
   bootstrap().then(({ config }) => {
     const PORT = config.port;
-    app.listen(PORT, () => {
-      logger.info(`Server running on port ${PORT}`);
+    app.listen(PORT, '127.0.0.1', () => {
+      logger.info(`Server running on http://127.0.0.1:${PORT}`);
       logger.info(`Mode: ${config.env}`);
     }).on('error', (err) => {
       if (err.code === 'EADDRINUSE') {
@@ -133,6 +139,9 @@ if (require.main === module) {
         logger.error('Server error', { error: err.message });
       }
     });
+  }).catch(err => {
+    console.error('❌ FATAL: Bootstrap failed:', err);
+    process.exit(1);
   });
 }
 

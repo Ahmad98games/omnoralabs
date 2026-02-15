@@ -146,22 +146,15 @@ export default function Cart() {
 
   return (
 
-    <div className="cart-page">
-
-      <header className="cart-hero">
-
-        <div className="cart-hero-content animate-fade-in-up">
-
-          <h1 className="cart-title">Shopping Bag</h1>
-
-          <p className="cart-subtitle">
-
-            {totalItems} {totalItems === 1 ? 'Item' : 'Items'} • PKR {subtotal.toLocaleString()}
-
+    <div className="cart-luxury">
+      <header className="cart-hero-mini">
+        <div className="container">
+          <span className="eyebrow">YOUR SELECTION</span>
+          <h1 className="h1 subtitle-serif">Shopping Bag</h1>
+          <p className="text-muted italic">
+            {totalItems} {totalItems === 1 ? 'Piece' : 'Pieces'} • PKR {subtotal.toLocaleString()}
           </p>
-
         </div>
-
       </header>
 
 
@@ -348,48 +341,15 @@ export default function Cart() {
 
             </button>
 
-           
 
-            <div style={{
 
-              marginTop: '1.5rem',
-
-              textAlign: 'center',
-
-              padding: '1rem',
-
-              background: 'rgba(0, 240, 255, 0.05)',
-
-              border: '1px solid rgba(0, 240, 255, 0.2)'
-
-            }}>
-
+            <div className="continue-shopping">
               <Link
-
                 to="/collection"
-
-                style={{
-
-                  color: 'var(--neon-cyan)',
-
-                  textDecoration: 'none',
-
-                  fontSize: '0.9rem',
-
-                  textTransform: 'uppercase',
-
-                  letterSpacing: '0.1em',
-
-                  fontWeight: 600
-
-                }}
-
+                className="continue-link"
               >
-
                 ← Continue Shopping
-
               </Link>
-
             </div>
 
           </div>

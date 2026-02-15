@@ -1,246 +1,222 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import client, { trackEvent } from '../api/client';
+import { ShoppingBag, ArrowLeft, ShieldCheck, Truck, MessageCircle, Minus, Plus } from 'lucide-react';
+import client from '../api/client';
 import { useToast } from '../context/ToastContext';
-import { FALLBACK_IMAGE } from '../constants';
-import SmartImage from '../components/SmartImage'; // Utilizing our custom component
-import { SkeletonProductDetail } from '../components/Skeleton';
-import { ShoppingBag, Minus, Plus, ArrowLeft, ShieldCheck, Truck } from 'lucide-react';
-import './Product.css';
+import '../styles/product.css';
 
-// Guaranteed "Cinematic" load time
-const MINIMUM_LOAD_TIME = 800; 
-
-type Product = {
+// Hardened Data Contract
+interface IGSGProduct {
     _id: string;
     name: string;
     price: number;
-    image: string;
-    category: string;
+    image?: string;
+    category?: string;
     description?: string;
-    isFeatured?: boolean;
-    isNew?: boolean;
-    stock?: number; // Optional on frontend if backend doesn't always send it
+    stock?: number;
+    fabric?: string;
+    work?: string;
 }
 
-type CartItem = {
-    id: string;
-    name: string;
-    price: number;
-    image: string;
-    quantity: number;
-}
+const BRAND_PLACEHOLDER = '/images/placeholder_gsg.png';
 
 export default function Product() {
     const { id } = useParams();
     const navigate = useNavigate();
     const { showToast } = useToast();
 
-    const [product, setProduct] = useState<Product | null>(null);
+    const [product, setProduct] = useState<IGSGProduct | null>(null);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const [error, setError] = useState<{ message: string; code?: string } | null>(null);
     const [quantity, setQuantity] = useState(1);
+    const [selectedSize, setSelectedSize] = useState<string>('M');
 
     useEffect(() => {
-        let isMounted = true;
-        const startTime = Date.now();
-        
-        async function load() {
-            let fetchedProduct: Product | null = null;
-            let fetchError: string | null = null;
+        const controller = new AbortController();
 
+        async function fetchProduct() {
+            setLoading(true);
+            setError(null);
             try {
-                setLoading(true);
-                const res = await client.get(`/products/${id}`);
-                // Handle different API response structures
-                fetchedProduct = res.data.data || res.data; 
-            } catch (e: any) {
-                fetchError = e?.message || 'Access Denied: Product data unavailable.';
+                const res = await client.get(`/products/${id}`, { signal: controller.signal });
+                const data = res.data?.data || res.data || null;
+                if (!data) throw new Error('Product not found');
+                setProduct(data);
+            } catch (err: any) {
+                if (!axios.isCancel(err)) {
+                    setError({
+                        message: err.response?.data?.error || err.message || 'Failed to load details',
+                        code: err.code || (err.response ? `API_${err.response.status}` : 'NETWORK_ERROR')
+                    });
+                    console.error('FETCH_ERROR:', err);
+                }
+            } finally {
+                setLoading(false);
             }
-
-            if (!isMounted) return;
-
-            // Enforce minimum cinematic delay
-            const timeElapsed = Date.now() - startTime;
-            const delayRemaining = MINIMUM_LOAD_TIME - timeElapsed;
-            await new Promise(resolve => setTimeout(resolve, Math.max(0, delayRemaining)));
-            
-            if (!isMounted) return;
-
-            setProduct(fetchedProduct);
-            setError(fetchError);
-            setLoading(false);
         }
 
-        load();
-        return () => { isMounted = false };
+        fetchProduct();
+        return () => controller.abort();
     }, [id]);
 
-    const handleQuantityUpdate = (delta: number) => {
-        const maxStock = product?.stock ?? 100; // Default high if unknown
-        let newQty = quantity + delta;
-        newQty = Math.max(1, Math.min(newQty, maxStock));
-        setQuantity(newQty);
-    };
-
-    const addToCart = () => {
+    const handleAddToCart = () => {
         if (!product) return;
 
-        const cart: CartItem[] = JSON.parse(localStorage.getItem('cart') || '[]');
-        const existing = cart.find((i) => i.id === product._id);
-        const currentStock = product.stock ?? 100;
-        
-        let finalQtyToAdd = quantity;
+        const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+        const existing = cart.find((i: any) => i.id === product._id && i.size === selectedSize);
 
         if (existing) {
-            if ((existing.quantity + quantity) > currentStock) {
-                showToast(`Stock limit reached. Only ${Math.max(0, currentStock - existing.quantity)} more available.`, 'warning');
-                return;
-            }
             existing.quantity += quantity;
         } else {
-            if (quantity > currentStock) {
-                showToast(`Insufficient stock. Only ${currentStock} available.`, 'warning');
-                return;
-            }
             cart.push({
                 id: product._id,
                 name: product.name,
                 price: product.price,
                 image: product.image,
-                quantity: quantity
+                quantity: quantity,
+                size: selectedSize
             });
         }
 
         localStorage.setItem('cart', JSON.stringify(cart));
-        window.dispatchEvent(new Event('cart-updated')); // Update Navbar
-        
-        trackEvent({
-            type: 'add_to_cart',
-            sessionId: localStorage.getItem('sid') || 'guest',
-            payload: { productId: product._id, price: product.price, quantity }
-        });
-
-        showToast(`Added ${quantity} x ${product.name} to bag`, 'success');
+        window.dispatchEvent(new Event('cart-updated'));
+        showToast(`${product.name} Added to Bag`, 'success');
     };
 
-    if (loading) return <div className="product-page"><SkeletonProductDetail /></div>;
+    const handleWhatsAppOrder = () => {
+        if (!product) return;
+        const message = `Hello Gold She Garments! I would like to order:
+*Product:* ${product.name || 'Fashion Piece'}
+*Size:* ${selectedSize}
+*Price:* PKR ${(product.price || 0).toLocaleString()}
+*Link:* ${window.location.href}`;
 
-    if (error || !product) {
-        return (
-            <div className="product-page">
-                <div className="empty-state-magnum">
-                    <h3>404: Asset Not Found</h3>
-                    <p>The product you are looking for has been decommissioned or moved.</p>
-                    <button onClick={() => navigate('/collection')} className="btn-action">
-                        Return to Collection
-                    </button>
-                </div>
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        const baseUrl = isMobile ? 'whatsapp://send' : 'https://web.whatsapp.com/send';
+
+        window.open(`${baseUrl}?phone=923097613611&text=${encodeURIComponent(message)}`, '_blank');
+    };
+
+    if (loading) return (
+        <div className="product-detail-page">
+            <div className="container" style={{ textAlign: 'center', padding: '10rem 0' }}>
+                <p className="description-small italic">Curating details for you...</p>
             </div>
-        );
-    }
+        </div>
+    );
 
-    const isOutOfStock = product.stock === 0;
+    if (error || !product) return (
+        <div className="product-detail-page">
+            <div className="container" style={{ textAlign: 'center', padding: '10rem 0' }}>
+                <h2>Something went wrong</h2>
+                <p style={{ color: 'red', fontWeight: 'bold' }}>{error?.message || 'We could not find the piece you are looking for.'}</p>
+                <p style={{ fontSize: '0.8rem', color: '#999' }}>Diagnostic Code: {error?.code || '404'}</p>
+                <button onClick={() => navigate('/collection')} className="btn-primary-gsg" style={{ marginTop: '1rem' }}>Back to Collection</button>
+            </div>
+        </div>
+    );
+
+    const isOutOfStock = product?.stock === 0;
 
     return (
-        <div className="product-page">
-            <div className="noise-layer" />
-            
+        <div className="product-detail-page">
             <div className="container">
-                {/* Breadcrumbs */}
-                <nav className="breadcrumbs-nav">
-                    <Link to="/" className="crumb-link">Home</Link> / 
-                    <Link to="/collection" className="crumb-link">Collection</Link> / 
-                    <span className="crumb-active">{product.name}</span>
-                </nav>
+                <Link to="/collection" className="back-link" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '2rem', textDecoration: 'none', color: 'var(--text-secondary)' }}>
+                    <ArrowLeft size={16} /> Back to Collection
+                </Link>
 
-                <div className="product-grid-layout">
-                    {/* Left: Image */}
-                    <div className="product-visual">
-                        <div className="image-frame">
-                            <SmartImage 
-                                src={product.image || FALLBACK_IMAGE} 
-                                alt={product.name}
-                                aspectRatio="1/1"
-                                className="main-product-img"
-                                priority={true}
+                <div className="product-container">
+                    {/* Gallery */}
+                    <div className="product-gallery">
+                        <div className="main-image-box">
+                            <img
+                                src={product.image || BRAND_PLACEHOLDER}
+                                alt={product.name || 'Fashion Piece'}
+                                onError={(e) => { (e.target as HTMLImageElement).src = BRAND_PLACEHOLDER; }}
                             />
-                            {product.isNew && <span className="corner-badge">NEW ARRIVAL</span>}
                         </div>
                     </div>
 
-                    {/* Right: Info */}
-                    <div className="product-intel">
-                        <h1 className="p-title">{product.name}</h1>
-                        
-                        <div className="p-meta">
-                            <span className="p-price">PKR {product.price.toLocaleString()}</span>
-                            {product.isFeatured && <span className="p-tag">FEATURED</span>}
-                        </div>
+                    {/* Info */}
+                    <div className="product-info-stack">
+                        <div className="p-brand-lux eyebrow">The GSG Atelier</div>
+                        <h1 className="p-name-lux subtitle-serif">{product.name}</h1>
+                        <div className="p-price-lux text-gold">PKR {product.price?.toLocaleString()}</div>
 
-                        <div className="p-divider"></div>
-
-                        <div className="p-description">
-                            <h3>Specifications</h3>
-                            <p>{product.description || "No description data available for this asset."}</p>
-                        </div>
-
-                        {/* Controls */}
-                        <div className="p-controls">
-                            <div className="qty-wrapper">
-                                <label>QUANTITY</label>
-                                <div className="qty-dial">
-                                    <button 
-                                        onClick={() => handleQuantityUpdate(-1)} 
-                                        disabled={quantity <= 1 || isOutOfStock}
-                                        className="qty-btn"
-                                    >
-                                        <Minus size={16} />
-                                    </button>
-                                    <span className="qty-val">{quantity}</span>
-                                    <button 
-                                        onClick={() => handleQuantityUpdate(1)} 
-                                        disabled={product.stock !== undefined && quantity >= product.stock}
-                                        className="qty-btn"
-                                    >
-                                        <Plus size={16} />
-                                    </button>
-                                </div>
+                        <div className="p-desc-lux legal-text-lux">
+                            {product.description || "Elegant and timeless Pakistani fashion piece, designed for style and comfort."}
+                            <div className="p-meta-lux mt-4 italic text-muted">
+                                {product.fabric && <div><strong>FABRIC:</strong> {product.fabric.toUpperCase()}</div>}
+                                {product.work && <div><strong>WORK:</strong> {product.work.toUpperCase()}</div>}
                             </div>
+                        </div>
 
-                            <button 
-                                onClick={addToCart} 
-                                className="btn-add-cart"
+                        <div className="form-group">
+                            <span className="group-label">Select Size</span>
+                            <div className="size-grid">
+                                {['S', 'M', 'L', 'XL'].map(size => (
+                                    <button
+                                        key={size}
+                                        className={`size-option ${selectedSize === size ? 'active' : ''}`}
+                                        onClick={() => setSelectedSize(size)}
+                                    >
+                                        {size}
+                                    </button>
+                                ))}
+                            </div>
+ <Link
+    to="/size-guide"
+    style={{
+        background: 'none',
+        border: 'none',
+        color: 'var(--royal-blue)',
+        fontSize: '0.8rem',
+        textDecoration: 'underline',
+        marginTop: '0.5rem',
+        cursor: 'pointer',
+        display: 'inline-block'
+    }}
+>
+    View Size Guide
+</Link>
+                        </div>
+
+                        <div className="form-group">
+                            <span className="group-label">Quantity</span>
+                            <div className="qty-control" style={{ display: 'flex', alignItems: 'center', gap: '1rem', border: '1px solid var(--border-color)', width: 'fit-content', padding: '0.5rem', borderRadius: '4px' }}>
+                                <button onClick={() => setQuantity(q => Math.max(1, q - 1))} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><Minus size={16} /></button>
+                                <span>{quantity}</span>
+                                <button onClick={() => setQuantity(q => q + 1)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><Plus size={16} /></button>
+                            </div>
+                        </div>
+
+                        <div className="p-actions-lux">
+                            <button
+                                onClick={handleAddToCart}
+                                className="btn-luxury-action"
                                 disabled={isOutOfStock}
                             >
-                                {isOutOfStock ? 'OUT OF STOCK' : (
-                                    <>
-                                        ADD TO BAG <ShoppingBag size={18} />
-                                    </>
-                                )}
+                                {isOutOfStock ? 'OUT OF STOCK' : 'ADD TO BAG'}
+                            </button>
+                            <button
+                                onClick={handleWhatsAppOrder}
+                                className="btn-luxury-outline w-100"
+                            >
+                                <MessageCircle size={18} /> ORDER ON WHATSAPP
                             </button>
                         </div>
 
-                        {product.stock !== undefined && (
-                            <p className={`stock-indicator ${product.stock < 5 ? 'low' : ''}`}>
-                                {isOutOfStock 
-                                    ? 'Stock Depleted.' 
-                                    : `Inventory Level: ${product.stock} Units`}
-                            </p>
-                        )}
-
-                        {/* Trust Signals */}
-                        <div className="trust-grid">
-                            <div className="trust-item">
-                                <ShieldCheck size={20} className="trust-icon" />
-                                <span>Quality Assured</span>
+                        <div className="trust-indicators">
+                            <div className="trust-card">
+                                <ShieldCheck size={20} />
+                                <span>Premium Quality Fabric</span>
                             </div>
-                            <div className="trust-item">
-                                <Truck size={20} className="trust-icon" />
-                                <span>Secure Shipping</span>
+                            <div className="trust-card">
+                                <Truck size={20} />
+                                <span>3-5 Day Secure Shipping</span>
                             </div>
                         </div>
-
                     </div>
                 </div>
             </div>

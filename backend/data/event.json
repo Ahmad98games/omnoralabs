@@ -1,0 +1,572 @@
+[
+  {
+    "type": "page_view",
+    "path": "/test",
+    "userAgent": "Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.7653",
+    "ip": "127.0.0.1",
+    "_id": "vjes548jt",
+    "_isNew": true,
+    "createdAt": "2026-01-22T18:56:38.234Z",
+    "updatedAt": "2026-01-22T18:56:38.234Z"
+  },
+  {
+    "type": "app_start",
+    "path": "/",
+    "sessionId": "gvtx8pz17bomicvvo7e",
+    "referrer": "",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36",
+    "screen": {
+      "width": 1920,
+      "height": 1080
+    },
+    "ip": "127.0.0.1",
+    "_id": "jq7cvjcgm",
+    "_isNew": true,
+    "createdAt": "2026-01-22T19:04:13.338Z",
+    "updatedAt": "2026-01-22T19:04:13.338Z"
+  },
+  {
+    "type": "app_start",
+    "path": "/product/5",
+    "sessionId": "gvtx8pz17bomicvvo7e",
+    "referrer": "http://localhost:5173/product/5",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36",
+    "screen": {
+      "width": 1920,
+      "height": 1080
+    },
+    "ip": "127.0.0.1",
+    "_id": "dsb72edtb",
+    "_isNew": true,
+    "createdAt": "2026-01-22T19:12:01.919Z",
+    "updatedAt": "2026-01-22T19:12:01.919Z"
+  },
+  {
+    "type": "app_start",
+    "path": "/size-guide",
+    "sessionId": "gvtx8pz17bomicvvo7e",
+    "referrer": "http://localhost:5173/product/5",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36",
+    "screen": {
+      "width": 1920,
+      "height": 1080
+    },
+    "ip": "127.0.0.1",
+    "_id": "kdg2lfzww",
+    "_isNew": true,
+    "createdAt": "2026-01-22T19:43:52.389Z",
+    "updatedAt": "2026-01-22T19:43:52.389Z"
+  },
+  {
+    "type": "app_start",
+    "path": "/size-guide",
+    "sessionId": "gvtx8pz17bomicvvo7e",
+    "referrer": "http://localhost:5173/size-guide",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36",
+    "screen": {
+      "width": 1920,
+      "height": 1080
+    },
+    "ip": "127.0.0.1",
+    "_id": "gwowssrf6",
+    "_isNew": true,
+    "createdAt": "2026-01-22T19:44:51.410Z",
+    "updatedAt": "2026-01-22T19:44:51.410Z"
+  },
+  {
+    "type": "app_start",
+    "path": "/size-guide",
+    "sessionId": "gvtx8pz17bomicvvo7e",
+    "referrer": "http://localhost:5173/size-guide",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36",
+    "screen": {
+      "width": 1920,
+      "height": 1080
+    },
+    "ip": "127.0.0.1",
+    "_id": "xfrl6lqff",
+    "_isNew": true,
+    "createdAt": "2026-01-22T19:44:54.220Z",
+    "updatedAt": "2026-01-22T19:44:54.220Z"
+  },
+  {
+    "type": "app_start",
+    "path": "/size-guide",
+    "sessionId": "gvtx8pz17bomicvvo7e",
+    "referrer": "http://localhost:5173/size-guide",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36",
+    "screen": {
+      "width": 1920,
+      "height": 1080
+    },
+    "ip": "127.0.0.1",
+    "_id": "zbilwd0ks",
+    "_isNew": true,
+    "createdAt": "2026-01-22T19:45:27.364Z",
+    "updatedAt": "2026-01-22T19:45:27.364Z"
+  },
+  {
+    "type": "app_start",
+    "path": "/size-guide.tsx",
+    "sessionId": "gvtx8pz17bomicvvo7e",
+    "referrer": "http://localhost:5173/size-guide",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36",
+    "screen": {
+      "width": 1920,
+      "height": 1080
+    },
+    "ip": "127.0.0.1",
+    "_id": "beky7rb8c",
+    "_isNew": true,
+    "createdAt": "2026-01-22T19:45:39.334Z",
+    "updatedAt": "2026-01-22T19:45:39.334Z"
+  },
+  {
+    "type": "app_start",
+    "path": "/size-guide.tsx",
+    "sessionId": "gvtx8pz17bomicvvo7e",
+    "referrer": "http://localhost:5173/size-guide.tsx",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36",
+    "screen": {
+      "width": 1920,
+      "height": 1080
+    },
+    "ip": "127.0.0.1",
+    "_id": "hfgujuztl",
+    "_isNew": true,
+    "createdAt": "2026-01-22T19:49:26.461Z",
+    "updatedAt": "2026-01-22T19:49:26.461Z"
+  },
+  {
+    "type": "app_start",
+    "path": "/size-guide.tsx",
+    "sessionId": "gvtx8pz17bomicvvo7e",
+    "referrer": "http://localhost:5173/size-guide.tsx",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36",
+    "screen": {
+      "width": 1920,
+      "height": 1080
+    },
+    "ip": "127.0.0.1",
+    "_id": "sazr9ox86",
+    "_isNew": true,
+    "createdAt": "2026-01-22T19:50:24.769Z",
+    "updatedAt": "2026-01-22T19:50:24.769Z"
+  },
+  {
+    "type": "app_start",
+    "path": "/size-guide.tsx",
+    "sessionId": "gvtx8pz17bomicvvo7e",
+    "referrer": "http://localhost:5173/size-guide.tsx",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36",
+    "screen": {
+      "width": 1920,
+      "height": 1080
+    },
+    "ip": "127.0.0.1",
+    "_id": "cynnifuai",
+    "_isNew": true,
+    "createdAt": "2026-01-22T19:51:47.690Z",
+    "updatedAt": "2026-01-22T19:51:47.691Z"
+  },
+  {
+    "type": "app_start",
+    "path": "/size-guide",
+    "sessionId": "gvtx8pz17bomicvvo7e",
+    "referrer": "http://localhost:5173/size-guide.tsx",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36",
+    "screen": {
+      "width": 1920,
+      "height": 1080
+    },
+    "ip": "127.0.0.1",
+    "_id": "as0v5m0ij",
+    "_isNew": true,
+    "createdAt": "2026-01-22T19:52:24.355Z",
+    "updatedAt": "2026-01-22T19:52:24.355Z"
+  },
+  {
+    "type": "app_start",
+    "path": "/size-guide",
+    "sessionId": "gvtx8pz17bomicvvo7e",
+    "referrer": "http://localhost:5173/size-guide.tsx",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36",
+    "screen": {
+      "width": 1920,
+      "height": 1080
+    },
+    "ip": "127.0.0.1",
+    "_id": "6nl7gpfmq",
+    "_isNew": true,
+    "createdAt": "2026-01-22T19:52:26.311Z",
+    "updatedAt": "2026-01-22T19:52:26.311Z"
+  },
+  {
+    "type": "app_start",
+    "path": "/size-guide",
+    "sessionId": "gvtx8pz17bomicvvo7e",
+    "referrer": "http://localhost:5173/size-guide.tsx",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36",
+    "screen": {
+      "width": 1920,
+      "height": 1080
+    },
+    "ip": "127.0.0.1",
+    "_id": "03afhi7pt",
+    "_isNew": true,
+    "createdAt": "2026-01-22T19:52:27.079Z",
+    "updatedAt": "2026-01-22T19:52:27.079Z"
+  },
+  {
+    "type": "app_start",
+    "path": "/size-guide",
+    "sessionId": "gvtx8pz17bomicvvo7e",
+    "referrer": "http://localhost:5173/size-guide.tsx",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36",
+    "screen": {
+      "width": 1920,
+      "height": 1080
+    },
+    "ip": "127.0.0.1",
+    "_id": "0zxukene1",
+    "_isNew": true,
+    "createdAt": "2026-01-22T19:53:18.896Z",
+    "updatedAt": "2026-01-22T19:53:18.896Z"
+  },
+  {
+    "type": "app_start",
+    "path": "/size-guide",
+    "sessionId": "gvtx8pz17bomicvvo7e",
+    "referrer": "http://localhost:5173/size-guide",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36",
+    "screen": {
+      "width": 1920,
+      "height": 1080
+    },
+    "ip": "127.0.0.1",
+    "_id": "pouu86x9c",
+    "_isNew": true,
+    "createdAt": "2026-01-22T19:56:50.552Z",
+    "updatedAt": "2026-01-22T19:56:50.552Z"
+  },
+  {
+    "type": "app_start",
+    "path": "/size-guide",
+    "sessionId": "gvtx8pz17bomicvvo7e",
+    "referrer": "http://localhost:5173/size-guide",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36",
+    "screen": {
+      "width": 1920,
+      "height": 1080
+    },
+    "ip": "127.0.0.1",
+    "_id": "dlkkdt63t",
+    "_isNew": true,
+    "createdAt": "2026-01-22T19:57:08.533Z",
+    "updatedAt": "2026-01-22T19:57:08.533Z"
+  },
+  {
+    "type": "app_start",
+    "path": "/login",
+    "sessionId": "gvtx8pz17bomicvvo7e",
+    "referrer": "http://localhost:5173/size-guide",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36",
+    "screen": {
+      "width": 1920,
+      "height": 1080
+    },
+    "ip": "127.0.0.1",
+    "_id": "cnrmx86c4",
+    "_isNew": true,
+    "createdAt": "2026-01-22T20:08:02.418Z",
+    "updatedAt": "2026-01-22T20:08:02.418Z"
+  },
+  {
+    "type": "app_start",
+    "path": "/profile",
+    "sessionId": "gvtx8pz17bomicvvo7e",
+    "referrer": "http://localhost:5173/profile",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36",
+    "screen": {
+      "width": 1920,
+      "height": 1080
+    },
+    "ip": "127.0.0.1",
+    "_id": "rp7eavscm",
+    "_isNew": true,
+    "createdAt": "2026-01-22T20:08:42.101Z",
+    "updatedAt": "2026-01-22T20:08:42.101Z"
+  },
+  {
+    "type": "app_start",
+    "path": "/login",
+    "sessionId": "gvtx8pz17bomicvvo7e",
+    "referrer": "http://localhost:5173/profile",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36",
+    "screen": {
+      "width": 1920,
+      "height": 1080
+    },
+    "ip": "127.0.0.1",
+    "_id": "m2eoiovwx",
+    "_isNew": true,
+    "createdAt": "2026-01-22T20:08:52.705Z",
+    "updatedAt": "2026-01-22T20:08:52.705Z"
+  },
+  {
+    "type": "app_start",
+    "path": "/login",
+    "sessionId": "gvtx8pz17bomicvvo7e",
+    "referrer": "http://localhost:5173/profile",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36",
+    "screen": {
+      "width": 1920,
+      "height": 1080
+    },
+    "ip": "127.0.0.1",
+    "_id": "4jphvjige",
+    "_isNew": true,
+    "createdAt": "2026-01-22T20:29:54.527Z",
+    "updatedAt": "2026-01-22T20:29:54.527Z"
+  },
+  {
+    "type": "app_start",
+    "path": "/collection",
+    "sessionId": "gvtx8pz17bomicvvo7e",
+    "referrer": "",
+    "userAgent": "Mozilla/5.0 (Linux; Android 8.0.0; SM-G955U Build/R16NW) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36",
+    "screen": {
+      "width": 360,
+      "height": 740
+    },
+    "ip": "127.0.0.1",
+    "_id": "vk0hzf0ay",
+    "_isNew": true,
+    "createdAt": "2026-01-24T19:26:48.824Z",
+    "updatedAt": "2026-01-24T19:26:48.824Z"
+  },
+  {
+    "type": "app_start",
+    "path": "/collection",
+    "sessionId": "gvtx8pz17bomicvvo7e",
+    "referrer": "",
+    "userAgent": "Mozilla/5.0 (Linux; Android 8.0.0; SM-G955U Build/R16NW) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36",
+    "screen": {
+      "width": 360,
+      "height": 740
+    },
+    "ip": "127.0.0.1",
+    "_id": "of6f7mpkh",
+    "_isNew": true,
+    "createdAt": "2026-01-24T19:27:09.884Z",
+    "updatedAt": "2026-01-24T19:27:09.884Z"
+  },
+  {
+    "type": "app_start",
+    "path": "/collection",
+    "sessionId": "gvtx8pz17bomicvvo7e",
+    "referrer": "",
+    "userAgent": "Mozilla/5.0 (Linux; Android 8.0.0; SM-G955U Build/R16NW) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Mobile Safari/537.36",
+    "screen": {
+      "width": 360,
+      "height": 740
+    },
+    "ip": "127.0.0.1",
+    "_id": "i04itw1sl",
+    "_isNew": true,
+    "createdAt": "2026-01-24T19:27:33.459Z",
+    "updatedAt": "2026-01-24T19:27:33.459Z"
+  },
+  {
+    "type": "app_start",
+    "path": "/collection",
+    "sessionId": "gvtx8pz17bomicvvo7e",
+    "referrer": "",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36",
+    "screen": {
+      "width": 1920,
+      "height": 1080
+    },
+    "ip": "127.0.0.1",
+    "_id": "i678zzgbq",
+    "_isNew": true,
+    "createdAt": "2026-01-24T19:27:52.970Z",
+    "updatedAt": "2026-01-24T19:27:52.970Z"
+  },
+  {
+    "type": "app_start",
+    "path": "/collection",
+    "sessionId": "gvtx8pz17bomicvvo7e",
+    "referrer": "",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36",
+    "screen": {
+      "width": 1920,
+      "height": 1080
+    },
+    "ip": "127.0.0.1",
+    "_id": "3gvgjuzhw",
+    "_isNew": true,
+    "createdAt": "2026-01-24T19:28:45.333Z",
+    "updatedAt": "2026-01-24T19:28:45.333Z"
+  },
+  {
+    "type": "app_start",
+    "path": "/checkout",
+    "sessionId": "gvtx8pz17bomicvvo7e",
+    "referrer": "http://localhost:5173/collection?category=stitched",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",
+    "screen": {
+      "width": 1920,
+      "height": 1080
+    },
+    "ip": "127.0.0.1",
+    "_id": "iz4rqf2ed",
+    "_isNew": true,
+    "createdAt": "2026-02-14T21:57:58.340Z",
+    "updatedAt": "2026-02-14T21:57:58.340Z"
+  },
+  {
+    "type": "app_start",
+    "path": "/checkout",
+    "sessionId": "gvtx8pz17bomicvvo7e",
+    "referrer": "http://localhost:5173/collection?category=stitched",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",
+    "screen": {
+      "width": 1920,
+      "height": 1080
+    },
+    "ip": "127.0.0.1",
+    "_id": "macv3ukx9",
+    "_isNew": true,
+    "createdAt": "2026-02-14T21:58:57.915Z",
+    "updatedAt": "2026-02-14T21:58:57.915Z"
+  },
+  {
+    "type": "app_start",
+    "path": "/checkout",
+    "sessionId": "gvtx8pz17bomicvvo7e",
+    "referrer": "http://localhost:5173/collection?category=stitched",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",
+    "screen": {
+      "width": 1920,
+      "height": 1080
+    },
+    "ip": "127.0.0.1",
+    "_id": "d0z0qjrtb",
+    "_isNew": true,
+    "createdAt": "2026-02-14T21:59:39.738Z",
+    "updatedAt": "2026-02-14T21:59:39.738Z"
+  },
+  {
+    "type": "app_start",
+    "path": "/checkout",
+    "sessionId": "gvtx8pz17bomicvvo7e",
+    "referrer": "http://localhost:5173/collection?category=stitched",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",
+    "screen": {
+      "width": 1920,
+      "height": 1080
+    },
+    "ip": "127.0.0.1",
+    "_id": "9ll39a4fd",
+    "_isNew": true,
+    "createdAt": "2026-02-14T22:00:07.975Z",
+    "updatedAt": "2026-02-14T22:00:07.975Z"
+  },
+  {
+    "type": "app_start",
+    "path": "/checkout",
+    "sessionId": "gvtx8pz17bomicvvo7e",
+    "referrer": "http://localhost:5173/collection?category=stitched",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",
+    "screen": {
+      "width": 1920,
+      "height": 1080
+    },
+    "ip": "127.0.0.1",
+    "_id": "whemcp2yy",
+    "_isNew": true,
+    "createdAt": "2026-02-14T22:00:45.366Z",
+    "updatedAt": "2026-02-14T22:00:45.366Z"
+  },
+  {
+    "type": "app_start",
+    "path": "/checkout",
+    "sessionId": "gvtx8pz17bomicvvo7e",
+    "referrer": "http://localhost:5173/collection?category=stitched",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",
+    "screen": {
+      "width": 1920,
+      "height": 1080
+    },
+    "ip": "127.0.0.1",
+    "_id": "6bquevv7b",
+    "_isNew": true,
+    "createdAt": "2026-02-14T22:01:11.813Z",
+    "updatedAt": "2026-02-14T22:01:11.813Z"
+  },
+  {
+    "type": "app_start",
+    "path": "/checkout",
+    "sessionId": "gvtx8pz17bomicvvo7e",
+    "referrer": "http://localhost:5173/collection?category=stitched",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",
+    "screen": {
+      "width": 1920,
+      "height": 1080
+    },
+    "ip": "127.0.0.1",
+    "_id": "pzhgbbgba",
+    "_isNew": true,
+    "createdAt": "2026-02-14T22:05:37.693Z",
+    "updatedAt": "2026-02-14T22:05:37.693Z"
+  },
+  {
+    "type": "app_start",
+    "path": "/checkout",
+    "sessionId": "gvtx8pz17bomicvvo7e",
+    "referrer": "http://localhost:5173/collection?category=stitched",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",
+    "screen": {
+      "width": 1920,
+      "height": 1080
+    },
+    "ip": "127.0.0.1",
+    "_id": "28ktpehm7",
+    "_isNew": true,
+    "createdAt": "2026-02-14T22:09:37.195Z",
+    "updatedAt": "2026-02-14T22:09:37.195Z"
+  },
+  {
+    "type": "app_start",
+    "path": "/checkout",
+    "sessionId": "gvtx8pz17bomicvvo7e",
+    "referrer": "http://localhost:5173/collection?category=stitched",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",
+    "screen": {
+      "width": 1920,
+      "height": 1080
+    },
+    "ip": "127.0.0.1",
+    "_id": "ksy7l9jdl",
+    "_isNew": true,
+    "createdAt": "2026-02-14T22:09:58.838Z",
+    "updatedAt": "2026-02-14T22:09:58.838Z"
+  },
+  {
+    "type": "app_start",
+    "path": "/checkout",
+    "sessionId": "gvtx8pz17bomicvvo7e",
+    "referrer": "http://localhost:5173/collection?category=stitched",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",
+    "screen": {
+      "width": 1920,
+      "height": 1080
+    },
+    "ip": "127.0.0.1",
+    "_id": "7ixuknd47",
+    "_isNew": true,
+    "createdAt": "2026-02-14T22:11:58.757Z",
+    "updatedAt": "2026-02-14T22:11:58.757Z"
+  }
+]

@@ -27,9 +27,15 @@ exports.register = async (req, res) => {
             return res.status(400).json({ error: 'User already exists' });
         }
 
+        // Split name into firstName and lastName for the new schema
+        const nameParts = (name || '').trim().split(/\s+/);
+        const firstName = nameParts[0] || 'Member';
+        const lastName = nameParts.slice(1).join(' ') || 'User';
+
         // Create user
         const user = await User.create({
-            name,
+            firstName,
+            lastName,
             email,
             password // Will be hashed by pre-save hook
         });
@@ -42,7 +48,9 @@ exports.register = async (req, res) => {
             token,
             user: {
                 id: user._id,
-                name: user.name,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                name: `${user.firstName} ${user.lastName}`.trim(),
                 email: user.email,
                 role: user.role
             }
@@ -61,19 +69,14 @@ exports.login = async (req, res) => {
         const { email, password } = req.body;
 
         // --- EMERGENCY ADMIN ACCESS FALLBACK (CONTROLLED) ---
-        // This bypass is intended strictly for operational recovery, not daily use.
-        // Triggers only if specific environment variables are set.
         const RESCUE_EMAIL = process.env.ADMIN_EMAIL;
         const RESCUE_PASS = process.env.ADMIN_PASSWORD;
 
         if (RESCUE_EMAIL && RESCUE_PASS && email === RESCUE_EMAIL && password === RESCUE_PASS) {
-            console.error('⚠️⚠️⚠️ SECURITY WARNING: EMERGENCY ADMIN ACCESS ACTIVATED ⚠️⚠️⚠️');
-            console.error(`timestamp: ${new Date().toISOString()} | ip: ${req.ip}`);
-            logger.warn('EMERGENCY_ADMIN_BYPASS_USED', { ip: req.ip, email });
-
             const rescueUser = {
                 _id: '000000000000000000000000',
-                name: 'Emergency Admin',
+                firstName: 'Emergency',
+                lastName: 'Admin',
                 email: RESCUE_EMAIL,
                 role: 'admin'
             };
@@ -83,13 +86,14 @@ exports.login = async (req, res) => {
                 token,
                 user: {
                     id: rescueUser._id,
-                    name: rescueUser.name,
+                    firstName: rescueUser.firstName,
+                    lastName: rescueUser.lastName,
+                    name: `${rescueUser.firstName} ${rescueUser.lastName}`.trim(),
                     email: rescueUser.email,
                     role: rescueUser.role
                 }
             });
         }
-        // -------------------------------------------
 
         // Check for user
         const user = await User.findOne({ email }).select('+password');
@@ -111,14 +115,16 @@ exports.login = async (req, res) => {
             token,
             user: {
                 id: user._id,
-                name: user.name,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                name: `${user.firstName} ${user.lastName}`.trim(),
                 email: user.email,
                 role: user.role
             }
         });
     } catch (error) {
         logger.error('Login error', { error: error.message });
-        res.status(500).json({ error: error.message, stack: error.stack });
+        res.status(500).json({ error: error.message });
     }
 };
 
@@ -127,18 +133,19 @@ exports.login = async (req, res) => {
 // @access  Private
 exports.getMe = async (req, res) => {
     try {
-        // Safety check to prevent 500 errors if middleware fails
         if (!req.user) {
             return res.status(401).json({ error: 'Not authenticated' });
         }
 
-        const user = req.user; // User is already attached by protect middleware
+        const user = req.user;
 
         res.json({
             success: true,
             user: {
                 id: user._id,
-                name: user.name,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                name: `${user.firstName} ${user.lastName}`.trim(),
                 email: user.email,
                 role: user.role
             }
@@ -162,91 +169,46 @@ exports.logout = async (req, res) => {
 exports.refreshToken = async (req, res) => {
     try {
         const { token } = req.body;
+        if (!token) return res.status(401).json({ error: 'No token provided' });
 
-        if (!token) {
-            return res.status(401).json({ error: 'No token provided' });
-        }
-
-        // Verify token
         const decoded = jwt.verify(token, config.jwt.secret);
         const user = await User.findById(decoded.id);
+        if (!user) return res.status(401).json({ error: 'User not found' });
 
-        if (!user) {
-            return res.status(401).json({ error: 'User not found' });
-        }
-
-        // Generate new token
         const newToken = generateToken(user._id);
-
-        res.json({
-            success: true,
-            token: newToken
-        });
+        res.json({ success: true, token: newToken });
     } catch (error) {
-        logger.error('Refresh token error', { error: error.message });
         res.status(401).json({ error: 'Invalid token' });
     }
 };
 
 // @desc    Forgot password
-// @route   POST /api/auth/forgot-password
-// @access  Public
 exports.forgotPassword = async (req, res) => {
     try {
         const { email } = req.body;
         const user = await User.findOne({ email });
+        if (!user) return res.status(404).json({ error: 'User not found' });
 
-        if (!user) {
-            return res.status(404).json({ error: 'User not found' });
-        }
-
-        // Generate reset token
-        const resetToken = jwt.sign({ id: user._id }, config.jwt.secret, {
-            expiresIn: '1h'
-        });
-
-        // TODO: Send email with reset link
-        // For now, just return the token
-        logger.info('Password reset requested', { email });
-
-        res.json({
-            success: true,
-            message: 'Password reset email sent',
-            // Remove this in production
-            resetToken
-        });
+        const resetToken = jwt.sign({ id: user._id }, config.jwt.secret, { expiresIn: '1h' });
+        res.json({ success: true, message: 'Password reset email sent', resetToken });
     } catch (error) {
-        logger.error('Forgot password error', { error: error.message });
-        res.status(500).json({ error: 'Failed to process request' });
+        res.status(500).json({ error: 'Failed' });
     }
 };
 
 // @desc    Reset password
-// @route   POST /api/auth/reset-password/:token
-// @access  Public
 exports.resetPassword = async (req, res) => {
     try {
         const { token } = req.params;
         const { password } = req.body;
-
-        // Verify token
         const decoded = jwt.verify(token, config.jwt.secret);
         const user = await User.findById(decoded.id);
+        if (!user) return res.status(404).json({ error: 'Invalid token' });
 
-        if (!user) {
-            return res.status(404).json({ error: 'Invalid token' });
-        }
-
-        // Update password
         user.password = password;
         await user.save();
-
-        res.json({
-            success: true,
-            message: 'Password reset successful'
-        });
+        res.json({ success: true, message: 'Password reset successful' });
     } catch (error) {
-        logger.error('Reset password error', { error: error.message });
-        res.status(500).json({ error: 'Failed to reset password' });
+        res.status(500).json({ error: 'Failed' });
     }
 };

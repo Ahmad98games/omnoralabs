@@ -207,24 +207,24 @@ const Login: React.FC = () => {
 
     return (
 
-        <div className="login-page">
+        <div className="login-luxury-page">
+            <div className="login-visual-sidebar">
+                <img src="/images/home/formal.png" alt="GSG Fashion" className="login-visual-img" />
+                <div className="visual-overlay-gold" />
+                <div className="visual-caption">
+                    <span className="eyebrow">GSG ATELIER</span>
+                    <h2 className="subtitle-serif text-white">Crafting Traditions</h2>
+                </div>
+            </div>
 
-            <canvas id="bgCanvas" className="bg-canvas"></canvas>
-
-            <div className="login-container animate-fade-in">
-
-                <div className="login-box">
-
-                    <div className="login-header">
-
-                        <h1 className="login-title">{isSignUp ? 'Create an account' : 'Welcome back'}</h1>
-
-                        <p className="login-subtitle">
-
-                            {isSignUp ? 'Sign up to get started' : 'Sign in to your account to continue'}
-
+            <div className="login-auth-container animate-fade-in">
+                <div className="login-auth-box">
+                    <div className="login-auth-header text-center">
+                        <span className="eyebrow">AUTHENTICATION</span>
+                        <h1 className="subtitle-serif">{isSignUp ? 'Join the Legacy' : 'Atelier Access'}</h1>
+                        <p className="text-muted italic">
+                            {isSignUp ? 'Create your profile to explore custom craftsmanship.' : 'Enter your credentials to manage your selection.'}
                         </p>
-
                     </div>
 
                     {error && <div id="errorMessage" style={{ display: 'block' }}>{error}</div>}
@@ -334,10 +334,8 @@ const Login: React.FC = () => {
 
                         </div>
 
-                        <button type="submit" className="login-button" disabled={loadingState}>
-
-                            {loadingState ? (isSignUp ? 'Creating Account...' : 'Signing In...') : isSignUp ? 'Create Account' : 'Sign In'}
-
+                        <button type="submit" className="btn-luxury-full" disabled={loadingState}>
+                            {loadingState ? (isSignUp ? 'PREPARING...' : 'ACCESSING...') : isSignUp ? 'CREATE ACCOUNT' : 'ENTER ATELIER'}
                         </button>
 
                     </form>

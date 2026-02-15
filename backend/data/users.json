@@ -1,9 +1,10 @@
 [
   {
     "_id": "fvrr6u3j9",
-    "name": "Admin User",
+    "firstName": "Admin",
+    "lastName": "User",
     "email": "pakahmad9815@gmail.com",
-    "password": "$2a$10$174yzKsVyqN5ggUFewh87uem9C7JlP8MKwnEerDpJ7BY2ooibCPUO",
+    "password": "$2a$10$ZMGemEIHpccNjQ98/VloIem6MQbtPUEkbGhZnngDwPscUoScGYwvBe",
     "role": "admin",
     "addresses": [],
     "createdAt": "2026-01-08T19:22:31.094Z",
@@ -12,9 +13,10 @@
   },
   {
     "_id": "admin_default",
-    "name": "Admin",
+    "firstName": "Admin",
+    "lastName": "Official",
     "email": "admin@omnora.com",
-    "password": "$2a$10$5sOObsCtcBgAXib.QCcZQevmLiTZUGTIXV97HAR.qFEepK5B/W9gm",
+    "password": "$2a$10$ZMGemEIHpccNjQ98/VloIem6MQbtPUEkbGhZnngDwPscUoScGYwvBe",
     "role": "admin",
     "addresses": [],
     "createdAt": "2024-01-01T00:00:00.000Z",

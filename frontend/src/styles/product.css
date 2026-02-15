@@ -1,0 +1,157 @@
+/* ============================================================ 
+    PRODUCT DETAIL PAGE - LUXURY THEME
+   ============================================================ */
+
+.product-detail-page {
+    background: #fff;
+    min-height: 100vh;
+    padding: 6rem 0 10rem;
+}
+
+.product-container {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 6rem;
+    align-items: start;
+}
+
+/* --- Gallery --- */
+.main-image-box {
+    aspect-ratio: 4/5;
+    background: #f9f9f9;
+    overflow: hidden;
+}
+
+.main-image-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* --- Info Stack --- */
+.p-brand-lux {
+    color: var(--gold);
+    margin-bottom: 1rem;
+}
+
+.p-name-lux {
+    font-size: 3rem;
+    line-height: 1.1;
+    margin-bottom: 1.5rem;
+}
+
+.p-price-lux {
+    font-size: 1.8rem;
+    font-weight: 500;
+    margin-bottom: 3rem;
+}
+
+.p-desc-lux {
+    margin-bottom: 4rem;
+}
+
+.p-meta-lux {
+    font-size: 0.8rem;
+    letter-spacing: 0.05em;
+}
+
+/* --- Selectors --- */
+.group-label {
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.15em;
+    color: #999;
+    text-transform: uppercase;
+}
+
+.size-grid {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.size-option {
+    width: 50px;
+    height: 50px;
+    border: 1px solid #eee;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.size-option:hover,
+.size-option.active {
+    border-color: var(--gold);
+    color: var(--gold);
+}
+
+.qty-control {
+    margin-top: 1rem;
+    border: 1px solid #eee;
+    padding: 0.8rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    width: fit-content;
+}
+
+/* --- Actions --- */
+.p-actions-lux {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 4rem;
+}
+
+.p-actions-lux .btn-luxury-action {
+    width: 100%;
+    padding: 1.5rem;
+}
+
+.p-actions-lux .btn-luxury-outline {
+    width: 100%;
+    padding: 1.3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+/* --- Trust --- */
+.trust-indicators {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-top: 5rem;
+    padding-top: 3rem;
+    border-top: 1px solid #f0f0f0;
+}
+
+.trust-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: #999;
+}
+
+.trust-card span {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+@media (max-width: 992px) {
+    .product-container {
+        grid-template-columns: 1fr;
+    }
+
+    .p-name-lux {
+        font-size: 2.2rem;
+    }
+}

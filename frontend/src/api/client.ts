@@ -55,14 +55,20 @@ client.interceptors.response.use(
 
     const config = error.config as InternalAxiosRequestConfig
 
+    // Handle Cancelled requests immediately - do not transform them
+    if (axios.isCancel(error)) {
+      return Promise.reject(error);
+    }
+
     // Initialize retry count
-    if (!config._retryCount) {
-      config._retryCount = 0
+    if (!config || !config._retryCount) {
+      if (config) config._retryCount = 0
     }
 
     // Check if we should retry
     const shouldRetry = (
-      config._retryCount < MAX_RETRIES &&
+      config &&
+      config._retryCount! < MAX_RETRIES &&
       (
         // Retry on network errors (backend not ready)
         error.code === 'ECONNREFUSED' ||
@@ -74,10 +80,10 @@ client.interceptors.response.use(
     )
 
     if (shouldRetry && config) {
-      config._retryCount++
+      config._retryCount!++
 
       // Exponential backoff: wait longer for each retry
-      const delay = RETRY_DELAY * Math.pow(2, config._retryCount - 1)
+      const delay = RETRY_DELAY * Math.pow(2, config._retryCount! - 1)
 
       console.log(`Retrying request (attempt ${config._retryCount}/${MAX_RETRIES}) after ${delay}ms...`)
 
@@ -106,13 +112,22 @@ client.interceptors.response.use(
           errorMessage = data.reason;
         }
       }
-      return Promise.reject(new Error(errorMessage))
+
+      const responseError = new Error(errorMessage) as any;
+      responseError.response = error.response;
+      responseError.code = `API_${error.response.status}`;
+      return Promise.reject(responseError)
     } else if (error.request) {
       // The request was made but no response was received
-      return Promise.reject(new Error('Unable to reach the server. Please check your internet connection or try again later.'))
+      const networkError = new Error('Unable to reach the server. Please check your internet connection or try again later.') as any;
+      networkError.code = error.code || 'ERR_NETWORK';
+      networkError.request = error.request;
+      return Promise.reject(networkError)
     } else {
       // Something happened in setting up the request
-      return Promise.reject(new Error('Failed to make request. Please try again.'))
+      const setupError = new Error('Failed to make request. Please try again.') as any;
+      setupError.code = error.code || 'ERR_SETUP';
+      return Promise.reject(setupError)
     }
   }
 )

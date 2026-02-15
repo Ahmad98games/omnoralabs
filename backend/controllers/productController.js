@@ -3,11 +3,6 @@ const Product = require('../models/Product');
 const logger = require('../services/logger');
 const defaultProducts = require('../data/defaultProducts');
 
-// Check if MongoDB is connected
-const isMongoDBConnected = () => {
-  return mongoose.connection.readyState === 1;
-};
-
 const buildFilters = (query) => {
   const filters = {};
   if (query.category) {
@@ -52,49 +47,6 @@ const getSortOrder = (sort) => {
  */
 exports.getProducts = async (req, res) => {
   try {
-    // Use in-memory fallback if MongoDB is not connected
-    if (!isMongoDBConnected()) {
-      const page = parseInt(req.query.page, 10) || 1;
-      const limit = Math.min(parseInt(req.query.limit, 10) || 12, 100);
-      const startIndex = (page - 1) * limit;
-      const endIndex = page * limit;
-
-      const results = defaultProducts.slice(startIndex, endIndex);
-
-      return res.json({
-        success: true,
-        data: results,
-        pagination: {
-          page,
-          limit,
-          total: defaultProducts.length,
-          pages: Math.ceil(defaultProducts.length / limit)
-        },
-        fallback: true
-      });
-    }
-
-    // Check if database is empty and seed it
-    const count = await Product.countDocuments();
-    if (count === 0) {
-      logger.info('Database is empty, seeding with default products');
-      const productsToSeed = defaultProducts.map(p => ({
-        _id: p._id, // Preserve ID
-        name: p.name,
-        description: p.description,
-        price: p.price,
-        image: p.image,
-        category: p.category,
-        isFeatured: p.featured || false,
-        isNew: false,
-        inventoryCount: 100
-      }));
-      for (const p of productsToSeed) {
-        await Product.create(p); // Create one by one to trigger LocalDB hooks/save
-      }
-      logger.info(`Seeded ${productsToSeed.length} products`);
-    }
-
     const page = parseInt(req.query.page, 10) || 1;
     const limit = Math.min(parseInt(req.query.limit, 10) || 12, 100);
     const skip = (page - 1) * limit;
@@ -102,14 +54,24 @@ exports.getProducts = async (req, res) => {
     const filters = buildFilters(req.query);
     const sort = getSortOrder(req.query.sort);
 
-    const [products, total] = await Promise.all([
-      Product.find(filters).sort(sort).skip(skip).limit(limit), // Removed .lean()
-      Product.countDocuments(filters)
-    ]);
+    // Initial seed if empty
+    const count = await Product.countDocuments();
+    if (count === 0) {
+      logger.info('Database/LocalDB is empty, seeding with default products');
+      for (const p of defaultProducts) {
+        await Product.create({
+          ...p,
+          isFeatured: p.featured || false
+        });
+      }
+    }
+
+    const productsSelection = await Product.find(filters).sort(sort).skip(skip).limit(limit);
+    const total = await Product.countDocuments(filters);
 
     res.json({
       success: true,
-      data: products,
+      data: productsSelection,
       pagination: {
         page,
         limit,
@@ -118,24 +80,8 @@ exports.getProducts = async (req, res) => {
       }
     });
   } catch (error) {
-    logger.error('Error fetching products', {
-      error: error.message,
-      stack: error.stack,
-      query: req.query
-    });
-
-    // Fallback on error
-    res.json({
-      success: true,
-      data: defaultProducts,
-      pagination: {
-        page: 1,
-        limit: defaultProducts.length,
-        total: defaultProducts.length,
-        pages: 1
-      },
-      fallback: true
-    });
+    logger.error('Error fetching products', { error: error.message });
+    res.status(500).json({ error: 'Server error', message: error.message });
   }
 };
 
@@ -178,28 +124,12 @@ exports.getProductById = async (req, res) => {
 exports.getProductsByCategory = async (req, res) => {
   try {
     const category = req.params.category.toLowerCase();
-
-    // Use in-memory fallback if MongoDB is not connected
-    if (!isMongoDBConnected()) {
-      const filtered = defaultProducts.filter(p => p.category === category);
-      return res.json({
-        success: true,
-        data: filtered,
-        pagination: {
-          page: 1,
-          limit: filtered.length,
-          total: filtered.length,
-          pages: 1
-        }
-      });
-    }
-
     const page = parseInt(req.query.page, 10) || 1;
     const limit = Math.min(parseInt(req.query.limit, 10) || 12, 100);
     const skip = (page - 1) * limit;
 
     const [products, total] = await Promise.all([
-      Product.find({ category }).skip(skip).limit(limit).lean(),
+      Product.find({ category }).sort({ createdAt: -1 }).skip(skip).limit(limit),
       Product.countDocuments({ category })
     ]);
 
@@ -214,113 +144,43 @@ exports.getProductsByCategory = async (req, res) => {
       }
     });
   } catch (error) {
-    logger.error('Error fetching products by category', {
-      error: error.message,
-      category: req.params.category
-    });
-
-    // CONSISTENT fallback
-    const category = req.params.category.toLowerCase();
-    const filtered = defaultProducts.filter(p => p.category === category);
-
-    res.status(200).json({
-      success: true,
-      data: filtered,
-      pagination: {
-        page: 1,
-        limit: filtered.length,
-        total: filtered.length,
-        pages: 1
-      },
-      fallback: true
-    });
+    logger.error('Error fetching products by category', { error: error.message });
+    res.status(500).json({ success: false, error: 'Server error' });
   }
 };
 
-/**
- * @desc    Get new arrivals
- * @route   GET /api/products/new-arrivals
- * @access  Public
- */
 exports.getNewArrivals = async (req, res) => {
   try {
-    // Use in-memory fallback if MongoDB is not connected
-    if (!isMongoDBConnected()) {
-      return res.json({
-        success: true,
-        data: defaultProducts.slice(0, 3)
-      });
-    }
-
     const limit = Math.min(parseInt(req.query.limit, 10) || 8, 50);
     const newArrivals = await Product.find({ isNew: true })
       .sort({ createdAt: -1 })
-      .limit(limit)
-      .lean();
+      .limit(limit);
 
     res.json({ success: true, data: newArrivals });
   } catch (error) {
     logger.error('Error fetching new arrivals', { error: error.message });
-    res.json({
-      success: true,
-      data: defaultProducts.slice(0, 3),
-      fallback: true
-    });
+    res.status(500).json({ success: false, error: 'Server error' });
   }
 };
 
-/**
- * @desc    Get featured products
- * @route   GET /api/products/featured
- * @access  Public
- */
 exports.getFeaturedProducts = async (req, res) => {
   try {
-    // Use in-memory fallback if MongoDB is not connected
-    if (!isMongoDBConnected()) {
-      const featured = defaultProducts.filter(p => p.featured);
-      return res.json({ success: true, data: featured });
-    }
-
     const limit = Math.min(parseInt(req.query.limit, 10) || 4, 50);
     const featuredProducts = await Product.find({ isFeatured: true })
-      .limit(limit)
-      .lean();
+      .limit(limit);
 
     res.json({ success: true, data: featuredProducts });
   } catch (error) {
     logger.error('Error fetching featured products', { error: error.message });
-    const featured = defaultProducts.filter(p => p.featured);
-    res.json({
-      success: true,
-      data: featured,
-      fallback: true
-    });
+    res.status(500).json({ success: false, error: 'Server error' });
   }
 };
 
-/**
- * @desc    Search products
- * @route   GET /api/products/search?q=query
- * @access  Public
- */
 exports.searchProducts = async (req, res) => {
   try {
     const { q } = req.query;
     if (!q) {
-      return res.status(400).json({
-        success: false,
-        error: 'Search query is required.'
-      });
-    }
-
-    // Use in-memory fallback if MongoDB is not connected
-    if (!isMongoDBConnected()) {
-      const results = defaultProducts.filter(p =>
-        p.name.toLowerCase().includes(q.toLowerCase()) ||
-        p.description.toLowerCase().includes(q.toLowerCase())
-      );
-      return res.json({ success: true, data: results });
+      return res.status(400).json({ success: false, error: 'Search query is required.' });
     }
 
     const results = await Product.find({
@@ -329,26 +189,12 @@ exports.searchProducts = async (req, res) => {
         { description: { $regex: q, $options: 'i' } },
         { category: { $regex: q, $options: 'i' } }
       ]
-    }).limit(50).lean();
+    }).limit(50);
 
     res.json({ success: true, data: results });
   } catch (error) {
-    logger.error('Error searching products', {
-      error: error.message,
-      query: req.query.q
-    });
-
-    const { q } = req.query;
-    const results = defaultProducts.filter(p =>
-      p.name.toLowerCase().includes(q.toLowerCase()) ||
-      p.description.toLowerCase().includes(q.toLowerCase())
-    );
-
-    res.json({
-      success: true,
-      data: results,
-      fallback: true
-    });
+    logger.error('Error searching products', { error: error.message });
+    res.status(500).json({ success: false, error: 'Server error' });
   }
 };
 

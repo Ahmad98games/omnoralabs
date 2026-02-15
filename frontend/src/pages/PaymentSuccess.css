@@ -1,211 +1,146 @@
-/* ============================================================================
-   PAYMENT SUCCESS - "The Confirmation"
-   Aesthetic: Dark / Neon Green / High-Tech
-   ============================================================================ */
-
-:root {
-    --success-green: #25D366;
-    --void: #030303;
-    --text-primary: #fff;
-    --text-muted: #888;
-}
+/* ============================================================ 
+    PAYMENT SUCCESS PAGE - LUXURY THEME
+   ============================================================ */
 
 .payment-success-page {
     min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: var(--void);
+    background: #fff;
     padding: 2rem;
-    position: relative;
-    overflow: hidden;
 }
 
-/* --- Container Card --- */
 .success-container {
-    background: rgba(20, 20, 20, 0.8);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(20px);
-    border-radius: 16px;
-    padding: 3.5rem 2.5rem;
     max-width: 500px;
     width: 100%;
     text-align: center;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
-    position: relative;
-    z-index: 1;
 }
 
-/* --- Icon Animation --- */
+/* --- Icon --- */
 .success-icon-wrapper {
     position: relative;
     width: 80px;
     height: 80px;
-    margin: 0 auto 2rem;
+    margin: 0 auto 3rem;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
 .success-icon {
-    color: var(--success-green);
-    position: relative;
+    color: var(--gold);
     z-index: 2;
-    filter: drop-shadow(0 0 10px rgba(37, 211, 102, 0.5));
 }
 
 .pulse-ring {
     position: absolute;
     inset: 0;
+    border: 1px solid var(--gold);
     border-radius: 50%;
-    border: 2px solid rgba(37, 211, 102, 0.3);
-    animation: ripple 2s infinite;
+    animation: ripple-lux 3s infinite;
 }
 
-@keyframes ripple {
-    0% { transform: scale(0.8); opacity: 1; }
-    100% { transform: scale(1.6); opacity: 0; }
+@keyframes ripple-lux {
+    0% {
+        transform: scale(0.8);
+        opacity: 0.8;
+    }
+
+    100% {
+        transform: scale(2);
+        opacity: 0;
+    }
 }
 
-/* --- Typography --- */
-.success-title {
-    font-family: var(--font-serif);
-    font-size: 2.2rem;
-    color: var(--text-primary);
-    margin-bottom: 1rem;
-    line-height: 1.1;
-}
-
+/* --- Content --- */
 .success-message {
-    color: var(--text-muted);
-    font-size: 1rem;
-    line-height: 1.6;
-    margin-bottom: 2.5rem;
+    color: #666;
+    margin-top: 1rem;
+    margin-bottom: 4rem;
 }
 
-/* --- Order Ticket --- */
-.order-ticket {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    padding: 1.5rem;
-    margin-bottom: 2rem;
+/* --- Ticket --- */
+.order-ticket-luxury {
+    background: #fafafa;
+    border: 1px solid #eee;
+    padding: 2.5rem;
+    margin-bottom: 3rem;
+    text-align: left;
 }
 
-.ticket-row {
+.ticket-row-lux {
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-.ticket-label {
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--text-muted);
-}
-
-.ticket-value {
-    color: var(--text-primary);
+.ticket-label-lux {
+    font-size: 0.65rem;
     font-weight: 700;
+    letter-spacing: 0.15em;
+    color: #999;
 }
 
-.mono-text {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 1.1rem;
-    color: var(--neon-cyan);
+.ticket-value-lux {
+    font-weight: 600;
+    color: var(--royal-blue);
 }
 
-.ticket-divider {
+.ticket-divider-lux {
     height: 1px;
-    background: rgba(255, 255, 255, 0.1);
-    margin: 1rem 0;
+    background: #eee;
+    margin: 1.5rem 0;
 }
 
-.status-badge-success {
-    background: rgba(37, 211, 102, 0.1);
-    color: var(--success-green);
-    font-size: 0.75rem;
+.status-pill-success {
+    font-size: 0.65rem;
     font-weight: 700;
-    padding: 0.3rem 0.8rem;
-    border-radius: 100px;
+    padding: 0.4rem 0.8rem;
+    background: #e6f6ee;
+    color: #1a7f4e;
     letter-spacing: 0.05em;
-    border: 1px solid rgba(37, 211, 102, 0.2);
 }
 
-/* --- Email Note --- */
 .email-note {
-    font-size: 0.85rem;
-    color: var(--text-muted);
-    margin-bottom: 2rem;
-    font-style: italic;
-    opacity: 0.8;
+    font-size: 0.8rem;
+    color: #999;
+    margin-bottom: 3rem;
 }
 
 /* --- Buttons --- */
-.action-buttons {
-    display: flex;
-    flex-direction: column;
+.action-buttons-luxury {
+    display: grid;
     gap: 1rem;
 }
 
-.btn-primary-glow {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.6rem;
-    padding: 1rem;
-    background: var(--text-primary);
-    color: #000;
+.btn-luxury-action {
+    padding: 1.2rem;
+    background: var(--royal-blue);
+    color: #fff;
+    text-decoration: none;
     font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    transition: background 0.3s ease;
+}
+
+.btn-luxury-action:hover {
+    background: #122846;
+}
+
+.btn-luxury-outline {
+    padding: 1.2rem;
+    border: 1px solid var(--gold);
+    color: var(--gold);
     text-decoration: none;
-    font-size: 0.9rem;
-    transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
-    border-radius: 2px;
+    font-weight: 700;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    transition: all 0.3s ease;
 }
 
-.btn-primary-glow:hover {
-    background: var(--neon-cyan);
-    box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
-    transform: translateY(-2px);
-}
-
-.btn-ghost {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.6rem;
-    padding: 1rem;
-    background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: var(--text-primary);
-    text-decoration: none;
-    text-transform: uppercase;
-    font-size: 0.8rem;
-    letter-spacing: 0.1em;
-    transition: all 0.3s;
-    border-radius: 2px;
-}
-
-.btn-ghost:hover {
-    border-color: var(--text-primary);
-    background: rgba(255, 255, 255, 0.05);
-}
-
-/* --- Animation --- */
-@keyframes scaleUp {
-    from { opacity: 0; transform: scale(0.95); }
-    to { opacity: 1; transform: scale(1); }
-}
-
-.animate-scale-up {
-    animation: scaleUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-/* Mobile */
-@media (max-width: 640px) {
-    .success-container { padding: 2.5rem 1.5rem; }
-    .success-title { font-size: 1.8rem; }
+.btn-luxury-outline:hover {
+    background: var(--gold);
+    color: #fff;
 }

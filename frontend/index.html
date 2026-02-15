@@ -4,40 +4,40 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Omnora — luxury handcrafted bath bombs for modern self-care." />
-  <title>Omnora</title>
+  <meta name="description" content="Gold She Garments — Premium Pakistani fashion for modern women. Ready-to-wear, unstitched, and formal collections." />
+  <title>Gold She Garments | Premium Pakistani Fashion</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://omnora.com/" />
-  <meta property="og:title" content="Omnora - Luxury Bath Bombs" />
-  <meta property="og:description" content="Handcrafted luxury bath bombs for modern self-care." />
-  <meta property="og:image" content="https://omnora.com/images/og-image.jpg" />
+  <meta property="og:url" content="https://goldshegarments.com/" />
+  <meta property="og:title" content="Gold She Garments - Premium Pakistani Fashion" />
+  <meta property="og:description" content="Premium Pakistani fashion for modern women. Explore our latest collections." />
+  <meta property="og:image" content="https://goldshegarments.com/images/og-image.jpg" />
 
   <!-- Twitter -->
   <meta property="twitter:card" content="summary_large_image" />
-  <meta property="twitter:url" content="https://omnora.com/" />
-  <meta property="twitter:title" content="Omnora - Luxury Bath Bombs" />
-  <meta property="twitter:description" content="Handcrafted luxury bath bombs for modern self-care." />
-  <meta property="twitter:image" content="https://omnora.com/images/og-image.jpg" />
+  <meta property="twitter:url" content="https://goldshegarments.com/" />
+  <meta property="twitter:title" content="Gold She Garments - Premium Pakistani Fashion" />
+  <meta property="twitter:description" content="Premium Pakistani fashion for modern women. Explore our latest collections." />
+  <meta property="twitter:image" content="https://goldshegarments.com/images/og-image.jpg" />
 
   <style>
     :root {
-      --bg-color: #0e0f12;
-      --dark-bg-color: #0b0c0f;
-      --surface-color: #14161b;
-      --text-color: #f5f7fa;
-      --light-text-color: #aeb5c0;
-      --border-color: rgba(255, 255, 255, 0.08);
-      --shadow-color: rgba(0, 0, 0, 0.25);
-      --accent-1: #9b87f5;
-      /* lavender */
-      --accent-2: #7ee7d8;
-      /* mint */
-      --accent-3: #f7b267;
-      /* apricot */
-      --accent-4: #f76da8;
-      /* rose */
+      --royal-blue: #1B365D;
+      --blush-pink: #FADADD;
+      --muted-gold: #C5A059;
+      --warm-white: #F9F9F9;
+      --bg-color: var(--warm-white);
+      --surface-color: #FFFFFF;
+      --text-color: #2D2D2D;
+      --light-text-color: #5C5C5C;
+      --border-color: #E2E8F0;
+      --shadow-color: rgba(27, 54, 93, 0.1);
     }
 
     html,
@@ -50,65 +50,72 @@
 
     body {
       margin: 0;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
     }
 
     .luxury-button {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      background: linear-gradient(135deg, var(--accent-1), var(--accent-4));
-      color: #0e0f12;
-      font-weight: 700;
-      padding: 0.65rem 1rem;
-      border-radius: 999px;
-      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: var(--royal-blue);
+      color: #FFFFFF;
+      font-weight: 600;
+      padding: 0.75rem 1.5rem;
+      border-radius: 4px;
+      border: none;
       text-decoration: none;
-      box-shadow: 0 10px 30px rgba(155, 135, 245, 0.25);
+      box-shadow: 0 4px 15px rgba(27, 54, 93, 0.15);
       cursor: pointer;
+      transition: all 0.3s ease;
     }
 
     .luxury-button:hover {
-      filter: brightness(1.05);
+      filter: brightness(1.1);
+      transform: translateY(-1px);
     }
 
     .form-input {
-      background: var(--surface-color);
+      background: #FFFFFF;
       color: var(--text-color);
       border: 1px solid var(--border-color);
       border-radius: 8px;
-      padding: 0.65rem 0.75rem;
+      padding: 0.75rem 1rem;
       outline: none;
+      transition: all 0.2s ease;
     }
 
     .form-input:focus {
-      border-color: var(--accent-1);
-      box-shadow: 0 0 0 3px rgba(155, 135, 245, 0.2);
+      border-color: var(--royal-blue);
+      box-shadow: 0 0 0 3px rgba(27, 54, 93, 0.05);
     }
 
     .nav-link {
       color: var(--text-color);
       text-decoration: none;
-      opacity: 0.8;
+      opacity: 0.9;
     }
 
     .nav-link.active,
     .nav-link:hover {
       opacity: 1;
+      color: var(--royal-blue);
     }
 
     .page-title {
-      font-size: 1.75rem;
-      letter-spacing: 0.5px;
+      font-family: 'Playfair Display', serif;
+      font-size: 2.5rem;
+      font-weight: 700;
     }
 
     .section-title {
-      font-size: 1.5rem;
-      margin-bottom: 1rem;
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
     }
 
     a {
-      color: var(--accent-2);
+      color: var(--royal-blue);
     }
   </style>
 </head>

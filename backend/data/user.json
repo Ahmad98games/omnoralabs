@@ -1,0 +1,26 @@
+[
+  {
+    "_id": "fvrr6u3j9",
+    "firstName": "Admin",
+    "lastName": "User",
+    "email": "pakahmad9815@gmail.com",
+    "password": "$2a$10$7jxhekfsB8JC0mxcUGFA9OcETd0U0sPTRsdOEI.jBe6BnxCqsTw0m",
+    "role": "admin",
+    "addresses": [],
+    "createdAt": "2026-01-08T19:22:31.094Z",
+    "updatedAt": "2026-01-08T19:22:31.094Z",
+    "__v": 0
+  },
+  {
+    "_id": "admin_default",
+    "firstName": "Admin",
+    "lastName": "Official",
+    "email": "admin@omnora.com",
+    "password": "$2a$10$7jxhekfsB8JC0mxcUGFA9OcETd0U0sPTRsdOEI.jBe6BnxCqsTw0m",
+    "role": "admin",
+    "addresses": [],
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z",
+    "__v": 0
+  }
+]

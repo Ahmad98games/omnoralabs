@@ -1,272 +1,223 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
+import axios from 'axios';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Sparkles, HandPlatter, Package, Flower, MessageSquare } from 'lucide-react';
+import {
+  ArrowRight,
+  Truck,
+  ShieldCheck,
+  CreditCard,
+  HeadphonesIcon
+} from 'lucide-react';
 import client from '../api/client';
-import { useToast } from '../context/ToastContext';
-import Carousel from '../components/Carousel';
-import PosterGallery from '../components/PosterGallery';
-import heroVideo from '../components/home/hero_video.mp4';
+import Skeleton from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
+import '../styles/Home.css';
 
-// Assets
-import bakingSodaImg from '../assets/ingredients/baking_soda.png';
-import citricAcidImg from '../assets/ingredients/citric_acid.png';
-import epsomSaltImg from '../assets/ingredients/epsom_salt.png';
-import polysorbateImg from '../assets/ingredients/polysorbate_80.png';
-import foodColorImg from '../assets/ingredients/food_color.png';
-import coconutOilImg from '../assets/ingredients/coconut_oil.png';
-import roseImg from '../assets/ingredients/rose.jpg';
-
-import './OmnoraFinal.css';
-
-// --- TYPES ---
-interface ValueCardProps {
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-}
-
-interface CategoryCardProps {
-  to: string;
-  title: string;
-  subtitle: string;
-  bgImage: string; // Changed to direct image URL for flexibility
-}
-
-interface IngredientCardProps {
-  image: string;
+interface Product {
+  _id: string;
   name: string;
-  description?: string;
+  price: number;
+  image?: string;
+  category?: string;
 }
 
-// --- SUB-COMPONENTS ---
-const ValueCard: React.FC<ValueCardProps> = ({ icon, title, description }) => (
-  <div className="value-card-magnum">
-    <div className="vc-icon">{icon}</div>
-    <h3 className="vc-title">{title}</h3>
-    <p className="vc-desc">{description}</p>
-  </div>
-);
-
-const CategoryCard: React.FC<CategoryCardProps> = ({ to, title, subtitle, bgImage }) => (
-  <Link to={to} className="cat-card-magnum">
-    <div className="cat-bg">
-      <div
-        style={{
-          width: '100%',
-          height: '100%',
-          backgroundImage: `url(${bgImage})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center'
-        }}
-      />
-    </div>
-    <div className="cat-content">
-      <h3 className="cat-title">{title}</h3>
-      <span className="cat-sub">{subtitle}</span>
-    </div>
-  </Link>
-);
-
-const IngredientCard: React.FC<IngredientCardProps> = ({ image, name, description }) => (
-  <div className="ing-card-visual">
-    <div className="ing-img-container">
-      <img src={image} alt={name} loading="lazy" />
-    </div>
-    <h3 className="ing-name">{name}</h3>
-    {description && <p className="ing-desc">{description}</p>}
-  </div>
-);
-
-// --- MAIN COMPONENT ---
 export default function Home() {
-  const [email, setEmail] = useState<string>('');
-  const [isSubscribing, setIsSubscribing] = useState<boolean>(false);
-  const [isMobile, setIsMobile] = useState<boolean>(false);
-  const { showToast } = useToast();
+  const [featured, setFeatured] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const scrollRefs = useRef<(HTMLElement | null)[]>([]);
 
-  const handleNewsletterSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!email.trim()) return;
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const res = await client.get('/products?limit=4');
+        const list = res.data?.data || res.data?.products || [];
+        setFeatured(list.slice(0, 4));
+      } catch (err) {
+        if (!axios.isCancel(err)) {
+          console.error('Failed to fetch featured products', err);
+          setFeatured([]);
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
+  }, []);
 
-    setIsSubscribing(true);
-    try {
-      await client.post('/newsletter/subscribe', { email });
-      showToast('Welcome to the inner circle.', 'success');
-      setEmail('');
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || 'Subscription failed.';
-      showToast(errorMessage, 'error');
-    } finally {
-      setIsSubscribing(false);
+  useEffect(() => {
+    // Defensive IntersectionObserver for Scroll Reveal
+    if (!window.IntersectionObserver) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('reveal-active');
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    const currentRefs = scrollRefs.current;
+    currentRefs.forEach((ref) => {
+      if (ref) observer.observe(ref);
+    });
+
+    return () => {
+      currentRefs.forEach((ref) => {
+        if (ref) observer.unobserve(ref);
+      });
+      observer.disconnect();
+    };
+  }, [loading, featured]);
+
+  const addToRefs = (el: HTMLElement | null) => {
+    if (el && !scrollRefs.current.includes(el)) {
+      scrollRefs.current.push(el);
     }
   };
 
   return (
-    <div className="home-magnum">
-      <div className="noise-layer" />
+    <div className="home-rebuild">
 
-      {/* 1. HERO SECTION */}
-      <section className="hero-magnum">
-        <div className="hero-backdrop">
-          {/* Desktop Video - Only load if width > 768px */}
-          <div className="desktop-only-video">
-            <video
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="hero-video"
-              poster="https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?q=80&w=1920&auto=format&fit=crop"
-            >
-              <source src={heroVideo} type="video/mp4" />
-            </video>
-          </div>
+      {/* ================= HERO ================= */}
+      <section className="master-hero">
+        <div className="container hero-inner reveal" ref={addToRefs}>
+          <span className="hero-eyebrow">PAKISTANI PREMIUM WEAR</span>
 
-          {/* Mobile Fallback Image - Always visible on mobile */}
-          <div className="mobile-hero-fallback"
-            style={{
-              backgroundImage: `url(https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?q=60&w=800&auto=format&fit=crop)`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              position: 'absolute',
-              inset: 0,
-              zIndex: -1
-            }}
-          />
-          {/* Overlay gradient is handled in CSS */}
-        </div>
-
-        <div className="container hero-content">
-          <span className="hero-badge">Handcrafted Luxury</span>
-          <h1 className="hero-title">
-            Relax & <br />
-            <i>Unwind</i>
+          <h1 className="h1 hero-title">
+            Designed for Elegance <br />
+            <span className="font-serif italic font-light text-blush">
+              Crafted for Confidence
+            </span>
           </h1>
-          <p className="hero-subtitle">
-            Experience the void. Handmade bath bombs crafted with organic ingredients for your personal sanctuary.
+
+          <p className="hero-description">
+            Experience the finest unstitched, ready-to-wear, and formal collections,
+            crafted with precision from Pakistan's most premium fabrics.
           </p>
-          <div className="btn-group">
-            <Link to="/collection" className="btn-cinema">
-              Shop Now <ArrowRight size={20} />
+
+          <div className="hero-actions">
+            <Link to="/collection" className="btn btn-primary btn-luxury">
+              Shop Collection
+              <ArrowRight size={18} className="ml-2" />
             </Link>
-            <Link to="/about" className="btn-ghost">
-              The Story
+
+            <Link to="/collection?category=unstitched" className="btn btn-glass">
+              Explore Fabrics
             </Link>
           </div>
         </div>
       </section>
 
-      {/* 2. CAROUSEL SECTION */}
-      <section className="section-pad">
-        <div className="container">
-          <Carousel />
-        </div>
-      </section>
-
-      {/* 3. CATEGORIES (Horizontal Scroll) */}
-      <section className="section-pad">
-        <div className="container header-row">
-          <h2 className="section-title">Our Collections</h2>
-          <Link to="/collection" className="link-view-all">View All →</Link>
+      {/* ================= MOSAIC ================= */}
+      <section className="section-padding container">
+        <div className="section-header reveal" ref={addToRefs}>
+          <h2 className="h2 subtitle-serif">The Collections</h2>
+          <div className="accent-bar" />
         </div>
 
-        <div className="cat-scroll-container">
-          <div className="spacer-start" />
+        <div className="category-mosaic reveal" ref={addToRefs}>
+          <Link to="/collection?category=unstitched" className="mosaic-card reveal-up" ref={addToRefs}>
+            <div className="mosaic-img-wrapper">
+              <img src="/images/home/unstitched.png" alt="Unstitched" className="mosaic-img" onError={(e) => (e.currentTarget.style.display = 'none')} />
+              <div className="mosaic-fallback">FABRIC</div>
+            </div>
+            <div className="mosaic-overlay">
+              <h3 className="mosaic-title">Unstitched</h3>
+              <p className="mosaic-sub">Luxury seasonal fabrics for custom tailoring</p>
+            </div>
+          </Link>
 
-          <CategoryCard
-            to="/collection?category=Relaxation"
-            title="Unwind"
-            subtitle="Lavender & Chamomile"
-            bgImage="https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=800"
-          />
-          <CategoryCard
-            to="/collection?category=Energy"
-            title="Revitalize"
-            subtitle="Citrus & Peppermint"
-            bgImage="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=800"
-          />
-          <CategoryCard
-            to="/collection?category=Skincare"
-            title="Nourish"
-            subtitle="Oatmeal & Shea Butter"
-            bgImage="https://images.unsplash.com/photo-1556228720-195a672e8a03?w=800"
-          />
+          <div className="mosaic-stack">
+            <Link to="/collection?category=stitched" className="mosaic-card light reveal-left" ref={addToRefs}>
+              <div className="mosaic-img-wrapper">
+                <img src="/images/home/ready-to-wear.png" alt="Ready to Wear" className="mosaic-img" onError={(e) => (e.currentTarget.style.display = 'none')} />
+                <div className="mosaic-fallback">STITCHED</div>
+              </div>
+              <div className="mosaic-overlay">
+                <h3 className="mosaic-title">Ready-to-Wear</h3>
+                <p className="mosaic-sub">Tailored fits for everyday elegance</p>
+              </div>
+            </Link>
 
-          <div className="spacer-end" />
-        </div>
-      </section>
-
-      {/* 4. POSTER GALLERY */}
-      <PosterGallery />
-
-      {/* 5. VALUE PROPS */}
-      <section className="section-pad container">
-        <h2 className="section-title center-text">Why Choose Us?</h2>
-        <div className="values-grid">
-          <ValueCard icon={<Flower size={32} />} title="Natural & Safe" description="Simple, skin-safe ingredients you can trust." />
-          <ValueCard icon={<HandPlatter size={32} />} title="Handmade" description="Hand-pressed in small batches for quality." />
-          <ValueCard icon={<Package size={32} />} title="Secure Delivery" description="Protective packaging ensures arrival intact." />
-          <ValueCard icon={<Sparkles size={32} />} title="Aromatic Bliss" description="Fragrances that linger and transform your mood." />
-        </div>
-      </section>
-
-      {/* 6. INGREDIENTS */}
-      <section className="section-pad">
-        <div className="container">
-          <div className="ing-header">
-            <h2 className="section-title">Transparency Protocol</h2>
-            <p className="section-desc">Exactly what goes into our products. No hidden chemicals.</p>
-          </div>
-
-          <div className="ingredients-grid-visual">
-            <IngredientCard image={bakingSodaImg} name="Baking Soda" description="Sodium Bicarbonate base" />
-            <IngredientCard image={citricAcidImg} name="Citric Acid" description="Creates the fizz reaction" />
-            <IngredientCard image={epsomSaltImg} name="Epsom Salt" description="Muscle relaxation" />
-            <IngredientCard image={polysorbateImg} name="Polysorbate 80" description="Oil emulsifier (Tween 80)" />
-            <IngredientCard image={foodColorImg} name="Food Color" description="Vibrant & skin-safe" />
-            <IngredientCard image={coconutOilImg} name="Coconut Oil" description="Deep moisturizing" />
-            <IngredientCard image={roseImg} name="Natural Essence" description="Premium fragrance oils" />
-          </div>
-
-          <div className="safety-notice">
-            <strong>Safety First:</strong> Isopropyl alcohol is used for sterilization during the crafting process.
-          </div>
-        </div>
-
-        {/* 7. REVIEWS PLACEHOLDER */}
-        <div className="container reviews-section">
-          <div className="reviews-placeholder">
-            <MessageSquare size={32} className="review-icon" />
-            <h3>Client Feedback Module</h3>
-            <p>
-              We are currently aggregating reviews from our early adopters.
-              <br />
-              <span className="highlight">Transparency is key.</span> Real screenshots and verified testimonials will be deployed here soon.
-            </p>
+            <Link to="/collection?category=formal" className="mosaic-card reveal-right" ref={addToRefs}>
+              <div className="mosaic-img-wrapper">
+                <img src="/images/home/formal.png" alt="Formal" className="mosaic-img" onError={(e) => (e.currentTarget.style.display = 'none')} />
+                <div className="mosaic-fallback">EVENING</div>
+              </div>
+              <div className="mosaic-overlay">
+                <h3 className="mosaic-title">Formal</h3>
+                <p className="mosaic-sub">Statement pieces for special occasions</p>
+              </div>
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* 8. NEWSLETTER */}
-      <section className="newsletter-magnum">
-        <div className="container">
-          <h2 className="section-title">Stay in the Loop</h2>
-          <p className="nl-desc">Subscribe for new scent drops and exclusive offers.</p>
+      {/* ================= FEATURED ================= */}
+      {(loading || featured.length > 0) && (
+        <section className="section-padding container">
+          <div className="section-header-split reveal" ref={addToRefs}>
+            <div>
+              <h2 className="h2 subtitle-serif">New Arrivals</h2>
+              <p className="text-muted italic">The latest additions to our atelier</p>
+            </div>
+            <Link to="/collection" className="text-gold letter-spacing-wide font-bold xsmall">
+              VIEW ALL
+            </Link>
+          </div>
 
-          <form className="nl-form" onSubmit={handleNewsletterSubmit}>
-            <input
-              type="email"
-              className="nl-input"
-              placeholder="email@address.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              disabled={isSubscribing}
-            />
-            <button type="submit" className="nl-btn" disabled={isSubscribing}>
-              {isSubscribing ? 'Processing...' : 'Subscribe'}
-            </button>
-          </form>
+          <div className="grid-2-mobile reveal" ref={addToRefs}>
+            {loading
+              ? Array(4).fill(0).map((_, i) => (
+                <div key={i} className="skeleton-card">
+                  <Skeleton height={420} borderRadius={0} />
+                  <Skeleton width="60%" height={20} className="mt-4" />
+                  <Skeleton width="40%" height={16} />
+                </div>
+              ))
+              : featured.map((p, idx) => (
+                <Link key={p._id} to={`/product/${p._id}`} className={`product-card reveal-up delay-${idx + 1}`} ref={addToRefs}>
+                  <div className="img-wrapper">
+                    {p.image ? (
+                      <img src={p.image} alt={p.name} className="product-img" />
+                    ) : (
+                      <div className="editorial-placeholder">
+                        <span>{p.category || 'PREMIUM'}</span>
+                        <span className="placeholder-sep" />
+                        <span>DETAIL</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="product-info">
+                    <h3 className="product-name">{p.name}</h3>
+                    <p className="product-price">PKR {p.price.toLocaleString()}</p>
+                  </div>
+                </Link>
+              ))}
+          </div>
+        </section>
+      )}
+
+      {/* ================= VALUES ================= */}
+      <section className="section-padding border-t reveal" ref={addToRefs}>
+        <div className="container grid-2-mobile text-center">
+          {[
+            { Icon: Truck, label: 'Nationwide Delivery', sub: '2–4 working days across Pakistan' },
+            { Icon: ShieldCheck, label: 'Secure Checkout', sub: 'Encrypted payment processing' },
+            { Icon: CreditCard, label: 'Quality First', sub: 'Premium Pakistani fabrics' },
+            { Icon: HeadphonesIcon, label: 'Customer Care', sub: 'Human-led support' }
+          ].map((item, idx) => (
+            <div key={idx} className="pillar reveal-up" ref={addToRefs}>
+              <item.Icon className="text-gold mb-4" size={32} strokeWidth={1.5} />
+              <h4 className="font-bold letter-spacing-tight mb-2 uppercase xsmall">{item.label}</h4>
+              <p className="text-muted xsmall">{item.sub}</p>
+            </div>
+          ))}
         </div>
       </section>
     </div>

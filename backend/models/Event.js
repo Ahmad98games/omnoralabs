@@ -1,20 +1,18 @@
-const mongoose = require('mongoose');
+const { createModel } = require('../utils/modelFactory');
 
-const EventSchema = new mongoose.Schema({
+const schema = {
   type: { type: String, required: true },
   path: { type: String },
   sessionId: { type: String, index: true },
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  userId: { type: String }, // Stored as string for LocalDB compatibility
   referrer: { type: String },
   userAgent: { type: String },
   screen: {
     width: Number,
     height: Number
   },
-  payload: { type: mongoose.Schema.Types.Mixed },
-  ip: { type: String },
-  createdAt: { type: Date, default: Date.now }
-});
+  payload: { type: Object },
+  ip: { type: String }
+};
 
-module.exports = mongoose.model('Event', EventSchema);
-
+module.exports = createModel('Event', schema);

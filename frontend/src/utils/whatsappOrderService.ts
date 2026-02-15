@@ -16,6 +16,7 @@ export interface OrderData {
     orderNumber: string; // Required now
     customerInfo?: { name: string; email: string; phone: string; };
     guestCustomer?: { name: string; email: string; phone: string; };
+    customer?: { name: string; email: string; phone: string; }; // BACKEND FORMAT
     shippingAddress?: {
         address: string;
         city: string;
@@ -64,12 +65,12 @@ function getOrderTotal(orderData: OrderData): string {
  * Generate Core Message Body
  */
 function formatOrderDetailsBody(orderData: OrderData): string {
-    const { orderNumber, customerInfo, guestCustomer, shippingAddress, items, paymentMethod, notes } = orderData;
+    const { orderNumber, customerInfo, guestCustomer, customer, shippingAddress, items, paymentMethod, notes } = orderData;
 
-    // Fallbacks
-    const name = customerInfo?.name || guestCustomer?.name || 'Guest';
-    const email = customerInfo?.email || guestCustomer?.email || 'N/A';
-    const phone = customerInfo?.phone || guestCustomer?.phone || 'N/A';
+    // Fallbacks - PRIORITIZE 'customer' (Backend Format)
+    const name = customer?.name || customerInfo?.name || guestCustomer?.name || 'Guest';
+    const email = customer?.email || customerInfo?.email || guestCustomer?.email || 'N/A';
+    const phone = customer?.phone || customerInfo?.phone || guestCustomer?.phone || 'N/A';
 
     // Address Composition
     const addr = shippingAddress?.address || 'N/A';

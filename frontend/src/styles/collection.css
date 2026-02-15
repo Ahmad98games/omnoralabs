@@ -1,0 +1,185 @@
+/* ============================================================ 
+    COLLECTION PAGE - LUXURY THEME
+   ============================================================ */
+
+.collection-page {
+    background: #fff;
+    min-height: 100vh;
+    padding-bottom: 8rem;
+}
+
+.collection-hero-luxury {
+    position: relative;
+    height: 40vh;
+    background: #111;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 4rem;
+}
+
+.collection-hero-luxury img {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.6;
+}
+
+.collection-hero-overlay {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+}
+
+/* --- Layout --- */
+.collection-layout {
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    gap: 5rem;
+}
+
+/* --- Sidebar --- */
+.shop-sidebar {
+    position: sticky;
+    top: 100px;
+}
+
+.filter-group {
+    margin-bottom: 3rem;
+}
+
+.filter-title {
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    color: #999;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.filter-list {
+    list-style: none;
+    padding: 0;
+}
+
+.filter-btn {
+    background: none;
+    border: none;
+    font-size: 0.85rem;
+    color: #666;
+    padding: 0.5rem 0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: left;
+    width: 100%;
+}
+
+.filter-btn:hover,
+.filter-btn.active {
+    color: var(--gold);
+    transform: translateX(5px);
+}
+
+/* --- Toolbar --- */
+.collection-toolbar-lux {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 3rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #f8f8f8;
+}
+
+.count-label-lux {
+    font-size: 0.9rem;
+    color: #999;
+}
+
+.sort-select {
+    border: none;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    padding-right: 1rem;
+    cursor: pointer;
+    color: var(--royal-blue);
+}
+
+/* --- Product Grid --- */
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 4rem 2rem;
+}
+
+/* --- Cards --- */
+.fashion-card {
+    text-decoration: none;
+    color: inherit;
+}
+
+.card-img-wrapper {
+    position: relative;
+    aspect-ratio: 3/4;
+    overflow: hidden;
+    background: #f9f9f9;
+    margin-bottom: 1.5rem;
+}
+
+.card-img-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.fashion-card:hover .card-img-wrapper img {
+    transform: scale(1.08);
+}
+
+.card-info-lux {
+    padding: 0 0.5rem;
+}
+
+.card-category-lux {
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.15em;
+    color: var(--gold);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+}
+
+.card-name-lux {
+    font-size: 1.2rem;
+    line-height: 1.3;
+    margin-bottom: 0.5rem;
+}
+
+.card-price-lux {
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.quick-add-btn {
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+}
+
+.fashion-card:hover .quick-add-btn {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+@media (max-width: 900px) {
+    .collection-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .shop-sidebar {
+        display: none;
+    }
+}

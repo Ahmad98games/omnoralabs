@@ -1,6 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import Home from './pages/HomeWithAds'
-import Collection from './pages/OmnoraCollection'
+import Collection from './pages/Collection'
 import Product from './pages/Product'
 import Cart from './pages/Cart'
 import Checkout from './pages/Checkout'
@@ -33,6 +33,7 @@ import AdminUsers from './pages/AdminUsers'
 import Terms from './pages/Terms'
 import Privacy from './pages/Privacy'
 import NotFound from './pages/NotFound'
+import SizeGuide from './pages/SizeGuide'
 
 export default function App() {
   return (
@@ -58,6 +59,7 @@ export default function App() {
               <Route path="wishlist" element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
               <Route path="about" element={<About onBack={() => window.history.back()} />} />
               <Route path="tech" element={<TechStackSection />} />
+              <Route path="size-guide" element={<SizeGuide />} />
               <Route path="*" element={<NotFound />} />
             </Route>
 

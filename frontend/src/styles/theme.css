@@ -1,14 +1,8 @@
-/* ================================================================
-   OMNORA DESIGN SYSTEM - "THE VOID ENGINE"
-   Architecture: Fluid Typography + Cyberpunk Theme
-================================================================ */
-
 :root {
-    /* --- 1. Fluid Typography (The "Smart" Text) --- */
-    --font-main: 'Space Grotesk', -apple-system, sans-serif;
-    --font-serif: 'Bodoni Moda', serif;
-    --font-mono: 'JetBrains Mono', monospace;
-    
+    /* --- 1. Typography (Gold She Garments) --- */
+    --font-main: 'Inter', -apple-system, sans-serif;
+    --font-serif: 'Playfair Display', serif;
+
     --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.8rem);
     --text-sm: clamp(0.875rem, 0.8rem + 0.3vw, 0.95rem);
     --text-base: 1rem;
@@ -18,38 +12,42 @@
     --text-3xl: clamp(2.5rem, 1.5rem + 3vw, 4rem);
     --text-4xl: clamp(3.5rem, 2rem + 4vw, 6rem);
 
-    /* --- 2. The Void Palette (Dark Mode Only) --- */
-    --void: #030303;           /* Deepest Black */
-    --void-depth: #0a0a0c;     /* Surface Level 1 */
-    --void-surface: #141416;   /* Surface Level 2 */
-    
-    /* --- 3. Neon Accents --- */
-    --neon-cyan: #00F0FF;      /* Primary Action */
-    --neon-gold: #FFD700;      /* Luxury/Featured */
-    --neon-red: #FF2A6D;       /* Danger/Alert */
-    --neon-green: #25D366;     /* Success/WhatsApp */
-    
-    /* --- 4. Text Colors --- */
-    --text-primary: #f8f9fa;
-    --text-muted: #94a3b8;
-    --text-dark: #000000;
+    /* --- 2. Color Palette (Production Hardened) --- */
+    --royal-blue: #1B365D;
+    --blush-pink: #FADADD;
+    --muted-gold: #C5A059;
+    /* ACCENT ONLY */
+    --warm-white: #F9F9F9;
 
-    /* --- 5. Glassmorphism System --- */
-    --glass-bg: rgba(20, 20, 22, 0.75);
-    --glass-border: 1px solid rgba(255, 255, 255, 0.08);
-    --glass-highlight: 1px solid rgba(255, 255, 255, 0.15);
+    /* Text Hierarchy */
+    --text-primary: var(--royal-blue);
+    /* Hardened Hierarchy */
+    --text-secondary: #4A5568;
+    --text-muted: #A0AEC0;
+
+    /* Functional */
+    --bg-color: var(--warm-white);
+    --surface-color: #FFFFFF;
+    --border-color: rgba(27, 54, 93, 0.1);
+    --success: #25D366;
+    --error: #E53E3E;
+
+    /* --- 3. Glassmorphism --- */
+    --glass-bg: rgba(255, 255, 255, 0.8);
+    --glass-border: 1px solid var(--border-color);
     --glass-blur: blur(20px);
 
-    /* --- 6. Physics (Motion) --- */
+    /* --- 4. Physics --- */
     --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
-    --ease-elastic: cubic-bezier(0.23, 1, 0.32, 1);
     --transition-base: 0.4s var(--ease-out-expo);
 }
 
 /* ================================================================
    RESET & BASE LAYOUT
 ================================================================ */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
@@ -58,16 +56,16 @@
 }
 
 html {
-    background-color: var(--void);
+    background-color: var(--bg-color);
     scroll-behavior: smooth;
-    /* Custom Scrollbar for the entire page */
+    /* Custom Scrollbar */
     scrollbar-width: thin;
-    scrollbar-color: var(--neon-cyan) var(--void);
+    scrollbar-color: var(--royal-blue) var(--bg-color);
 }
 
 body {
     font-family: var(--font-main);
-    background-color: var(--void);
+    background-color: var(--bg-color);
     color: var(--text-primary);
     line-height: 1.6;
     overflow-x: hidden;
@@ -95,11 +93,58 @@ body {
     mix-blend-mode: overlay;
 }
 
-/* --- Typography Helpers --- */
-.font-serif { font-family: var(--font-serif); }
-.font-mono { font-family: var(--font-mono); }
-.text-cyan { color: var(--neon-cyan); }
-.text-gold { color: var(--neon-gold); }
+/* --- Typography Hierarchy (Spec Enforcement) --- */
+h1,
+.h1 {
+    font-family: var(--font-serif);
+    font-size: var(--text-4xl);
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--text-primary);
+}
+
+h2,
+.h2 {
+    font-family: var(--font-serif);
+    font-size: var(--text-2xl);
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--text-primary);
+}
+
+h3,
+.h3 {
+    font-family: var(--font-serif);
+    font-size: var(--text-xl);
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--text-primary);
+}
+
+.font-serif {
+    font-family: var(--font-serif);
+}
+
+.text-primary {
+    color: var(--text-primary);
+}
+
+.text-secondary {
+    color: var(--text-secondary);
+}
+
+.text-muted {
+    color: var(--text-muted);
+}
+
+.text-gold {
+    color: var(--muted-gold);
+}
+
+/* Use only for accents! */
+.text-pink {
+    color: var(--blush-pink);
+}
 
 /* --- High-Tech Buttons --- */
 .btn {
@@ -121,27 +166,25 @@ body {
 }
 
 .btn-primary {
-    background: var(--text-primary);
-    color: var(--void);
+    background: var(--royal-blue);
+    color: white;
 }
 
 .btn-primary:hover {
-    background: var(--neon-cyan);
-    color: var(--text-dark);
-    box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
+    background: #15294a;
+    box-shadow: 0 10px 25px rgba(27, 54, 93, 0.2);
     transform: translateY(-2px);
 }
 
 .btn-outline {
     background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: var(--text-primary);
+    border: 1px solid var(--royal-blue);
+    color: var(--royal-blue);
 }
 
 .btn-outline:hover {
-    border-color: var(--neon-cyan);
-    color: var(--neon-cyan);
-    background: rgba(0, 240, 255, 0.05);
+    background: var(--royal-blue);
+    color: white;
 }
 
 /* ================================================================
@@ -149,18 +192,39 @@ body {
 ================================================================ */
 
 @keyframes fadeInUp {
-    from { opacity: 0; transform: translate3d(0, 30px, 0); }
-    to { opacity: 1; transform: translate3d(0, 0, 0); }
+    from {
+        opacity: 0;
+        transform: translate3d(0, 30px, 0);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
 }
 
 @keyframes scaleUp {
-    from { opacity: 0; transform: scale(0.95); }
-    to { opacity: 1; transform: scale(1); }
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
 @keyframes blurIn {
-    from { opacity: 0; filter: blur(10px); }
-    to { opacity: 1; filter: blur(0); }
+    from {
+        opacity: 0;
+        filter: blur(10px);
+    }
+
+    to {
+        opacity: 1;
+        filter: blur(0);
+    }
 }
 
 .animate-fade-in-up {
@@ -192,7 +256,10 @@ body {
    RESPONSIVENESS & ACCESSIBILITY
 ================================================================ */
 @media (prefers-reduced-motion: reduce) {
-    *, ::before, ::after {
+
+    *,
+    ::before,
+    ::after {
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
@@ -202,6 +269,6 @@ body {
 
 /* Selection */
 ::selection {
-    background: var(--neon-cyan);
-    color: var(--void);
+    background: var(--blush-pink);
+    color: var(--royal-blue);
 }
