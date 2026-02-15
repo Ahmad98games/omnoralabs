@@ -584,5 +584,21 @@
     "_isNew": true,
     "createdAt": "2026-02-15T09:53:53.130Z",
     "updatedAt": "2026-02-15T09:53:53.130Z"
+  },
+  {
+    "type": "app_start",
+    "path": "/",
+    "sessionId": "zjnsw7eivjfmicwzz2m",
+    "referrer": "",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "screen": {
+      "width": 1920,
+      "height": 1080
+    },
+    "ip": "127.0.0.1",
+    "_id": "0vcdxdzfl",
+    "_isNew": true,
+    "createdAt": "2026-02-15T18:14:59.934Z",
+    "updatedAt": "2026-02-15T18:14:59.934Z"
   }
 ]
