@@ -57,8 +57,27 @@ iframe {
     width: 100%;
     max-width: 1400px;
     margin: 0 auto;
-    padding-left: clamp(1rem, 3vw, 2rem);
-    padding-right: clamp(1rem, 3vw, 2rem);
+    padding-left: clamp(1rem, 5vw, 2rem);
+    padding-right: clamp(1rem, 5vw, 2rem);
+}
+
+/* Section Spacing */
+.section-padding {
+    padding: clamp(3rem, 8vw, 6rem) 0;
+}
+
+/* Mobile-First Grid Utilities */
+.grid-2-mobile {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+@media (min-width: 640px) {
+    .grid-2-mobile {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 2rem;
+    }
 }
 
 /* === LUXURY DESIGN SYSTEM === */

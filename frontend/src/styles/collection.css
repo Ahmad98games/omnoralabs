@@ -110,8 +110,15 @@
 /* --- Product Grid --- */
 .product-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 4rem 2rem;
+    grid-template-columns: repeat(2, 1fr);
+    gap: clamp(1rem, 3vw, 2rem);
+}
+
+@media (min-width: 640px) {
+    .product-grid {
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 4rem 2.5rem;
+    }
 }
 
 /* --- Cards --- */
@@ -153,7 +160,7 @@
 }
 
 .card-name-lux {
-    font-size: 1.2rem;
+    font-size: clamp(0.9rem, 2.5vh, 1.2rem);
     line-height: 1.3;
     margin-bottom: 0.5rem;
 }

@@ -30,12 +30,12 @@
 .header-container {
     max-width: 1400px;
     margin: 0 auto;
-    padding: 0 2rem;
-    height: 70px;
+    padding: 0 clamp(1rem, 5vw, 2rem);
+    height: clamp(60px, 10vh, 70px);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 3rem;
+    gap: clamp(1rem, 3vw, 3rem);
 }
 
 /* ==================== BRAND ==================== */
@@ -54,13 +54,13 @@
 }
 
 .brand-logo {
-    width: 40px;
-    height: 40px;
+    width: clamp(32px, 8vw, 40px);
+    height: clamp(32px, 8vw, 40px);
     display: flex;
     align-items: center;
     justify-content: center;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 10px;
+    border-radius: clamp(8px, 2vw, 10px);
     color: white;
 }
 
@@ -308,6 +308,9 @@
 
 .mobile-logout {
     color: #dc2626;
+    margin-top: 1rem;
+    border-top: 1px solid #eee !important;
+    border-radius: 0 !important;
 }
 
 .mobile-logout:hover {
