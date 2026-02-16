@@ -600,5 +600,149 @@
     "_isNew": true,
     "createdAt": "2026-02-15T18:14:59.934Z",
     "updatedAt": "2026-02-15T18:14:59.934Z"
+  },
+  {
+    "type": "app_start",
+    "path": "/checkout",
+    "sessionId": "zjnsw7eivjfmicwzz2m",
+    "referrer": "",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "screen": {
+      "width": 1920,
+      "height": 1080
+    },
+    "ip": "127.0.0.1",
+    "_id": "szw3uqn92",
+    "_isNew": true,
+    "createdAt": "2026-02-16T19:17:53.372Z",
+    "updatedAt": "2026-02-16T19:17:53.372Z"
+  },
+  {
+    "type": "app_start",
+    "path": "/checkout",
+    "sessionId": "zjnsw7eivjfmicwzz2m",
+    "referrer": "",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "screen": {
+      "width": 1920,
+      "height": 1080
+    },
+    "ip": "127.0.0.1",
+    "_id": "bw76jp3fc",
+    "_isNew": true,
+    "createdAt": "2026-02-16T19:18:01.988Z",
+    "updatedAt": "2026-02-16T19:18:01.988Z"
+  },
+  {
+    "type": "app_start",
+    "path": "/checkout",
+    "sessionId": "zjnsw7eivjfmicwzz2m",
+    "referrer": "",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "screen": {
+      "width": 1920,
+      "height": 1080
+    },
+    "ip": "127.0.0.1",
+    "_id": "8e1a5lpwd",
+    "_isNew": true,
+    "createdAt": "2026-02-16T19:23:28.987Z",
+    "updatedAt": "2026-02-16T19:23:28.987Z"
+  },
+  {
+    "type": "app_start",
+    "path": "/checkout",
+    "sessionId": "zjnsw7eivjfmicwzz2m",
+    "referrer": "",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "screen": {
+      "width": 1920,
+      "height": 1080
+    },
+    "ip": "127.0.0.1",
+    "_id": "qrhvc0fb2",
+    "_isNew": true,
+    "createdAt": "2026-02-16T19:24:48.300Z",
+    "updatedAt": "2026-02-16T19:24:48.300Z"
+  },
+  {
+    "type": "app_start",
+    "path": "/checkout",
+    "sessionId": "zjnsw7eivjfmicwzz2m",
+    "referrer": "",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "screen": {
+      "width": 1920,
+      "height": 1080
+    },
+    "ip": "127.0.0.1",
+    "_id": "l32acv0nr",
+    "_isNew": true,
+    "createdAt": "2026-02-16T19:26:33.785Z",
+    "updatedAt": "2026-02-16T19:26:33.785Z"
+  },
+  {
+    "type": "app_start",
+    "path": "/checkout",
+    "sessionId": "zjnsw7eivjfmicwzz2m",
+    "referrer": "",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "screen": {
+      "width": 1920,
+      "height": 1080
+    },
+    "ip": "127.0.0.1",
+    "_id": "ds4mnuytb",
+    "_isNew": true,
+    "createdAt": "2026-02-16T19:27:44.459Z",
+    "updatedAt": "2026-02-16T19:27:44.459Z"
+  },
+  {
+    "type": "app_start",
+    "path": "/checkout",
+    "sessionId": "zjnsw7eivjfmicwzz2m",
+    "referrer": "",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "screen": {
+      "width": 1920,
+      "height": 1080
+    },
+    "ip": "127.0.0.1",
+    "_id": "cfpp68kl9",
+    "_isNew": true,
+    "createdAt": "2026-02-16T19:29:46.040Z",
+    "updatedAt": "2026-02-16T19:29:46.040Z"
+  },
+  {
+    "type": "app_start",
+    "path": "/checkout",
+    "sessionId": "zjnsw7eivjfmicwzz2m",
+    "referrer": "",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "screen": {
+      "width": 1920,
+      "height": 1080
+    },
+    "ip": "127.0.0.1",
+    "_id": "qp1iw0215",
+    "_isNew": true,
+    "createdAt": "2026-02-16T19:31:26.400Z",
+    "updatedAt": "2026-02-16T19:31:26.400Z"
+  },
+  {
+    "type": "app_start",
+    "path": "/checkout",
+    "sessionId": "zjnsw7eivjfmicwzz2m",
+    "referrer": "",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+    "screen": {
+      "width": 1920,
+      "height": 1080
+    },
+    "ip": "127.0.0.1",
+    "_id": "bnbxai17q",
+    "_isNew": true,
+    "createdAt": "2026-02-16T19:31:39.693Z",
+    "updatedAt": "2026-02-16T19:31:39.693Z"
   }
 ]

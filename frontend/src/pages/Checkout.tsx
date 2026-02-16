@@ -213,11 +213,11 @@ export default function Checkout() {
                 </div>
 
                 <div className="checkout-content">
-                    <div className="checkout-form-container" ref={formRef}>
+                    <div className="checkout-form-container reveal" ref={formRef}>
                         <form id="checkoutForm" onSubmit={placeOrder} noValidate>
 
                             {/* Customer Info */}
-                            <div className="form-section animate-fade-in-up">
+                            <div className="form-section reveal delay-100">
                                 <h2 className="form-section-title">Customer Information</h2>
                                 <div className="form-row">
                                     <div className="form-group">
@@ -275,7 +275,7 @@ export default function Checkout() {
                             </div>
 
                             {/* Shipping Info */}
-                            <div className="form-section">
+                            <div className="form-section reveal delay-200">
                                 <h2 className="form-section-title">Shipping Information</h2>
                                 <div className="form-group">
                                     <label htmlFor="address">Street Address *</label>
@@ -354,7 +354,7 @@ export default function Checkout() {
                             </div>
 
                             {/* Payment Info */}
-                            <div className="form-section">
+                            <div className="form-section reveal delay-300">
                                 <h2 className="form-section-title">Payment Information</h2>
 
                                 <div className="payment-tabs" role="tablist">
@@ -434,7 +434,7 @@ export default function Checkout() {
                                             <p style={{ fontSize: '1.1rem', marginBottom: '0.5rem' }}>
                                                 You have selected <strong style={{ color: 'var(--royal-blue)' }}>{getPaymentMethodName()}</strong>.
                                             </p>
-                                            <p style={{ color: 'var(--text-muted)' }}>
+                                            <p style={{ color: '#475569', lineHeight: '1.6' }}>
                                                 Complete your order securely now. You will receive precise payment details (Account Number/IBAN) and a receipt submission link on the order confirmation page.
                                             </p>
                                         </div>
@@ -467,7 +467,7 @@ export default function Checkout() {
                         </form>
                     </div>
 
-                    <div className="order-summary-container" ref={summaryRef}>
+                    <div className="order-summary-container reveal delay-200" ref={summaryRef}>
                         <h2 className="form-section-title">Order Summary</h2>
                         <div className="summary-items">
                             {items.map(i => (
@@ -502,7 +502,7 @@ export default function Checkout() {
                             background: 'rgba(27, 54, 93, 0.05)',
                             border: '1px solid rgba(27, 54, 93, 0.2)',
                             fontSize: '0.85rem',
-                            color: 'var(--text-muted)'
+                            color: '#475569'
                         }}>
                             <p style={{ margin: 0 }}>
                                 <strong style={{ color: 'var(--royal-blue)' }}>Payment Method:</strong> {getPaymentMethodName()}

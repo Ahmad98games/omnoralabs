@@ -103,7 +103,8 @@
 }
 
 /* --- 3. Scroll Reveal State (Used by useScrollReveal hook) --- */
-.reveal {
+.reveal,
+.reveal-on-scroll {
   opacity: 0;
   transform: translate3d(0, var(--reveal-distance), 0);
   transition:
@@ -113,7 +114,8 @@
   will-change: transform, opacity;
 }
 
-.reveal.active {
+.reveal.active,
+.reveal-on-scroll.is-visible {
   opacity: 1;
   transform: translate3d(0, 0, 0);
 }
