@@ -9,7 +9,7 @@
  */
 
 const request = require('supertest');
-const mongoose = require('mongoose');
+// [Mongoose Removed] const mongoose = require('mongoose');
 const path = require('path');
 const fs = require('fs');
 

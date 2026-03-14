@@ -1,7 +1,7 @@
-const User = require('../models/User');
+// [Mongoose Removed] const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const SiteContent = require('../models/SiteContent');
+// [Mongoose Removed] const SiteContent = require('../models/SiteContent');
 const logger = require('../services/logger');
 
 const { validateEnv } = require('../config/env');

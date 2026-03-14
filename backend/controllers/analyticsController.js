@@ -1,4 +1,4 @@
-const Event = require('../models/Event');
+const { supabase } = require('../shared/lib/supabaseClient');
 const logger = require('../services/logger');
 
 /**
@@ -16,30 +16,40 @@ exports.track = async (req, res) => {
       return res.status(400).json({ error: 'Event type is required' });
     }
 
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
     // Capture telemetry data
     const eventData = {
-      tenant_id: tenantId,
-      type,
-      path,
-      sessionId,
-      userId: userId || undefined,
+      merchant_id: tenantId,
+      event_type: type === 'page_view' ? 'page_view' : 'search', // Simplified mapping to schema
+      page_url: path,
+      session_id: sessionId,
+      customer_id: uuidRegex.test(userId) ? userId : null,
       referrer: referrer || req.get('referrer'),
-      userAgent: userAgent || req.get('user-agent'),
-      screen,
-      payload,
-      ip: req.ip,
-      capturedAt: new Date()
+      metadata: {
+        ...(payload || {}),
+        userAgent: userAgent || req.get('user-agent'),
+        screen,
+        ip: req.ip
+      }
     };
 
     // Offload write to background: Non-blocking
-    setImmediate(async () => {
-      try {
-        const event = new Event(eventData);
-        await event.save();
-      } catch (err) {
-        logger.error('Background Telemetry Write Failed', { error: err.message, tenantId });
-      }
-    });
+    if (uuidRegex.test(tenantId)) {
+      setImmediate(async () => {
+        try {
+          const { error } = await supabase
+            .from('interaction_logs')
+            .insert([eventData]);
+          
+          if (error) throw error;
+        } catch (err) {
+          logger.error('Background Telemetry Write Failed', { error: err.message, tenantId });
+        }
+      });
+    } else {
+      logger.debug(`TELEMETRY_PERSIST_SKIP: [${tenantId}] is not a valid UUID.`);
+    }
 
     const duration = Date.now() - startTime;
     logger.debug(`Telemetry ingested in ${duration}ms`, { type, tenantId });
@@ -55,10 +65,25 @@ exports.track = async (req, res) => {
 exports.list = async (req, res) => {
   try {
     const { limit = 100, type, sessionId } = req.query;
-    const query = { tenant_id: req.tenantId || 'default_tenant' };
-    if (type) query.type = type;
-    if (sessionId) query.sessionId = sessionId;
-    const events = await Event.find(query).sort({ createdAt: -1 }).limit(Number(limit));
+    const tenantId = req.tenantId || 'default_tenant';
+    
+    if (!uuidRegex.test(tenantId)) {
+        return res.json({ success: true, events: [] });
+    }
+
+    let query = supabase
+      .from('interaction_logs')
+      .select('*')
+      .eq('merchant_id', tenantId)
+      .order('created_at', { ascending: false })
+      .limit(Number(limit));
+
+    if (type) query = query.eq('event_type', type);
+    if (sessionId) query = query.eq('session_id', sessionId);
+
+    const { data: events, error } = await query;
+    if (error) throw error;
+
     res.json({ success: true, events });
   } catch (err) {
     console.error('Error fetching events:', err);

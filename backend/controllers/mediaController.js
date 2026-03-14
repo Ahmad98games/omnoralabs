@@ -1,4 +1,4 @@
-const { ImageAsset } = require('../models/Phase3Models');
+// [Mongoose Removed] const { ImageAsset } = require('../models/Phase3Models');
 const path = require('path');
 
 const mediaController = {

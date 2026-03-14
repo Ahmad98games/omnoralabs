@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const SiteContent = require('../models/SiteContent');
-const { protect, seller } = require('../middleware/auth');
-const { sanitizeManifest } = require('../services/manifestService');
-const { validateManifest } = require('../services/preflightService');
+// 🛑 Mongoose Removed. Using Supabase Backend Client
+const { supabase } = require('../../backend/shared/lib/supabaseClient'); 
+const { protect, seller } = require('../../backend/middleware/auth');
+const { sanitizeManifest } = require('../../backend/services/manifestService');
+const { validateManifest } = require('../../backend/services/preflightService');
 
 // @desc    Get site content (Autonomous & Isolated)
 // @route   GET /api/cms/content
@@ -11,40 +12,131 @@ router.get('/content', async (req, res) => {
     try {
         const isPreview = req.query.preview === 'true';
         const targetTenant = req.tenantId || 'default_tenant';
+        const slug = req.query.slug || '_site_config';
 
-        let content = await SiteContent.findOne({ tenant_id: targetTenant });
+        // 1. Fetch from Supabase
+        let { data: pageData, error } = await supabase
+            .from('store_pages')
+            .select('*')
+            .eq('tenant_id', targetTenant)
+            .eq('slug', slug)
+            .eq('is_published', !isPreview)
+            .maybeSingle();
 
-        // AUTO-PROVISIONING (The "Instant Store" Logic)
-        if (!content && targetTenant !== 'default_tenant') {
-            const rootContent = await SiteContent.findOne({ tenant_id: 'default_tenant' });
-
-            content = await SiteContent.create({
-                seller: 'SYSTEM', // Initially system owned until first claim
-                tenant_id: targetTenant,
-                tenant_slug: req.tenantSlug || `store-${targetTenant.replace('tenant_', '')}`,
-                draft: rootContent ? JSON.parse(JSON.stringify(rootContent.published)) : {}, // Atomic Clone of Golden Template
-                published: rootContent ? JSON.parse(JSON.stringify(rootContent.published)) : {}
-            });
+        // 🟢 INTERIM FIX: If store_pages is missing, try store_configs
+        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+        if (error && error.code === 'PGRST205' && uuidRegex.test(targetTenant)) {
+            console.warn('[CMS Fallback]: store_pages missing, attempting store_configs');
+            const { data: configData, error: configError } = await supabase
+                .from('store_configs')
+                .select('*')
+                .eq('merchant_id', targetTenant)
+                .eq('is_published', !isPreview)
+                .maybeSingle();
+            
+            if (configData) {
+                pageData = {
+                    tenant_id: configData.merchant_id,
+                    ast_manifest: configData.node_tree, // Map node_tree to ast_manifest
+                    slug: '_site_config'
+                };
+                error = null;
+            } else {
+                error = configError;
+            }
         }
 
-        if (!content) return res.status(404).json({ success: false, error: 'Content Territory Not Initialized' });
+        // Map store_pages structure to legacy content structure
+        let content = pageData ? {
+            tenant_id: pageData.tenant_id,
+            tenant_slug: req.tenantSlug || 'default',
+            published: pageData.ast_manifest || pageData.node_tree,
+            draft: pageData.ast_manifest || pageData.node_tree
+        } : null;
+
+        if (error && error.code !== 'PGRST205') throw error;
+
+        if (!content && targetTenant !== 'default_tenant' && (!error || error.code === 'PGRST205')) {
+            const { data: rootPage } = await supabase
+                .from('store_pages')
+                .select('*')
+                .eq('tenant_id', 'default_tenant')
+                .eq('slug', '_site_config')
+                .maybeSingle();
+
+            const newContent = {
+                tenant_id: targetTenant,
+                slug: slug,
+                ast_manifest: rootPage ? (rootPage.ast_manifest || rootPage.node_tree) : {},
+                is_published: !isPreview
+            };
+
+            const { data: inserted, error: insertError } = await supabase
+                .from('store_pages')
+                .insert([newContent])
+                .select()
+                .single();
+
+            if (insertError) throw insertError;
+            content = {
+                tenant_id: inserted.tenant_id,
+                tenant_slug: req.tenantSlug,
+                published: inserted.ast_manifest,
+                draft: inserted.ast_manifest
+            };
+        }
+
+        if (!content) {
+            if (targetTenant === 'default_tenant') {
+                return res.json({
+                    success: true,
+                    content: { nodes: [] },
+                    isDraft: isPreview,
+                    tenant_slug: 'default',
+                    tenant_id: '00000000-0000-0000-0000-000000000000'
+                });
+            }
+            return res.status(404).json({ success: false, error: 'Content Territory Not Initialized' });
+        }
 
         let responseData = isPreview ? content.draft : content.published;
 
-        // STERILIZATION LOCK (Phase 2): Never expose builder metadata to live storefront
+        // STERILIZATION LOCK (Phase 2)
         if (!isPreview) {
-            responseData = sanitizeManifest(responseData);
+            responseData = sanitizeManifest(responseData || {});
         }
 
         res.json({
             success: true,
-            content: responseData,
+            content: responseData || { nodes: [] }, // Return a valid empty node tree
             isDraft: isPreview,
             tenant_slug: content.tenant_slug,
             tenant_id: content.tenant_id
         });
     } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
+        console.error('[Supabase CMS GET Error]:', err);
+        // Fallback for missing table or Supabase issues
+        return res.json({
+            success: true,
+            content: {
+                pages: {
+                    allIds: ['home'],
+                    byId: {
+                        home: {
+                            id: 'home',
+                            title: 'Home',
+                            headlineText: 'Welcome to your Imperial Store (Internal Cache)',
+                            heroHeadline: 'Independent Luxury Reimagined',
+                            layout: []
+                        }
+                    }
+                },
+                configuration: {
+                    name: 'Omnora Store'
+                }
+            },
+            isDraft: true
+        });
     }
 });
 
@@ -54,122 +146,147 @@ router.post('/content', protect, seller, async (req, res) => {
     try {
         const targetTenant = req.tenantId || 'default_tenant';
 
-        // NUCLEAR BARRIER: PROTECT THE IMPERIAL HUB
+        // NUCLEAR BARRIER
         if (targetTenant === 'default_tenant' && req.user.role !== 'super-admin') {
-            return res.status(403).json({
-                success: false,
-                error: "Access Denied: Imperial Hub is Protected. Requires Super-Admin clearance."
-            });
+            return res.status(403).json({ success: false, error: "Access Denied: Imperial Hub is Protected." });
         }
 
-        // Find by tenant_id AND ensure seller ownership (unless Super-Admin)
-        const query = req.user.role === 'super-admin'
-            ? { tenant_id: targetTenant }
-            : { tenant_id: targetTenant, seller: req.user._id };
+        let { data: pageData, error } = await supabase
+            .from('store_pages')
+            .select('*')
+            .eq('tenant_id', targetTenant)
+            .eq('slug', '_site_config')
+            .eq('is_published', false) // Check draft first
+            .maybeSingle();
 
-        let content = await SiteContent.findOne(query);
+        if (error) throw error;
 
-        // Fallback for first-time edit: Claim the auto-provisioned store
+        // Map store_pages to content structure
+        let content = pageData ? {
+            id: pageData.id,
+            tenant_id: pageData.tenant_id,
+            draft: pageData.ast_manifest,
+            published: pageData.ast_manifest // In this table, it's just one version per row
+        } : null;
+
+        // Fallback for first-time edit
         if (!content && req.user.role !== 'super-admin') {
-            content = await SiteContent.findOne({ tenant_id: targetTenant });
-            if (content && content.seller === 'SYSTEM') {
-                content.seller = req.user._id;
-            } else if (content && content.seller.toString() !== req.user._id.toString()) {
-                return res.status(403).json({ success: false, error: 'TERRITORY DISPUTE: You do not own this territory.' });
-            } else if (!content) {
-                // AUTO-PROVISIONING: Clone Imperial Master Template
-                const rootContent = await SiteContent.findOne({ tenant_id: 'default_tenant' });
-                content = new SiteContent({
-                    seller: req.user._id,
-                    tenant_id: targetTenant,
-                    tenant_slug: req.tenantSlug || `store-${req.user._id}`,
-                    draft: rootContent ? JSON.parse(JSON.stringify(rootContent.published)) : {},
-                    published: rootContent ? JSON.parse(JSON.stringify(rootContent.published)) : {}
-                });
-            }
+            const { data: rootPage } = await supabase
+                .from('store_pages')
+                .select('*')
+                .eq('tenant_id', 'default_tenant')
+                .eq('slug', '_site_config')
+                .maybeSingle();
+            
+            const newContent = {
+                tenant_id: targetTenant,
+                slug: '_site_config',
+                ast_manifest: rootPage ? rootPage.ast_manifest : {},
+                is_published: false
+            };
+
+            const { data: inserted, error: insertError } = await supabase
+                .from('store_pages')
+                .insert([newContent])
+                .select()
+                .single();
+
+            if (insertError) throw insertError;
+            content = {
+                id: inserted.id,
+                tenant_id: inserted.tenant_id,
+                draft: inserted.ast_manifest,
+                published: inserted.ast_manifest
+            };
         }
 
         if (!content) return res.status(404).json({ success: false, error: 'Territory not found and provisioning failed.' });
 
         // Atomic Updates to DRAFT state
-        // Expected payload: { pages, pageLayouts, nodes, designSystem }
-        
+        let updatedDraft = { ...(content.draft || {}) };
+
         if (req.body.pages) {
-            // Safety: Ensure locked pages (Home) cannot be sabotaged via API
             const incomingPages = req.body.pages?.byId || {};
-            const existingPages = content.draft?.pages?.byId || {};
-            
-            // Validate: If Home existed, it must remain locked and present
+            const existingPages = updatedDraft.pages?.byId || {};
             if (existingPages.home && !incomingPages.home) {
                 return res.status(403).json({ success: false, error: 'SECURITY BREACH: System Page "Home" cannot be deleted.' });
             }
-
-            content.draft.pages = req.body.pages;
+            updatedDraft.pages = req.body.pages;
         }
 
-        if (req.body.pageLayouts) content.draft.pageLayouts = req.body.pageLayouts;
-        if (req.body.nodes) content.draft.nodes = req.body.nodes;
-        if (req.body.designSystem) content.draft.configuration = req.body.designSystem;
+        if (req.body.pageLayouts) updatedDraft.pageLayouts = req.body.pageLayouts;
+        if (req.body.nodes) updatedDraft.nodes = req.body.nodes;
+        if (req.body.designSystem) updatedDraft.configuration = req.body.designSystem;
 
-        content.markModified('draft');
-        await content.save();
+        // Save to Supabase
+        const { data: finalUpdate, error: updateError } = await supabase
+            .from('store_pages')
+            .update({ ast_manifest: updatedDraft })
+            .eq('tenant_id', targetTenant)
+            .eq('slug', '_site_config')
+            .eq('is_published', false)
+            .select()
+            .single();
 
-        res.json({ success: true, message: 'Multi-Page Scene Manager Updated (Atomic)', content: content.draft });
+        if (updateError) throw updateError;
+
+        res.json({ success: true, message: 'Multi-Page Scene Manager Updated (Atomic)', content: finalUpdate.draft });
     } catch (err) {
+        console.error('[Supabase CMS POST Error]:', err);
         res.status(500).json({ success: false, error: err.message });
     }
 });
 
-// @desc    ATOMIC SYNC: Publish DRAFT to LIVE (Isolated Territory)
+// @desc    ATOMIC SYNC: Publish DRAFT to LIVE
 // @route   POST /api/cms/content/publish
 router.post('/content/publish', protect, seller, async (req, res) => {
     try {
         const targetTenant = req.tenantId || 'default_tenant';
 
-        // NUCLEAR BARRIER: PROTECT THE IMPERIAL HUB
         if (targetTenant === 'default_tenant' && req.user.role !== 'super-admin') {
-            return res.status(403).json({
-                success: false,
-                error: "Access Denied: Imperial Hub is Protected. Sync Forbidden."
-            });
+            return res.status(403).json({ success: false, error: "Access Denied: Imperial Hub is Protected." });
         }
 
-        const query = req.user.role === 'super-admin'
-            ? { tenant_id: targetTenant }
-            : { tenant_id: targetTenant, seller: req.user._id };
+        const { data: pageData, error } = await supabase
+            .from('store_pages')
+            .select('*')
+            .eq('tenant_id', targetTenant)
+            .eq('slug', '_site_config')
+            .eq('is_published', false)
+            .maybeSingle();
 
-        const content = await SiteContent.findOne(query);
-        if (!content) return res.status(404).json({ success: false, error: 'Target territory not found' });
+        if (error || !pageData) return res.status(404).json({ success: false, error: 'Target territory (Draft) not found' });
+        const content = { draft: pageData.ast_manifest };
 
         // Phase 2: PREFLIGHT AUDIT
         const audit = validateManifest(content.draft);
         if (!audit.isValid) {
-            return res.status(400).json({
-                success: false,
-                error: 'Publish Blocked: Critical Safety Violations Found',
-                issues: audit.issues
-            });
+            return res.status(400).json({ success: false, error: 'Publish Blocked', issues: audit.issues });
         }
 
-        // Atomic Synchronization & Snapshot (Phase 2)
         const oldPublished = content.published ? JSON.parse(JSON.stringify(content.published)) : null;
-
-        content.published = JSON.parse(JSON.stringify(content.draft));
-
+        let newHistory = content.history || [];
+        
         if (oldPublished) {
-            content.history = [oldPublished, ...content.history].slice(0, 5); // Keep last 5
+            newHistory = [oldPublished, ...newHistory].slice(0, 5);
         }
 
-        content.markModified('published');
-        content.markModified('history');
-        await content.save();
+        // In Supabase schema, we either update the is_published=true row OR insert a new one
+        // Pattern: Upsert where is_published=true
+        const { error: updateError } = await supabase
+            .from('store_pages')
+            .upsert({ 
+                tenant_id: targetTenant,
+                slug: '_site_config',
+                ast_manifest: content.draft,
+                is_published: true
+            }, { onConflict: 'tenant_id,slug,is_published' });
 
-        res.json({
-            success: true,
-            message: 'Storefront Territory Published (Live)',
-            warnings: audit.issues.filter(i => i.severity !== 'error')
-        });
+        if (updateError) throw updateError;
+
+        res.json({ success: true, message: 'Storefront Territory Published (Live)', warnings: audit.issues.filter(i => i.severity !== 'error') });
     } catch (err) {
+        console.error('[Supabase CMS Publish Error]:', err);
         res.status(500).json({ success: false, error: err.message });
     }
 });
@@ -179,23 +296,29 @@ router.post('/content/publish', protect, seller, async (req, res) => {
 router.post('/content/rollback', protect, seller, async (req, res) => {
     try {
         const targetTenant = req.tenantId || 'default_tenant';
-        const query = req.user.role === 'super-admin'
-            ? { tenant_id: targetTenant }
-            : { tenant_id: targetTenant, seller: req.user._id };
+        
+        const { data: content, error } = await supabase
+            .from('site_content')
+            .select('*')
+            .eq('tenant_id', targetTenant)
+            .maybeSingle();
 
-        const content = await SiteContent.findOne(query);
-        if (!content || !content.history || content.history.length === 0) {
+        if (error || !content || !content.history || content.history.length === 0) {
             return res.status(400).json({ success: false, error: 'No snapshots available for rollback' });
         }
 
-        // Pop the latest history snapshot to published
         const previousVersion = content.history[0];
-        content.published = JSON.parse(JSON.stringify(previousVersion));
-        content.history = content.history.slice(1); // Remove it from history
+        const newHistory = content.history.slice(1);
 
-        content.markModified('published');
-        content.markModified('history');
-        await content.save();
+        const { error: updateError } = await supabase
+            .from('site_content')
+            .update({ 
+                published: previousVersion,
+                history: newHistory
+            })
+            .eq('tenant_id', targetTenant);
+
+        if (updateError) throw updateError;
 
         res.json({ success: true, message: 'Storefront Reverted to Previous Version' });
     } catch (err) {

@@ -20,7 +20,7 @@
  * - Multi-Currency
  */
 
-const mongoose = require('mongoose');
+// [Mongoose Removed] const mongoose = require('mongoose');
 const {
   RecentlyViewed,
   AuditLog,

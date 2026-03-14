@@ -1,8 +1,9 @@
-﻿const express = require('express');
+const express = require('express');
 const router = express.Router();
 const { protect: authenticate } = require('../middleware/auth');
 const aiContentService = require('../services/aiContentService');
 const logger = require('../services/logger');
+const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 // â”€â”€ POST /api/ai/generate â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 router.post('/generate', authenticate, async (req, res) => {
@@ -10,7 +11,11 @@ router.post('/generate', authenticate, async (req, res) => {
         const { type, niche, tone, language, length, storeName, extraContext, forceRegenerate } = req.body;
         if (!type || !niche) return res.status(400).json({ error: 'type and niche are required' });
 
-        const result = await aiContentService.generateContent(req.user.id, { type, niche, tone, language, length, storeName, extraContext, forceRegenerate });
+        const userId = req.user.id || req.user._id;
+        if (!uuidRegex.test(userId)) {
+            return res.status(403).json({ error: 'Merchant Identity Required' });
+        }
+        const result = await aiContentService.generateContent(userId, { type, niche, tone, language, length, storeName, extraContext, forceRegenerate });
 
         // Quota / rate-limit block â†’ 429
         if (result.allowed === false) {

@@ -1,11 +1,11 @@
 const logger = require('../services/logger');
-const MessageLog = require('../models/MessageLog');
+// [Mongoose Removed] const MessageLog = require('../models/MessageLog');
 const crypto = require('crypto');
 const { validateEnv } = require('../config/env');
 const stripe = require('stripe')(validateEnv().payments.stripe.secretKey);
-const Product = require('../models/Product');
-const Order = require('../models/Order');
-const mongoose = require('mongoose');
+// [Mongoose Removed] const Product = require('../models/Product');
+// [Mongoose Removed] const Order = require('../models/Order');
+// [Mongoose Removed] const mongoose = require('mongoose');
 
 const config = validateEnv();
 const { whatsapp } = config.services;

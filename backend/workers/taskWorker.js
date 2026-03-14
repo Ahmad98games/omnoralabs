@@ -9,7 +9,7 @@ const { Worker } = require('bullmq');
 const { connection, sendToDLQ } = require('../services/queueService');
 const logger = require('../services/logger');
 const onboardingService = require('../services/onboardingService');
-const SiteContent = require('../models/SiteContent');
+// [Mongoose Removed] const SiteContent = require('../models/SiteContent');
 const { validateManifest } = require('../services/preflightService');
 const aiStoreBuilderService = require('../services/aiStoreBuilderService');
 

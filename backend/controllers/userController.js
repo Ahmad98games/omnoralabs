@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+// [Mongoose Removed] const User = require('../models/User');
 const logger = require('../services/logger');
 const { validateEnv } = require('../config/env');
 

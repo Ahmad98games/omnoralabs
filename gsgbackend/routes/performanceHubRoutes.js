@@ -1,8 +1,6 @@
-const express = require('express');
-const router = express.Router();
+// 🛑 Mongoose Removed. Using Supabase Backend Client
+const { supabase } = require('../../backend/shared/lib/supabaseClient'); 
 const { protect, seller } = require('../middleware/auth');
-const Event = require('../models/Event');
-const SiteContent = require('../models/SiteContent');
 
 // @desc    Get Performance Analytics (Isolated)
 // @route   GET /api/cms/performance-hub
@@ -10,20 +8,34 @@ router.get('/', protect, seller, async (req, res) => {
     try {
         const targetTenant = req.tenantId || 'default_tenant';
 
-        // Fetch events for this tenant
-        const events = await Event.find({ tenant_id: targetTenant }).sort({ createdAt: -1 }).limit(1000);
+        // Fetch events for this tenant from interaction_logs
+        const { data: logs, error: logsError } = await supabase
+            .from('interaction_logs')
+            .select('*')
+            .eq('merchant_id', targetTenant)
+            .order('created_at', { ascending: false })
+            .limit(1000);
 
-        // Basic Aggregation Logic (Aggregated for Dashboard)
+        if (logsError) throw logsError;
+
+        // Basic Aggregation Logic
         const stats = {
-            views: events.filter(e => e.type === 'page_view').length,
-            clicks: events.filter(e => e.type === 'interaction').length,
-            conversions: events.filter(e => e.type === 'conversion').length,
-            recentEvents: events.slice(0, 10)
+            views: logs.filter(e => e.event_type === 'page_view').length,
+            clicks: logs.filter(e => e.event_type === 'product_view').length,
+            conversions: logs.filter(e => e.event_type === 'purchase').length,
+            recentEvents: logs.slice(0, 10)
         };
 
-        // Integration with "Draft vs Published" for Targets/Goals
-        const content = await SiteContent.findOne({ tenant_id: targetTenant });
-        const analyticsConfig = content?.draft?.configuration?.analytics || { targetMonthlySales: 10000 };
+        // Integration with "Draft" config from store_pages
+        const { data: pageData } = await supabase
+            .from('store_pages')
+            .select('ast_manifest')
+            .eq('tenant_id', targetTenant)
+            .eq('slug', '_site_config')
+            .eq('is_published', false)
+            .maybeSingle();
+
+        const analyticsConfig = pageData?.ast_manifest?.configuration?.analytics || { targetMonthlySales: 10000 };
 
         res.json({
             success: true,
@@ -49,19 +61,35 @@ router.post('/targets', protect, seller, async (req, res) => {
             });
         }
 
-        const content = await SiteContent.findOne({ tenant_id: targetTenant, seller: req.user._id });
-        if (!content) return res.status(404).json({ success: false, error: 'Territory not found.' });
+        const { data: pageData, error: fetchError } = await supabase
+            .from('store_pages')
+            .select('ast_manifest')
+            .eq('tenant_id', targetTenant)
+            .eq('slug', '_site_config')
+            .eq('is_published', false)
+            .maybeSingle();
 
-        content.draft.configuration = {
-            ...content.draft.configuration,
-            analytics: {
-                ...content.draft.configuration?.analytics,
-                ...req.body
+        if (fetchError || !pageData) return res.status(404).json({ success: false, error: 'Territory not found.' });
+
+        const updatedManifest = {
+            ...pageData.ast_manifest,
+            configuration: {
+                ...pageData.ast_manifest?.configuration,
+                analytics: {
+                    ...pageData.ast_manifest?.configuration?.analytics,
+                    ...req.body
+                }
             }
         };
 
-        content.markModified('draft');
-        await content.save();
+        const { error: updateError } = await supabase
+            .from('store_pages')
+            .update({ ast_manifest: updatedManifest })
+            .eq('tenant_id', targetTenant)
+            .eq('slug', '_site_config')
+            .eq('is_published', false);
+
+        if (updateError) throw updateError;
 
         res.json({ success: true, message: 'Performance Targets Updated (Draft)' });
     } catch (err) {

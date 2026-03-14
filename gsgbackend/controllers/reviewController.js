@@ -3,8 +3,8 @@
  * Handles all review operations
  */
 
-const { Review, ReviewService } = require('../models/Review');
-const { Order } = require('../models/Order');
+// [Mongoose Removed] const { Review, ReviewService } = require('../models/Review');
+// [Mongoose Removed] const { Order } = require('../models/Order');
 
 class ReviewController {
   /**

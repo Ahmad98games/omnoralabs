@@ -1,4 +1,4 @@
-const Newsletter = require('../models/Newsletter');
+// [Mongoose Removed] const Newsletter = require('../models/Newsletter');
 const nodemailer = require('nodemailer');
 const { validateEnv } = require('../config/env');
 

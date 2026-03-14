@@ -6,8 +6,8 @@
  */
 
 require('dotenv').config();
-const mongoose = require('mongoose');
-const User = require('../models/User');
+// [Mongoose Removed] const mongoose = require('mongoose');
+// [Mongoose Removed] const User = require('../models/User');
 
 const ADMIN_CREDENTIALS = {
     name: 'Admin',

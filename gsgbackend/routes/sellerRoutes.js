@@ -1,8 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const Product = require('../models/Product');
+// 🛑 Mongoose Removed. Using Supabase Backend Client
+const { supabase } = require('../../backend/shared/lib/supabaseClient'); 
 const { protect, seller } = require('../middleware/auth');
 const logger = require('../services/logger');
+const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 /**
  * @desc    Get all products for the authenticated seller
@@ -10,7 +12,17 @@ const logger = require('../services/logger');
  */
 router.get('/inventory', protect, seller, async (req, res) => {
     try {
-        const products = await Product.find({ seller: req.user._id });
+        const merchantId = req.user.id || req.user._id;
+        if (!uuidRegex.test(merchantId)) {
+            return res.json({ success: true, count: 0, data: [] });
+        }
+        const { data: products, error } = await supabase
+            .from('products')
+            .select('*')
+            .eq('merchant_id', merchantId);
+
+        if (error) throw error;
+
         res.json({ success: true, count: products.length, data: products });
     } catch (err) {
         logger.error('SELLER_INVENTORY_FETCH_ERROR', { error: err.message });
@@ -24,11 +36,16 @@ router.get('/inventory', protect, seller, async (req, res) => {
  */
 router.post('/inventory', protect, seller, async (req, res) => {
     try {
-        const productData = {
-            ...req.body,
-            seller: req.user._id
-        };
-        const product = await Product.create(productData);
+        const { data: product, error } = await supabase
+            .from('products')
+            .insert([{
+                ...req.body,
+                merchant_id: req.user.id || req.user._id
+            }])
+            .select()
+            .single();
+
+        if (error) throw error;
         res.status(201).json({ success: true, data: product });
     } catch (err) {
         logger.error('SELLER_PRODUCT_CREATE_ERROR', { error: err.message });
@@ -42,13 +59,15 @@ router.post('/inventory', protect, seller, async (req, res) => {
  */
 router.put('/inventory/:id', protect, seller, async (req, res) => {
     try {
-        const product = await Product.findOneAndUpdate(
-            { _id: req.params.id, seller: req.user._id },
-            req.body,
-            { new: true, runValidators: true }
-        );
+        const { data: product, error } = await supabase
+            .from('products')
+            .update(req.body)
+            .eq('id', req.params.id)
+            .eq('merchant_id', req.user.id || req.user._id)
+            .select()
+            .single();
 
-        if (!product) {
+        if (error || !product) {
             return res.status(404).json({ success: false, error: 'Product not found or unauthorized' });
         }
 
@@ -64,9 +83,13 @@ router.put('/inventory/:id', protect, seller, async (req, res) => {
  */
 router.delete('/inventory/:id', protect, seller, async (req, res) => {
     try {
-        const product = await Product.findOneAndDelete({ _id: req.params.id, seller: req.user._id });
+        const { error } = await supabase
+            .from('products')
+            .delete()
+            .eq('id', req.params.id)
+            .eq('merchant_id', req.user.id || req.user._id);
 
-        if (!product) {
+        if (error) {
             return res.status(404).json({ success: false, error: 'Product not found or unauthorized' });
         }
 

@@ -3,7 +3,7 @@
  * Rule-based intelligent product recommendations
  */
 
-const { Recommendation, RecentlyViewed, BoughtTogether } = require('../models/Recommendation');
+// [Mongoose Removed] const { Recommendation, RecentlyViewed, BoughtTogether } = require('../models/Recommendation');
 const axios = require('axios');
 
 class RecommendationService {

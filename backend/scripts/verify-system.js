@@ -5,7 +5,7 @@
  * Run: node scripts/verify-system.js
  */
 
-const mongoose = require('mongoose');
+// [Mongoose Removed] const mongoose = require('mongoose');
 require('dotenv').config();
 
 async function verifySystem() {
@@ -51,9 +51,9 @@ async function verifySystem() {
         await mongoose.connect(process.env.MONGODB_URI);
         console.log('   ✅ MongoDB connected');
 
-        const Order = require('../models/Order');
-        const AdminActionLog = require('../models/AdminActionLog');
-        const MessageLog = require('../models/MessageLog');
+        // [Mongoose Removed] const Order = require('../models/Order');
+        // [Mongoose Removed] const AdminActionLog = require('../models/AdminActionLog');
+        // [Mongoose Removed] const MessageLog = require('../models/MessageLog');
 
         // Check Order indexes
         const orderIndexes = await Order.collection.getIndexes();

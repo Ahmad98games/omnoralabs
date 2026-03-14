@@ -3,33 +3,42 @@
  * Event-driven WhatsApp messaging with anti-spam, opt-out, and timing controls.
  * Extends the existing whatsappService (CallMeBot) via queueService.
  */
+// 🛑 Mongoose Removed. Using Supabase Backend Client
+const { supabase } = require('../../backend/shared/lib/supabaseClient'); 
 const logger = require('./logger');
 const queueService = require('./queueService');
 const waRateGuard = require('./waRateGuard');
 
-const getModels = () => ({
-    WhatsAppTemplate: require('../models/WhatsAppTemplate'),
-    WaOptOut: require('../models/WaOptOut'),
-});
-
 // ─── Anti-spam: check if safe to send ────────────────────────────────────────
 
 async function canSend(phone, sellerId, eventName) {
-    const { WhatsAppTemplate, WaOptOut } = getModels();
-
     // 1. Check opt-out list
-    const optedOut = await WaOptOut.findOne({ phone, sellerId, reinstated: false });
+    const { data: optedOut, error: optError } = await supabase
+        .from('whatsapp_optouts')
+        .select('*')
+        .eq('phone', phone)
+        .eq('merchant_id', sellerId)
+        .eq('reinstated', false)
+        .maybeSingle();
+
     if (optedOut) {
         logger.info(`WA_BLOCKED: ${phone} opted out — skipping ${eventName}`);
         return false;
     }
 
     // 2. Check timing window from template settings
-    const template = await WhatsAppTemplate.findOne({ sellerId, eventName });
-    if (template) {
+    const { data: template, error: tempError } = await supabase
+        .from('whatsapp_templates')
+        .select('*')
+        .eq('merchant_id', sellerId)
+        .eq('event_name', eventName)
+        .maybeSingle();
+
+    if (template && template.metadata) {
         const hour = new Date().getHours();
-        if (hour < template.timingWindowStart || hour >= template.timingWindowEnd) {
-            logger.info(`WA_TIMING: Outside window (${template.timingWindowStart}–${template.timingWindowEnd}) — skipping`);
+        const { timingWindowStart = 0, timingWindowEnd = 24 } = template.metadata;
+        if (hour < timingWindowStart || hour >= timingWindowEnd) {
+            logger.info(`WA_TIMING: Outside window (${timingWindowStart}–${timingWindowEnd}) — skipping`);
             return false;
         }
     }
@@ -40,20 +49,31 @@ async function canSend(phone, sellerId, eventName) {
 // ─── Template renderer ────────────────────────────────────────────────────────
 
 async function renderTemplate(sellerId, eventName, vars = {}) {
-    const { WhatsAppTemplate } = getModels();
+    const { data: template, error } = await supabase
+        .from('whatsapp_templates')
+        .select('*')
+        .eq('merchant_id', sellerId)
+        .eq('event_name', eventName)
+        .eq('is_active', true)
+        .maybeSingle();
 
-    let template = await WhatsAppTemplate.findOne({ sellerId, eventName, isActive: true });
+    let templateText = template?.template_body;
 
     // Fall back to default templates if seller hasn't customized
-    if (!template) {
-        const { DEFAULT_TEMPLATES } = WhatsAppTemplate;
-        const defaultText = DEFAULT_TEMPLATES?.[eventName];
-        if (!defaultText) return null;
-        template = { templateText: defaultText };
+    if (!templateText) {
+        const DEFAULT_TEMPLATES = {
+            order_confirmation: "Hello {{name}}, your order {{orderNumber}} has been received! Total: {{amount}}. Thank you for shopping with us.",
+            payment_approved: "Good news {{name}}! Your payment for order {{orderNumber}} has been approved. We'll start preparing your package.",
+            order_shipped: "Hi {{name}}, your order {{orderNumber}} has been shipped! Tracking number: {{trackingNumber}}.",
+            abandoned_cart: "Hi {{name}}, you left some items in your cart. Use code 'BACK5' for a special discount!",
+            welcome_message: "Welcome to our store, {{name}}! We're glad to have you."
+        };
+        templateText = DEFAULT_TEMPLATES[eventName];
+        if (!templateText) return null;
     }
 
     // Interpolate {{variables}}
-    let text = template.templateText;
+    let text = templateText;
     Object.entries(vars).forEach(([key, val]) => {
         text = text.replace(new RegExp(`{{${key}}}`, 'g'), val ?? '');
     });
@@ -150,12 +170,15 @@ async function reorderReminder({ phone, name, sellerId, storeLink }) {
 // ─── Opt-out handler (called when customer sends STOP) ────────────────────────
 
 async function processOptOut(phone, sellerId) {
-    const { WaOptOut } = getModels();
-    const existing = await WaOptOut.findOne({ phone, sellerId });
-    if (!existing) {
-        await WaOptOut.create({ phone, sellerId });
-        logger.info(`WA_OPTOUT: ${phone} opted out from seller ${sellerId}`);
+    const { error } = await supabase
+        .from('whatsapp_optouts')
+        .upsert({ phone, merchant_id: sellerId, reinstated: false }, { onConflict: 'phone,merchant_id' });
+    
+    if (error) {
+        logger.error(`WA_OPTOUT_ERROR: ${error.message}`);
+        return { success: false };
     }
+    logger.info(`WA_OPTOUT: ${phone} opted out from seller ${sellerId}`);
     return { success: true };
 }
 

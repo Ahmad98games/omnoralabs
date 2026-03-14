@@ -1,5 +1,5 @@
 require('dotenv').config({ path: require('path').resolve(__dirname, '../.env') });
-const User = require('../models/User');
+// [Mongoose Removed] const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 
 const email = process.argv[2];

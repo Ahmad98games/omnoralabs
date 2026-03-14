@@ -1,5 +1,7 @@
+// 🛑 Mongoose Removed. Using Supabase Backend Client
+const { supabase } = require('../../backend/shared/lib/supabaseClient'); 
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+const bcrypt = require('bcryptjs');
 const logger = require('../services/logger');
 const { validateEnv } = require('../config/env');
 
@@ -10,51 +12,63 @@ const ACCESS_TOKEN_EXPIRES_IN = config.jwt.expiresIn;
 const REFRESH_TOKEN_EXPIRES_IN = process.env.JWT_REFRESH_EXPIRES_IN || '30d';
 
 const signAccessToken = (user) =>
-  jwt.sign({ id: user._id.toString(), role: user.role }, JWT_SECRET, {
+  jwt.sign({ id: user.id || user._id, role: user.role }, JWT_SECRET, {
     expiresIn: ACCESS_TOKEN_EXPIRES_IN
   });
 
 const signRefreshToken = (user) =>
-  jwt.sign({ id: user._id.toString(), type: 'refresh' }, REFRESH_SECRET, {
+  jwt.sign({ id: user.id || user._id, type: 'refresh' }, REFRESH_SECRET, {
     expiresIn: REFRESH_TOKEN_EXPIRES_IN
   });
 
 const issueTokens = async (user) => {
-  const accessToken = signAccessToken(user);
-  const refreshToken = signRefreshToken(user);
-  await user.setRefreshToken(refreshToken);
-  await user.save({ validateBeforeSave: false });
+  const accessToken = jwt.sign({ id: user.id || user._id, role: user.role || 'customer' }, JWT_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRES_IN });
+  const refreshToken = jwt.sign({ id: user.id || user._id, type: 'refresh' }, REFRESH_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRES_IN });
+  
+  // Update refresh token in DB
+  await supabase.from('merchants').update({ 
+    metadata: { ...user.metadata, refreshToken } 
+  }).eq('id', user.id);
+  
   return { accessToken, refreshToken };
 };
 
 const sanitizeUser = (user) => ({
-  id: user._id,
-  firstName: user.firstName,
-  lastName: user.lastName,
+  id: user.id || user._id,
+  firstName: user.firstName || user.metadata?.firstName,
+  lastName: user.lastName || user.metadata?.lastName,
   email: user.email,
-  role: user.role,
-  phone: user.phone,
-  brandProfile: user.brandProfile || {}
+  role: user.role || user.metadata?.role,
+  phone: user.phone || user.metadata?.phone,
+  brandProfile: (user.brandProfile || user.metadata?.brandProfile) || {}
 });
 
 exports.registerUser = async (req, res) => {
   try {
     const { firstName, lastName, email, password, phone } = req.body;
-    const existingUser = await User.findOne({ email });
-
+    
+    // Check if user exists
+    const { data: existingUser } = await supabase.from('merchants').select('id').eq('email', email).maybeSingle();
     if (existingUser) {
       return res.status(409).json({ error: 'User already exists with this email.' });
     }
 
-    const user = new User({
-      firstName,
-      lastName,
-      email,
-      password,
-      phone
-    });
+    const salt = await bcrypt.genSalt(10);
+    const passwordHash = await bcrypt.hash(password, salt);
 
-    await user.save();
+    const { data: user, error } = await supabase
+      .from('merchants')
+      .insert([{
+        email,
+        password_hash: passwordHash,
+        display_name: `${firstName} ${lastName}`.trim(),
+        metadata: { firstName, lastName, phone, role: 'customer' }
+      }])
+      .select()
+      .single();
+
+    if (error) throw error;
+
     const tokens = await issueTokens(user);
 
     return res.status(201).json({
@@ -72,23 +86,18 @@ exports.registerUser = async (req, res) => {
 exports.loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const user = await User.findOne({ email }).select('+password +refreshToken');
+    const { data: user, error } = await supabase
+      .from('merchants')
+      .select('*')
+      .eq('email', email)
+      .maybeSingle();
 
-    logger.info(`Auth check: ${email}`, {
-      hasUser: !!user,
-      hasPassword: !!user?.password,
-      passwordType: typeof user?.password,
-      passwordStart: user?.password?.substring(0, 5)
-    });
-
-    if (!user) {
-      logger.warn(`Auth failed: User not found - ${email}`);
+    if (error || !user) {
       return res.status(400).json({ error: 'Invalid credentials.' });
     }
 
-    const isMatch = await user.matchPassword(password);
+    const isMatch = await bcrypt.compare(password, user.password_hash);
     if (!isMatch) {
-      logger.warn(`Auth failed: Invalid password for ${email}`);
       return res.status(400).json({ error: 'Invalid credentials.' });
     }
 
@@ -110,14 +119,18 @@ exports.refreshToken = async (req, res) => {
   try {
     const { refreshToken } = req.body;
     const decoded = jwt.verify(refreshToken, REFRESH_SECRET);
-    const user = await User.findById(decoded.id).select('+refreshToken');
+    const { data: user, error } = await supabase
+      .from('merchants')
+      .select('*')
+      .eq('id', decoded.id)
+      .maybeSingle();
 
-    if (!user) {
+    if (error || !user) {
       return res.status(401).json({ error: 'Invalid refresh token.' });
     }
 
-    const isValid = await user.verifyRefreshToken(refreshToken);
-    if (!isValid) {
+    const storedToken = user.metadata?.refreshToken;
+    if (storedToken !== refreshToken) {
       return res.status(401).json({ error: 'Refresh token has been revoked.' });
     }
 
@@ -138,11 +151,10 @@ exports.logout = async (req, res) => {
     if (!req.user) {
       return res.status(200).json({ success: true });
     }
-    const user = await User.findById(req.user._id).select('+refreshToken');
-    if (user) {
-      user.clearRefreshToken();
-      await user.save({ validateBeforeSave: false });
-    }
+    await supabase.from('merchants').update({ 
+      metadata: { ...req.user.metadata, refreshToken: null } 
+    }).eq('id', req.user.id || req.user._id);
+    
     return res.json({ success: true });
   } catch (error) {
     logger.error('Error during logout', { error: error.message });
@@ -159,23 +171,48 @@ exports.getUserProfile = (req, res) => {
 
 exports.updateUserProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id).select('+password');
-    if (!user) {
+    const { firstName, lastName, phone, password, brandProfile } = req.body;
+    const userId = req.user.id || req.user._id;
+
+    const { data: user, error: fetchError } = await supabase
+      .from('merchants')
+      .select('*')
+      .eq('id', userId)
+      .single();
+
+    if (fetchError || !user) {
       return res.status(404).json({ error: 'User not found.' });
     }
 
-    const { firstName, lastName, phone, password, brandProfile } = req.body;
-    if (firstName !== undefined) user.firstName = firstName;
-    if (lastName !== undefined) user.lastName = lastName;
-    if (phone !== undefined) user.phone = phone;
-    if (password) user.password = password;
-    if (brandProfile) user.brandProfile = { ...user.brandProfile, ...brandProfile };
+    const updateData = {
+      display_name: `${firstName || user.metadata?.firstName} ${lastName || user.metadata?.lastName}`.trim(),
+      metadata: { 
+        ...user.metadata, 
+        firstName: firstName || user.metadata?.firstName,
+        lastName: lastName || user.metadata?.lastName,
+        phone: phone || user.metadata?.phone,
+        brandProfile: { ...(user.metadata?.brandProfile || {}), ...(brandProfile || {}) }
+      }
+    };
 
-    await user.save();
+    if (password) {
+      const salt = await bcrypt.genSalt(10);
+      updateData.password_hash = await bcrypt.hash(password, salt);
+    }
+
+    const { data: updatedUser, error: updateError } = await supabase
+      .from('merchants')
+      .update(updateData)
+      .eq('id', userId)
+      .select()
+      .single();
+
+    if (updateError) throw updateError;
+
     return res.json({
       success: true,
       message: 'Profile updated successfully.',
-      user: sanitizeUser(user)
+      user: sanitizeUser(updatedUser)
     });
   } catch (error) {
     logger.error('Error updating profile', { error: error.message });
@@ -185,10 +222,16 @@ exports.updateUserProfile = async (req, res) => {
 
 exports.getAllUsers = async (req, res) => {
   try {
-    const users = await User.find().select('-password -__v');
+    const { data: users, error } = await supabase
+      .from('merchants')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
     res.json({
       success: true,
-      users
+      users: users.map(sanitizeUser)
     });
   } catch (error) {
     logger.error('Error fetching all users', { error: error.message });
@@ -198,10 +241,13 @@ exports.getAllUsers = async (req, res) => {
 
 exports.deleteUser = async (req, res) => {
   try {
-    const user = await User.findByIdAndDelete(req.params.id);
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
+    const { error } = await supabase
+      .from('merchants')
+      .delete()
+      .eq('id', req.params.id);
+
+    if (error) throw error;
+
     res.json({ success: true, message: 'User deleted successfully' });
   } catch (error) {
     logger.error('Error deleting user', { error: error.message });
@@ -212,20 +258,32 @@ exports.deleteUser = async (req, res) => {
 exports.updateUserRole = async (req, res) => {
   try {
     const { isAdmin } = req.body;
-    const user = await User.findById(req.params.id);
+    const { data: user, error: fetchError } = await supabase
+      .from('merchants')
+      .select('*')
+      .eq('id', req.params.id)
+      .single();
 
-    if (!user) {
+    if (fetchError || !user) {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    // Role toggle
-    user.role = isAdmin ? 'admin' : 'customer';
-    await user.save({ validateBeforeSave: false });
+    const newRole = isAdmin ? 'admin' : 'customer';
+    const { data: updatedUser, error: updateError } = await supabase
+      .from('merchants')
+      .update({ 
+        metadata: { ...user.metadata, role: newRole }
+      })
+      .eq('id', req.params.id)
+      .select()
+      .single();
+
+    if (updateError) throw updateError;
 
     res.json({
       success: true,
-      message: `User role updated the to ${user.role}`,
-      user: sanitizeUser(user)
+      message: `User role updated the to ${newRole}`,
+      user: sanitizeUser(updatedUser)
     });
   } catch (error) {
     logger.error('Error updating user role', { error: error.message });

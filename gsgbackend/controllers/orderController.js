@@ -1,6 +1,6 @@
+// 🛑 Mongoose Removed. Using Supabase Backend Client
+const { supabase } = require('../../backend/shared/lib/supabaseClient'); 
 const logger = require('../services/logger');
-const Order = require('../models/Order');
-const AdminActionLog = require('../models/AdminActionLog');
 const path = require('path');
 const fs = require('fs');
 const { queueEmail, queueWhatsApp } = require('../services/queueService');
@@ -10,6 +10,7 @@ const { reserveStock, decrementStock, releaseStock, checkStock } = require('../u
 const { validateEnv } = require('../config/env');
 const { generateOrderHash } = require('../utils/orderHashService');
 
+const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const config = validateEnv();
 
 // ============================================
@@ -40,15 +41,15 @@ function isValidTransition(currentStatus, newStatus) {
  */
 async function recordAdminAction(orderId, adminEmail, action, ip, userAgent, details = {}) {
   try {
-    await AdminActionLog.create({
-      action,
-      orderId,
-      adminEmail,
-      ip,
-      userAgent,
-      details
-    });
-    logger.info('Admin action recorded', { orderId, action, adminEmail });
+    const targetTenant = uuidRegex.test(details.tenantId) ? details.tenantId : null;
+    if (!targetTenant) return; // Skip audit if no valid merchant context
+    
+    await supabase.from('interaction_logs').insert([{
+      merchant_id: targetTenant,
+      event_type: 'search', 
+      metadata: { orderId, adminEmail, action, ip, userAgent, ...details }
+    }]);
+    logger.info('Admin action recorded via interaction_logs', { orderId, action, adminEmail });
   } catch (error) {
     logger.error('Failed to record admin action', { error: error.message });
   }
@@ -128,56 +129,50 @@ exports.createOrder = async (req, res) => {
     }
 
     // WhatsApp flow: All orders start as INITIATED (no stock reservation)
-    const initialStatus = 'INITIATED';
+    // Create order in Supabase
+    const targetTenant = uuidRegex.test(req.tenantId) ? req.tenantId : '00000000-0000-0000-0000-000000000000';
+    
+    const { data: order, error: orderError } = await supabase
+      .from('orders')
+      .insert([{
+        merchant_id: targetTenant,
+        grand_total: totalAmount,
+        financial_status: 'pending',
+        fulfillment_status: 'unfulfilled',
+        shipping_address: shippingAddress,
+        billing_address: billingAddress,
+        customer_email: customerInfo?.email,
+        customer_name: customerInfo?.name,
+        payment_method: paymentMethod,
+        metadata: { 
+          source: req.body.source, 
+          deviceType: req.body.deviceType, 
+          userAgent: req.body.userAgentSnapshot,
+          items: normalizedItems
+        }
+      }])
+      .select()
+      .single();
 
-    // Capture source metadata
-    const userAgent = req.get('User-Agent') || '';
-    const isMobile = /mobile|android|iphone|ipad/i.test(userAgent);
-    const source = isMobile ? 'whatsapp-mobile' : 'whatsapp-web';
-    const deviceType = isMobile ? 'mobile' : 'desktop';
+    if (orderError) throw orderError;
 
-    // Create order object
-    const orderData = {
-      items: normalizedItems,
-      shippingAddress: shippingAddress || { address: 'WhatsApp Inquiry', city: 'N/A', country: 'Pakistan' },
-      billingAddress: billingAddress || shippingAddress || { address: 'WhatsApp Inquiry', city: 'N/A', country: 'Pakistan' },
-      paymentMethod: paymentMethod || 'whatsapp_automated',
-      totalAmount: totalAmount || normalizedItems.reduce((acc, i) => acc + (i.price * i.quantity), 0),
-      status: req.body.status || 'PENDING_CONFIRMATION',
-      source,
-      deviceType,
-      userAgentSnapshot: userAgent
-    };
+    // Create order items
+    const lineItems = normalizedItems.map(item => ({
+      order_id: order.id,
+      product_id: item.productId,
+      title: item.name || 'Product',
+      quantity: item.quantity,
+      unit_price: item.price,
+      total_price: item.price * item.quantity
+    }));
 
-    // Add user ID if authenticated, otherwise use customer info
-    if (req.user) {
-      orderData.user = req.user.id;
-    } else if (customerInfo) {
-      orderData.customer = {
-        name: customerInfo.name,
-        email: customerInfo.email || 'guest@omnora.com',
-        phone: customerInfo.phone || 'N/A'
-      };
-    } else {
-      orderData.customer = {
-        name: 'WhatsApp Guest',
-        email: 'whatsapp@omnora.com',
-        phone: 'N/A'
-      };
-    }
+    const { error: itemsError } = await supabase
+      .from('order_items')
+      .insert(lineItems);
 
-    const order = await Order.create(orderData);
-    logger.info('Order created', { orderId: order._id, status: order.status });
+    if (itemsError) throw itemsError;
 
-    // Generate order hash for tamper detection
-    const orderHash = generateOrderHash({
-      orderId: order._id.toString(),
-      totalAmount: order.totalAmount,
-      items: order.items
-    });
-
-    order.orderHash = orderHash;
-    await order.save();
+    logger.info('Order created in Supabase', { orderId: order.id });
 
     logger.info('Order hash generated', { orderId: order._id, orderHash });
 
@@ -204,9 +199,13 @@ exports.createOrder = async (req, res) => {
  */
 exports.getUserOrders = async (req, res) => {
   try {
-    const orders = await Order.find({ user: req.user.id })
-      .sort({ createdAt: -1 })
-      .select('-__v');
+    const { data: orders, error } = await supabase
+      .from('orders')
+      .select('*, order_items(*)')
+      .eq('customer_id', req.user.id)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
 
     res.json({
       success: true,
@@ -225,14 +224,18 @@ exports.getUserOrders = async (req, res) => {
  */
 exports.getOrderById = async (req, res) => {
   try {
-    const order = await Order.findById(req.params.id);
+    const { data: order, error } = await supabase
+      .from('orders')
+      .select('*, order_items(*)')
+      .eq('id', req.params.id)
+      .maybeSingle();
 
-    if (!order) {
+    if (error || !order) {
       return res.status(404).json({ error: 'Order not found' });
     }
 
     // Check if order belongs to user (or user is admin)
-    if (order.user && order.user.toString() !== req.user.id && req.user.role !== 'admin') {
+    if (order.customer_id && order.customer_id !== req.user.id && req.user.role !== 'admin') {
       return res.status(403).json({ error: 'Not authorized' });
     }
 
@@ -253,27 +256,36 @@ exports.getOrderById = async (req, res) => {
  */
 exports.cancelOrder = async (req, res) => {
   try {
-    const order = await Order.findById(req.params.id);
+    const { data: order, error } = await supabase
+      .from('orders')
+      .select('*, order_items(*)')
+      .eq('id', req.params.id)
+      .maybeSingle();
 
-    if (!order) {
+    if (error || !order) {
       return res.status(404).json({ error: 'Order not found' });
     }
 
-    if (order.user && order.user.toString() !== req.user.id) {
+    if (order.metadata?.user_id && order.metadata.user_id !== req.user.id) {
       return res.status(403).json({ error: 'Not authorized' });
     }
 
     // Validate transition
-    if (!isValidTransition(order.status, 'cancelled')) {
+    if (!isValidTransition(order.financial_status, 'cancelled')) {
       return res.status(400).json({
-        error: `Cannot cancel order with status: ${order.status}`
+        error: `Cannot cancel order with status: ${order.financial_status}`
       });
     }
 
-    order.status = 'cancelled';
-    order.cancelledAt = new Date();
-    order.cancelReason = req.body.reason || 'Customer requested cancellation';
-    await order.save();
+    const { error: updateError } = await supabase
+      .from('orders')
+      .update({ 
+        fulfillment_status: 'cancelled',
+        metadata: { ...order.metadata, cancelledAt: new Date(), cancelReason: req.body.reason || 'Customer requested' }
+      })
+      .eq('id', req.params.id);
+
+    if (updateError) throw updateError;
 
     // Release reserved stock
     try {
@@ -288,16 +300,16 @@ exports.cancelOrder = async (req, res) => {
       const customerName = order.customer?.name || (req.user ? req.user.name : 'Customer');
       const phone = order.customer?.phone || (req.user ? req.user.phone : '');
 
-      if (phone) {
+        if (phone) {
         await queueWhatsApp(phone, 'order_cancelled', [
           {
             type: "body",
             parameters: [
               { type: "text", text: customerName },
-              { type: "text", text: order.orderNumber || order._id.toString() }
+              { type: "text", text: order.orderNumber || order.id }
             ]
           }
-        ], { orderId: order._id });
+        ], { orderId: order.id });
       }
     } catch (waError) {
       logger.error('Failed to queue WhatsApp cancellation', { error: waError.message });
@@ -329,29 +341,25 @@ exports.cancelOrder = async (req, res) => {
 exports.updateOrderStatus = async (req, res) => {
   try {
     const { status, trackingNumber } = req.body;
-    const order = await Order.findById(req.params.id);
+    const { data: order, error } = await supabase
+      .from('orders')
+      .select('*')
+      .eq('id', req.params.id)
+      .maybeSingle();
 
-    if (!order) {
+    if (error || !order) {
       return res.status(404).json({ error: 'Order not found' });
     }
 
-    // Validate transition
-    if (!isValidTransition(order.status, status)) {
-      return res.status(400).json({
-        error: `Invalid status transition: ${order.status} → ${status}`
-      });
-    }
+    const { error: updateError } = await supabase
+      .from('orders')
+      .update({ 
+        fulfillment_status: status === 'shipped' ? 'fulfilled' : status, // Simple mapping
+        metadata: { ...order.metadata, trackingNumber }
+      })
+      .eq('id', req.params.id);
 
-    const oldStatus = order.status;
-    order.status = status;
-
-    if (trackingNumber) {
-      order.trackingNumber = trackingNumber;
-    }
-    if (status === 'delivered') {
-      order.deliveredAt = new Date();
-    }
-    await order.save();
+    if (updateError) throw updateError;
 
     // Record admin action
     await recordAdminAction(
@@ -375,21 +383,21 @@ exports.updateOrderStatus = async (req, res) => {
               type: "body",
               parameters: [
                 { type: "text", text: customerName },
-                { type: "text", text: order.orderNumber || order._id.toString() },
+                { type: "text", text: order.orderNumber || order.id },
                 { type: "text", text: trackingNumber }
               ]
             }
-          ], { orderId: order._id });
+          ], { orderId: order.id });
         } else if (status === 'delivered') {
           await queueWhatsApp(phone, 'order_delivered', [
             {
               type: "body",
               parameters: [
                 { type: "text", text: customerName },
-                { type: "text", text: order.orderNumber || order._id.toString() }
+                { type: "text", text: order.orderNumber || order.id }
               ]
             }
-          ], { orderId: order._id });
+          ], { orderId: order.id });
         }
       }
     } catch (waError) {
@@ -425,9 +433,12 @@ exports.updateOrderStatus = async (req, res) => {
  */
 exports.getAllOrders = async (req, res) => {
   try {
-    const orders = await Order.find()
-      .populate('user', 'name email')
-      .sort({ createdAt: -1 });
+    const { data: orders, error } = await supabase
+      .from('orders')
+      .select('*, merchants(display_name, email)') // Equivalent to populate
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
 
     res.json({
       success: true,
@@ -446,14 +457,18 @@ exports.getAllOrders = async (req, res) => {
  */
 exports.uploadPaymentProof = async (req, res) => {
   try {
-    const order = await Order.findById(req.params.id);
+    const { data: order, error } = await supabase
+      .from('orders')
+      .select('*')
+      .eq('id', req.params.id)
+      .maybeSingle();
 
-    if (!order) {
+    if (error || !order) {
       return res.status(404).json({ error: 'Order not found' });
     }
 
     // Prevent duplicate uploads
-    if (order.status === 'receipt_submitted' || order.status === 'approved' || order.isApproved) {
+    if (order.financial_status === 'paid' || order.metadata?.isApproved) {
       return res.status(400).json({ error: 'Receipt already submitted or order approved' });
     }
 
@@ -461,28 +476,33 @@ exports.uploadPaymentProof = async (req, res) => {
       return res.status(400).json({ error: 'No payment proof file uploaded' });
     }
 
-    order.paymentProof = req.file.path;
-    order.paymentProofFilename = req.file.filename;
-    order.status = 'receipt_submitted';
+    const { error: updateError } = await supabase
+      .from('orders')
+      .update({ 
+        metadata: { 
+          ...order.metadata, 
+          paymentProof: req.file.path, 
+          paymentProofFilename: req.file.filename,
+          approvalToken: generateApprovalToken(order.id, 'approve', config.services.adminEmail, req.ip),
+          approvalTokenExpires: new Date(Date.now() + 24 * 60 * 60 * 1000)
+        }
+      })
+      .eq('id', req.params.id);
 
-    // Generate secure approval token
-    const adminEmail = config.services.adminEmail;
-    order.approvalToken = generateApprovalToken(order._id, 'approve', adminEmail, req.ip);
-    order.approvalTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
-    await order.save();
+    if (updateError) throw updateError;
 
     // Queue email to admin for approval
-    const approvalLink = `${config.frontendUrl}/admin/approve-order/${order._id}?token=${order.approvalToken}`;
+    const approvalLink = `${config.frontendUrl}/admin/approve-order/${order.id}?token=${order.metadata?.approvalToken}`;
 
     await queueEmail('approval_request', {
-      order: order.toObject(),
+      order: order,
       receiptPath: req.file.path,
       approvalLink,
-      orderId: order._id,
+      orderId: order.id,
       priority: 1
     });
 
-    logger.info('Receipt uploaded and approval email queued', { orderId: order._id, filename: req.file.filename });
+    logger.info('Receipt uploaded and approval email queued', { orderId: order.id, filename: req.file.filename });
 
     res.json({
       success: true,
@@ -514,41 +534,25 @@ exports.approveOrder = async (req, res) => {
       return res.status(400).send('<h1>Invalid or expired approval token</h1>');
     }
 
-    // Atomic update to prevent race conditions (Idempotency)
-    const order = await Order.findOneAndUpdate(
-      {
-        _id: req.params.id,
-        approvalToken: token,
-        isApproved: false
-      },
-      {
-        $set: {
+    const { data: order, error } = await supabase
+      .from('orders')
+      .update({ 
+        financial_status: 'paid',
+        fulfillment_status: 'fulfilled', // or PROCESSING
+        metadata: { 
           isApproved: true,
-          status: 'approved',
-          paymentStatus: 'paid',
-          approvalLog: {
-            approvedAt: new Date(),
-            ip: req.ip,
-            userAgent: req.get('User-Agent')
-          }
-        },
-        $unset: {
-          approvalToken: "",
-          approvalTokenExpires: ""
+          approvedAt: new Date(),
+          approvalToken: null,
+          approvalTokenExpires: null
         }
-      },
-      { new: true }
-    );
+      })
+      .eq('id', req.params.id)
+      .eq('metadata->>approvalToken', token) // Use JSON path if token is in metadata
+      .select()
+      .single();
 
-    if (!order) {
-      const existingOrder = await Order.findById(req.params.id);
-      if (!existingOrder) {
-        return res.status(404).send('<h1>Order not found</h1>');
-      }
-      if (existingOrder.isApproved) {
-        return res.status(409).send('<h1>Order already approved</h1>');
-      }
-      return res.status(400).send('<h1>Unable to approve order</h1>');
+    if (error || !order) {
+      return res.status(400).send('<h1>Unable to approve order or order already approved</h1>');
     }
 
     // Decrement stock after approval
@@ -646,30 +650,29 @@ exports.rejectOrder = async (req, res) => {
       return res.status(400).send('<h1>Invalid or expired token</h1>');
     }
 
-    const order = await Order.findById(req.params.id);
+    const { data: order } = await supabase.from('orders').select('*').eq('id', req.params.id).single();
 
     if (!order) {
       return res.status(404).send('<h1>Order not found</h1>');
     }
 
-    if (!order.approvalToken || order.approvalToken !== token) {
+    if (!order.metadata?.approvalToken || order.metadata.approvalToken !== token) {
       return res.status(403).send('<h1>Invalid or expired token</h1>');
     }
 
     // Update status to rejected
-    await Order.updateOne(
-      { _id: order._id },
-      {
-        $set: {
-          status: 'rejected',
-          isApproved: false
-        },
-        $unset: {
-          approvalToken: "",
-          approvalTokenExpires: ""
+    const { error: updateError } = await supabase
+      .from('orders')
+      .update({ 
+        fulfillment_status: 'cancelled',
+        metadata: { 
+          isApproved: false,
+          rejectedAt: new Date(),
+          approvalToken: null,
+          approvalTokenExpires: null
         }
-      }
-    );
+      })
+      .eq('id', order.id);
 
     // Release reserved stock
     try {
@@ -705,37 +708,41 @@ exports.rejectOrder = async (req, res) => {
  */
 exports.getReceipt = async (req, res) => {
   try {
-    const order = await Order.findById(req.params.id);
+    const { data: order, error } = await supabase
+      .from('orders')
+      .select('*')
+      .eq('id', req.params.id)
+      .maybeSingle();
 
-    if (!order || !order.paymentProof) {
+    if (error || !order || !order.metadata?.paymentProof) {
       return res.status(404).json({ error: 'Receipt not found' });
     }
 
     // Authorization check
-    if (order.user && req.user && order.user.toString() !== req.user.id && req.user.role !== 'admin') {
+    if (order.customer_id && req.user && order.customer_id !== req.user.id && req.user.role !== 'admin') {
       logger.warn('Unauthorized receipt access attempt', {
-        orderId: order._id,
+        orderId: order.id,
         attemptedBy: req.user.id,
         ip: req.ip
       });
       return res.status(403).json({ error: 'Not authorized to access this receipt' });
     }
 
-    const absolutePath = path.resolve(order.paymentProof);
+    const absolutePath = path.resolve(order.metadata.paymentProof);
 
     if (!fs.existsSync(absolutePath)) {
       logger.error('Receipt file not found on disk', {
-        orderId: order._id,
+        orderId: order.id,
         path: absolutePath
       });
       return res.status(404).json({ error: 'Receipt file not found' });
     }
 
-    const filename = order.paymentProofFilename || path.basename(absolutePath);
+    const filename = order.metadata.paymentProofFilename || path.basename(absolutePath);
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
 
     logger.info('Receipt accessed', {
-      orderId: order._id,
+      orderId: order.id,
       accessedBy: req.user?.id || 'unknown',
       ip: req.ip
     });

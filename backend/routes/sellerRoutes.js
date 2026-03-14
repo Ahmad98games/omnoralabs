@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const Product = require('../models/Product');
+// [Mongoose Removed] const Product = require('../models/Product');
 const { protect, seller } = require('../middleware/auth');
 const logger = require('../services/logger');
 

@@ -13,7 +13,7 @@ const useMongo = !!process.env.MONGODB_URI && !useLocalOverride;
 function createModel(name, schemaDef, options = {}) {
     if (useMongo) {
         // STRICT: Only require mongoose when mongo is active
-        const mongoose = require('mongoose');
+        // [Mongoose Removed] const mongoose = require('mongoose');
 
         // Check if model already exists to avoid OverwriteModelError
         if (mongoose.models[name]) return mongoose.models[name];

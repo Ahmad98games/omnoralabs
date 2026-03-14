@@ -24,9 +24,10 @@ const config = {
     logLevel: process.env.LOG_LEVEL || 'info',
     frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173',
 
-    mongo: {
-        uri: process.env.MONGODB_URI
-    },
+    // [MongoDB Removed]
+    // mongo: {
+    //     uri: process.env.MONGODB_URI
+    // },
 
     redis: {
         host: process.env.REDIS_HOST || 'localhost',

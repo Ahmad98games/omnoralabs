@@ -1,4 +1,5 @@
-const Product = require('../models/Product');
+// 🛑 Mongoose Removed. Using Supabase Backend Client
+const { supabase } = require('../../backend/shared/lib/supabaseClient'); 
 const logger = require('../services/logger');
 
 /**
@@ -7,8 +8,8 @@ const logger = require('../services/logger');
  * @returns {number} - Available stock
  */
 function getAvailableStock(product) {
-    const stock = Number(product.stock || 0);
-    const reserved = Number(product.reservedStock || 0);
+    const stock = Number(product.inventory_count || 0); // Correct Supabase column
+    const reserved = Number(product.metadata?.reservedStock || 0);
     return Math.max(0, stock - reserved);
 }
 
@@ -19,32 +20,37 @@ function getAvailableStock(product) {
  */
 async function reserveStock(items) {
     for (const item of items) {
-        const product = await Product.findById(item.product);
+        const { data: product, error } = await supabase
+            .from('products')
+            .select('*')
+            .eq('id', item.product || item.productId)
+            .maybeSingle();
 
-        if (!product) {
-            throw new Error(`Product not found: ${item.product}`);
+        if (error || !product) {
+            throw new Error(`Product not found: ${item.product || item.productId}`);
         }
 
         const availableStock = getAvailableStock(product);
-
         if (availableStock < item.quantity) {
             throw new Error(
-                `Insufficient stock for ${product.name}. ` +
+                `Insufficient stock for ${product.title}. ` +
                 `Available: ${availableStock}, Requested: ${item.quantity}`
             );
         }
 
-        // Reserve the stock
-        await Product.updateOne(
-            { _id: item.product },
-            { $inc: { reservedStock: item.quantity } }
-        );
+        // Reserve the stock in metadata
+        const currentReserved = Number(product.metadata?.reservedStock || 0);
+        await supabase
+            .from('products')
+            .update({ 
+                metadata: { ...product.metadata, reservedStock: currentReserved + item.quantity } 
+            })
+            .eq('id', product.id);
 
-        logger.info('Stock reserved', {
-            productId: item.product,
-            productName: product.name,
-            quantity: item.quantity,
-            newReservedStock: product.reservedStock + item.quantity
+        logger.info('Stock reserved in Supabase', {
+            productId: product.id,
+            productName: product.title,
+            quantity: item.quantity
         });
     }
 }
@@ -55,30 +61,26 @@ async function reserveStock(items) {
  */
 async function decrementStock(items) {
     for (const item of items) {
-        const product = await Product.findById(item.product);
+        const { data: product } = await supabase
+            .from('products')
+            .select('*')
+            .eq('id', item.product || item.productId)
+            .maybeSingle();
 
-        if (!product) {
-            logger.error('Product not found for stock decrement', { productId: item.product });
-            continue;
-        }
+        if (!product) continue;
 
-        // Decrement both stock and reserved stock
-        await Product.updateOne(
-            { _id: item.product },
-            {
-                $inc: {
-                    stock: -item.quantity,
-                    reservedStock: -item.quantity
-                }
-            }
-        );
+        const currentStock = Number(product.inventory_count || 0);
+        const currentReserved = Number(product.metadata?.reservedStock || 0);
 
-        logger.info('Stock decremented', {
-            productId: item.product,
-            productName: product.name,
-            quantity: item.quantity,
-            newStock: product.stock - item.quantity
-        });
+        await supabase
+            .from('products')
+            .update({ 
+                inventory_count: Math.max(0, currentStock - item.quantity),
+                metadata: { ...product.metadata, reservedStock: Math.max(0, currentReserved - item.quantity) }
+            })
+            .eq('id', product.id);
+
+        logger.info('Stock decremented in Supabase', { productId: product.id });
     }
 }
 
@@ -88,25 +90,23 @@ async function decrementStock(items) {
  */
 async function releaseStock(items) {
     for (const item of items) {
-        const product = await Product.findById(item.product);
+        const { data: product } = await supabase
+            .from('products')
+            .select('*')
+            .eq('id', item.product || item.productId)
+            .maybeSingle();
 
-        if (!product) {
-            logger.error('Product not found for stock release', { productId: item.product });
-            continue;
-        }
+        if (!product) continue;
 
-        // Release the reserved stock
-        await Product.updateOne(
-            { _id: item.product },
-            { $inc: { reservedStock: -item.quantity } }
-        );
+        const currentReserved = Number(product.metadata?.reservedStock || 0);
+        await supabase
+            .from('products')
+            .update({ 
+                metadata: { ...product.metadata, reservedStock: Math.max(0, currentReserved - item.quantity) }
+            })
+            .eq('id', product.id);
 
-        logger.info('Stock released', {
-            productId: item.product,
-            productName: product.name,
-            quantity: item.quantity,
-            newReservedStock: product.reservedStock - item.quantity
-        });
+        logger.info('Stock released in Supabase', { productId: product.id });
     }
 }
 
@@ -119,24 +119,22 @@ async function checkStock(items) {
     const outOfStock = [];
 
     for (const item of items) {
-        console.log(`[Inventory Check] Looking up Product ID: "${item.product}"`); // DEBUG LOG
-        const product = await Product.findById(item.product);
+        const { data: product } = await supabase
+            .from('products')
+            .select('*')
+            .eq('id', item.product || item.productId)
+            .maybeSingle();
 
         if (!product) {
-            console.error(`[Inventory Check] FAILED: Product ID "${item.product}" not found in DB!`); // DEBUG LOG
-            outOfStock.push({
-                productId: item.product,
-                reason: 'Product not found'
-            });
+            outOfStock.push({ productId: item.product, reason: 'Product not found' });
             continue;
         }
 
         const availableStock = getAvailableStock(product);
-
         if (availableStock < item.quantity) {
             outOfStock.push({
-                productId: item.product,
-                productName: product.name,
+                productId: product.id,
+                productName: product.title,
                 requested: item.quantity,
                 available: availableStock
             });

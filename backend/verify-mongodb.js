@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+// [Mongoose Removed] const mongoose = require('mongoose');
 const logger = require('./services/logger');
 
 /**

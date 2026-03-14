@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+const { supabase } = require('../shared/lib/supabaseClient');
 const logger = require('../services/logger');
 
 const { validateEnv } = require('../config/env');
@@ -23,9 +23,19 @@ const attachUser = async (decoded) => {
   if (!userId) {
     return null;
   }
-  // LocalDB does not support chaining .select() on findById promise
-  // We return the user directly.
-  return User.findById(userId);
+  
+  const { data: user, error } = await supabase
+    .from('merchants')
+    .select('*')
+    .eq('id', userId)
+    .single();
+
+  if (error) {
+    logger.error('AUTH_USER_FETCH_ERROR', { error: error.message, userId });
+    return null;
+  }
+
+  return user;
 };
 
 const protect = async (req, res, next) => {

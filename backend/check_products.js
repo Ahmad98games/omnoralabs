@@ -1,5 +1,5 @@
 process.env.USE_LOCAL_DB = 'true';
-const Product = require('./models/Product');
+// [Mongoose Removed] const Product = require('./models/Product');
 const bootstrap = require('./bootstrap');
 
 const buildFilters = (query, tenantId) => {

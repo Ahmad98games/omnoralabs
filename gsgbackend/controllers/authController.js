@@ -1,7 +1,7 @@
-const User = require('../models/User');
+// 🛑 Mongoose Removed. Using Supabase Backend Client
+const { supabase } = require('../../backend/shared/lib/supabaseClient'); 
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const SiteContent = require('../models/SiteContent');
 const logger = require('../services/logger');
 
 const { validateEnv } = require('../config/env');
@@ -23,64 +23,81 @@ exports.register = async (req, res) => {
         const { name, email, password } = req.body;
 
         // Check if user exists
-        const userExists = await User.findOne({ email });
+        const { data: userExists } = await supabase
+            .from('merchants')
+            .select('id')
+            .eq('email', email)
+            .maybeSingle();
+
         if (userExists) {
             return res.status(400).json({ error: 'User already exists' });
         }
 
-        // Split name into firstName and lastName for the new schema
+        // Hash password
+        const salt = await bcrypt.genSalt(10);
+        const password_hash = await bcrypt.hash(password, salt);
+
+        // Split name into firstName and lastName for compatibility
         const nameParts = (name || '').trim().split(/\s+/);
         const firstName = nameParts[0] || 'Member';
         const lastName = nameParts.slice(1).join(' ') || 'User';
 
-        // Create user
-        const user = await User.create({
-            firstName,
-            lastName,
-            email,
-            password, // Will be hashed by pre-save hook
-            role: req.body.role || 'customer'
-        });
+        // Create user in merchants table
+        const { data: user, error: registerError } = await supabase
+            .from('merchants')
+            .insert([{
+                email,
+                password_hash,
+                display_name: name || `${firstName} ${lastName}`,
+                store_slug: name.toLowerCase().replace(/[^a-z0-0]/g, '') || `store-${Date.now()}`,
+                subscription: req.body.role === 'seller' ? 'pro' : 'free',
+                metadata: { firstName, lastName, role: req.body.role || 'customer' }
+            }])
+            .select()
+            .single();
+
+        if (registerError) throw registerError;
 
         // --- Demo Hydration for Sellers ---
-        if (user.role === 'seller') {
-            const baseSlug = firstName.toLowerCase().replace(/[^a-z0-0]/g, '') || `store${user._id.toString().slice(-4)}`;
-            await SiteContent.create({
-                seller: user._id,
-                tenant_id: user._id.toString(), // 1:1 mapping for simplicity in v1
-                tenant_slug: baseSlug,
-                published: {
-                    configuration: {
-                        name: `${firstName}'s Imperial Store`,
-                        assets: {
-                            logo: '/images/omnora.jpg',
-                            favicon: '/favicon.ico'
+        if (user.metadata?.role === 'seller') {
+            await supabase
+                .from('store_pages')
+                .insert([{
+                    tenant_id: user.id,
+                    slug: '_site_config',
+                    ast_manifest: {
+                        configuration: {
+                            name: `${firstName}'s Imperial Store`,
+                            assets: {
+                                logo: '/images/omnora.jpg',
+                                favicon: '/favicon.ico'
+                            }
+                        },
+                        pages: {
+                            home: {
+                                heroHeadline: `Welcome to ${firstName}'s Collection`,
+                                heroSubheadline: 'Experience Independent Luxury'
+                            }
                         }
                     },
-                    pages: {
-                        home: {
-                            heroHeadline: `Welcome to ${firstName}'s Collection`,
-                            heroSubheadline: 'Experience Independent Luxury'
-                        }
-                    }
-                }
-            });
-            logger.info('Demo Site Hydrated', { sellerId: user._id, slug: baseSlug });
+                    is_published: true
+                }]);
+            logger.info('Demo Site Hydrated', { sellerId: user.id, slug: user.store_slug });
         }
 
         // Generate token
-        const token = generateToken(user._id);
+        const token = generateToken(user.id);
 
         res.status(201).json({
             success: true,
             token,
             user: {
-                id: user._id,
-                firstName: user.firstName,
-                lastName: user.lastName,
-                name: `${user.firstName} ${user.lastName}`.trim(),
+                id: user.id,
+                firstName: user.metadata?.firstName,
+                lastName: user.metadata?.lastName,
+                name: user.display_name,
                 email: user.email,
-                role: user.role
+                role: user.metadata?.role
             }
         });
     } catch (error) {
@@ -90,93 +107,40 @@ exports.register = async (req, res) => {
 };
 
 // @desc    Login user
-// @route   POST /api/auth/login
-// @access  Public
 exports.login = async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        // --- EMERGENCY ADMIN ACCESS FALLBACK (CONTROLLED) ---
-        const RESCUE_EMAIL = process.env.ADMIN_EMAIL;
-        const RESCUE_PASS = process.env.ADMIN_PASSWORD;
-
-        if (RESCUE_EMAIL && RESCUE_PASS && email === RESCUE_EMAIL && password === RESCUE_PASS) {
-            const rescueUser = {
-                _id: '000000000000000000000000',
-                firstName: 'Emergency',
-                lastName: 'Admin',
-                email: RESCUE_EMAIL,
-                role: 'admin'
-            };
-            const token = generateToken(rescueUser._id);
-            return res.json({
-                success: true,
-                token,
-                user: {
-                    id: rescueUser._id,
-                    firstName: rescueUser.firstName,
-                    lastName: rescueUser.lastName,
-                    name: `${rescueUser.firstName} ${rescueUser.lastName}`.trim(),
-                    email: rescueUser.email,
-                    role: rescueUser.role
-                }
-            });
-        }
-
         // Check for user
-        const user = await User.findOne({ email }).select('+password');
-        if (!user) {
+        const { data: user, error: loginError } = await supabase
+            .from('merchants')
+            .select('*')
+            .eq('email', email)
+            .maybeSingle();
+
+        if (!user || loginError) {
             return res.status(401).json({ error: 'Invalid credentials' });
         }
 
         // Check password
-        const isMatch = await user.matchPassword(password);
+        const isMatch = await bcrypt.compare(password, user.password_hash);
         if (!isMatch) {
             return res.status(401).json({ error: 'Invalid credentials' });
         }
 
         // Generate token
-        const token = generateToken(user._id);
-
-        // --- Robust Hydration Check for Sellers ---
-        if (user.role === 'seller') {
-            const hasStore = await SiteContent.findOne({ seller: user._id });
-            if (!hasStore) {
-                const baseSlug = user.firstName.toLowerCase().replace(/[^a-z0-0]/g, '') || `store${user._id.toString().slice(-4)}`;
-                await SiteContent.create({
-                    seller: user._id,
-                    tenant_id: user._id.toString(),
-                    tenant_slug: baseSlug,
-                    published: {
-                        configuration: {
-                            name: `${user.firstName}'s Imperial Store`,
-                            assets: {
-                                logo: '/images/omnora.jpg',
-                                favicon: '/favicon.ico'
-                            }
-                        },
-                        pages: {
-                            home: {
-                                heroHeadline: `Welcome to ${user.firstName}'s Collection`,
-                                heroSubheadline: 'Your Sovereign Territory is Ready'
-                            }
-                        }
-                    }
-                });
-                logger.info('Legacy Seller Hydrated on Login', { sellerId: user._id, slug: baseSlug });
-            }
-        }
+        const token = generateToken(user.id);
 
         res.json({
             success: true,
             token,
             user: {
-                id: user._id,
-                firstName: user.firstName,
-                lastName: user.lastName,
-                name: `${user.firstName} ${user.lastName}`.trim(),
+                id: user.id,
+                firstName: user.metadata?.firstName || user.firstName,
+                lastName: user.metadata?.lastName || user.lastName,
+                name: user.display_name || `${user.firstName} ${user.lastName}`.trim(),
                 email: user.email,
-                role: user.role
+                role: user.metadata?.role || user.role
             }
         });
     } catch (error) {
@@ -199,12 +163,12 @@ exports.getMe = async (req, res) => {
         res.json({
             success: true,
             user: {
-                id: user._id,
-                firstName: user.firstName,
-                lastName: user.lastName,
-                name: `${user.firstName} ${user.lastName}`.trim(),
+                id: user.id || user._id,
+                firstName: user.metadata?.firstName || user.firstName,
+                lastName: user.metadata?.lastName || user.lastName,
+                name: user.display_name || `${user.firstName} ${user.lastName}`.trim(),
                 email: user.email,
-                role: user.role
+                role: user.metadata?.role || user.role
             }
         });
     } catch (error) {
@@ -229,10 +193,10 @@ exports.refreshToken = async (req, res) => {
         if (!token) return res.status(401).json({ error: 'No token provided' });
 
         const decoded = jwt.verify(token, config.jwt.secret);
-        const user = await User.findById(decoded.id);
+        const { data: user } = await supabase.from('merchants').select('*').eq('id', decoded.id).single();
         if (!user) return res.status(401).json({ error: 'User not found' });
 
-        const newToken = generateToken(user._id);
+        const newToken = generateToken(user.id);
         res.json({ success: true, token: newToken });
     } catch (error) {
         res.status(401).json({ error: 'Invalid token' });

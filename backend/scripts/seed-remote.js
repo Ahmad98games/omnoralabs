@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+// [Mongoose Removed] const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
 // Hardcoded Production URI

@@ -1,5 +1,5 @@
-const mongoose = require('mongoose');
-const Product = require('../models/Product');
+// [Mongoose Removed] const mongoose = require('mongoose');
+// [Mongoose Removed] const Product = require('../models/Product');
 const logger = require('../services/logger');
 const defaultProducts = require('../data/defaultProducts');
 

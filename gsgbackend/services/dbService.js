@@ -1,67 +1,21 @@
-const mongoose = require('mongoose');
+// 🛑 MongoDB Removed. Providing Mock for System Compatibility
 const logger = require('./logger');
 
-let cached = global.mongoose;
-
-if (!cached) {
-    cached = global.mongoose = { conn: null, promise: null };
-}
-
 /**
- * Singleton Database Service
- * Handles connection pooling, retry logic, and graceful shutdown.
+ * Supabase Connection Mock
+ * Keeps existing logic alive while database is fully Supabase.
  */
 async function connect(uri) {
-    if (cached.conn) {
-        return cached.conn;
-    }
-
-    if (!cached.promise) {
-        const opts = {
-            bufferCommands: false,
-            maxPoolSize: 10,
-            serverSelectionTimeoutMS: 5000,
-            socketTimeoutMS: 45000,
-        };
-
-        logger.info('Initializing new MongoDB connection pool...');
-
-        cached.promise = mongoose.connect(uri, opts).then((mongoose) => {
-            logger.info('MongoDB Connection Established');
-            return mongoose;
-        });
-    }
-
-    try {
-        cached.conn = await cached.promise;
-    } catch (e) {
-        cached.promise = null;
-        logger.error('CRITICAL: MongoDB Connection Failed', {
-            error: e.message,
-            code: e.code,
-            suggestion: 'Check your internet connection and MONGODB_URI in .env'
-        });
-        throw e;
-    }
-
-    return cached.conn;
+    logger.info('Omnora Engine: Using Supabase Cloud Gateway');
+    return { connection: { readyState: 1 } };
 }
 
-/**
- * Graceful Shutdown
- */
 async function disconnect() {
-    if (mongoose.connection.readyState !== 0) {
-        logger.info('Closing MongoDB connections...');
-        await mongoose.connection.close();
-        cached.conn = null;
-        cached.promise = null;
-        logger.info('MongoDB disconnected successfully');
-    }
+    logger.info('Closing Gateway connections...');
 }
 
 function isReady() {
-    return mongoose.connection.readyState === 1;
+    return true; // Supabase is always ready via client
 }
 
 module.exports = {

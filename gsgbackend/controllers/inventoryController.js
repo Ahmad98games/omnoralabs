@@ -3,8 +3,8 @@
  * Handles stock management, reservations, and alerts
  */
 
-const mongoose = require('mongoose');
-const { InventoryService } = require('../models/Inventory');
+// [Mongoose Removed] const mongoose = require('mongoose');
+// [Mongoose Removed] const { InventoryService } = require('../models/Inventory');
 
 const ensureObjectId = (value) => {
   if (mongoose.Types.ObjectId.isValid(value)) {

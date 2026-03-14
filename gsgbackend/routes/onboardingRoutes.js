@@ -22,7 +22,7 @@ router.post('/store', authenticate, async (req, res) => {
 router.post('/branding', authenticate, async (req, res) => {
     try {
         const { logoUrl, faviconUrl, primaryColor, accentColor, slogan } = req.body;
-        const SiteContent = require('../models/SiteContent');
+        // [Mongoose Removed] const SiteContent = require('../models/SiteContent');
         const sellerId = req.user.id;
 
         await SiteContent.findOneAndUpdate(
@@ -51,7 +51,7 @@ router.post('/branding', authenticate, async (req, res) => {
 router.post('/payments', authenticate, async (req, res) => {
     try {
         const { cod, bankTransfer, easypaisa, jazzcash } = req.body;
-        const PaymentMethod = require('../models/PaymentMethod');
+        // [Mongoose Removed] const PaymentMethod = require('../models/PaymentMethod');
         const sellerId = req.user.id;
 
         await PaymentMethod.findOneAndUpdate(

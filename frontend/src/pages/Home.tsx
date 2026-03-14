@@ -23,7 +23,7 @@ import { BuilderProvider } from '../context/BuilderContext';
 import { DiagnosticsPanel } from '../components/cms/DiagnosticsPanel';
 
 interface Product {
-  _id: string;
+  id: string;
   name: string;
   price: number;
   image?: string;

@@ -2,8 +2,8 @@ const { validateEnv } = require('../config/env');
 const config = validateEnv();
 const stripe = require('stripe')(config.payments.stripe.secretKey);
 const logger = require('../services/logger');
-const Order = require('../models/Order');
-const Product = require('../models/Product');
+// [Mongoose Removed] const Order = require('../models/Order');
+// [Mongoose Removed] const Product = require('../models/Product');
 
 /**
  * @desc    Create Stripe Checkout Session

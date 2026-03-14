@@ -36,7 +36,7 @@ async function bootstrap() {
             // If in production, this is fatal. In dev, maybe fallback to LocalDB?
             // But since Models have already chosen Mongoose mode based on URI presence, 
             // we cannot easily switch model implementation at runtime without reload.
-            // So we must exit or let it fail.
+            // No changes needed here, handled in routes
             stateService.setInfraStatus(INFRA.DB, false);
             if (process.env.NODE_ENV === 'production') process.exit(1);
         }

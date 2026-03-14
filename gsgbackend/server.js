@@ -6,7 +6,7 @@ const path = require('path');
 const fs = require('fs');
 const helmet = require('helmet');
 const morgan = require('morgan');
-const mongoose = require('mongoose');
+// [Mongoose Removed] const mongoose = require('mongoose');
 const compression = require('compression');
 const cookieParser = require('cookie-parser');
 const hpp = require('hpp');
@@ -35,22 +35,19 @@ if (process.env.SENTRY_DSN) {
 
 // Database connection and seeding are handled by bootstrap.js
 
-// Load all Mongoose models after DB connection
-// We need to load them before seeding
-require('./models/OneClickCheckout');
-require('./models/AbandonedCart');
-require('./models/Bundle');
-require('./models/Phase1Models');
-require('./models/Phase2Models');
-require('./models/Phase3Models');
-require('./models/SiteContent');
-require('./models/Product');
-// Phase 4+ models
-require('./models/PaymentMethod');
-require('./models/WaOptOut');
-require('./models/WhatsAppTemplate');
-require('./models/AiContent');
-require('./models/Shipment');
+// [Mongoose Removed] require('./models/OneClickCheckout');
+// [Mongoose Removed] require('./models/AbandonedCart');
+// [Mongoose Removed] require('./models/Bundle');
+// [Mongoose Removed] require('./models/Phase1Models');
+// [Mongoose Removed] require('./models/Phase2Models');
+// [Mongoose Removed] require('./models/Phase3Models');
+// [Mongoose Removed] require('./models/SiteContent');
+// [Mongoose Removed] require('./models/Product');
+// [Mongoose Removed] require('./models/PaymentMethod');
+// [Mongoose Removed] require('./models/WaOptOut');
+// [Mongoose Removed] require('./models/WhatsAppTemplate');
+// [Mongoose Removed] require('./models/AiContent');
+// [Mongoose Removed] require('./models/Shipment');
 
 const { tenantContext } = require('./middleware/tenantContext');
 app.use(tenantContext);

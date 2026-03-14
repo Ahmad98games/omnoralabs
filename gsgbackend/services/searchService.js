@@ -8,7 +8,7 @@
  * - Search analytics
  */
 
-const mongoose = require('mongoose');
+// [Mongoose Removed] const mongoose = require('mongoose');
 
 const SearchHistorySchema = new mongoose.Schema({
   userId: String, // Optional: track for personalization

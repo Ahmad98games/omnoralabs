@@ -2,7 +2,7 @@ const { validateEnv } = require('../config/env');
 const config = validateEnv();
 const stripe = require('stripe')(config.payments.stripe.secretKey);
 const logger = require('../services/logger');
-const Order = require('../models/Order');
+// [Mongoose Removed] const Order = require('../models/Order');
 
 // @desc    Create Stripe payment intent
 exports.createStripeIntent = async (req, res) => {

@@ -1,4 +1,4 @@
-const Contact = require('../models/Contact');
+// [Mongoose Removed] const Contact = require('../models/Contact');
 const nodemailer = require('nodemailer');
 const { validateEnv } = require('../config/env');
 

@@ -1,5 +1,5 @@
 const request = require('supertest');
-const mongoose = require('mongoose');
+// [Mongoose Removed] const mongoose = require('mongoose');
 const bootstrap = require('../../bootstrap');
 
 describe('Bootstrap & Resilience Integration Tests', () => {

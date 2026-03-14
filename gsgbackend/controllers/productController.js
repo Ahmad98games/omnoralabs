@@ -1,28 +1,29 @@
-const mongoose = require('mongoose');
-const Product = require('../models/Product');
+// 🛑 Mongoose Removed. Using Supabase Backend Client
+const { supabase } = require('../../backend/shared/lib/supabaseClient'); 
 const logger = require('../services/logger');
 const defaultProducts = require('../data/defaultProducts');
 
-const buildFilters = (query, tenantId) => {
-  const filters = { tenant_id: tenantId || 'default_tenant' };
+const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+const buildFilters = (query, tenantId, supabaseQuery) => {
+  const targetId = uuidRegex.test(tenantId) ? tenantId : null;
+  let q = supabaseQuery.eq('merchant_id', targetId || '00000000-0000-0000-0000-000000000000'); // Use NIL UUID if non-merchant
+
   if (query.category) {
-    filters.category = query.category.toLowerCase();
+    q = q.eq('product_type', query.category); // Mapping category to product_type
   }
   if (typeof query.isFeatured !== 'undefined') {
-    filters.isFeatured = query.isFeatured === true || query.isFeatured === 'true';
+    const isFeatured = query.isFeatured === true || query.isFeatured === 'true';
+    if (isFeatured) q = q.eq('status', 'active'); // Mocking featured via active for now or status
   }
-  if (typeof query.isNew !== 'undefined') {
-    filters.isNew = query.isNew === true || query.isNew === 'true';
-  }
-  if (query.minPrice || query.maxPrice) {
-    filters.price = {};
-    if (query.minPrice) filters.price.$gte = Number(query.minPrice);
-    if (query.maxPrice) filters.price.$lte = Number(query.maxPrice);
-  }
+  
+  if (query.minPrice) q = q.gte('base_price', Number(query.minPrice));
+  if (query.maxPrice) q = q.lte('base_price', Number(query.maxPrice));
+  
   if (query.search) {
-    filters.$text = { $search: query.search };
+    q = q.ilike('title', `%${query.search}%`);
   }
-  return filters;
+  return q;
 };
 
 const getSortOrder = (sort) => {
@@ -51,30 +52,23 @@ exports.getProducts = async (req, res) => {
     const limit = Math.min(parseInt(req.query.limit, 10) || 12, 100);
     const skip = (page - 1) * limit;
 
-    const filters = buildFilters(req.query, req.tenantId);
-    const sort = getSortOrder(req.query.sort);
+    let supabaseQuery = supabase.from('products').select('*', { count: 'exact' });
+    supabaseQuery = buildFilters(req.query, req.tenantId, supabaseQuery);
+    
+    // Sorting
+    const sort = req.query.sort || 'newest';
+    if (sort === 'price_asc') supabaseQuery = supabaseQuery.order('base_price', { ascending: true });
+    else if (sort === 'price_desc') supabaseQuery = supabaseQuery.order('base_price', { ascending: false });
+    else supabaseQuery = supabaseQuery.order('created_at', { ascending: false });
 
-    console.log(`[getProducts] Filters: ${JSON.stringify(filters)} - req.tenantId: ${req.tenantId}`);
+    const { data: products, count: total, error } = await supabaseQuery
+      .range(skip, skip + limit - 1);
 
-    // Initial seed if empty
-    const count = await Product.countDocuments({ tenant_id: 'default_tenant' });
-    console.log(`[getProducts] Total default products in DB: ${count}`);
-    if (count === 0) {
-      logger.info('Database/LocalDB is empty, seeding with default products');
-      for (const p of defaultProducts) {
-        await Product.create({
-          ...p,
-          isFeatured: p.featured || false
-        });
-      }
-    }
-
-    const productsSelection = await Product.find(filters).sort(sort).skip(skip).limit(limit);
-    const total = await Product.countDocuments(filters);
+    if (error) throw error;
 
     res.json({
       success: true,
-      data: productsSelection,
+      data: products,
       pagination: {
         page,
         limit,
@@ -97,7 +91,15 @@ exports.getProductById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const product = await Product.findOne({ _id: id, tenant_id: req.tenantId || 'default_tenant' });
+    const targetId = uuidRegex.test(req.tenantId) ? req.tenantId : '00000000-0000-0000-0000-000000000000';
+    const { data: product, error } = await supabase
+      .from('products')
+      .select('*')
+      .eq('id', id)
+      .eq('merchant_id', targetId)
+      .maybeSingle();
+
+    if (error) throw error;
     if (!product) {
       return res.status(404).json({
         success: false,
@@ -131,10 +133,15 @@ exports.getProductsByCategory = async (req, res) => {
     const limit = Math.min(parseInt(req.query.limit, 10) || 12, 100);
     const skip = (page - 1) * limit;
 
-    const [products, total] = await Promise.all([
-      Product.find({ category, tenant_id: req.tenantId || 'default_tenant' }).sort({ createdAt: -1 }).skip(skip).limit(limit),
-      Product.countDocuments({ category, tenant_id: req.tenantId || 'default_tenant' })
-    ]);
+    const { data: products, count: total, error } = await supabase
+      .from('products')
+      .select('*', { count: 'exact' })
+      .eq('product_type', category)
+      .eq('merchant_id', req.tenantId || '00000000-0000-0000-0000-000000000000')
+      .order('created_at', { ascending: false })
+      .range(skip, skip + limit - 1);
+
+    if (error) throw error;
 
     res.json({
       success: true,
@@ -154,11 +161,15 @@ exports.getProductsByCategory = async (req, res) => {
 
 exports.getNewArrivals = async (req, res) => {
   try {
-    const limit = Math.min(parseInt(req.query.limit, 10) || 8, 50);
-    const newArrivals = await Product.find({ isNew: true, tenant_id: req.tenantId || 'default_tenant' })
-      .sort({ createdAt: -1 })
+    const { data: newArrivals, error } = await supabase
+      .from('products')
+      .select('*')
+      .eq('merchant_id', req.tenantId || '00000000-0000-0000-0000-000000000000')
+      .eq('status', 'active') // Mocking isNew via status=active for now or can use created_at
+      .order('created_at', { ascending: false })
       .limit(limit);
 
+    if (error) throw error;
     res.json({ success: true, data: newArrivals });
   } catch (error) {
     logger.error('Error fetching new arrivals', { error: error.message });
@@ -168,10 +179,14 @@ exports.getNewArrivals = async (req, res) => {
 
 exports.getFeaturedProducts = async (req, res) => {
   try {
-    const limit = Math.min(parseInt(req.query.limit, 10) || 4, 50);
-    const featuredProducts = await Product.find({ isFeatured: true, tenant_id: req.tenantId || 'default_tenant' })
+    const { data: featuredProducts, error } = await supabase
+      .from('products')
+      .select('*')
+      .eq('merchant_id', req.tenantId || '00000000-0000-0000-0000-000000000000')
+      .eq('status', 'active')
       .limit(limit);
 
+    if (error) throw error;
     res.json({ success: true, data: featuredProducts });
   } catch (error) {
     logger.error('Error fetching featured products', { error: error.message });
@@ -186,15 +201,14 @@ exports.searchProducts = async (req, res) => {
       return res.status(400).json({ success: false, error: 'Search query is required.' });
     }
 
-    const results = await Product.find({
-      tenant_id: req.tenantId || 'default_tenant',
-      $or: [
-        { name: { $regex: q, $options: 'i' } },
-        { description: { $regex: q, $options: 'i' } },
-        { category: { $regex: q, $options: 'i' } }
-      ]
-    }).limit(50);
+    const { data: results, error } = await supabase
+      .from('products')
+      .select('*')
+      .eq('merchant_id', req.tenantId || '00000000-0000-0000-0000-000000000000')
+      .or(`title.ilike.%${q}%,description.ilike.%${q}%,product_type.ilike.%${q}%`)
+      .limit(50);
 
+    if (error) throw error;
     res.json({ success: true, data: results });
   } catch (error) {
     logger.error('Error searching products', { error: error.message });
@@ -209,27 +223,28 @@ exports.searchProducts = async (req, res) => {
  */
 exports.createProduct = async (req, res) => {
   try {
-    const { name, description, price, stock, category, image, isFeatured, isNew } = req.body;
+    const { name, description, price, stock, category, image, handle } = req.body;
 
-    const payload = {
-      seller: req.user._id,
-      tenant_id: req.tenantId || 'default_tenant',
-      name,
-      description,
-      price: Number(price),
-      stock: Number(stock), // Explicitly handle stock
-      category: category.toLowerCase(),
-      image,
-      isFeatured: isFeatured === true || isFeatured === 'true',
-      isNew: isNew === true || isNew === 'true',
-      reservedStock: 0 // Initialize reserved stock
-    };
+    const targetId = uuidRegex.test(req.tenantId) ? req.tenantId : null;
+    if (!targetId) return res.status(403).json({ error: 'Merchant Identity Required' });
 
-    if (payload.price < 0 || payload.stock < 0) {
-      return res.status(400).json({ success: false, error: 'Price and stock cannot be negative.' });
-    }
+    const { data: product, error } = await supabase
+      .from('products')
+      .insert([{
+        merchant_id: targetId,
+        title: name,
+        description,
+        handle: handle || name.toLowerCase().replace(/ /g, '-'),
+        base_price: Number(price),
+        inventory_count: Number(stock),
+        product_type: category,
+        featured_image: image,
+        status: 'active'
+      }])
+      .select()
+      .single();
 
-    const product = await Product.create(payload);
+    if (error) throw error;
     res.status(201).json({ success: true, data: product });
   } catch (error) {
     logger.error('Error creating product', { error: error.message });
@@ -247,10 +262,29 @@ exports.createProduct = async (req, res) => {
  */
 exports.updateProduct = async (req, res) => {
   try {
-    // 1. Find the product first (Strict Scoping)
-    let product = await Product.findOne({ _id: req.params.id, tenant_id: req.tenantId || 'default_tenant' });
+    const { name, description, price, stock, category, image, handle } = req.body;
 
-    if (!product) {
+    const updateData = {};
+    if (name) updateData.title = name;
+    if (description) updateData.description = description;
+    if (price !== undefined) updateData.base_price = Number(price);
+    if (stock !== undefined) updateData.inventory_count = Number(stock);
+    if (category) updateData.product_type = category;
+    if (image) updateData.featured_image = image;
+    if (handle) updateData.handle = handle;
+
+    const targetId = uuidRegex.test(req.tenantId) ? req.tenantId : null;
+    if (!targetId) return res.status(403).json({ error: 'Merchant Identity Required' });
+
+    const { data: product, error } = await supabase
+      .from('products')
+      .update(updateData)
+      .eq('id', req.params.id)
+      .eq('merchant_id', targetId)
+      .select()
+      .single();
+
+    if (error) {
       logger.warn('Update failed: Product not found or Unauthorized', { id: req.params.id, tenant: req.tenantId });
       return res.status(404).json({
         success: false,
@@ -258,35 +292,7 @@ exports.updateProduct = async (req, res) => {
       });
     }
 
-    // 2. Validate and Apply Updates Manually
-    const { name, description, price, stock, category, image, isFeatured, isNew } = req.body;
-
-    // Apply updates directly to the document object
-    if (name) product.name = name;
-    if (description) product.description = description;
-    if (category) product.category = category.toLowerCase();
-    if (image) product.image = image;
-
-    // Boolean flags - explicit check to allow filtering 'false'
-    if (isFeatured !== undefined) product.isFeatured = isFeatured === true || isFeatured === 'true';
-    if (isNew !== undefined) product.isNew = isNew === true || isNew === 'true';
-
-    // Numbers
-    if (price !== undefined) {
-      const p = Number(price);
-      if (p < 0) return res.status(400).json({ success: false, error: 'Price cannot be negative' });
-      product.price = p;
-    }
-    if (stock !== undefined) {
-      const s = Number(stock);
-      if (s < 0) return res.status(400).json({ success: false, error: 'Stock cannot be negative' });
-      product.stock = s;
-    }
-
-    // 3. Save using the instance method (more reliable in mocks)
-    await product.save();
-
-    logger.info('Product updated successfully', { id: product._id });
+    logger.info('Product updated successfully', { id: product.id });
     res.json({ success: true, data: product });
   } catch (error) {
     logger.error('Error updating product', { error: error.message });
@@ -304,8 +310,16 @@ exports.updateProduct = async (req, res) => {
  */
 exports.deleteProduct = async (req, res) => {
   try {
-    const product = await Product.findOneAndDelete({ _id: req.params.id, tenant_id: req.tenantId || 'default_tenant' });
-    if (!product) {
+    const targetId = uuidRegex.test(req.tenantId) ? req.tenantId : null;
+    if (!targetId) return res.status(403).json({ error: 'Merchant Identity Required' });
+
+    const { error } = await supabase
+      .from('products')
+      .delete()
+      .eq('id', req.params.id)
+      .eq('merchant_id', targetId);
+
+    if (error) {
       return res.status(404).json({
         success: false,
         error: 'Product not found or Unauthorized.'

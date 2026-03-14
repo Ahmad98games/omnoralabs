@@ -1,5 +1,6 @@
-const logger = require('../services/logger');
-const { tenantStorage } = require('../utils/tenantStorage');
+const { supabase } = require('../lib/supabaseClient');
+const logger = require('../../services/logger');
+const { tenantStorage } = require('../../utils/tenantStorage');
 
 /**
  * Middleware to identify the tenant based on hostname or headers.
@@ -13,7 +14,8 @@ const tenantContext = async (req, res, next) => {
         // 1. Resolve Slug from Hostname (Sub-domain Pattern: slug.platform.com)
         let slug = null;
         const hostParts = hostname.split('.');
-        if (hostParts.length > 2 && !hostParts[0].includes('www') && hostParts[0] !== 'localhost') {
+        const isIP = hostParts.length === 4 && hostParts.every(p => !isNaN(p));
+        if (hostParts.length > 2 && !hostParts[0].includes('www') && hostParts[0] !== 'localhost' && !isIP) {
             slug = hostParts[0];
         }
 
@@ -30,11 +32,22 @@ const tenantContext = async (req, res, next) => {
 
         // 3. Resolve TenantID from Slug (Strict Isolation)
         if (slug) {
-            const content = await SiteContent.findOne({ tenant_slug: slug });
-            if (content) {
-                tenantId = content.tenant_id;
+            const { data: merchant, error } = await supabase
+                .from('merchants')
+                .select('id')
+                .eq('store_slug', slug)
+                .maybeSingle();
+
+            if (error) {
+                logger.error('TENANT_RESOLUTION_DB_ERROR', { error: error.message, slug });
+            }
+
+            if (merchant) {
+                tenantId = merchant.id;
             } else {
-                tenantId = `tenant_${slug}`; // Fallback for auto-provisioning
+                // If no merchant found for slug, we leave tenantId as 'default_tenant' 
+                // but note that 'default_tenant' is NOT a UUID.
+                tenantId = 'default_tenant'; 
             }
         }
 
@@ -43,7 +56,7 @@ const tenantContext = async (req, res, next) => {
 
         // Force multi-tenant scoping via AsyncLocalStorage
         tenantStorage.run({ tenantId, slug }, () => {
-            if (slug) {
+            if (slug && tenantId !== 'default_tenant') {
                 logger.info(`GATEWAY_ISOLATION: [${tenantId}] territory active for -> ${req.path}`);
             }
             next();

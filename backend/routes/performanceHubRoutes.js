@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const { protect, seller } = require('../middleware/auth');
-const Event = require('../models/Event');
-const SiteContent = require('../models/SiteContent');
+// [Mongoose Removed] const Event = require('../models/Event');
+// [Mongoose Removed] const SiteContent = require('../models/SiteContent');
 
 // @desc    Get Performance Analytics (Isolated)
 // @route   GET /api/cms/performance-hub

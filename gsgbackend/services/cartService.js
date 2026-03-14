@@ -9,8 +9,8 @@
  * - Real-time price updates
  */
 
-const mongoose = require('mongoose');
-const { InventoryService } = require('../models/Inventory');
+// [Mongoose Removed] const mongoose = require('mongoose');
+// [Mongoose Removed] const { InventoryService } = require('../models/Inventory');
 
 const toObjectId = (value) => {
   if (mongoose.Types.ObjectId.isValid(value)) {

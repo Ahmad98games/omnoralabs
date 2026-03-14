@@ -2,7 +2,7 @@
 const router = express.Router();
 const { protect: authenticate } = require('../middleware/auth');
 const logger = require('../services/logger');
-const { DEFAULT_TEMPLATES } = require('../models/WhatsAppTemplate');
+// [Mongoose Removed] const { DEFAULT_TEMPLATES } = require('../models/WhatsAppTemplate');
 
 const getModel = () => require('../models/WhatsAppTemplate');
 

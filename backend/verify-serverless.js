@@ -1,5 +1,5 @@
 require('dotenv').config();
-const mongoose = require('mongoose');
+// [Mongoose Removed] const mongoose = require('mongoose');
 
 // Simple Mock Response Class
 class MockResponse {

@@ -13,7 +13,7 @@ import '../styles/collection.css';
 // Types
 // Hardened Data Contract
 interface IGSGProduct {
-    _id: string;
+    id: string;
     name: string;
     price: number;
     image?: string;
@@ -132,9 +132,9 @@ export default function Collection() {
         e.preventDefault();
         e.stopPropagation();
         const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-        const existing = cart.find((i: any) => i.id === product._id);
+        const existing = cart.find((i: any) => i.id === product.id);
         if (existing) existing.quantity += 1;
-        else cart.push({ id: product._id, name: product.name, price: product.price, image: product.image, quantity: 1 });
+        else cart.push({ id: product.id, name: product.name, price: product.price, image: product.image, quantity: 1 });
 
         localStorage.setItem('cart', JSON.stringify(cart));
         window.dispatchEvent(new Event('cart-updated'));
@@ -237,7 +237,7 @@ export default function Collection() {
                             ) : (
                                 <div className="product-grid">
                                     {filteredProducts.map(product => (
-                                        <Link to={`/product/${product._id}`} key={product._id} className="fashion-card">
+                                        <Link to={`/product/${product.id}`} key={product.id} className="fashion-card">
                                             <div className="card-img-wrapper">
                                                 <img
                                                     src={product.image || BRAND_PLACEHOLDER}

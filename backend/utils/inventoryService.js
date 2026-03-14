@@ -1,4 +1,4 @@
-const Product = require('../models/Product');
+// [Mongoose Removed] const Product = require('../models/Product');
 const logger = require('../services/logger');
 
 /**

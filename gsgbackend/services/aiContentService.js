@@ -3,11 +3,10 @@
  * Async AI content generation with prompt engineering, cache, and BullMQ queue.
  * Supports English, Urdu, and Roman Urdu outputs.
  */
-const crypto = require('crypto');
+// 🛑 Mongoose Removed. Using Supabase Backend Client
+const { supabase } = require('../../backend/shared/lib/supabaseClient'); 
 const logger = require('./logger');
 const aiQuota = require('./aiQuotaService');
-
-const getModels = () => ({ AiContent: require('../models/AiContent') });
 
 // ─── Prompt builder ───────────────────────────────────────────────────────────
 
@@ -50,14 +49,21 @@ function hashContext(context) {
 // ─── Check cache ─────────────────────────────────────────────────────────────
 
 async function getCached(sellerId, type, contextHash) {
-    const { AiContent } = getModels();
-    return AiContent.findOne({ sellerId, type, contextHash, status: 'done' });
+    const { data, error } = await supabase
+        .from('ai_content')
+        .select('*')
+        .eq('merchant_id', sellerId)
+        .eq('content_type', type) // Map type to content_type
+        .eq('context_hash', contextHash)
+        .eq('status', 'done')
+        .maybeSingle();
+    
+    return error ? null : data;
 }
 
 // ─── Queue job (async generation) ────────────────────────────────────────────
 
 async function generateContent(sellerId, { type, niche, tone = 'professional', language = 'english', length = 'medium', storeName = 'My Store', extraContext = '', forceRegenerate = false }) {
-    const { AiContent } = getModels();
     const queueService = require('./queueService');
 
     // ── Quota & rate guard ────────────────────────────────────────────────────
@@ -75,7 +81,7 @@ async function generateContent(sellerId, { type, niche, tone = 'professional', l
         const cached = await getCached(sellerId, type, contextHash);
         if (cached) {
             logger.info(`AI_CONTENT: Cache hit for ${sellerId}/${type}/${language}`);
-            return { cached: true, status: 'done', result: cached.result, id: cached._id };
+            return { cached: true, status: 'done', result: cached.result, id: cached.id };
         }
     }
 
@@ -83,15 +89,26 @@ async function generateContent(sellerId, { type, niche, tone = 'professional', l
     const prompt = buildPrompt({ type, niche, tone, language, length, storeName, extraContext });
 
     // Upsert a pending record
-    const record = await AiContent.findOneAndUpdate(
-        { sellerId, type, contextHash },
-        { $set: { prompt, status: 'pending', language, length, result: null, errorMsg: null } },
-        { upsert: true, new: true }
-    );
+    const { data: record, error } = await supabase
+        .from('ai_content')
+        .upsert({ 
+            merchant_id: sellerId, 
+            content_type: type, 
+            context_hash: contextHash,
+            prompt, 
+            status: 'pending', 
+            metadata: { language, length, storeName, niche, tone, extraContext },
+            result: null, 
+            error_msg: null 
+        }, { onConflict: 'merchant_id,content_type,context_hash' })
+        .select()
+        .single();
+
+    if (error) throw error;
 
     // Queue for async processing
     const queued = await queueService.safeAdd('ai-content', 'generate', {
-        recordId: record._id?.toString(),
+        recordId: record.id.toString(),
         sellerId,
         prompt,
         type,
@@ -101,18 +118,21 @@ async function generateContent(sellerId, { type, niche, tone = 'professional', l
     if (!queued.success) {
         // Fallback: process synchronously if queue unavailable (dev mode)
         logger.warn('AI_CONTENT: Queue unavailable — returning pending status');
-        return { cached: false, status: 'pending', result: null, id: record._id };
+        return { cached: false, status: 'pending', result: null, id: record.id };
     }
 
     logger.info(`AI_CONTENT: Job queued for ${sellerId}/${type}`, { jobId: queued.jobId });
-    return { cached: false, status: 'pending', result: null, id: record._id };
+    return { cached: false, status: 'pending', result: null, id: record.id };
 }
 
 // ─── Clear cache ──────────────────────────────────────────────────────────────
 
 async function clearCache(sellerId, type) {
-    const { AiContent } = getModels();
-    await AiContent.findOneAndUpdate({ sellerId, type }, { $set: { status: 'pending', result: null, regeneratedAt: new Date() } });
+    await supabase
+        .from('ai_content')
+        .update({ status: 'pending', result: null, updated_at: new Date() })
+        .eq('merchant_id', sellerId)
+        .eq('content_type', type);
     return { cleared: true };
 }
 

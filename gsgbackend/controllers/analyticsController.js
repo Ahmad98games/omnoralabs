@@ -1,4 +1,5 @@
-const Event = require('../models/Event');
+// 🛑 Mongoose Removed. Using Supabase Backend Client
+const { supabase } = require('../../backend/shared/lib/supabaseClient'); 
 const logger = require('../services/logger');
 
 /**
@@ -10,11 +11,8 @@ exports.track = async (req, res) => {
   const startTime = Date.now();
   try {
     const { type, path, sessionId, userId, referrer, userAgent, screen, payload } = req.body || {};
-    const tenantId = req.headers['x-tenant-id'] || req.tenantId || 'default_tenant';
-
-    if (!type) {
-      return res.status(400).json({ error: 'Event type is required' });
-    }
+    const ip = req.ip;
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
     // Capture telemetry data
     const eventData = {
@@ -27,19 +25,40 @@ exports.track = async (req, res) => {
       userAgent: userAgent || req.get('user-agent'),
       screen,
       payload,
-      ip: req.ip,
+      ip,
       capturedAt: new Date()
     };
 
     // Offload write to background: Non-blocking
-    setImmediate(async () => {
-      try {
-        const event = new Event(eventData);
-        await event.save();
-      } catch (err) {
-        logger.error('Background Telemetry Write Failed', { error: err.message, tenantId });
-      }
-    });
+    if (uuidRegex.test(tenantId)) {
+      setImmediate(async () => {
+        try {
+          const { error } = await supabase
+            .from('interaction_logs')
+            .insert([{
+              merchant_id: tenantId, 
+              event_type: type === 'page_view' ? 'page_view' : 'search', // Simplified mapping to schema
+              page_url: path,
+              session_id: sessionId,
+              customer_id: uuidRegex.test(userId) ? userId : null,
+              metadata: {
+                ...payload,
+                userAgent: eventData.userAgent,
+                referrer: eventData.referrer,
+                screen,
+                ip
+              },
+              created_at: new Date()
+            }]);
+          
+          if (error) throw error;
+        } catch (err) {
+          logger.error('Background Telemetry Write Failed', { error: err.message, tenantId });
+        }
+      });
+    } else {
+      logger.debug(`TELEMETRY_PERSIST_SKIP: [${tenantId}] is not a valid UUID.`);
+    }
 
     const duration = Date.now() - startTime;
     logger.debug(`Telemetry ingested in ${duration}ms`, { type, tenantId });
@@ -55,13 +74,22 @@ exports.track = async (req, res) => {
 exports.list = async (req, res) => {
   try {
     const { limit = 100, type, sessionId } = req.query;
-    const query = { tenant_id: req.tenantId || 'default_tenant' };
-    if (type) query.type = type;
-    if (sessionId) query.sessionId = sessionId;
-    const events = await Event.find(query).sort({ createdAt: -1 }).limit(Number(limit));
+    let query = supabase
+      .from('interaction_logs')
+      .select('*')
+      .eq('merchant_id', req.tenantId || 'default_tenant')
+      .order('created_at', { ascending: false })
+      .limit(Number(limit));
+
+    if (type) query = query.eq('interaction_type', type);
+    if (sessionId) query = query.eq('session_id', sessionId);
+
+    const { data: events, error } = await query;
+    if (error) throw error;
+
     res.json({ success: true, events });
   } catch (err) {
-    console.error('Error fetching events:', err);
+    logger.error('Error fetching events', { error: err.message });
     res.status(500).json({ error: 'Server error' });
   }
 };

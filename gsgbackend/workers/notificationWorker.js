@@ -1,6 +1,6 @@
 const { Worker } = require('bullmq');
 const { emailDLQ, whatsappDLQ, connection } = require('../services/queueService');
-const MessageLog = require('../models/MessageLog');
+// [Mongoose Removed] const MessageLog = require('../models/MessageLog');
 const { validateEnv } = require('../config/env');
 
 const config = validateEnv();

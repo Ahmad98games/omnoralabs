@@ -14,7 +14,7 @@
  * - AI Product Descriptions
  */
 
-const mongoose = require('mongoose');
+// [Mongoose Removed] const mongoose = require('mongoose');
 const {
   CustomerSegment,
   LoyaltyAccount,

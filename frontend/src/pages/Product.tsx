@@ -19,7 +19,7 @@ interface Variant {
 }
 
 interface IGSGProduct {
-    _id: string;
+    id: string;
     name: string;
     price: number;
     image?: string;
@@ -94,7 +94,7 @@ const Product: React.FC = () => {
         if (!product) return;
 
         addItem({
-            id: product._id,
+            id: product.id,
             name: product.name,
             price: product.price,
             image: product.image || BRAND_PLACEHOLDER
@@ -111,7 +111,7 @@ const Product: React.FC = () => {
             // Save order as PENDING_CONFIRMATION before redirect
             const payload = {
                 items: [{
-                    productId: product._id,
+                    productId: product.id,
                     name: product.name,
                     price: product.price,
                     quantity: quantity,
@@ -123,7 +123,7 @@ const Product: React.FC = () => {
             };
 
             const res = await client.post('/orders', payload);
-            const orderId = res.data?.order?.orderNumber || res.data?.order?._id || 'INQUIRY';
+            const orderId = res.data?.order?.orderNumber || res.data?.order?.id || 'INQUIRY';
 
             const message = `🚀 *NEW ORDER REQUEST* (#${orderId})
         

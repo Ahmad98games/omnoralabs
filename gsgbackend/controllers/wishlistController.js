@@ -3,8 +3,8 @@
  * Handles all wishlist operations
  */
 
-const mongoose = require('mongoose');
-const { Wishlist, WishlistService } = require('../models/Wishlist');
+// [Mongoose Removed] const mongoose = require('mongoose');
+// [Mongoose Removed] const { Wishlist, WishlistService } = require('../models/Wishlist');
 
 const toObjectId = (value) => {
   if (mongoose.Types.ObjectId.isValid(value)) {

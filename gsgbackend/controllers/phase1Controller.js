@@ -3,7 +3,7 @@
  * Handles one-click checkout operations
  */
 
-const OneClickCheckout = require('../models/OneClickCheckout');
+// [Mongoose Removed] const OneClickCheckout = require('../models/OneClickCheckout');
 
 exports.setupOneClickCheckout = async (req, res) => {
   try {
@@ -200,7 +200,7 @@ exports.setDefaultPaymentMethod = async (req, res) => {
  * Handles abandoned cart operations
  */
 
-const { AbandonedCartService } = require('../models/AbandonedCart');
+// [Mongoose Removed] const { AbandonedCartService } = require('../models/AbandonedCart');
 
 exports.trackCartAbandon = async (req, res) => {
   try {
@@ -306,7 +306,7 @@ exports.sendBulkRecoveryEmails = async (req, res) => {
  * Bundle Controller
  */
 
-const { BundleService } = require('../models/Bundle');
+// [Mongoose Removed] const { BundleService } = require('../models/Bundle');
 
 exports.createBundle = async (req, res) => {
   try {
@@ -385,7 +385,7 @@ exports.trackBundleView = async (req, res) => {
  * ProductVariant Controller
  */
 
-const { ProductVariantService } = require('../models/Phase1Models');
+// [Mongoose Removed] const { ProductVariantService } = require('../models/Phase1Models');
 
 exports.getProductVariants = async (req, res) => {
   try {
@@ -422,7 +422,7 @@ exports.updateVariantStock = async (req, res) => {
  * FlashSale Controller
  */
 
-const { FlashSaleService } = require('../models/Phase1Models');
+// [Mongoose Removed] const { FlashSaleService } = require('../models/Phase1Models');
 
 exports.getActiveFlashSales = async (req, res) => {
   try {
@@ -456,7 +456,7 @@ exports.trackFlashSaleImpression = async (req, res) => {
  * OrderTracking Controller
  */
 
-const { OrderTrackingService } = require('../models/Phase1Models');
+// [Mongoose Removed] const { OrderTrackingService } = require('../models/Phase1Models');
 
 exports.getOrderTracking = async (req, res) => {
   try {
@@ -498,7 +498,7 @@ exports.updateOrderStatus = async (req, res) => {
  * BackInStockAlert Controller
  */
 
-const BackInStockAlert = require('../models/Phase1Models').BackInStockAlert;
+// [Mongoose Removed] const BackInStockAlert = require('../models/Phase1Models').BackInStockAlert;
 
 exports.subscribeBackInStockAlert = async (req, res) => {
   try {

@@ -24,9 +24,10 @@ const config = {
     logLevel: process.env.LOG_LEVEL || 'info',
     frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173',
 
-    mongo: {
-        uri: process.env.MONGODB_URI
-    },
+    // [MongoDB Removed]
+    // mongo: {
+    //     uri: process.env.MONGODB_URI
+    // },
 
     supabase: {
         poolUrl: process.env.DATABASE_POOL_URL || process.env.DATABASE_URL?.replace(':5432', ':6543'),

@@ -1,5 +1,5 @@
-const mongoose = require('mongoose');
-const Order = require('../models/Order');
+// [Mongoose Removed] const mongoose = require('mongoose');
+// [Mongoose Removed] const Order = require('../models/Order');
 const { createOrder, approveOrder, rejectOrder } = require('../controllers/orderController');
 const httpMocks = require('node-mocks-http');
 const path = require('path');

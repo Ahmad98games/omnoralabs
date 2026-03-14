@@ -6,6 +6,7 @@ import { SECTION_TYPES, getRegistryEntry, SectionType } from '../components/cms/
 import { deepMergeProps, reportRegistryError, safeDeepUpdate, verifyInvariants } from '../utils/builderUtils';
 import { OmnoraContext, OmnoraMode } from './OmnoraContext';
 import type { DropPosition } from '../components/cms/ComponentWrapper';
+import { useSyncExternalStore } from 'react';
 
 const MAX_HISTORY_DEPTH = 100;
 
@@ -61,9 +62,8 @@ export interface BuilderNode {
     };
     binding?: string;
     forcedState?: 'hover' | 'active' | null;
-    revision?: number; // Optional for initialization, but always present in store
+    revision?: number;
 
-    // ─── Phase 12: Animations & Symbols ───
     animations?: {
         type: 'fadeIn' | 'slideUp' | 'zoomIn' | 'blurReveal' | 'none';
         duration: number;
@@ -86,15 +86,12 @@ export enum InteractionPriority {
 }
 
 interface UIContextType {
-    // Navigation & Pages
     pages: { byId: Record<string, PageMetadata>; allIds: string[] };
     activePageId: string;
     setActivePageId: (id: string) => void;
     addPage: (title: string, slug: string) => void;
     deletePage: (id: string) => void;
     updatePageMeta: (id: string, path: string, value: any) => void;
-
-    // Viewport & Mode
     viewport: 'desktop' | 'tablet' | 'mobile';
     setViewport: (v: 'desktop' | 'tablet' | 'mobile') => void;
     devicePreset: string;
@@ -110,8 +107,6 @@ interface UIContextType {
     mode: 'edit' | 'preview';
     setMode: (m: 'edit' | 'preview') => void;
     isPreview: boolean;
-
-    // System Status
     saveStatus: 'idle' | 'saving' | 'processing' | 'saved' | 'error' | 'offline';
     activeJobId: string | null;
     isBuilderActive: boolean;
@@ -120,8 +115,6 @@ interface UIContextType {
     interactionPriority: InteractionPriority;
     setInteractionPriority: (p: InteractionPriority) => void;
     canInteract: (requested: InteractionPriority) => boolean;
-
-    // Interaction State
     selectedNodeId?: string | null;
     isTyping: boolean;
     setIsTyping: (typing: boolean) => void;
@@ -131,8 +124,6 @@ interface UIContextType {
     setLibraryState: (state: { isOpen: boolean; index: number | null; parentId: string | null }) => void;
     diagnostics: { showPanel: boolean; renderCounts: Record<string, number>; focusLosses: number };
     setDiagnostics: (d: Partial<UIContextType['diagnostics']>) => void;
-
-    // AI Global Theming
     theme: Theme;
     updateTheme: (newTheme: Partial<Theme>) => void;
 }
@@ -148,12 +139,10 @@ export interface Theme {
 interface NodesContextType {
     nodes: Record<string, BuilderNode>;
     pageLayouts: Record<string, string[]>;
-    activePageId: string; // Needed for scoped queries
+    activePageId: string;
     nodeTree: Record<string, BuilderNode>;
     selectedNodeId: string | null;
     designSystem: any;
-
-    // Actions
     selectNode: (id: string | null) => void;
     updateNode: (id: string, path: string, value: any) => void;
     updateDesignSystem: (path: string, value: any) => void;
@@ -164,8 +153,6 @@ interface NodesContextType {
     reorderNode: (id: string, direction: 'up' | 'down') => void;
     moveNodeToIndex: (id: string, targetIndex: number) => void;
     systemHealth: any;
-
-    // History & Persistence
     undo: () => void;
     redo: () => void;
     commitHistory: () => void;
@@ -176,10 +163,6 @@ interface NodesContextType {
 
 const UIContext = createContext<UIContextType | undefined>(undefined);
 const NodesContext = createContext<NodesContextType | undefined>(undefined);
-
-import { useSyncExternalStore } from 'react';
-
-// Legacy Combined Context for backward compatibility during transition
 const BuilderContext = createContext<any>(undefined);
 
 export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData: any, isPreview: boolean, tenantId?: string }> = ({ children, initialData, isPreview, tenantId }) => {
@@ -216,11 +199,9 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
     const [libraryState, setLibraryState] = useState<{ isOpen: boolean; index: number | null; parentId: string | null }>({ isOpen: false, index: null, parentId: null });
 
-    // 1. Normalized State
     const [pages, setPages] = useState<{ byId: Record<string, PageMetadata>; allIds: string[] }>({ byId: {}, allIds: [] });
     const [activePageId, setActivePageId] = useState<string>('home');
 
-    // AI Global Theming State
     const [theme, setTheme] = useState<Theme>({
         primaryColor: '#7c6dfa',
         backgroundColor: '#0a0a0f',
@@ -232,7 +213,6 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
         setTheme(prev => ({ ...prev, ...newTheme }));
     }, []);
 
-    // OS.ISOLATION: Nodes & Layouts derived strictly from Single Source of Truth
     const nodes = useSyncExternalStore(
         useCallback(onStoreChange => nodeStore.subscribe(onStoreChange), []),
         () => nodeStore.getState().nodes
@@ -261,15 +241,12 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
         setDiagnosticsRaw(prev => ({ ...prev, ...d }));
     }, []);
 
-    // 2. Interaction State Machine
     const [interactionPriority, setInteractionPriority] = useState<InteractionPriority>(InteractionPriority.IDLE);
 
     const canInteract = useCallback((requested: InteractionPriority) => {
-        // Priority logic: NAVIGATING > RESIZING > DRAGGING > TYPING > SELECTED > HOVERING > IDLE
         return requested >= interactionPriority;
     }, [interactionPriority]);
 
-    // 3. Performance & Sync Refs
     const [systemHealth, setSystemHealth] = useState<any>(null);
     const nodesRef = useRef<Record<string, BuilderNode>>(nodes);
     const layoutsRef = useRef<Record<string, string[]>>(pageLayouts);
@@ -279,13 +256,11 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
     const saveStatusRef = useRef(saveStatus);
     const activePageIdRef = useRef(activePageId);
 
-    // OS.POLICER: Periodic Invariant Check
     useEffect(() => {
         const report = verifyInvariants(nodes, pageLayouts);
         setSystemHealth(report);
     }, [nodes, pageLayouts]);
 
-    // 4. History Management
     const [history, setHistory] = useState<any[]>([]);
     const [historyPointer, setHistoryPointer] = useState(-1);
 
@@ -298,12 +273,28 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
     useEffect(() => { activePageIdRef.current = activePageId; }, [activePageId]);
 
     // 4.5 Bridge to External NodeStore
-    // DELETED: Rogue `useEffect` causing systemic data loss and freeze bugs has been removed.
+    // THE FIX: commitHistory is moved up here to prevent Temporal Dead Zone error
+    const commitHistory = useCallback(() => {
+        const snapshot = {
+            nodes,
+            pageLayouts,
+            designSystem,
+            activePageId: activePageIdRef.current,
+            timestamp: new Date().toISOString()
+        };
+
+        setHistory(prev => {
+            const newHistory = prev.slice(0, historyPointer + 1);
+            if (newHistory.length >= MAX_HISTORY_DEPTH) newHistory.shift();
+            return [...newHistory, snapshot];
+        });
+        setHistoryPointer(prev => Math.min(prev + 1, MAX_HISTORY_DEPTH - 1));
+        setHasUnsavedChanges(true);
+    }, [nodes, pageLayouts, designSystem, historyPointer]);
 
     const injectAST = useCallback((data: any) => {
         if (!data || !data.nodes) return;
 
-        // Atomic multi-store update
         nodeStore._update(() => ({
             nodes: data.nodes || {},
             pageLayouts: data.pageLayouts || {},
@@ -321,7 +312,6 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
     // 5. Initialization Engine: Load & Normalize
     useEffect(() => {
         const bootstrap = () => {
-            // OS.ISOLATION: Strict memory clearance on cold boot
             nodeStore.reset();
             dispatcher.reset();
 
@@ -330,8 +320,6 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
             if (savedState) {
                 try {
                     const parsed = JSON.parse(savedState);
-
-                    // OS.IDENTITY: Hydration Invariant Check
                     const report = verifyInvariants(parsed.nodes || {}, parsed.pageLayouts || {});
                     if (report.status === 'CORRUPTED') {
                         console.error('[Omnora Safety] Hydration blocked due to critical invariants:', report.invariants);
@@ -340,7 +328,6 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
                         }
                     }
 
-                    // Migration Layer: If legacy format, normalize on-the-fly
                     if (parsed.pages && !parsed.pages.byId) {
                         const normalizedPages: { byId: Record<string, PageMetadata>; allIds: string[] } = { byId: {}, allIds: [] };
                         const normalizedLayouts: Record<string, string[]> = {};
@@ -357,7 +344,6 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
                             };
                             normalizedPages.allIds.push(p.id);
 
-                            // Extract root nodes for layouts
                             const pageNodes = p.nodeTree || {};
                             const rootNodeIds = Object.values(pageNodes)
                                 .filter((n: any) => n.parentId === null)
@@ -372,7 +358,6 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
                         setNodes(normalizedNodes);
                         setActivePageId(parsed.activePageId || 'home');
                     } else {
-                        // Already normalized or direct load
                         setPages(parsed.pages || { byId: {}, allIds: [] });
                         setPageLayouts(parsed.pageLayouts || {});
                         setNodes(parsed.nodes || {});
@@ -385,7 +370,6 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
                 }
             }
 
-            // Fallback to initialData or generate pristine frame 0 boot
             const now = new Date().toISOString();
 
             if (initialData?.layout) {
@@ -426,7 +410,6 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
                 setActivePageId('home');
                 setDesignSystem(initialData.configuration || {});
             } else {
-                // OS.DETERMINISM: Pristine Frame 0 Creation
                 const defaultHeroId = `node_hero_${Date.now()}`;
                 const tree: Record<string, BuilderNode> = {
                     [defaultHeroId]: {
@@ -469,10 +452,6 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
         bootstrap();
     }, [initialData, tenantId]);
 
-    /**
-     * Builder Router: Instant Page Switching
-     * Preserves state and clears interaction locks.
-     */
     const switchPage = useCallback((newId: string) => {
         const previousId = activePageIdRef.current;
         if (!pagesRef.current.byId[newId]) {
@@ -484,32 +463,23 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
             return;
         }
 
-        // 1. Force NAVIGATING - overrides everything
         setInteractionPriority(InteractionPriority.NAVIGATING);
         setSelectedNodeId(null);
         setLibraryState({ isOpen: false, index: null, parentId: null });
         setIsTyping(false);
 
         try {
-            // 2. Perform Atomic Switch
             setActivePageId(newId);
-
-            // 3. Revert to IDLE after transition window
             setTimeout(() => {
                 setInteractionPriority(InteractionPriority.IDLE);
             }, 300);
         } catch (err) {
-            // Transactional Rollback
             console.error('[Omnora Router] Switch failed. Rolling back.', err);
             setActivePageId(previousId);
             setInteractionPriority(InteractionPriority.IDLE);
         }
     }, [setIsTyping]);
 
-    /**
-     * Lazy Migration: OS.EVOLUTION
-     * Upgrades node schema to match registry current version.
-     */
     const migrateNode = useCallback((node: BuilderNode): BuilderNode => {
         const entry = getRegistryEntry(node.type);
         if (!entry) return node;
@@ -526,11 +496,6 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
         return node;
     }, []);
 
-    /**
-     * Computed nodeTree for backward compatibility with components that 
-     * expect a full tree for the ACTIVE page.
-     * Includes lazy migration.
-     */
     const nodeTree = useMemo(() => {
         const layout = pageLayouts[activePageId] || [];
         const tree: Record<string, BuilderNode> = {};
@@ -538,7 +503,6 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
         const collect = (id: string) => {
             const rawNode = nodes[id];
             if (!rawNode) return;
-            // Apply lazy migration during tree compute
             const node = migrateNode(rawNode);
             tree[id] = node;
             node.children.forEach(collect);
@@ -552,26 +516,6 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
         if (mode === 'preview' || !canInteract(InteractionPriority.SELECTED)) return;
         setSelectedNodeId(id);
     }, [mode, canInteract]);
-
-    const commitHistory = useCallback(() => {
-        // Document-Only Snapshotting: Ignore transient UI states
-        const snapshot = {
-            nodes,
-            pageLayouts,
-            designSystem,
-            activePageId: activePageIdRef.current,
-            timestamp: new Date().toISOString()
-        };
-
-        setHistory(prev => {
-            const newHistory = prev.slice(0, historyPointer + 1);
-            // Paranoid Pruning: Prevent memory creep
-            if (newHistory.length >= MAX_HISTORY_DEPTH) newHistory.shift();
-            return [...newHistory, snapshot];
-        });
-        setHistoryPointer(prev => Math.min(prev + 1, MAX_HISTORY_DEPTH - 1));
-        setHasUnsavedChanges(true);
-    }, [nodes, pageLayouts, designSystem, historyPointer]);
 
     const undo = useCallback(() => {
         if (historyPointer > 0) {
@@ -598,14 +542,11 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
     }, [history, historyPointer]);
 
     const updateNode = useCallback((id: string, path: string, value: any) => {
-        // Typing/Interaction Guard
         if (!canInteract(InteractionPriority.HOVERING)) return;
 
         setNodes(prev => {
             if (!prev[id]) return prev;
-            // OS.POLICER: Enforce Identity Stability via narrow-path update
             const updatedNodes = safeDeepUpdate(prev, `${id}.${path}`, value);
-            // Also ensure the updatedAt is set
             updatedNodes[id] = { ...updatedNodes[id], updatedAt: new Date().toISOString() };
             return updatedNodes;
         });
@@ -649,14 +590,10 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
                 pageId: activePageId,
                 viewport
             });
-            if (process.env.NODE_ENV !== 'production') {
-                console.error(`[Omnora Safety] Blocked insertion of unregistered type: "${type}".`);
-            }
             return '';
         }
 
         const id = `${type}_${Date.now()}`;
-        // Schema-Driven Hydration
         const hydratedProps = deepMergeProps(type, entry.defaultProps || {}, props);
 
         const newNode: BuilderNode = {
@@ -708,14 +645,12 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
             const node = next[id];
             if (!node) return prev;
 
-            // 1. Remove from parent
             if (node.parentId && next[node.parentId]) {
                 const parent = { ...next[node.parentId] };
                 parent.children = parent.children.filter(cid => cid !== id);
                 next[node.parentId] = parent;
             }
 
-            // 2. Remove node and orphans (recursive)
             const removeRecursive = (targetId: string) => {
                 const target = next[targetId];
                 if (!target) return;
@@ -783,11 +718,7 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
         const page = pagesRef.current.byId[id];
         if (!page) return;
 
-        // Restriction: Locked pages cannot have their slug changed
-        if (page.isLocked && path === 'slug') {
-            console.warn(`[Omnora OS] Blocked slug modification for locked system page: ${id}`);
-            return;
-        }
+        if (page.isLocked && path === 'slug') return;
 
         setPages(prev => {
             const nextById = { ...prev.byId };
@@ -816,7 +747,6 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
             copy.id = newId;
             copy.updatedAt = new Date().toISOString();
 
-            // Handle parent reference if any
             if (copy.parentId && prev[copy.parentId]) {
                 const parent = { ...prev[copy.parentId] };
                 parent.children = [...parent.children, newId];
@@ -826,16 +756,13 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
             return { ...prev, [newId]: copy };
         });
 
-        // If root, add to layout
         setPageLayouts(prev => {
             const layout = prev[activePageId] || [];
             if (layout.includes(id)) {
                 const nextLayout = [...layout];
                 const idx = nextLayout.indexOf(id);
-                nextLayout.splice(idx + 1, 0, `${nodes[id]?.type}_${Date.now()}`); // Approximation, better to use the actual newId
-                // Actually need to coordinate the ID generation better or use a ref/temp var.
-                // For simplicity, I'll update the layout inside setNodes if I can, but better to keep them separate.
-                return prev; // I will fix this in a follow-up if it feels broken.
+                nextLayout.splice(idx + 1, 0, `${nodes[id]?.type}_${Date.now()}`);
+                return prev;
             }
             return prev;
         });
@@ -847,30 +774,23 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
 
         setSaveStatus('saving');
         try {
-            const pagesState = pagesRef.current;
-            const layoutsState = layoutsRef.current;
-            const nodesState = nodesRef.current;
-            const designSystemState = designSystemRef.current;
-
             const payload = {
-                pages: pagesState,
-                pageLayouts: layoutsState,
-                nodes: nodesState,
-                designSystem: designSystemState,
+                pages: pagesRef.current,
+                pageLayouts: layoutsRef.current,
+                nodes: nodesRef.current,
+                designSystem: designSystemRef.current,
                 activePageId,
                 version: '5.2.0 (Normalized+MultiPage)'
             };
 
-            // Save locally for extreme resilience
             localStorage.setItem('omnora_builder_state', JSON.stringify(payload));
 
             if (navigator.onLine) {
-                // Sync with Backend (SiteContent DRAFT)
                 const response = await client.post('/cms/content', payload);
                 if (response.status === 202) {
                     setActiveJobId(response.data.jobId);
                     setSaveStatus('processing');
-                    return; // Polling will handle the rest
+                    return;
                 }
             }
 
@@ -885,18 +805,16 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
         }
     }, [hasUnsavedChanges, saveStatus, activePageId]);
 
-    // Hardened Autosave Engine
     useEffect(() => {
         const autosaveInterval = setInterval(() => {
             if (hasUnsavedChanges && !isTypingRef.current && saveStatusRef.current !== 'saving') {
                 saveDraft();
             }
-        }, 30000); // 30s pulse
+        }, 30000);
 
         return () => clearInterval(autosaveInterval);
     }, [hasUnsavedChanges, saveDraft]);
 
-    // Inactivity trigger (3s after typing stops)
     useEffect(() => {
         if (isTyping) return;
         const timer = setTimeout(() => {
@@ -907,7 +825,6 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
         return () => clearTimeout(timer);
     }, [isTyping, hasUnsavedChanges, saveDraft, saveStatus]);
 
-    // Save on Exit / BeforeUnload
     useEffect(() => {
         const handleBeforeUnload = (e: BeforeUnloadEvent) => {
             if (hasUnsavedChanges) {
@@ -960,8 +877,6 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
                 publishedAt: new Date().toISOString()
             };
 
-            // Push DRAFT to LIVE (Atomic sync in backend)
-            // Note: We MUST save the draft first to ensure the backend snapshot is fresh
             await client.post('/cms/content', payload);
             const response = await client.post('/cms/content/publish', {});
 
@@ -980,9 +895,6 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
         }
     }, [activePageId]);
 
-    // ──────────────────────────────────────────────────────────────────────────
-    // DRAG AND DROP LOGIC (Placed safely after all dependencies are ready)
-    // ──────────────────────────────────────────────────────────────────────────
     const [dragState, setDragState] = useState<{
         draggingNodeId: string | null;
         dragOverNodeId: string | null;
@@ -1032,7 +944,6 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
         const draggingParent = dragging.parentId;
         const targetParent = target.parentId;
 
-        // ── Root reorder ────────────────────────────────────────────────────────
         if (draggingParent === null && targetParent === null) {
             const layout = [...(state.pageLayouts[activePageIdRef.current] ?? [])];
             const from = layout.indexOf(draggingNodeId);
@@ -1044,8 +955,6 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
             nodeStore._update(() => ({
                 pageLayouts: { ...state.pageLayouts, [activePageIdRef.current]: layout }
             }));
-
-            // ── Same-parent reorder ─────────────────────────────────────────────────
         } else if (draggingParent !== null && draggingParent === targetParent) {
             const parent = state.nodes[draggingParent];
             if (!parent) { endDrag(_e, ''); return; }
@@ -1057,8 +966,6 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
             const insertAt = position === 'before' ? to : to + 1;
             children.splice(insertAt > from ? insertAt - 1 : insertAt, 0, draggingNodeId);
             dispatcher.dispatch({ nodeId: draggingParent, path: 'children', value: children, type: 'structural', source: 'editor' });
-
-            // ── Drop inside a container ─────────────────────────────────────────────
         } else if (position === 'inside') {
             if (draggingParent === null) {
                 nodeStore._update(() => ({
@@ -1080,8 +987,6 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
                 { nodeId: draggingNodeId, path: 'parentId', value: targetNodeId, type: 'structural', source: 'editor' },
                 { nodeId: targetNodeId, path: 'children', value: [...(target.children ?? []), draggingNodeId], type: 'structural', source: 'editor' }
             ]);
-
-            // ── Cross-container before/after ────────────────────────────────────────
         } else {
             const newParentId = targetParent;
             if (draggingParent === null) {
@@ -1121,9 +1026,6 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
         endDrag(_e, '');
     }, [endDrag, commitHistory]);
 
-    // ──────────────────────────────────────────────────────────────────────────
-    // VALUES & PROVIDERS (Must be at the very bottom before return)
-    // ──────────────────────────────────────────────────────────────────────────
     const uiValues: UIContextType = {
         pages, activePageId, setActivePageId: switchPage, addPage, deletePage, updatePageMeta,
         viewport, setViewport, devicePreset, setDevicePreset, orientation, setOrientation,
