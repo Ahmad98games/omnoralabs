@@ -1,0 +1,110 @@
+/* ============================================================ 
+    LEGAL PAGES (TERMS & PRIVACY) - LUXURY THEME
+   ============================================================ */
+
+.legal-page-luxury {
+    background: #fff;
+    min-height: 100vh;
+    padding: 8rem 0;
+}
+
+.legal-header-lux {
+    text-align: center;
+    margin-bottom: 6rem;
+}
+
+.legal-content-lux {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.legal-section-lux {
+    margin-bottom: 5rem;
+}
+
+.section-num-lux {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    margin-bottom: 1rem;
+}
+
+.section-title-serif {
+    font-family: var(--font-serif);
+    font-size: 1.8rem;
+    color: var(--text-primary);
+    margin-bottom: 2rem;
+}
+
+.legal-text-lux {
+    font-size: 1rem;
+    line-height: 1.8;
+    color: var(--text-secondary);
+}
+
+.legal-list-lux {
+    margin-top: 2rem;
+    list-style: none;
+    padding: 0;
+}
+
+.legal-list-lux li {
+    position: relative;
+    padding-left: 2rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+}
+
+.legal-list-lux li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.7rem;
+    width: 6px;
+    height: 6px;
+    background: var(--gold);
+    border-radius: 50%;
+}
+
+/* --- Luxury Table Styling --- */
+.luxury-table-container {
+    overflow-x: auto;
+    margin: 3rem 0;
+}
+
+.luxury-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.luxury-table th {
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.15em;
+    color: #999;
+    padding: 1.5rem;
+    border-bottom: 2px solid var(--gold);
+    text-transform: uppercase;
+}
+
+.luxury-table td {
+    padding: 1.5rem;
+    border-bottom: 1px solid #f8f8f8;
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+}
+
+.luxury-table tr:hover td {
+    background: var(--blush);
+    color: var(--royal-blue);
+}
+
+@media (max-width: 768px) {
+    .legal-page-luxury {
+        padding: 6rem 1.5rem;
+    }
+}

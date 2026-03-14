@@ -1,0 +1,261 @@
+/* ============================================================ 
+    PROFILE PAGE - LUXURY THEME
+   ============================================================ */
+
+.profile-page {
+    background: #fff;
+    min-height: 100vh;
+    padding: 6rem 0;
+}
+
+.profile-layout {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 5rem;
+    align-items: start;
+}
+
+/* --- Sidebar --- */
+.profile-sidebar-luxury {
+    background: #fafafa;
+    border: 1px solid #eee;
+    padding: 3rem;
+}
+
+.user-profile-card {
+    text-align: center;
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid #eee;
+}
+
+.avatar-gold {
+    width: 60px;
+    height: 60px;
+    background: var(--gold);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    margin: 0 auto 1.5rem;
+    font-weight: 700;
+    font-size: 1.2rem;
+}
+
+.user-rank {
+    display: block;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    margin-top: 0.5rem;
+}
+
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.nav-btn {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+    padding: 1rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    text-align: left;
+    transition: all 0.3s ease;
+}
+
+.nav-btn:hover,
+.nav-btn.active {
+    background: #fff;
+    color: var(--gold);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
+}
+
+.logout-btn {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+    padding: 1rem;
+    margin-top: 3rem;
+    border: none;
+    background: none;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #999;
+    cursor: pointer;
+    border-top: 1px solid #eee;
+    transition: color 0.3s ease;
+}
+
+.logout-btn:hover {
+    color: crimson;
+}
+
+/* --- Panel Style --- */
+.panel-luxury {
+    background: #fff;
+}
+
+.panel-header-luxury {
+    margin-bottom: 4rem;
+}
+
+.description-small {
+    font-size: 0.85rem;
+    color: #999;
+    margin-top: 0.5rem;
+}
+
+.luxury-profile-form {
+    display: grid;
+    gap: 2.5rem;
+    max-width: 600px;
+}
+
+.form-group-lux label {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    color: #999;
+    margin-bottom: 1rem;
+}
+
+.lux-form-input {
+    width: 100%;
+    border: none;
+    border-bottom: 1px solid #ddd;
+    padding: 1rem 0;
+    font-size: 1rem;
+    background: transparent;
+    transition: border-color 0.3s ease;
+}
+
+.lux-form-input:focus {
+    outline: none;
+    border-bottom-color: var(--gold);
+}
+
+.btn-luxury-action {
+    padding: 1.5rem 3rem;
+    background: var(--royal-blue);
+    color: #fff;
+    border: none;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    cursor: pointer;
+    width: fit-content;
+    transition: background 0.3s ease;
+}
+
+.btn-luxury-action:hover {
+    background: #122846;
+}
+
+/* --- Orders List --- */
+.orders-list-luxury {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.order-row-luxury {
+    display: grid;
+    grid-template-columns: 2fr 1.5fr 1fr 1fr;
+    align-items: center;
+    padding: 2rem;
+    border: 1px solid #eee;
+    transition: all 0.3s ease;
+}
+
+.order-row-luxury:hover {
+    border-color: var(--gold);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+.ord-id {
+    display: block;
+    font-weight: 700;
+    color: var(--royal-blue);
+}
+
+.ord-date {
+    font-size: 0.8rem;
+    color: #999;
+}
+
+.ord-amount {
+    font-weight: 600;
+    color: var(--royal-blue);
+}
+
+.status-pill {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    border-radius: 50px;
+    background: #f0f0f0;
+    color: #666;
+}
+
+.status-pill.delivered {
+    background: #e6f6ee;
+    color: #1a7f4e;
+}
+
+.status-pill.pending {
+    background: #fff8e6;
+    color: #b7791f;
+}
+
+.view-link-lux {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--gold);
+    text-decoration: none;
+    letter-spacing: 0.1em;
+}
+
+/* --- Empty States --- */
+.empty-state-luxury {
+    text-align: center;
+    padding: 5rem 0;
+}
+
+.empty-state-luxury p {
+    color: #999;
+    margin-bottom: 2rem;
+}
+
+.btn-luxury-outline {
+    display: inline-block;
+    padding: 1rem 2rem;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+}
+
+@media (max-width: 992px) {
+    .profile-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .order-row-luxury {
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+    }
+}

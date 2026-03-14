@@ -1,0 +1,69 @@
+/* ============================================================================
+   SMART IMAGE - "The Lens"
+   Aesthetic: Dark / Glass / Smooth Transition
+   ============================================================================ */
+
+:root {
+    --img-bg: #0a0a0a;
+    --img-duration: 0.5s; /* Smooth fade in duration */
+}
+
+/* --- CONTAINER --- */
+.smart-image-container {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    background-color: var(--img-bg);
+    border-radius: inherit; /* Inherits border-radius from parent */
+    /* Prevents pixelated edges during transitions */
+    transform: translateZ(0); 
+}
+
+/* --- THE IMAGE --- */
+.smart-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transform: scale(1.05); /* Slight zoom out effect on load */
+    transition: 
+        opacity var(--img-duration) ease-out,
+        transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+    will-change: opacity, transform;
+}
+
+/* State: Loaded */
+.smart-img.visible {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* --- THE SKELETON OVERLAY --- */
+.smart-skeleton {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    background: var(--img-bg);
+    /* Reusing the shimmer logic from our Skeleton system */
+    background-image: linear-gradient(
+        105deg,
+        #0a0a0a 0%,
+        #151515 50%,
+        #0a0a0a 100%
+    );
+    background-size: 200% 100%;
+    animation: imageShimmer 1.5s infinite linear;
+    transition: opacity 0.3s ease-out;
+    pointer-events: none;
+}
+
+.smart-skeleton.hidden {
+    opacity: 0;
+    visibility: hidden;
+    animation: none; /* Stop consuming CPU once hidden */
+}
+
+@keyframes imageShimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}

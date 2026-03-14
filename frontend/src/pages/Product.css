@@ -1,0 +1,278 @@
+/* ============================================================================
+   OMNORA PRODUCT - "The Artifact"
+   Aesthetic: Dark / Glass / Precision
+   ============================================================================ */
+
+:root {
+    --bg-dark: #050505;
+    --neon-cyan: #00F0FF;
+    --neon-gold: #FFD600;
+    --neon-red: #FF2A6D;
+    --text-main: #F2F2F2;
+    --text-muted: #888;
+}
+
+.product-page {
+    background-color: var(--bg-dark);
+    min-height: 100vh;
+    color: var(--text-main);
+    padding-bottom: 4rem;
+}
+
+/* --- Breadcrumbs --- */
+.breadcrumbs-nav {
+    padding: 2rem 0;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.crumb-link {
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.crumb-link:hover { color: var(--neon-cyan); }
+.crumb-active { color: var(--neon-cyan); font-weight: 600; margin-left: 0.5rem; }
+
+/* --- Layout --- */
+.product-grid-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 3rem;
+    margin-top: 1rem;
+}
+
+@media (min-width: 900px) {
+    .product-grid-layout {
+        grid-template-columns: 1fr 1fr;
+        align-items: start;
+    }
+}
+
+/* --- Visual (Left) --- */
+.image-frame {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 4px;
+    padding: 1rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.main-product-img {
+    width: 100%;
+    height: auto;
+    display: block;
+    transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.image-frame:hover .main-product-img {
+    transform: scale(1.05);
+}
+
+.corner-badge {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    background: var(--neon-cyan);
+    color: #000;
+    font-size: 0.7rem;
+    font-weight: 800;
+    padding: 0.25rem 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    z-index: 2;
+}
+
+/* --- Intel (Right) --- */
+.product-intel {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.p-title {
+    font-family: var(--font-serif);
+    font-size: clamp(2.5rem, 5vw, 3.5rem);
+    margin: 0;
+    line-height: 1;
+    color: #fff;
+}
+
+.p-meta {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.p-price {
+    font-family: var(--font-mono);
+    font-size: 1.5rem;
+    color: var(--neon-gold);
+    font-weight: 700;
+}
+
+.p-tag {
+    font-size: 0.7rem;
+    border: 1px solid var(--neon-gold);
+    color: var(--neon-gold);
+    padding: 0.2rem 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.p-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+    width: 100%;
+}
+
+.p-description h3 {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+}
+
+.p-description p {
+    line-height: 1.7;
+    color: #ccc;
+    font-size: 1rem;
+}
+
+/* --- Controls --- */
+.p-controls {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+}
+
+.qty-wrapper label {
+    display: block;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.1em;
+}
+
+.qty-dial {
+    display: flex;
+    align-items: center;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+}
+
+.qty-btn {
+    background: transparent;
+    border: none;
+    color: #fff;
+    padding: 0.8rem;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+}
+
+.qty-btn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.qty-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.qty-val {
+    width: 40px;
+    text-align: center;
+    font-family: var(--font-mono);
+    font-weight: 700;
+}
+
+.btn-add-cart {
+    flex: 1;
+    background: #fff;
+    color: #000;
+    border: none;
+    font-family: var(--font-sans);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 1rem 2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+    min-width: 200px;
+    margin-top: 1.25rem; /* Align with dial visually */
+}
+
+.btn-add-cart:hover:not(:disabled) {
+    background: var(--neon-cyan);
+    box-shadow: 0 0 30px rgba(0, 240, 255, 0.4);
+    transform: translateY(-2px);
+}
+
+.btn-add-cart:disabled {
+    background: #333;
+    color: #666;
+    cursor: not-allowed;
+}
+
+.stock-indicator {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.stock-indicator.low { color: var(--neon-red); }
+
+/* --- Trust Grid --- */
+.trust-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.trust-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: #ccc;
+    font-size: 0.9rem;
+}
+
+.trust-icon {
+    color: var(--neon-cyan);
+}
+
+/* --- Empty State --- */
+.empty-state-magnum {
+    text-align: center;
+    padding: 6rem 1rem;
+}
+
+.btn-action {
+    background: transparent;
+    border: 1px solid var(--neon-cyan);
+    color: var(--neon-cyan);
+    padding: 0.8rem 1.5rem;
+    cursor: pointer;
+    margin-top: 1.5rem;
+    transition: all 0.2s;
+}
+
+.btn-action:hover {
+    background: var(--neon-cyan);
+    color: #000;
+}

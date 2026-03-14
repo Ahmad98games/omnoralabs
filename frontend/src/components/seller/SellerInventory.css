@@ -1,0 +1,211 @@
+.seller-inventory {
+    padding: 1rem 0;
+}
+
+.seller-inventory .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.seller-inventory h2 {
+    font-size: 1.5rem;
+    letter-spacing: 0.1em;
+    margin: 0;
+}
+
+.seller-inventory p {
+    color: #666;
+    font-size: 0.8rem;
+    margin: 0.2rem 0 0 0;
+}
+
+.seller-inventory .btn-luxury-primary {
+    background: #000;
+    color: #fff;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 700;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.seller-inventory .btn-luxury-primary:hover {
+    background: #333;
+    transform: translateY(-2px);
+}
+
+.inventory-grid table {
+    width: 100%;
+    border-collapse: collapse;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.inventory-grid th {
+    text-align: left;
+    padding: 1rem;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    color: #888;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.inventory-grid td {
+    padding: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.product-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.product-info img {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.product-info .name {
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.product-info .category {
+    font-size: 0.7rem;
+    color: #666;
+}
+
+.stock {
+    font-weight: 700;
+}
+
+.stock.low {
+    color: var(--status-error);
+}
+
+.status-pill {
+    padding: 0.2rem 0.6rem;
+    border-radius: 100px;
+    font-size: 0.6rem;
+    font-weight: 800;
+}
+
+.status-pill.active {
+    background: rgba(39, 174, 96, 0.1);
+    color: var(--status-success);
+}
+
+.actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.actions button {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+    padding: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.actions button:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.actions button.delete:hover {
+    background: rgba(255, 0, 0, 0.1);
+    color: #ff4d4d;
+}
+
+/* Modal */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+.modal-content {
+    background: #111;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    width: 100%;
+    max-width: 500px;
+    padding: 2rem;
+}
+
+.modal-content header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #888;
+    margin-bottom: 0.5rem;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+    padding: 0.8rem;
+    border-radius: 4px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.modal-content footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.modal-content .btn-primary {
+    background: #fff;
+    color: #000;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.modal-content .btn-secondary {
+    background: transparent;
+    color: #888;
+    border: 1px solid #333;
+    padding: 0.8rem 1.5rem;
+    font-weight: 700;
+    cursor: pointer;
+}

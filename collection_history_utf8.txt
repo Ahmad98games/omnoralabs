@@ -1,0 +1,2519 @@
+﻿commit 65358359d6356d6806c3362df3b3c269e0071cde
+Author: Ahmad Mahboob <pakahmad9815@gmail.com>
+Date:   Mon Mar 9 02:25:00 2026 +0500
+
+    fix: Inject x-tenant-id into API requests to restore storefront data linking
+
+diff --git a/frontend/src/pages/Collection.tsx b/frontend/src/pages/Collection.tsx
+new file mode 100644
+index 0000000..b4a7b71
+--- /dev/null
++++ b/frontend/src/pages/Collection.tsx
+@@ -0,0 +1,172 @@
++import React, { useState, useEffect, useMemo } from 'react';
++import axios from 'axios';
++import { Link, useSearchParams } from 'react-router-dom';
++import { Filter, ChevronDown, ShoppingBag, WifiOff, PackageOpen } from 'lucide-react';
++import client from '../api/client';
++import { useToast } from '../context/ToastContext';
++import { useTheme } from '../context/ThemeContext';
++import { BuilderProvider } from '../context/BuilderContext';
++// import SovereignWidget from '../components/cms/SovereignWidget';
++import '../styles/collection.css';
++
++// Types
++// Hardened Data Contract
++interface IGSGProduct {
++    _id: string;
++    name: string;
++    price: number;
++    image?: string;
++    category?: string;
++    isNew?: boolean;
++    stock?: number;
++}
++
++const BRAND_PLACEHOLDER = '/images/placeholder_gsg.png';
++
++const CATEGORIES = [
++    { id: 'all', name: 'All Collection' },
++    { id: 'unstitched', name: 'Unstitched' },
++    { id: 'ready-to-wear', name: 'Ready-to-Wear' },
++    { id: 'formal', name: 'Formal Wear' },
++    { id: 'seasonal', name: 'Seasonal' },
++];
++
++const PRICE_RANGES = [
++    { id: 'all', name: 'All Prices' },
++    { id: 'under-2500', name: 'Under PKR 2,500' },
++    { id: '2500-5000', name: 'PKR 2,500 - 5,000' },
++    { id: '5000-10000', name: 'PKR 5,000 - 10,000' },
++    { id: 'over-10000', name: 'Over PKR 10,000' },
++];
++
++export default function Collection() {
++    const [searchParams, setSearchParams] = useSearchParams();
++    const [products, setProducts] = useState<IGSGProduct[]>([]);
++    const [loading, setLoading] = useState(true);
++    const [error, setError] = useState<{ message: string; code?: string } | null>(null);
++    const [isFilterOpen, setIsFilterOpen] = useState(false);
++    const [siteContent, setSiteContent] = useState<any>(null);
++    const { updateSellerStyles } = useTheme();
++
++    const { showToast } = useToast();
++
++    const activeCategory = searchParams.get('category') || 'all';
++    const activeSort = searchParams.get('sort') || 'newest';
++    const activePriceRange = searchParams.get('priceRange') || 'all';
++
++    useEffect(() => {
++        const controller = new AbortController();
++
++        async function fetchProducts() {
++            setLoading(true);
++            setError(null);
++            try {
++                const res = await client.get('/products', { signal: controller.signal });
++                const data = res.data?.data || res.data?.products || res.data || [];
++                setProducts(Array.isArray(data) ? data : []);
++            } catch (err: any) {
++                if (!axios.isCancel(err)) {
++                    setError({
++                        message: err.response?.data?.error || err.message || 'Connection failed',
++                        code: err.code || (err.response ? `API_${err.response.status}` : 'NETWORK_ERROR')
++                    });
++                    console.error('FETCH_ERROR:', err);
++                }
++            } finally {
++                setLoading(false);
++            }
++        }
++
++        fetchProducts();
++
++        async function fetchCMS() {
++            try {
++                const { data } = await client.get('/cms/content');
++                if (data.success && data.content) {
++                    setSiteContent(data.content);
++                    if (data.content.globalStyles) updateSellerStyles(data.content.globalStyles);
++                }
++            } catch (err) {
++                console.error('CMS Fetch failed', err);
++            }
++        }
++        fetchCMS();
++
++        return () => controller.abort();
++    }, [updateSellerStyles]);
++
++    const filteredProducts = useMemo(() => {
++        let result = [...products];
++
++        // Filter by category
++        if (activeCategory !== 'all') {
++            result = result.filter(p => p.category?.toLowerCase() === activeCategory.toLowerCase());
++        }
++
++        // Filter by price
++        if (activePriceRange !== 'all') {
++            result = result.filter(p => {
++                if (activePriceRange === 'under-2500') return p.price < 2500;
++                if (activePriceRange === '2500-5000') return p.price >= 2500 && p.price <= 5000;
++                if (activePriceRange === '5000-10000') return p.price >= 5000 && p.price <= 10000;
++                if (activePriceRange === 'over-10000') return p.price > 10000;
++                return true;
++            });
++        }
++
++        // Sort
++        if (activeSort === 'price-low') result.sort((a, b) => a.price - b.price);
++        if (activeSort === 'price-high') result.sort((a, b) => b.price - a.price);
++        if (activeSort === 'newest') result.sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0));
++
++        return result;
++    }, [products, activeCategory, activePriceRange, activeSort]);
++
++    const updateFilter = (key: string, value: string) => {
++        const nextParams = new URLSearchParams(searchParams);
++        if (value === 'all') nextParams.delete(key);
++        else nextParams.set(key, value);
++        setSearchParams(nextParams);
++    };
++
++    const handleAddToCart = (e: React.MouseEvent, product: IGSGProduct) => {
++        e.preventDefault();
++        e.stopPropagation();
++        const cart = JSON.parse(localStorage.getItem('cart') || '[]');
++        const existing = cart.find((i: any) => i.id === product._id);
++        if (existing) existing.quantity += 1;
++        else cart.push({ id: product._id, name: product.name, price: product.price, image: product.image, quantity: 1 });
++
++        localStorage.setItem('cart', JSON.stringify(cart));
++        window.dispatchEvent(new Event('cart-updated'));
++        showToast(`${product.name} added to bag`, 'success');
++    };
++
++    const isPreview = window.location.search.includes('preview=true');
++
++    return (
++        <BuilderProvider initialData={siteContent || {}} isPreview={isPreview}>
++            <div className="collection-page">
++                <header className="collection-hero-luxury">
++                    <img
++                        src={siteContent?.pages?.collection?.heroBannerURL || "/images/placeholder_gsg.png"}
++                        alt="GSG Collection"
++                    />
++                    <div className="collection-hero-overlay">
++                        <span className="eyebrow text-white">{siteContent?.pages?.collection?.eyebrow || 'THE CURATED SELECTION'}</span>
++                        <h1 className="subtitle-serif text-white">{siteContent?.pages?.collection?.headlineText || 'Elegant Catalogue'}</h1>
++                    </div>
++                </header>
++
++                <div className="container">
++                    <div className="collection-layout">
++                        {/* Sidebar and Grid... */}
++                        {/* ... existing logic ... */}
++                    </div>
++                </div>
++
++                {/* <SovereignWidget /> */}
++            </div>
++        </BuilderProvider>
++    );
++}
+
+commit 52dec039fc92c165b3beb5b8de7de39133754513
+Author: Ahmad Mahboob <pakahmad9815@gmail.com>
+Date:   Sun Mar 8 19:11:26 2026 +0500
+
+    refactor: Extract all buyer storefront UI to /storefront-export staging area
+
+diff --git a/frontend/src/pages/Collection.tsx b/frontend/src/pages/Collection.tsx
+deleted file mode 100644
+index b4a7b71..0000000
+--- a/frontend/src/pages/Collection.tsx
++++ /dev/null
+@@ -1,172 +0,0 @@
+-import React, { useState, useEffect, useMemo } from 'react';
+-import axios from 'axios';
+-import { Link, useSearchParams } from 'react-router-dom';
+-import { Filter, ChevronDown, ShoppingBag, WifiOff, PackageOpen } from 'lucide-react';
+-import client from '../api/client';
+-import { useToast } from '../context/ToastContext';
+-import { useTheme } from '../context/ThemeContext';
+-import { BuilderProvider } from '../context/BuilderContext';
+-// import SovereignWidget from '../components/cms/SovereignWidget';
+-import '../styles/collection.css';
+-
+-// Types
+-// Hardened Data Contract
+-interface IGSGProduct {
+-    _id: string;
+-    name: string;
+-    price: number;
+-    image?: string;
+-    category?: string;
+-    isNew?: boolean;
+-    stock?: number;
+-}
+-
+-const BRAND_PLACEHOLDER = '/images/placeholder_gsg.png';
+-
+-const CATEGORIES = [
+-    { id: 'all', name: 'All Collection' },
+-    { id: 'unstitched', name: 'Unstitched' },
+-    { id: 'ready-to-wear', name: 'Ready-to-Wear' },
+-    { id: 'formal', name: 'Formal Wear' },
+-    { id: 'seasonal', name: 'Seasonal' },
+-];
+-
+-const PRICE_RANGES = [
+-    { id: 'all', name: 'All Prices' },
+-    { id: 'under-2500', name: 'Under PKR 2,500' },
+-    { id: '2500-5000', name: 'PKR 2,500 - 5,000' },
+-    { id: '5000-10000', name: 'PKR 5,000 - 10,000' },
+-    { id: 'over-10000', name: 'Over PKR 10,000' },
+-];
+-
+-export default function Collection() {
+-    const [searchParams, setSearchParams] = useSearchParams();
+-    const [products, setProducts] = useState<IGSGProduct[]>([]);
+-    const [loading, setLoading] = useState(true);
+-    const [error, setError] = useState<{ message: string; code?: string } | null>(null);
+-    const [isFilterOpen, setIsFilterOpen] = useState(false);
+-    const [siteContent, setSiteContent] = useState<any>(null);
+-    const { updateSellerStyles } = useTheme();
+-
+-    const { showToast } = useToast();
+-
+-    const activeCategory = searchParams.get('category') || 'all';
+-    const activeSort = searchParams.get('sort') || 'newest';
+-    const activePriceRange = searchParams.get('priceRange') || 'all';
+-
+-    useEffect(() => {
+-        const controller = new AbortController();
+-
+-        async function fetchProducts() {
+-            setLoading(true);
+-            setError(null);
+-            try {
+-                const res = await client.get('/products', { signal: controller.signal });
+-                const data = res.data?.data || res.data?.products || res.data || [];
+-                setProducts(Array.isArray(data) ? data : []);
+-            } catch (err: any) {
+-                if (!axios.isCancel(err)) {
+-                    setError({
+-                        message: err.response?.data?.error || err.message || 'Connection failed',
+-                        code: err.code || (err.response ? `API_${err.response.status}` : 'NETWORK_ERROR')
+-                    });
+-                    console.error('FETCH_ERROR:', err);
+-                }
+-            } finally {
+-                setLoading(false);
+-            }
+-        }
+-
+-        fetchProducts();
+-
+-        async function fetchCMS() {
+-            try {
+-                const { data } = await client.get('/cms/content');
+-                if (data.success && data.content) {
+-                    setSiteContent(data.content);
+-                    if (data.content.globalStyles) updateSellerStyles(data.content.globalStyles);
+-                }
+-            } catch (err) {
+-                console.error('CMS Fetch failed', err);
+-            }
+-        }
+-        fetchCMS();
+-
+-        return () => controller.abort();
+-    }, [updateSellerStyles]);
+-
+-    const filteredProducts = useMemo(() => {
+-        let result = [...products];
+-
+-        // Filter by category
+-        if (activeCategory !== 'all') {
+-            result = result.filter(p => p.category?.toLowerCase() === activeCategory.toLowerCase());
+-        }
+-
+-        // Filter by price
+-        if (activePriceRange !== 'all') {
+-            result = result.filter(p => {
+-                if (activePriceRange === 'under-2500') return p.price < 2500;
+-                if (activePriceRange === '2500-5000') return p.price >= 2500 && p.price <= 5000;
+-                if (activePriceRange === '5000-10000') return p.price >= 5000 && p.price <= 10000;
+-                if (activePriceRange === 'over-10000') return p.price > 10000;
+-                return true;
+-            });
+-        }
+-
+-        // Sort
+-        if (activeSort === 'price-low') result.sort((a, b) => a.price - b.price);
+-        if (activeSort === 'price-high') result.sort((a, b) => b.price - a.price);
+-        if (activeSort === 'newest') result.sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0));
+-
+-        return result;
+-    }, [products, activeCategory, activePriceRange, activeSort]);
+-
+-    const updateFilter = (key: string, value: string) => {
+-        const nextParams = new URLSearchParams(searchParams);
+-        if (value === 'all') nextParams.delete(key);
+-        else nextParams.set(key, value);
+-        setSearchParams(nextParams);
+-    };
+-
+-    const handleAddToCart = (e: React.MouseEvent, product: IGSGProduct) => {
+-        e.preventDefault();
+-        e.stopPropagation();
+-        const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+-        const existing = cart.find((i: any) => i.id === product._id);
+-        if (existing) existing.quantity += 1;
+-        else cart.push({ id: product._id, name: product.name, price: product.price, image: product.image, quantity: 1 });
+-
+-        localStorage.setItem('cart', JSON.stringify(cart));
+-        window.dispatchEvent(new Event('cart-updated'));
+-        showToast(`${product.name} added to bag`, 'success');
+-    };
+-
+-    const isPreview = window.location.search.includes('preview=true');
+-
+-    return (
+-        <BuilderProvider initialData={siteContent || {}} isPreview={isPreview}>
+-            <div className="collection-page">
+-                <header className="collection-hero-luxury">
+-                    <img
+-                        src={siteContent?.pages?.collection?.heroBannerURL || "/images/placeholder_gsg.png"}
+-                        alt="GSG Collection"
+-                    />
+-                    <div className="collection-hero-overlay">
+-                        <span className="eyebrow text-white">{siteContent?.pages?.collection?.eyebrow || 'THE CURATED SELECTION'}</span>
+-                        <h1 className="subtitle-serif text-white">{siteContent?.pages?.collection?.headlineText || 'Elegant Catalogue'}</h1>
+-                    </div>
+-                </header>
+-
+-                <div className="container">
+-                    <div className="collection-layout">
+-                        {/* Sidebar and Grid... */}
+-                        {/* ... existing logic ... */}
+-                    </div>
+-                </div>
+-
+-                {/* <SovereignWidget /> */}
+-            </div>
+-        </BuilderProvider>
+-    );
+-}
+
+commit 1547c01497ccb7614f36e4246195ea9a341143d4
+Author: Ahmad Mahboob <pakahmad9815@gmail.com>
+Date:   Sun Mar 8 16:35:37 2026 +0500
+
+    feat: Implement Phase 24 & Phase 25 (God Mode & Geo-Pricing)
+
+diff --git a/frontend/src/pages/Collection.tsx b/frontend/src/pages/Collection.tsx
+index 55d5aaa..b4a7b71 100644
+--- a/frontend/src/pages/Collection.tsx
++++ b/frontend/src/pages/Collection.tsx
+@@ -4,6 +4,9 @@ import { Link, useSearchParams } from 'react-router-dom';
+ import { Filter, ChevronDown, ShoppingBag, WifiOff, PackageOpen } from 'lucide-react';
+ import client from '../api/client';
+ import { useToast } from '../context/ToastContext';
++import { useTheme } from '../context/ThemeContext';
++import { BuilderProvider } from '../context/BuilderContext';
++// import SovereignWidget from '../components/cms/SovereignWidget';
+ import '../styles/collection.css';
+ 
+ // Types
+@@ -42,6 +45,8 @@ export default function Collection() {
+     const [loading, setLoading] = useState(true);
+     const [error, setError] = useState<{ message: string; code?: string } | null>(null);
+     const [isFilterOpen, setIsFilterOpen] = useState(false);
++    const [siteContent, setSiteContent] = useState<any>(null);
++    const { updateSellerStyles } = useTheme();
+ 
+     const { showToast } = useToast();
+ 
+@@ -73,8 +78,22 @@ export default function Collection() {
+         }
+ 
+         fetchProducts();
++
++        async function fetchCMS() {
++            try {
++                const { data } = await client.get('/cms/content');
++                if (data.success && data.content) {
++                    setSiteContent(data.content);
++                    if (data.content.globalStyles) updateSellerStyles(data.content.globalStyles);
++                }
++            } catch (err) {
++                console.error('CMS Fetch failed', err);
++            }
++        }
++        fetchCMS();
++
+         return () => controller.abort();
+-    }, []);
++    }, [updateSellerStyles]);
+ 
+     const filteredProducts = useMemo(() => {
+         let result = [...products];
+@@ -123,128 +142,31 @@ export default function Collection() {
+         showToast(`${product.name} added to bag`, 'success');
+     };
+ 
++    const isPreview = window.location.search.includes('preview=true');
++
+     return (
+-        <div className="collection-page">
+-            <header className="collection-hero-luxury">
+-                <img
+-                    src="/brain/267393fd-15ea-4545-93a9-82ddcad349ad/gold_she_hero_banner_1768764516155.png"
+-                    alt="GSG Collection"
+-                />
+-                <div className="collection-hero-overlay">
+-                    <span className="eyebrow text-white">THE CURATED SELECTION</span>
+-                    <h1 className="subtitle-serif text-white">Elegant Catalogue</h1>
+-                </div>
+-            </header>
+-
+-            <div className="container">
+-                <div className="collection-layout">
+-                    {/* Desktop Sidebar */}
+-                    <aside className="shop-sidebar">
+-                        <div className="filter-group">
+-                            <h3 className="filter-title">Categories</h3>
+-                            <ul className="filter-list">
+-                                {CATEGORIES.map(cat => (
+-                                    <li key={cat.id} className="filter-item">
+-                                        <button
+-                                            onClick={() => updateFilter('category', cat.id)}
+-                                            className={`filter-btn ${activeCategory === cat.id ? 'active' : ''}`}
+-                                        >
+-                                            {cat.name}
+-                                        </button>
+-                                    </li>
+-                                ))}
+-                            </ul>
+-                        </div>
+-
+-                        <div className="filter-group">
+-                            <h3 className="filter-title">Price Range</h3>
+-                            <ul className="filter-list">
+-                                {PRICE_RANGES.map(range => (
+-                                    <li key={range.id} className="filter-item">
+-                                        <button
+-                                            onClick={() => updateFilter('priceRange', range.id)}
+-                                            className={`filter-btn ${activePriceRange === range.id ? 'active' : ''}`}
+-                                        >
+-                                            {range.name}
+-                                        </button>
+-                                    </li>
+-                                ))}
+-                            </ul>
+-                        </div>
+-                    </aside>
+-
+-                    {/* Main Content */}
+-                    <main className="shop-main">
+-                        <div className="collection-toolbar-lux">
+-                            <div className="count-label-lux font-serif italic">
+-                                {filteredProducts.length} {filteredProducts.length === 1 ? 'Piece' : 'Pieces'} Found
+-                            </div>
+-                            <div className="sort-box">
+-                                <select
+-                                    value={activeSort}
+-                                    onChange={(e) => updateFilter('sort', e.target.value)}
+-                                    className="sort-select"
+-                                >
+-                                    <option value="newest">Newest Arrivals</option>
+-                                    <option value="price-low">Price: Low to High</option>
+-                                    <option value="price-high">Price: High to Low</option>
+-                                </select>
+-                            </div>
+-                        </div>
+-
+-                        {loading ? (
+-                            <div className="product-grid">
+-                                {[1, 2, 3, 4, 5, 6].map(i => (
+-                                    <div key={i} className="skeleton-card" style={{ height: '400px', backgroundColor: '#f0f0f0', borderRadius: '4px' }}></div>
+-                                ))}
+-                            </div>
+-                        ) : error ? (
+-                            <div className="empty-state container" style={{ textAlign: 'center', padding: '4rem 0' }}>
+-                                <WifiOff size={48} style={{ color: 'var(--text-secondary)', marginBottom: '1rem' }} />
+-                                <h2>Connection Issue</h2>
+-                                <p style={{ color: 'red', fontWeight: 'bold' }}>{error.message}</p>
+-                                <p style={{ fontSize: '0.8rem', color: '#999' }}>Diagnostic Code: {error.code}</p>
+-                                <button onClick={() => window.location.reload()} className="btn-primary-gsg" style={{ marginTop: '1rem' }}>RETRY</button>
+-                            </div>
+-                        ) : filteredProducts.length === 0 ? (
+-                            <div className="empty-state container" style={{ textAlign: 'center', padding: '4rem 0' }}>
+-                                <PackageOpen size={48} style={{ color: 'var(--text-secondary)', marginBottom: '1rem' }} />
+-                                <h2>No pieces found</h2>
+-                                <p>Try adjusting your search or filters to find what you're looking for.</p>
+-                                <button onClick={() => setSearchParams({})} className="btn-primary-gsg" style={{ marginTop: '1rem' }}>RESET ALL FILTERS</button>
+-                            </div>
+-                        ) : (
+-                            <div className="product-grid">
+-                                {filteredProducts.map(product => (
+-                                    <Link to={`/product/${product._id}`} key={product._id} className="fashion-card">
+-                                        <div className="card-img-wrapper">
+-                                            <img
+-                                                src={product.image || BRAND_PLACEHOLDER}
+-                                                alt={product.name || 'Fashion Piece'}
+-                                                onError={(e) => { (e.target as HTMLImageElement).src = BRAND_PLACEHOLDER; }}
+-                                            />
+-                                            <button
+-                                                onClick={(e) => handleAddToCart(e, product)}
+-                                                className="quick-add-btn"
+-                                                style={{ position: 'absolute', bottom: '1rem', right: '1rem', background: 'white', border: 'none', padding: '0.6rem', borderRadius: '50%', boxShadow: '0 2px 5px rgba(0,0,0,0.1)', cursor: 'pointer' }}
+-                                            >
+-                                                <ShoppingBag size={18} />
+-                                            </button>
+-                                        </div>
+-                                        <div className="card-info-lux">
+-                                            <div className="card-category-lux">{product.category || 'Collection'}</div>
+-                                            <h3 className="card-name-lux font-serif">{product.name || 'Unlabeled Piece'}</h3>
+-                                            <div className="card-price-lux">
+-                                                {product.price ? `PKR ${product.price.toLocaleString()}` : 'Price on Request'}
+-                                            </div>
+-                                        </div>
+-                                    </Link>
+-                                ))}
+-                            </div>
+-                        )}
+-                    </main>
++        <BuilderProvider initialData={siteContent || {}} isPreview={isPreview}>
++            <div className="collection-page">
++                <header className="collection-hero-luxury">
++                    <img
++                        src={siteContent?.pages?.collection?.heroBannerURL || "/images/placeholder_gsg.png"}
++                        alt="GSG Collection"
++                    />
++                    <div className="collection-hero-overlay">
++                        <span className="eyebrow text-white">{siteContent?.pages?.collection?.eyebrow || 'THE CURATED SELECTION'}</span>
++                        <h1 className="subtitle-serif text-white">{siteContent?.pages?.collection?.headlineText || 'Elegant Catalogue'}</h1>
++                    </div>
++                </header>
++
++                <div className="container">
++                    <div className="collection-layout">
++                        {/* Sidebar and Grid... */}
++                        {/* ... existing logic ... */}
++                    </div>
+                 </div>
++
++                {/* <SovereignWidget /> */}
+             </div>
+-        </div>
++        </BuilderProvider>
+     );
+ }
+
+commit 058af7d51b9e5466bd6596c54e93831ce075b5c1
+Author: Ahmad Mahboob <pakahmad9815@gmail.com>
+Date:   Sun Feb 15 14:48:12 2026 +0500
+
+    Production-grade polish: Enhanced Checkout reliability, premium aesthetics, and optimized animations
+
+diff --git a/frontend/src/pages/Collection.tsx b/frontend/src/pages/Collection.tsx
+new file mode 100644
+index 0000000..55d5aaa
+--- /dev/null
++++ b/frontend/src/pages/Collection.tsx
+@@ -0,0 +1,250 @@
++import React, { useState, useEffect, useMemo } from 'react';
++import axios from 'axios';
++import { Link, useSearchParams } from 'react-router-dom';
++import { Filter, ChevronDown, ShoppingBag, WifiOff, PackageOpen } from 'lucide-react';
++import client from '../api/client';
++import { useToast } from '../context/ToastContext';
++import '../styles/collection.css';
++
++// Types
++// Hardened Data Contract
++interface IGSGProduct {
++    _id: string;
++    name: string;
++    price: number;
++    image?: string;
++    category?: string;
++    isNew?: boolean;
++    stock?: number;
++}
++
++const BRAND_PLACEHOLDER = '/images/placeholder_gsg.png';
++
++const CATEGORIES = [
++    { id: 'all', name: 'All Collection' },
++    { id: 'unstitched', name: 'Unstitched' },
++    { id: 'ready-to-wear', name: 'Ready-to-Wear' },
++    { id: 'formal', name: 'Formal Wear' },
++    { id: 'seasonal', name: 'Seasonal' },
++];
++
++const PRICE_RANGES = [
++    { id: 'all', name: 'All Prices' },
++    { id: 'under-2500', name: 'Under PKR 2,500' },
++    { id: '2500-5000', name: 'PKR 2,500 - 5,000' },
++    { id: '5000-10000', name: 'PKR 5,000 - 10,000' },
++    { id: 'over-10000', name: 'Over PKR 10,000' },
++];
++
++export default function Collection() {
++    const [searchParams, setSearchParams] = useSearchParams();
++    const [products, setProducts] = useState<IGSGProduct[]>([]);
++    const [loading, setLoading] = useState(true);
++    const [error, setError] = useState<{ message: string; code?: string } | null>(null);
++    const [isFilterOpen, setIsFilterOpen] = useState(false);
++
++    const { showToast } = useToast();
++
++    const activeCategory = searchParams.get('category') || 'all';
++    const activeSort = searchParams.get('sort') || 'newest';
++    const activePriceRange = searchParams.get('priceRange') || 'all';
++
++    useEffect(() => {
++        const controller = new AbortController();
++
++        async function fetchProducts() {
++            setLoading(true);
++            setError(null);
++            try {
++                const res = await client.get('/products', { signal: controller.signal });
++                const data = res.data?.data || res.data?.products || res.data || [];
++                setProducts(Array.isArray(data) ? data : []);
++            } catch (err: any) {
++                if (!axios.isCancel(err)) {
++                    setError({
++                        message: err.response?.data?.error || err.message || 'Connection failed',
++                        code: err.code || (err.response ? `API_${err.response.status}` : 'NETWORK_ERROR')
++                    });
++                    console.error('FETCH_ERROR:', err);
++                }
++            } finally {
++                setLoading(false);
++            }
++        }
++
++        fetchProducts();
++        return () => controller.abort();
++    }, []);
++
++    const filteredProducts = useMemo(() => {
++        let result = [...products];
++
++        // Filter by category
++        if (activeCategory !== 'all') {
++            result = result.filter(p => p.category?.toLowerCase() === activeCategory.toLowerCase());
++        }
++
++        // Filter by price
++        if (activePriceRange !== 'all') {
++            result = result.filter(p => {
++                if (activePriceRange === 'under-2500') return p.price < 2500;
++                if (activePriceRange === '2500-5000') return p.price >= 2500 && p.price <= 5000;
++                if (activePriceRange === '5000-10000') return p.price >= 5000 && p.price <= 10000;
++                if (activePriceRange === 'over-10000') return p.price > 10000;
++                return true;
++            });
++        }
++
++        // Sort
++        if (activeSort === 'price-low') result.sort((a, b) => a.price - b.price);
++        if (activeSort === 'price-high') result.sort((a, b) => b.price - a.price);
++        if (activeSort === 'newest') result.sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0));
++
++        return result;
++    }, [products, activeCategory, activePriceRange, activeSort]);
++
++    const updateFilter = (key: string, value: string) => {
++        const nextParams = new URLSearchParams(searchParams);
++        if (value === 'all') nextParams.delete(key);
++        else nextParams.set(key, value);
++        setSearchParams(nextParams);
++    };
++
++    const handleAddToCart = (e: React.MouseEvent, product: IGSGProduct) => {
++        e.preventDefault();
++        e.stopPropagation();
++        const cart = JSON.parse(localStorage.getItem('cart') || '[]');
++        const existing = cart.find((i: any) => i.id === product._id);
++        if (existing) existing.quantity += 1;
++        else cart.push({ id: product._id, name: product.name, price: product.price, image: product.image, quantity: 1 });
++
++        localStorage.setItem('cart', JSON.stringify(cart));
++        window.dispatchEvent(new Event('cart-updated'));
++        showToast(`${product.name} added to bag`, 'success');
++    };
++
++    return (
++        <div className="collection-page">
++            <header className="collection-hero-luxury">
++                <img
++                    src="/brain/267393fd-15ea-4545-93a9-82ddcad349ad/gold_she_hero_banner_1768764516155.png"
++                    alt="GSG Collection"
++                />
++                <div className="collection-hero-overlay">
++                    <span className="eyebrow text-white">THE CURATED SELECTION</span>
++                    <h1 className="subtitle-serif text-white">Elegant Catalogue</h1>
++                </div>
++            </header>
++
++            <div className="container">
++                <div className="collection-layout">
++                    {/* Desktop Sidebar */}
++                    <aside className="shop-sidebar">
++                        <div className="filter-group">
++                            <h3 className="filter-title">Categories</h3>
++                            <ul className="filter-list">
++                                {CATEGORIES.map(cat => (
++                                    <li key={cat.id} className="filter-item">
++                                        <button
++                                            onClick={() => updateFilter('category', cat.id)}
++                                            className={`filter-btn ${activeCategory === cat.id ? 'active' : ''}`}
++                                        >
++                                            {cat.name}
++                                        </button>
++                                    </li>
++                                ))}
++                            </ul>
++                        </div>
++
++                        <div className="filter-group">
++                            <h3 className="filter-title">Price Range</h3>
++                            <ul className="filter-list">
++                                {PRICE_RANGES.map(range => (
++                                    <li key={range.id} className="filter-item">
++                                        <button
++                                            onClick={() => updateFilter('priceRange', range.id)}
++                                            className={`filter-btn ${activePriceRange === range.id ? 'active' : ''}`}
++                                        >
++                                            {range.name}
++                                        </button>
++                                    </li>
++                                ))}
++                            </ul>
++                        </div>
++                    </aside>
++
++                    {/* Main Content */}
++                    <main className="shop-main">
++                        <div className="collection-toolbar-lux">
++                            <div className="count-label-lux font-serif italic">
++                                {filteredProducts.length} {filteredProducts.length === 1 ? 'Piece' : 'Pieces'} Found
++                            </div>
++                            <div className="sort-box">
++                                <select
++                                    value={activeSort}
++                                    onChange={(e) => updateFilter('sort', e.target.value)}
++                                    className="sort-select"
++                                >
++                                    <option value="newest">Newest Arrivals</option>
++                                    <option value="price-low">Price: Low to High</option>
++                                    <option value="price-high">Price: High to Low</option>
++                                </select>
++                            </div>
++                        </div>
++
++                        {loading ? (
++                            <div className="product-grid">
++                                {[1, 2, 3, 4, 5, 6].map(i => (
++                                    <div key={i} className="skeleton-card" style={{ height: '400px', backgroundColor: '#f0f0f0', borderRadius: '4px' }}></div>
++                                ))}
++                            </div>
++                        ) : error ? (
++                            <div className="empty-state container" style={{ textAlign: 'center', padding: '4rem 0' }}>
++                                <WifiOff size={48} style={{ color: 'var(--text-secondary)', marginBottom: '1rem' }} />
++                                <h2>Connection Issue</h2>
++                                <p style={{ color: 'red', fontWeight: 'bold' }}>{error.message}</p>
++                                <p style={{ fontSize: '0.8rem', color: '#999' }}>Diagnostic Code: {error.code}</p>
++                                <button onClick={() => window.location.reload()} className="btn-primary-gsg" style={{ marginTop: '1rem' }}>RETRY</button>
++                            </div>
++                        ) : filteredProducts.length === 0 ? (
++                            <div className="empty-state container" style={{ textAlign: 'center', padding: '4rem 0' }}>
++                                <PackageOpen size={48} style={{ color: 'var(--text-secondary)', marginBottom: '1rem' }} />
++                                <h2>No pieces found</h2>
++                                <p>Try adjusting your search or filters to find what you're looking for.</p>
++                                <button onClick={() => setSearchParams({})} className="btn-primary-gsg" style={{ marginTop: '1rem' }}>RESET ALL FILTERS</button>
++                            </div>
++                        ) : (
++                            <div className="product-grid">
++                                {filteredProducts.map(product => (
++                                    <Link to={`/product/${product._id}`} key={product._id} className="fashion-card">
++                                        <div className="card-img-wrapper">
++                                            <img
++                                                src={product.image || BRAND_PLACEHOLDER}
++                                                alt={product.name || 'Fashion Piece'}
++                                                onError={(e) => { (e.target as HTMLImageElement).src = BRAND_PLACEHOLDER; }}
++                                            />
++                                            <button
++                                                onClick={(e) => handleAddToCart(e, product)}
++                                                className="quick-add-btn"
++                                                style={{ position: 'absolute', bottom: '1rem', right: '1rem', background: 'white', border: 'none', padding: '0.6rem', borderRadius: '50%', boxShadow: '0 2px 5px rgba(0,0,0,0.1)', cursor: 'pointer' }}
++                                            >
++                                                <ShoppingBag size={18} />
++                                            </button>
++                                        </div>
++                                        <div className="card-info-lux">
++                                            <div className="card-category-lux">{product.category || 'Collection'}</div>
++                                            <h3 className="card-name-lux font-serif">{product.name || 'Unlabeled Piece'}</h3>
++                                            <div className="card-price-lux">
++                                                {product.price ? `PKR ${product.price.toLocaleString()}` : 'Price on Request'}
++                                            </div>
++                                        </div>
++                                    </Link>
++                                ))}
++                            </div>
++                        )}
++                    </main>
++                </div>
++            </div>
++        </div>
++    );
++}
+
+commit d7bbf0dbb88e3631cf0e38f7c46a7b22746802fd
+Author: Ahmad Mahboob <pakahmad9815@gmail.com>
+Date:   Fri Jan 9 00:13:59 2026 +0500
+
+    Update: Save current state
+
+diff --git a/frontend/src/pages/Collection.tsx b/frontend/src/pages/Collection.tsx
+deleted file mode 100644
+index 5d94703..0000000
+--- a/frontend/src/pages/Collection.tsx
++++ /dev/null
+@@ -1,349 +0,0 @@
+-import { useState, useEffect } from 'react';
+-import { Link, useSearchParams } from 'react-router-dom';
+-import client, { trackEvent } from '../api/client';
+-import { useScrollReveal } from '../hooks/useScrollReveal';
+-import { useToast } from '../context/ToastContext';
+-import AdPlacementZone from '../components/AdPlacementZone';
+-import SkeletonProductCard from '../components/SkeletonProductCard';
+-import SmartImage from '../components/SmartImage';
+-import adConfig from '../config/adConfig.json';
+-import './Collection.css';
+-
+-// ============================================================================
+-// CONSTANTS
+-// ============================================================================
+-
+-const SKELETON_COUNT = 4;
+-
+-// ============================================================================
+-// TYPE DEFINITIONS
+-// ============================================================================
+-
+-interface Product {
+-    _id: string;
+-    name: string;
+-    price: number;
+-    image: string;
+-    category: string;
+-    description?: string;
+-    isFeatured?: boolean;
+-    isNew?: boolean;
+-}
+-
+-interface CartItem {
+-    id: string;
+-    name: string;
+-    price: number;
+-    image: string;
+-    quantity: number;
+-}
+-
+-type PriceRange = 'all' | 'under-500' | '500-1000' | 'over-1000';
+-type SortOption = 'default' | 'new' | 'price-low' | 'price-high' | 'name-asc' | 'name-desc' | 'featured';
+-
+-// ============================================================================
+-// CHILD COMPONENTS
+-// ============================================================================
+-
+-interface ProductCardProps {
+-    product: Product;
+-    onAddToCart: (product: Product) => void;
+-}
+-
+-const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => (
+-    <article className="product-card">
+-        <Link to={`/product/${product._id}`} className="product-card__image-link">
+-            <div className="product-card__image-wrapper">
+-                <SmartImage
+-                    src={product.image}
+-                    alt={product.name}
+-                    className="product-card__image"
+-                    priority={true}
+-                />
+-            </div>
+-        </Link>
+-
+-        <div className="product-card__content">
+-            <Link to={`/product/${product._id}`} className="product-card__title-link">
+-                <h3 className="product-card__title">
+-                    {product.name}
+-                    {product.isNew && <span className="product-card__badge product-card__badge--new">NEW</span>}
+-                    {product.isFeatured && <span className="product-card__badge product-card__badge--featured">Γÿà</span>}
+-                </h3>
+-            </Link>
+-
+-            {product.description && (
+-                <p className="product-card__description">{product.description}</p>
+-            )}
+-
+-            <p className="product-card__price">PKR {product.price.toLocaleString()}</p>
+-
+-            <button
+-                onClick={() => onAddToCart(product)}
+-                className="product-card__add-btn"
+-                aria-label={`Add ${product.name} to cart`}
+-            >
+-                Add to Bag
+-            </button>
+-        </div>
+-    </article>
+-);
+-
+-interface EmptyStateProps {
+-    type: 'error' | 'no-results';
+-    message?: string;
+-    onRetry?: () => void;
+-}
+-
+-const EmptyState: React.FC<EmptyStateProps> = ({ type, message, onRetry }) => (
+-    <div className="empty-state">
+-        {type === 'error' ? (
+-            <>
+-                <h3 className="empty-state__title">Oops! Something went wrong</h3>
+-                <p className="empty-state__message">{message || 'Failed to load products'}</p>
+-                {onRetry && (
+-                    <button onClick={onRetry} className="empty-state__button">
+-                        Try Again
+-                    </button>
+-                )}
+-            </>
+-        ) : (
+-            <>
+-                <h3 className="empty-state__title">No products found ≡ƒ¢ü</h3>
+-                <p className="empty-state__message">
+-                    Try adjusting your filters, clearing your search query, or check back later for new arrivals.
+-                </p>
+-            </>
+-        )}
+-    </div>
+-);
+-
+-// ============================================================================
+-// MAIN COMPONENT
+-// ============================================================================
+-
+-export default function Collection() {
+-    const [searchParams] = useSearchParams();
+-    const [products, setProducts] = useState<Product[]>([]);
+-    const [loading, setLoading] = useState(true);
+-    const [error, setError] = useState<string | null>(null);
+-    const [sortBy, setSortBy] = useState<SortOption>('default');
+-    const [priceRange, setPriceRange] = useState<PriceRange>('all');
+-
+-    const { showToast } = useToast();
+-    useScrollReveal(100); // Trigger hooks if they internally use refs or side effects
+-    useScrollReveal(200);
+-
+-    useEffect(() => {
+-        let isMounted = true;
+-
+-        async function fetchProducts() {
+-            let fetchedData: Product[] = [];
+-            let fetchError: string | null = null;
+-
+-            try {
+-                setLoading(true);
+-                setError(null);
+-
+-                const query = searchParams.get('q');
+-                const category = searchParams.get('category');
+-                let response;
+-
+-                try {
+-                    if (query) {
+-                        response = await client.get('/products/search', { params: { q: query } });
+-                    } else if (category) {
+-                        response = await client.get(`/products/category/${encodeURIComponent(category)}`);
+-                    } else {
+-                        response = await client.get('/products');
+-                    }
+-                } catch (apiError) {
+-                    console.warn('API connection failed, using fallback data:', apiError);
+-                    const { fallbackProducts } = await import('../data/fallbackProducts');
+-                    response = { data: { success: true, data: fallbackProducts } };
+-                }
+-
+-                if (!isMounted) return;
+-
+-                let data = response.data || [];
+-                if (data.data && Array.isArray(data.data)) {
+-                    data = data.data;
+-                } else if (Array.isArray(response.data)) {
+-                    data = response.data;
+-                }
+-
+-                fetchedData = Array.isArray(data) ? data : [];
+-
+-            } catch (e: any) {
+-                console.error('Critical error loading products:', e);
+-                fetchError = 'Failed to load products. Please check your connection.';
+-
+-                try {
+-                    const { fallbackProducts } = await import('../data/fallbackProducts');
+-                    fetchedData = fallbackProducts;
+-                } catch {
+-                    fetchedData = [];
+-                }
+-            }
+-
+-            if (!isMounted) return;
+-
+-            const filteredAndSorted = filterAndSortProducts(fetchedData, priceRange, sortBy);
+-            setProducts(filteredAndSorted);
+-            setError(fetchError);
+-            setLoading(false);
+-        }
+-
+-        fetchProducts();
+-        return () => { isMounted = false; };
+-    }, [searchParams, sortBy, priceRange]);
+-
+-    const filterAndSortProducts = (data: Product[], range: PriceRange, sort: SortOption): Product[] => {
+-        let filtered = data.filter((p) => {
+-            if (range === 'under-500') return p.price < 500;
+-            if (range === '500-1000') return p.price >= 500 && p.price <= 1000;
+-            if (range === 'over-1000') return p.price > 1000;
+-            return true;
+-        });
+-
+-        const sorted = [...filtered];
+-        switch (sort) {
+-            case 'price-low': sorted.sort((a, b) => a.price - b.price); break;
+-            case 'price-high': sorted.sort((a, b) => b.price - a.price); break;
+-            case 'name-asc': sorted.sort((a, b) => a.name.localeCompare(b.name)); break;
+-            case 'name-desc': sorted.sort((a, b) => b.name.localeCompare(a.name)); break;
+-            case 'featured': sorted.sort((a, b) => (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0)); break;
+-            case 'new': sorted.sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0)); break;
+-        }
+-        return sorted;
+-    };
+-
+-    const handleAddToCart = (product: Product) => {
+-        const cart: CartItem[] = JSON.parse(localStorage.getItem('cart') || '[]');
+-        const existing = cart.find((item) => item.id === product._id);
+-
+-        if (existing) {
+-            existing.quantity++;
+-        } else {
+-            cart.push({
+-                id: product._id,
+-                name: product.name,
+-                price: product.price,
+-                image: product.image,
+-                quantity: 1,
+-            });
+-        }
+-
+-        localStorage.setItem('cart', JSON.stringify(cart));
+-        window.dispatchEvent(new Event('cart-updated'));
+-        trackEvent({
+-            type: 'add_to_cart',
+-            sessionId: localStorage.getItem('sid') || '',
+-            payload: { productId: product._id, price: product.price },
+-        });
+-
+-        showToast(`Added ${product.name} to bag`, 'success');
+-    };
+-
+-    return (
+-        <div className="collection">
+-            <header className="collection__hero">
+-                <div className="collection__hero-content container">
+-                    <h1 className="collection__title">Bath Bomb Collection</h1>
+-                    <p className="collection__subtitle">
+-                        Immerse yourself in luxury with our handcrafted bath bombs.
+-                    </p>
+-                </div>
+-            </header>
+-
+-            <div className="collection__container container">
+-                <nav className="breadcrumbs" aria-label="Breadcrumb">
+-                    <Link to="/" className="breadcrumbs__link">Home</Link>
+-                    <span className="breadcrumbs__separator">/</span>
+-                    <span className="breadcrumbs__current">Bath Bombs</span>
+-                </nav>
+-
+-                <AdPlacementZone
+-                    type="banner"
+-                    config={adConfig.collection.topBanner}
+-                    zoneName="Collection Top Banner"
+-                />
+-
+-                <div className="toolbar">
+-                    <div className="toolbar__info">
+-                        <p className="toolbar__count">
+-                            Showing <strong>{products.length}</strong> {products.length === 1 ? 'product' : 'products'}
+-                        </p>
+-                        <div className="toolbar__filter">
+-                            <label htmlFor="priceFilter" className="toolbar__label">Price:</label>
+-                            <select
+-                                id="priceFilter"
+-                                className="toolbar__select"
+-                                value={priceRange}
+-                                onChange={(e) => setPriceRange(e.target.value as PriceRange)}
+-                            >
+-                                <option value="all">All Prices</option>
+-                                <option value="under-500">Under PKR 500</option>
+-                                <option value="500-1000">PKR 500 - 1000</option>
+-                                <option value="over-1000">Over PKR 1000</option>
+-                            </select>
+-                        </div>
+-                    </div>
+-
+-                    <div className="toolbar__filter">
+-                        <label htmlFor="sortBy" className="toolbar__label">Sort By:</label>
+-                        <select
+-                            id="sortBy"
+-                            className="toolbar__select"
+-                            value={sortBy}
+-                            onChange={(e) => setSortBy(e.target.value as SortOption)}
+-                        >
+-                            <option value="default">Featured</option>
+-                            <option value="new">New Arrivals</option>
+-                            <option value="price-low">Price: Low to High</option>
+-                            <option value="price-high">Price: High to Low</option>
+-                            <option value="name-asc">Name: A-Z</option>
+-                            <option value="name-desc">Name: Z-A</option>
+-                        </select>
+-                    </div>
+-                </div>
+-
+-                <section className="collection__products">
+-                    {loading ? (
+-                        <div className="product-grid">
+-                            {Array.from({ length: SKELETON_COUNT }).map((_, index) => (
+-                                <SkeletonProductCard key={index} />
+-                            ))}
+-                        </div>
+-                    ) : error ? (
+-                        <EmptyState
+-                            type="error"
+-                            message={error}
+-                            onRetry={() => window.location.reload()}
+-                        />
+-                    ) : products.length === 0 ? (
+-                        <EmptyState type="no-results" />
+-                    ) : (
+-                        <div className="product-grid">
+-                            {products.map((product) => (
+-                                <ProductCard 
+-                                    key={product._id} 
+-                                    product={product} 
+-                                    onAddToCart={handleAddToCart} 
+-                                />
+-                            ))}
+-                        </div>
+-                    )}
+-                </section>
+-
+-                <aside className="collection__sidebar">
+-                    <AdPlacementZone
+-                        type="sidebar"
+-                        config={adConfig.collection.sidebarAd}
+-                        zoneName="Collection Sidebar Ad"
+-                    />
+-                </aside>
+-            </div>
+-        </div>
+-    );
+-}
+\ No newline at end of file
+
+commit 7bf3fb0dacca8645a471f6a0ca129cf17a786096
+Author: Ahmad Mahboob <pakahmad9815@gmail.com>
+Date:   Thu Dec 18 23:59:53 2025 +0500
+
+    Update to latest premium design: Midnight Sanctuary theme with glassmorphism and modern UI
+
+diff --git a/frontend/src/pages/Collection.tsx b/frontend/src/pages/Collection.tsx
+index 3495075..5d94703 100644
+--- a/frontend/src/pages/Collection.tsx
++++ b/frontend/src/pages/Collection.tsx
+@@ -1,30 +1,36 @@
+-import { useState, useEffect, Fragment } from 'react' // ≡ƒÜ¿ FIX: Added Fragment here for JSX shorthand <> keys
+-import { Link, useSearchParams } from 'react-router-dom'
+-import client, { trackEvent } from '../api/client'
+-import './Collection.css'
+-import { useScrollReveal } from '../hooks/useScrollReveal'
+-import { useToast } from '../context/ToastContext'
+-import AdPlacementZone from '../components/AdPlacementZone'
+-import adConfig from '../config/adConfig.json'
+-import SkeletonProductCard from '../components/SkeletonProductCard'
+-import { FALLBACK_IMAGE } from '../constants'
+-import SmartImage from '../components/SmartImage'
+-
+-// Define the guaranteed minimum loading time in milliseconds (5 seconds)
+-const MINIMUM_LOAD_TIME = 5000;
+-
+-type Product = {
+-    _id: string
+-    name: string
+-    price: number
+-    image: string
+-    category: string
+-    description?: string
+-    isFeatured?: boolean
+-    isNew?: boolean
++import { useState, useEffect } from 'react';
++import { Link, useSearchParams } from 'react-router-dom';
++import client, { trackEvent } from '../api/client';
++import { useScrollReveal } from '../hooks/useScrollReveal';
++import { useToast } from '../context/ToastContext';
++import AdPlacementZone from '../components/AdPlacementZone';
++import SkeletonProductCard from '../components/SkeletonProductCard';
++import SmartImage from '../components/SmartImage';
++import adConfig from '../config/adConfig.json';
++import './Collection.css';
++
++// ============================================================================
++// CONSTANTS
++// ============================================================================
++
++const SKELETON_COUNT = 4;
++
++// ============================================================================
++// TYPE DEFINITIONS
++// ============================================================================
++
++interface Product {
++    _id: string;
++    name: string;
++    price: number;
++    image: string;
++    category: string;
++    description?: string;
++    isFeatured?: boolean;
++    isNew?: boolean;
+ }
+ 
+-interface CartItem { // Added missing CartItem interface for consistency with addToCart logic
++interface CartItem {
+     id: string;
+     name: string;
+     price: number;
+@@ -32,333 +38,312 @@ interface CartItem { // Added missing CartItem interface for consistency with ad
+     quantity: number;
+ }
+ 
+-// ----------------------------------------------------
+-// 1. DEFINE FOOTER COMPONENT
+-// ----------------------------------------------------
+-const Footer = () => (
+-    <footer className="footer">
+-        <div className="container">
+-            <div className="footer-bottom" style={{ textAlign: 'center' }}>
+-                &copy; {new Date().getFullYear()} Omnora. All rights reserved. | Operated and Developed By Ahmad Mahboob
++type PriceRange = 'all' | 'under-500' | '500-1000' | 'over-1000';
++type SortOption = 'default' | 'new' | 'price-low' | 'price-high' | 'name-asc' | 'name-desc' | 'featured';
++
++// ============================================================================
++// CHILD COMPONENTS
++// ============================================================================
++
++interface ProductCardProps {
++    product: Product;
++    onAddToCart: (product: Product) => void;
++}
++
++const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => (
++    <article className="product-card">
++        <Link to={`/product/${product._id}`} className="product-card__image-link">
++            <div className="product-card__image-wrapper">
++                <SmartImage
++                    src={product.image}
++                    alt={product.name}
++                    className="product-card__image"
++                    priority={true}
++                />
+             </div>
++        </Link>
++
++        <div className="product-card__content">
++            <Link to={`/product/${product._id}`} className="product-card__title-link">
++                <h3 className="product-card__title">
++                    {product.name}
++                    {product.isNew && <span className="product-card__badge product-card__badge--new">NEW</span>}
++                    {product.isFeatured && <span className="product-card__badge product-card__badge--featured">Γÿà</span>}
++                </h3>
++            </Link>
++
++            {product.description && (
++                <p className="product-card__description">{product.description}</p>
++            )}
++
++            <p className="product-card__price">PKR {product.price.toLocaleString()}</p>
++
++            <button
++                onClick={() => onAddToCart(product)}
++                className="product-card__add-btn"
++                aria-label={`Add ${product.name} to cart`}
++            >
++                Add to Bag
++            </button>
+         </div>
+-    </footer>
++    </article>
++);
++
++interface EmptyStateProps {
++    type: 'error' | 'no-results';
++    message?: string;
++    onRetry?: () => void;
++}
++
++const EmptyState: React.FC<EmptyStateProps> = ({ type, message, onRetry }) => (
++    <div className="empty-state">
++        {type === 'error' ? (
++            <>
++                <h3 className="empty-state__title">Oops! Something went wrong</h3>
++                <p className="empty-state__message">{message || 'Failed to load products'}</p>
++                {onRetry && (
++                    <button onClick={onRetry} className="empty-state__button">
++                        Try Again
++                    </button>
++                )}
++            </>
++        ) : (
++            <>
++                <h3 className="empty-state__title">No products found ≡ƒ¢ü</h3>
++                <p className="empty-state__message">
++                    Try adjusting your filters, clearing your search query, or check back later for new arrivals.
++                </p>
++            </>
++        )}
++    </div>
+ );
+ 
++// ============================================================================
++// MAIN COMPONENT
++// ============================================================================
+ 
+ export default function Collection() {
+-    const [searchParams, setSearchParams] = useSearchParams()
+-    const [products, setProducts] = useState<Product[]>([])
+-    const [loading, setLoading] = useState(true)
+-    const [error, setError] = useState<string | null>(null)
+-    const [sortBy, setSortBy] = useState('default')
+-    const [priceRange, setPriceRange] = useState<'all' | 'under-500' | '500-1000' | 'over-1000'>('all')
+-
+-    const { showToast } = useToast()
+-    // ≡ƒÜ¿ FIX: useScrollReveal must be called without a ref object argument if it expects a number (as per previous errors). 
+-    // Assuming it's meant to be called without args, or it returns a ref, but to fix the type errors, 
+-    // we'll assume the hook handles the element internally or takes a numeric parameter.
+-    // However, the original code assigned its return value to two refs. Since ref is often an object, 
+-    // let's simplify and assume the hook takes a number (delay) for now.
+-    const headerRef = useScrollReveal(100); // Assuming 100ms delay for header reveal
+-    const gridRef = useScrollReveal(200);  // Assuming 200ms delay for grid reveal
+-
+-    // Define how many skeleton cards to show during load
+-    const SKELETON_COUNT = 8;
++    const [searchParams] = useSearchParams();
++    const [products, setProducts] = useState<Product[]>([]);
++    const [loading, setLoading] = useState(true);
++    const [error, setError] = useState<string | null>(null);
++    const [sortBy, setSortBy] = useState<SortOption>('default');
++    const [priceRange, setPriceRange] = useState<PriceRange>('all');
++
++    const { showToast } = useToast();
++    useScrollReveal(100); // Trigger hooks if they internally use refs or side effects
++    useScrollReveal(200);
+ 
+     useEffect(() => {
+         let isMounted = true;
+-        
+-        // Record the start time for the minimum load check
+-        const startTime = Date.now();
+ 
+-        async function load() {
++        async function fetchProducts() {
+             let fetchedData: Product[] = [];
+             let fetchError: string | null = null;
+-            
++
+             try {
+                 setLoading(true);
+                 setError(null);
+-                const q = searchParams.get('q');
+-                const cat = searchParams.get('category');
+-                let res;
+ 
+-                // --- Product Fetching Logic with Fallback ---
++                const query = searchParams.get('q');
++                const category = searchParams.get('category');
++                let response;
++
+                 try {
+-                    if (q) {
+-                        res = await client.get(`/products/search`, { params: { q } });
+-                    } else if (cat) {
+-                        res = await client.get(`/products/category/${encodeURIComponent(cat)}`);
++                    if (query) {
++                        response = await client.get('/products/search', { params: { q: query } });
++                    } else if (category) {
++                        response = await client.get(`/products/category/${encodeURIComponent(category)}`);
+                     } else {
+-                        res = await client.get(`/products`);
++                        response = await client.get('/products');
+                     }
+                 } catch (apiError) {
+                     console.warn('API connection failed, using fallback data:', apiError);
+-                    // Fallback data is loaded silently - no toast needed
+                     const { fallbackProducts } = await import('../data/fallbackProducts');
+-                    res = { data: { success: true, data: fallbackProducts } };
++                    response = { data: { success: true, data: fallbackProducts } };
+                 }
+ 
+                 if (!isMounted) return;
+ 
+-                let data = res.data || [];
+-                // Normalize data structure
++                let data = response.data || [];
+                 if (data.data && Array.isArray(data.data)) {
+                     data = data.data;
+-                } else if (Array.isArray(res.data)) {
+-                    data = res.data;
++                } else if (Array.isArray(response.data)) {
++                    data = response.data;
+                 }
+ 
+-                if (!Array.isArray(data)) {
+-                    data = [];
+-                }
+-
+-                fetchedData = data;
++                fetchedData = Array.isArray(data) ? data : [];
+ 
+             } catch (e: any) {
+                 console.error('Critical error loading products:', e);
+                 fetchError = 'Failed to load products. Please check your connection.';
+ 
+-                // Final fallback if even the dynamic import fails (highly unlikely)
+                 try {
+                     const { fallbackProducts } = await import('../data/fallbackProducts');
+                     fetchedData = fallbackProducts;
+-                } catch (fallbackError) {
+-                    fetchedData = []; // Set to empty array on total failure
++                } catch {
++                    fetchedData = [];
+                 }
+             }
+ 
+-            // --- Guaranteed Minimum Load Time Delay ---
+-            const timeElapsed = Date.now() - startTime;
+-            const delayRemaining = MINIMUM_LOAD_TIME - timeElapsed;
+-            
+-            // This promise resolves only after the minimum load time has passed
+-            await new Promise(resolve => setTimeout(resolve, Math.max(0, delayRemaining)));
+-
+             if (!isMounted) return;
+-            
+-            // --- Filtering & Sorting Applied After Delay ---
+-
+-            // Apply price filter
+-            let filteredData = fetchedData.filter((p: Product) => {
+-                if (priceRange === 'under-500') return p.price < 500
+-                if (priceRange === '500-1000') return p.price >= 500 && p.price <= 1000
+-                if (priceRange === 'over-1000') return p.price > 1000
+-                return true
+-            })
+-
+-            // Client-side sorting
+-            if (sortBy === 'price-low') {
+-                filteredData.sort((a: Product, b: Product) => a.price - b.price)
+-            } else if (sortBy === 'price-high') {
+-                filteredData.sort((a: Product, b: Product) => b.price - a.price)
+-            } else if (sortBy === 'name-asc') {
+-                filteredData.sort((a: Product, b: Product) => a.name.localeCompare(b.name))
+-            } else if (sortBy === 'name-desc') {
+-                filteredData.sort((a: Product, b: Product) => b.name.localeCompare(a.name))
+-            } else if (sortBy === 'featured') {
+-                filteredData.sort((a: Product, b: Product) => (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0))
+-            } else if (sortBy === 'new') {
+-                filteredData.sort((a: Product, b: Product) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0))
+-            }
+ 
+-            setProducts(filteredData);
++            const filteredAndSorted = filterAndSortProducts(fetchedData, priceRange, sortBy);
++            setProducts(filteredAndSorted);
+             setError(fetchError);
+             setLoading(false);
+         }
+-        
+-        load();
+-        
+-        return () => { isMounted = false }
+-    }, [searchParams, sortBy, priceRange])
+ 
+-    const addToCart = (p: Product) => {
++        fetchProducts();
++        return () => { isMounted = false; };
++    }, [searchParams, sortBy, priceRange]);
++
++    const filterAndSortProducts = (data: Product[], range: PriceRange, sort: SortOption): Product[] => {
++        let filtered = data.filter((p) => {
++            if (range === 'under-500') return p.price < 500;
++            if (range === '500-1000') return p.price >= 500 && p.price <= 1000;
++            if (range === 'over-1000') return p.price > 1000;
++            return true;
++        });
++
++        const sorted = [...filtered];
++        switch (sort) {
++            case 'price-low': sorted.sort((a, b) => a.price - b.price); break;
++            case 'price-high': sorted.sort((a, b) => b.price - a.price); break;
++            case 'name-asc': sorted.sort((a, b) => a.name.localeCompare(b.name)); break;
++            case 'name-desc': sorted.sort((a, b) => b.name.localeCompare(a.name)); break;
++            case 'featured': sorted.sort((a, b) => (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0)); break;
++            case 'new': sorted.sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0)); break;
++        }
++        return sorted;
++    };
++
++    const handleAddToCart = (product: Product) => {
+         const cart: CartItem[] = JSON.parse(localStorage.getItem('cart') || '[]');
+-        const existing = cart.find((i: CartItem) => i.id === p._id);
+-        
++        const existing = cart.find((item) => item.id === product._id);
++
+         if (existing) {
+             existing.quantity++;
+         } else {
+-            cart.push({ id: p._id, name: p.name, price: p.price, image: p.image, quantity: 1 });
++            cart.push({
++                id: product._id,
++                name: product.name,
++                price: product.price,
++                image: product.image,
++                quantity: 1,
++            });
+         }
+ 
+         localStorage.setItem('cart', JSON.stringify(cart));
+         window.dispatchEvent(new Event('cart-updated'));
+-        trackEvent({ 
+-            type: 'add_to_cart', 
+-            sessionId: localStorage.getItem('sid') || '', 
+-            payload: { productId: p._id, price: p.price } 
++        trackEvent({
++            type: 'add_to_cart',
++            sessionId: localStorage.getItem('sid') || '',
++            payload: { productId: product._id, price: product.price },
+         });
+-        showToast(`Added ${p.name} to bag`, 'success');
+-    }
+ 
+-    const displayedProducts = products
+-    const adInsertIndex = 4;
++        showToast(`Added ${product.name} to bag`, 'success');
++    };
+ 
+     return (
+-        <>
+-            <div className="collection-page">
+-                {/* Ref usage corrected to pass the numeric return value of the hook */}
+-                <header className="collection-hero" style={{ transitionDelay: `${headerRef}ms` }}>
+-                    <div className="collection-hero-content animate-fade-in-up">
+-                        <h1 className="collection-title">Bath Bomb Collection</h1>
+-                        <p className="collection-subtitle">Immerse yourself in luxury with our handcrafted bath bombs. Each one is carefully formulated with premium ingredients for the ultimate relaxation experience.</p>
+-                    </div>
+-                </header>
+-
+-                <div className="collection-container">
+-                    <div className="breadcrumbs animate-fade-in">
+-                        <Link to="/">Home</Link> / <span>Bath Bombs</span>
+-                    </div>
+-
+-                    {/* Top Banner Ad Zone */}
+-                    <AdPlacementZone
+-                        type="banner"
+-                        config={adConfig.collection.topBanner}
+-                        zoneName="Collection Top Banner"
+-                    />
+-
+-                    <div className="collection-toolbar animate-fade-in">
+-                        <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+-                            <p>Showing **{displayedProducts.length}** {displayedProducts.length === 1 ? 'product' : 'products'}</p>
+-
+-                            {/* Price Filter */}
+-                            <div className="filter-group">
+-                                <label htmlFor="priceFilter">Price:</label>
+-                                <select
+-                                    id="priceFilter"
+-                                    className="sort-select"
+-                                    value={priceRange}
+-                                    onChange={(e) => setPriceRange(e.target.value as any)}
+-                                >
+-                                    <option value="all">All Prices</option>
+-                                    <option value="under-500">Under PKR 500</option>
+-                                    <option value="500-1000">PKR 500 - 1000</option>
+-                                    <option value="over-1000">Over PKR 1000</option>
+-                                </select>
+-                            </div>
+-                        </div>
+-
+-                        <div className="filter-group">
+-                            <label htmlFor="sortBy">Sort By:</label>
++        <div className="collection">
++            <header className="collection__hero">
++                <div className="collection__hero-content container">
++                    <h1 className="collection__title">Bath Bomb Collection</h1>
++                    <p className="collection__subtitle">
++                        Immerse yourself in luxury with our handcrafted bath bombs.
++                    </p>
++                </div>
++            </header>
++
++            <div className="collection__container container">
++                <nav className="breadcrumbs" aria-label="Breadcrumb">
++                    <Link to="/" className="breadcrumbs__link">Home</Link>
++                    <span className="breadcrumbs__separator">/</span>
++                    <span className="breadcrumbs__current">Bath Bombs</span>
++                </nav>
++
++                <AdPlacementZone
++                    type="banner"
++                    config={adConfig.collection.topBanner}
++                    zoneName="Collection Top Banner"
++                />
++
++                <div className="toolbar">
++                    <div className="toolbar__info">
++                        <p className="toolbar__count">
++                            Showing <strong>{products.length}</strong> {products.length === 1 ? 'product' : 'products'}
++                        </p>
++                        <div className="toolbar__filter">
++                            <label htmlFor="priceFilter" className="toolbar__label">Price:</label>
+                             <select
+-                                id="sortBy"
+-                                className="sort-select"
+-                                value={sortBy}
+-                                onChange={(e) => setSortBy(e.target.value)}
++                                id="priceFilter"
++                                className="toolbar__select"
++                                value={priceRange}
++                                onChange={(e) => setPriceRange(e.target.value as PriceRange)}
+                             >
+-                                <option value="default">Featured</option>
+-                                <option value="new">New Arrivals</option>
+-                                <option value="price-low">Price: Low to High</option>
+-                                <option value="price-high">Price: High to Low</option>
+-                                <option value="name-asc">Name: A-Z</option>
+-                                <option value="name-desc">Name: Z-A</option>
++                                <option value="all">All Prices</option>
++                                <option value="under-500">Under PKR 500</option>
++                                <option value="500-1000">PKR 500 - 1000</option>
++                                <option value="over-1000">Over PKR 1000</option>
+                             </select>
+                         </div>
+                     </div>
+ 
+-                    <div className="product-display-section">
+-                        {/* 1. SKELETON LOADING STATE (5-second minimum) */}
+-                        {loading ? (
+-                            // Note: gridRef is now a number (delay) as per the fix, not a RefObject. 
+-                            // If useScrollReveal handles animation based on this number, its usage should be reviewed 
+-                            // in the CSS/JSX, but for now, we remove the ref={gridRef} to avoid TypeScript errors.
+-                            <div className="product-grid"> 
+-                                {/* Render multiple SkeletonProductCard components */}
+-                                {Array(SKELETON_COUNT).fill(0).map((_, index) => (
+-                                    <SkeletonProductCard key={index} />
+-                                ))}
+-                            </div>
+-                        ) : error ? (
+-                            <div className="empty-state">
+-                                <h3>Oops! Something went wrong</h3>
+-                                <p style={{ color: 'var(--color-text-secondary)', marginBottom: '2rem' }}>{error}</p>
+-                                <button
+-                                    onClick={() => window.location.reload()}
+-                                    className="add-to-cart-btn"
+-                                    style={{ maxWidth: '300px', margin: '0 auto' }}
+-                                >
+-                                    Try Again
+-                                </button>
+-                            </div>
+-                        ) : displayedProducts.length === 0 ? (
+-                            <div className="empty-state">
+-                                <h3>No products found ≡ƒ¢ü</h3>
+-                                <p>Try adjusting your filters, clearing your search query, or check back later for new arrivals.</p>
+-                            </div>
+-                        ) : (
+-                            <div className="product-grid" style={{ transitionDelay: `${gridRef}ms` }}> 
+-                                {/* 2. CONSOLIDATED PRODUCT RENDERING WITH AD INJECTION */}
+-                                {displayedProducts.map((p, index) => (
+-                                    // ≡ƒÜ¿ FIX: Using the imported 'Fragment' component for the map key.
+-                                    <Fragment key={p._id}> 
+-                                        {/* Inject Ad after 'adInsertIndex' products (e.g., after the 4th card) */}
+-                                        {index === adInsertIndex && (
+-                                            <div key="mid-ad-banner" style={{ gridColumn: '1 / -1', margin: '2rem 0' }}>
+-                                                <AdPlacementZone
+-                                                    type="banner"
+-                                                    config={adConfig.collection.midContentBanner}
+-                                                    zoneName="Mid-Content Banner"
+-                                                />
+-                                            </div>
+-                                        )}
+-
+-                                        <div className="product-card hover-lift">
+-                                            <Link to={`/product/${p._id}`} className="product-image-link">
+-                                                <div className="product-image-placeholder"><img src={p.image} alt={p.name} loading="lazy" /></div>
+-                                            </Link>
+-                                            <div className="product-info">
+-                                                <Link to={`/product/${p._id}`} className="product-title">
+-                                                    {p.name}
+-                                                    {p.isNew && <span style={{
+-                                                        marginLeft: '0.5rem',
+-                                                        fontSize: '0.75rem',
+-                                                        padding: '0.25rem 0.5rem',
+-                                                        background: 'var(--color-aqua)',
+-                                                        color: 'var(--color-bg-dark)',
+-                                                        borderRadius: '0.25rem',
+-                                                        fontWeight: 700
+-                                                    }}>NEW</span>}
+-                                                    {p.isFeatured && <span style={{
+-                                                        marginLeft: '0.5rem',
+-                                                        fontSize: '0.75rem',
+-                                                        padding: '0.25rem 0.5rem',
+-                                                        background: 'var(--color-silver)',
+-                                                        color: 'var(--color-bg-dark)',
+-                                                        borderRadius: '0.25rem',
+-                                                        fontWeight: 700
+-                                                    }}>Γÿà</span>}
+-                                                </Link>
+-                                                {p.description && (
+-                                                    <p className="product-description">{p.description}</p>
+-                                                )}
+-                                                <p className="product-price">PKR **{p.price.toLocaleString()}**</p>
+-                                                <button
+-                                                    onClick={() => addToCart(p)}
+-                                                    className="add-to-cart-btn hover-scale"
+-                                                >
+-                                                    Add to Bag
+-                                                </button>
+-                                            </div>
+-                                        </div>
+-                                    </Fragment> // ≡ƒÜ¿ FIX: Closing Fragment tag
+-                                ))}
+-                            </div>
+-                        )}
++                    <div className="toolbar__filter">
++                        <label htmlFor="sortBy" className="toolbar__label">Sort By:</label>
++                        <select
++                            id="sortBy"
++                            className="toolbar__select"
++                            value={sortBy}
++                            onChange={(e) => setSortBy(e.target.value as SortOption)}
++                        >
++                            <option value="default">Featured</option>
++                            <option value="new">New Arrivals</option>
++                            <option value="price-low">Price: Low to High</option>
++                            <option value="price-high">Price: High to Low</option>
++                            <option value="name-asc">Name: A-Z</option>
++                            <option value="name-desc">Name: Z-A</option>
++                        </select>
+                     </div>
++                </div>
+ 
+-                    {/* Sidebar Ad Zone - Hidden on mobile */}
+-                    <div style={{ display: 'none' }} className="sidebar-ad-desktop">
+-                        <AdPlacementZone
+-                            type="sidebar"
+-                            config={adConfig.collection.sidebarAd}
+-                            zoneName="Collection Sidebar Ad"
++                <section className="collection__products">
++                    {loading ? (
++                        <div className="product-grid">
++                            {Array.from({ length: SKELETON_COUNT }).map((_, index) => (
++                                <SkeletonProductCard key={index} />
++                            ))}
++                        </div>
++                    ) : error ? (
++                        <EmptyState
++                            type="error"
++                            message={error}
++                            onRetry={() => window.location.reload()}
+                         />
+-                    </div>
+-                </div>
+-            </div>
++                    ) : products.length === 0 ? (
++                        <EmptyState type="no-results" />
++                    ) : (
++                        <div className="product-grid">
++                            {products.map((product) => (
++                                <ProductCard 
++                                    key={product._id} 
++                                    product={product} 
++                                    onAddToCart={handleAddToCart} 
++                                />
++                            ))}
++                        </div>
++                    )}
++                </section>
+ 
+-            <Footer />
+-        </>
+-    )
++                <aside className="collection__sidebar">
++                    <AdPlacementZone
++                        type="sidebar"
++                        config={adConfig.collection.sidebarAd}
++                        zoneName="Collection Sidebar Ad"
++                    />
++                </aside>
++            </div>
++        </div>
++    );
+ }
+\ No newline at end of file
+
+commit d6b40402b9a9218521cefd8c93d40e8c4388686e
+Author: Ahmad Mahboob <pakahmad9815@gmail.com>
+Date:   Fri Dec 5 13:06:17 2025 +0500
+
+    Fix Vercel build: install frontend deps before build
+
+diff --git a/frontend/src/pages/Collection.tsx b/frontend/src/pages/Collection.tsx
+index 6a19478..3495075 100644
+--- a/frontend/src/pages/Collection.tsx
++++ b/frontend/src/pages/Collection.tsx
+@@ -1,4 +1,4 @@
+-import { useState, useEffect } from 'react'
++import { useState, useEffect, Fragment } from 'react' // ≡ƒÜ¿ FIX: Added Fragment here for JSX shorthand <> keys
+ import { Link, useSearchParams } from 'react-router-dom'
+ import client, { trackEvent } from '../api/client'
+ import './Collection.css'
+@@ -6,9 +6,12 @@ import { useScrollReveal } from '../hooks/useScrollReveal'
+ import { useToast } from '../context/ToastContext'
+ import AdPlacementZone from '../components/AdPlacementZone'
+ import adConfig from '../config/adConfig.json'
+-// Used for better loading visualization
+ import SkeletonProductCard from '../components/SkeletonProductCard'
+ import { FALLBACK_IMAGE } from '../constants'
++import SmartImage from '../components/SmartImage'
++
++// Define the guaranteed minimum loading time in milliseconds (5 seconds)
++const MINIMUM_LOAD_TIME = 5000;
+ 
+ type Product = {
+     _id: string
+@@ -21,13 +24,20 @@ type Product = {
+     isNew?: boolean
+ }
+ 
++interface CartItem { // Added missing CartItem interface for consistency with addToCart logic
++    id: string;
++    name: string;
++    price: number;
++    image: string;
++    quantity: number;
++}
++
+ // ----------------------------------------------------
+ // 1. DEFINE FOOTER COMPONENT
+ // ----------------------------------------------------
+ const Footer = () => (
+     <footer className="footer">
+         <div className="container">
+-            {/* Added style for centering content */}
+             <div className="footer-bottom" style={{ textAlign: 'center' }}>
+                 &copy; {new Date().getFullYear()} Omnora. All rights reserved. | Operated and Developed By Ahmad Mahboob
+             </div>
+@@ -42,124 +52,154 @@ export default function Collection() {
+     const [loading, setLoading] = useState(true)
+     const [error, setError] = useState<string | null>(null)
+     const [sortBy, setSortBy] = useState('default')
+-    // Removed unused state: [viewMode, setViewMode]
+     const [priceRange, setPriceRange] = useState<'all' | 'under-500' | '500-1000' | 'over-1000'>('all')
+ 
+     const { showToast } = useToast()
+-    const headerRef = useScrollReveal()
+-    const gridRef = useScrollReveal()
++    // ≡ƒÜ¿ FIX: useScrollReveal must be called without a ref object argument if it expects a number (as per previous errors). 
++    // Assuming it's meant to be called without args, or it returns a ref, but to fix the type errors, 
++    // we'll assume the hook handles the element internally or takes a numeric parameter.
++    // However, the original code assigned its return value to two refs. Since ref is often an object, 
++    // let's simplify and assume the hook takes a number (delay) for now.
++    const headerRef = useScrollReveal(100); // Assuming 100ms delay for header reveal
++    const gridRef = useScrollReveal(200);  // Assuming 200ms delay for grid reveal
+ 
+     // Define how many skeleton cards to show during load
+     const SKELETON_COUNT = 8;
+ 
+     useEffect(() => {
+-        let isMounted = true
++        let isMounted = true;
++        
++        // Record the start time for the minimum load check
++        const startTime = Date.now();
++
+         async function load() {
++            let fetchedData: Product[] = [];
++            let fetchError: string | null = null;
++            
+             try {
+-                setLoading(true)
+-                setError(null)
+-                const q = searchParams.get('q')
+-                const cat = searchParams.get('category')
+-                let res
++                setLoading(true);
++                setError(null);
++                const q = searchParams.get('q');
++                const cat = searchParams.get('category');
++                let res;
+ 
+                 // --- Product Fetching Logic with Fallback ---
+                 try {
+                     if (q) {
+-                        res = await client.get(`/products/search`, { params: { q } })
++                        res = await client.get(`/products/search`, { params: { q } });
+                     } else if (cat) {
+-                        res = await client.get(`/products/category/${encodeURIComponent(cat)}`)
++                        res = await client.get(`/products/category/${encodeURIComponent(cat)}`);
+                     } else {
+-                        res = await client.get(`/products`)
++                        res = await client.get(`/products`);
+                     }
+                 } catch (apiError) {
+-                    console.warn('API connection failed, using fallback data:', apiError)
++                    console.warn('API connection failed, using fallback data:', apiError);
+                     // Fallback data is loaded silently - no toast needed
+-                    // Import fallback data dynamically
+-                    const { fallbackProducts } = await import('../data/fallbackProducts')
+-                    res = { data: { success: true, data: fallbackProducts } }
++                    const { fallbackProducts } = await import('../data/fallbackProducts');
++                    res = { data: { success: true, data: fallbackProducts } };
+                 }
+ 
+-                if (!isMounted) return
++                if (!isMounted) return;
+ 
+-                let data = res.data || []
++                let data = res.data || [];
+                 // Normalize data structure
+                 if (data.data && Array.isArray(data.data)) {
+-                    data = data.data
++                    data = data.data;
+                 } else if (Array.isArray(res.data)) {
+-                    data = res.data
++                    data = res.data;
+                 }
+ 
+                 if (!Array.isArray(data)) {
+-                    data = []
++                    data = [];
+                 }
+ 
+-                // --- Filtering & Sorting ---
+-
+-                // Apply price filter
+-                let filteredData = data.filter((p: Product) => {
+-                    if (priceRange === 'under-500') return p.price < 500
+-                    if (priceRange === '500-1000') return p.price >= 500 && p.price <= 1000
+-                    if (priceRange === 'over-1000') return p.price > 1000
+-                    return true
+-                })
+-
+-                // Client-side sorting
+-                if (sortBy === 'price-low') {
+-                    filteredData.sort((a: any, b: any) => a.price - b.price)
+-                } else if (sortBy === 'price-high') {
+-                    filteredData.sort((a: any, b: any) => b.price - a.price)
+-                } else if (sortBy === 'name-asc') {
+-                    filteredData.sort((a: any, b: any) => a.name.localeCompare(b.name))
+-                } else if (sortBy === 'name-desc') {
+-                    filteredData.sort((a: any, b: any) => b.name.localeCompare(a.name))
+-                } else if (sortBy === 'featured') {
+-                    filteredData.sort((a: any, b: any) => (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0))
+-                } else if (sortBy === 'new') {
+-                    filteredData.sort((a: any, b: any) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0))
+-                }
+-
+-                setProducts(filteredData)
++                fetchedData = data;
+ 
+             } catch (e: any) {
+-                console.error('Critical error loading products:', e)
+-                setError('Failed to load products. Please check your connection.')
++                console.error('Critical error loading products:', e);
++                fetchError = 'Failed to load products. Please check your connection.';
+ 
+                 // Final fallback if even the dynamic import fails (highly unlikely)
+                 try {
+-                    const { fallbackProducts } = await import('../data/fallbackProducts')
+-                    setProducts(fallbackProducts)
++                    const { fallbackProducts } = await import('../data/fallbackProducts');
++                    fetchedData = fallbackProducts;
+                 } catch (fallbackError) {
+-                    setProducts([]); // Set to empty array on total failure
++                    fetchedData = []; // Set to empty array on total failure
+                 }
+-            } finally {
+-                if (isMounted) setLoading(false)
+             }
++
++            // --- Guaranteed Minimum Load Time Delay ---
++            const timeElapsed = Date.now() - startTime;
++            const delayRemaining = MINIMUM_LOAD_TIME - timeElapsed;
++            
++            // This promise resolves only after the minimum load time has passed
++            await new Promise(resolve => setTimeout(resolve, Math.max(0, delayRemaining)));
++
++            if (!isMounted) return;
++            
++            // --- Filtering & Sorting Applied After Delay ---
++
++            // Apply price filter
++            let filteredData = fetchedData.filter((p: Product) => {
++                if (priceRange === 'under-500') return p.price < 500
++                if (priceRange === '500-1000') return p.price >= 500 && p.price <= 1000
++                if (priceRange === 'over-1000') return p.price > 1000
++                return true
++            })
++
++            // Client-side sorting
++            if (sortBy === 'price-low') {
++                filteredData.sort((a: Product, b: Product) => a.price - b.price)
++            } else if (sortBy === 'price-high') {
++                filteredData.sort((a: Product, b: Product) => b.price - a.price)
++            } else if (sortBy === 'name-asc') {
++                filteredData.sort((a: Product, b: Product) => a.name.localeCompare(b.name))
++            } else if (sortBy === 'name-desc') {
++                filteredData.sort((a: Product, b: Product) => b.name.localeCompare(a.name))
++            } else if (sortBy === 'featured') {
++                filteredData.sort((a: Product, b: Product) => (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0))
++            } else if (sortBy === 'new') {
++                filteredData.sort((a: Product, b: Product) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0))
++            }
++
++            setProducts(filteredData);
++            setError(fetchError);
++            setLoading(false);
+         }
+-        load()
++        
++        load();
++        
+         return () => { isMounted = false }
+     }, [searchParams, sortBy, priceRange])
+ 
+     const addToCart = (p: Product) => {
+-        const cart = JSON.parse(localStorage.getItem('cart') || '[]')
+-        const existing = cart.find((i: any) => i.id === p._id)
+-        if (existing) existing.quantity++
+-        else cart.push({ id: p._id, name: p.name, price: p.price, image: p.image, quantity: 1 })
+-
+-        localStorage.setItem('cart', JSON.stringify(cart))
+-        window.dispatchEvent(new Event('cart-updated'))
+-        trackEvent({ type: 'add_to_cart', sessionId: localStorage.getItem('sid') || '', payload: { productId: p._id, price: p.price } })
+-        showToast(`Added ${p.name} to bag`, 'success')
++        const cart: CartItem[] = JSON.parse(localStorage.getItem('cart') || '[]');
++        const existing = cart.find((i: CartItem) => i.id === p._id);
++        
++        if (existing) {
++            existing.quantity++;
++        } else {
++            cart.push({ id: p._id, name: p.name, price: p.price, image: p.image, quantity: 1 });
++        }
++
++        localStorage.setItem('cart', JSON.stringify(cart));
++        window.dispatchEvent(new Event('cart-updated'));
++        trackEvent({ 
++            type: 'add_to_cart', 
++            sessionId: localStorage.getItem('sid') || '', 
++            payload: { productId: p._id, price: p.price } 
++        });
++        showToast(`Added ${p.name} to bag`, 'success');
+     }
+ 
+-    // Use the products state directly since filtering is done in useEffect
+     const displayedProducts = products
+-    // Calculate ad insertion index (e.g., after the 3rd or 4th item)
+     const adInsertIndex = 4;
+ 
+     return (
+         <>
+             <div className="collection-page">
+-                <header className="collection-hero" ref={headerRef}>
++                {/* Ref usage corrected to pass the numeric return value of the hook */}
++                <header className="collection-hero" style={{ transitionDelay: `${headerRef}ms` }}>
+                     <div className="collection-hero-content animate-fade-in-up">
+                         <h1 className="collection-title">Bath Bomb Collection</h1>
+                         <p className="collection-subtitle">Immerse yourself in luxury with our handcrafted bath bombs. Each one is carefully formulated with premium ingredients for the ultimate relaxation experience.</p>
+@@ -218,9 +258,12 @@ export default function Collection() {
+                     </div>
+ 
+                     <div className="product-display-section">
+-                        {/* 1. SKELETON LOADING STATE (Enhanced UX) */}
++                        {/* 1. SKELETON LOADING STATE (5-second minimum) */}
+                         {loading ? (
+-                            <div className="product-grid" ref={gridRef}>
++                            // Note: gridRef is now a number (delay) as per the fix, not a RefObject. 
++                            // If useScrollReveal handles animation based on this number, its usage should be reviewed 
++                            // in the CSS/JSX, but for now, we remove the ref={gridRef} to avoid TypeScript errors.
++                            <div className="product-grid"> 
+                                 {/* Render multiple SkeletonProductCard components */}
+                                 {Array(SKELETON_COUNT).fill(0).map((_, index) => (
+                                     <SkeletonProductCard key={index} />
+@@ -244,10 +287,11 @@ export default function Collection() {
+                                 <p>Try adjusting your filters, clearing your search query, or check back later for new arrivals.</p>
+                             </div>
+                         ) : (
+-                            <div className="product-grid" ref={gridRef}>
++                            <div className="product-grid" style={{ transitionDelay: `${gridRef}ms` }}> 
+                                 {/* 2. CONSOLIDATED PRODUCT RENDERING WITH AD INJECTION */}
+                                 {displayedProducts.map((p, index) => (
+-                                    <>
++                                    // ≡ƒÜ¿ FIX: Using the imported 'Fragment' component for the map key.
++                                    <Fragment key={p._id}> 
+                                         {/* Inject Ad after 'adInsertIndex' products (e.g., after the 4th card) */}
+                                         {index === adInsertIndex && (
+                                             <div key="mid-ad-banner" style={{ gridColumn: '1 / -1', margin: '2rem 0' }}>
+@@ -259,15 +303,9 @@ export default function Collection() {
+                                             </div>
+                                         )}
+ 
+-                                        <div key={p._id} className="product-card hover-lift">
++                                        <div className="product-card hover-lift">
+                                             <Link to={`/product/${p._id}`} className="product-image-link">
+-                                                <div className="product-image-placeholder">
+-                                                    <img
+-                                                        src={p.image}
+-                                                        alt={p.name}
+-                                                        onError={(e) => e.currentTarget.src = FALLBACK_IMAGE}
+-                                                    />
+-                                                </div>
++                                                <div className="product-image-placeholder"><img src={p.image} alt={p.name} loading="lazy" /></div>
+                                             </Link>
+                                             <div className="product-info">
+                                                 <Link to={`/product/${p._id}`} className="product-title">
+@@ -303,7 +341,7 @@ export default function Collection() {
+                                                 </button>
+                                             </div>
+                                         </div>
+-                                    </>
++                                    </Fragment> // ≡ƒÜ¿ FIX: Closing Fragment tag
+                                 ))}
+                             </div>
+                         )}
+
+commit 8ea3649997e1581d6850908f49ae5b1eb1504678
+Author: Ahmad Mahboob <pakahmad9815@gmail.com>
+Date:   Thu Dec 4 15:23:04 2025 +0500
+
+    Initial commit
+
+diff --git a/frontend/src/pages/Collection.tsx b/frontend/src/pages/Collection.tsx
+new file mode 100644
+index 0000000..6a19478
+--- /dev/null
++++ b/frontend/src/pages/Collection.tsx
+@@ -0,0 +1,326 @@
++import { useState, useEffect } from 'react'
++import { Link, useSearchParams } from 'react-router-dom'
++import client, { trackEvent } from '../api/client'
++import './Collection.css'
++import { useScrollReveal } from '../hooks/useScrollReveal'
++import { useToast } from '../context/ToastContext'
++import AdPlacementZone from '../components/AdPlacementZone'
++import adConfig from '../config/adConfig.json'
++// Used for better loading visualization
++import SkeletonProductCard from '../components/SkeletonProductCard'
++import { FALLBACK_IMAGE } from '../constants'
++
++type Product = {
++    _id: string
++    name: string
++    price: number
++    image: string
++    category: string
++    description?: string
++    isFeatured?: boolean
++    isNew?: boolean
++}
++
++// ----------------------------------------------------
++// 1. DEFINE FOOTER COMPONENT
++// ----------------------------------------------------
++const Footer = () => (
++    <footer className="footer">
++        <div className="container">
++            {/* Added style for centering content */}
++            <div className="footer-bottom" style={{ textAlign: 'center' }}>
++                &copy; {new Date().getFullYear()} Omnora. All rights reserved. | Operated and Developed By Ahmad Mahboob
++            </div>
++        </div>
++    </footer>
++);
++
++
++export default function Collection() {
++    const [searchParams, setSearchParams] = useSearchParams()
++    const [products, setProducts] = useState<Product[]>([])
++    const [loading, setLoading] = useState(true)
++    const [error, setError] = useState<string | null>(null)
++    const [sortBy, setSortBy] = useState('default')
++    // Removed unused state: [viewMode, setViewMode]
++    const [priceRange, setPriceRange] = useState<'all' | 'under-500' | '500-1000' | 'over-1000'>('all')
++
++    const { showToast } = useToast()
++    const headerRef = useScrollReveal()
++    const gridRef = useScrollReveal()
++
++    // Define how many skeleton cards to show during load
++    const SKELETON_COUNT = 8;
++
++    useEffect(() => {
++        let isMounted = true
++        async function load() {
++            try {
++                setLoading(true)
++                setError(null)
++                const q = searchParams.get('q')
++                const cat = searchParams.get('category')
++                let res
++
++                // --- Product Fetching Logic with Fallback ---
++                try {
++                    if (q) {
++                        res = await client.get(`/products/search`, { params: { q } })
++                    } else if (cat) {
++                        res = await client.get(`/products/category/${encodeURIComponent(cat)}`)
++                    } else {
++                        res = await client.get(`/products`)
++                    }
++                } catch (apiError) {
++                    console.warn('API connection failed, using fallback data:', apiError)
++                    // Fallback data is loaded silently - no toast needed
++                    // Import fallback data dynamically
++                    const { fallbackProducts } = await import('../data/fallbackProducts')
++                    res = { data: { success: true, data: fallbackProducts } }
++                }
++
++                if (!isMounted) return
++
++                let data = res.data || []
++                // Normalize data structure
++                if (data.data && Array.isArray(data.data)) {
++                    data = data.data
++                } else if (Array.isArray(res.data)) {
++                    data = res.data
++                }
++
++                if (!Array.isArray(data)) {
++                    data = []
++                }
++
++                // --- Filtering & Sorting ---
++
++                // Apply price filter
++                let filteredData = data.filter((p: Product) => {
++                    if (priceRange === 'under-500') return p.price < 500
++                    if (priceRange === '500-1000') return p.price >= 500 && p.price <= 1000
++                    if (priceRange === 'over-1000') return p.price > 1000
++                    return true
++                })
++
++                // Client-side sorting
++                if (sortBy === 'price-low') {
++                    filteredData.sort((a: any, b: any) => a.price - b.price)
++                } else if (sortBy === 'price-high') {
++                    filteredData.sort((a: any, b: any) => b.price - a.price)
++                } else if (sortBy === 'name-asc') {
++                    filteredData.sort((a: any, b: any) => a.name.localeCompare(b.name))
++                } else if (sortBy === 'name-desc') {
++                    filteredData.sort((a: any, b: any) => b.name.localeCompare(a.name))
++                } else if (sortBy === 'featured') {
++                    filteredData.sort((a: any, b: any) => (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0))
++                } else if (sortBy === 'new') {
++                    filteredData.sort((a: any, b: any) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0))
++                }
++
++                setProducts(filteredData)
++
++            } catch (e: any) {
++                console.error('Critical error loading products:', e)
++                setError('Failed to load products. Please check your connection.')
++
++                // Final fallback if even the dynamic import fails (highly unlikely)
++                try {
++                    const { fallbackProducts } = await import('../data/fallbackProducts')
++                    setProducts(fallbackProducts)
++                } catch (fallbackError) {
++                    setProducts([]); // Set to empty array on total failure
++                }
++            } finally {
++                if (isMounted) setLoading(false)
++            }
++        }
++        load()
++        return () => { isMounted = false }
++    }, [searchParams, sortBy, priceRange])
++
++    const addToCart = (p: Product) => {
++        const cart = JSON.parse(localStorage.getItem('cart') || '[]')
++        const existing = cart.find((i: any) => i.id === p._id)
++        if (existing) existing.quantity++
++        else cart.push({ id: p._id, name: p.name, price: p.price, image: p.image, quantity: 1 })
++
++        localStorage.setItem('cart', JSON.stringify(cart))
++        window.dispatchEvent(new Event('cart-updated'))
++        trackEvent({ type: 'add_to_cart', sessionId: localStorage.getItem('sid') || '', payload: { productId: p._id, price: p.price } })
++        showToast(`Added ${p.name} to bag`, 'success')
++    }
++
++    // Use the products state directly since filtering is done in useEffect
++    const displayedProducts = products
++    // Calculate ad insertion index (e.g., after the 3rd or 4th item)
++    const adInsertIndex = 4;
++
++    return (
++        <>
++            <div className="collection-page">
++                <header className="collection-hero" ref={headerRef}>
++                    <div className="collection-hero-content animate-fade-in-up">
++                        <h1 className="collection-title">Bath Bomb Collection</h1>
++                        <p className="collection-subtitle">Immerse yourself in luxury with our handcrafted bath bombs. Each one is carefully formulated with premium ingredients for the ultimate relaxation experience.</p>
++                    </div>
++                </header>
++
++                <div className="collection-container">
++                    <div className="breadcrumbs animate-fade-in">
++                        <Link to="/">Home</Link> / <span>Bath Bombs</span>
++                    </div>
++
++                    {/* Top Banner Ad Zone */}
++                    <AdPlacementZone
++                        type="banner"
++                        config={adConfig.collection.topBanner}
++                        zoneName="Collection Top Banner"
++                    />
++
++                    <div className="collection-toolbar animate-fade-in">
++                        <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
++                            <p>Showing **{displayedProducts.length}** {displayedProducts.length === 1 ? 'product' : 'products'}</p>
++
++                            {/* Price Filter */}
++                            <div className="filter-group">
++                                <label htmlFor="priceFilter">Price:</label>
++                                <select
++                                    id="priceFilter"
++                                    className="sort-select"
++                                    value={priceRange}
++                                    onChange={(e) => setPriceRange(e.target.value as any)}
++                                >
++                                    <option value="all">All Prices</option>
++                                    <option value="under-500">Under PKR 500</option>
++                                    <option value="500-1000">PKR 500 - 1000</option>
++                                    <option value="over-1000">Over PKR 1000</option>
++                                </select>
++                            </div>
++                        </div>
++
++                        <div className="filter-group">
++                            <label htmlFor="sortBy">Sort By:</label>
++                            <select
++                                id="sortBy"
++                                className="sort-select"
++                                value={sortBy}
++                                onChange={(e) => setSortBy(e.target.value)}
++                            >
++                                <option value="default">Featured</option>
++                                <option value="new">New Arrivals</option>
++                                <option value="price-low">Price: Low to High</option>
++                                <option value="price-high">Price: High to Low</option>
++                                <option value="name-asc">Name: A-Z</option>
++                                <option value="name-desc">Name: Z-A</option>
++                            </select>
++                        </div>
++                    </div>
++
++                    <div className="product-display-section">
++                        {/* 1. SKELETON LOADING STATE (Enhanced UX) */}
++                        {loading ? (
++                            <div className="product-grid" ref={gridRef}>
++                                {/* Render multiple SkeletonProductCard components */}
++                                {Array(SKELETON_COUNT).fill(0).map((_, index) => (
++                                    <SkeletonProductCard key={index} />
++                                ))}
++                            </div>
++                        ) : error ? (
++                            <div className="empty-state">
++                                <h3>Oops! Something went wrong</h3>
++                                <p style={{ color: 'var(--color-text-secondary)', marginBottom: '2rem' }}>{error}</p>
++                                <button
++                                    onClick={() => window.location.reload()}
++                                    className="add-to-cart-btn"
++                                    style={{ maxWidth: '300px', margin: '0 auto' }}
++                                >
++                                    Try Again
++                                </button>
++                            </div>
++                        ) : displayedProducts.length === 0 ? (
++                            <div className="empty-state">
++                                <h3>No products found ≡ƒ¢ü</h3>
++                                <p>Try adjusting your filters, clearing your search query, or check back later for new arrivals.</p>
++                            </div>
++                        ) : (
++                            <div className="product-grid" ref={gridRef}>
++                                {/* 2. CONSOLIDATED PRODUCT RENDERING WITH AD INJECTION */}
++                                {displayedProducts.map((p, index) => (
++                                    <>
++                                        {/* Inject Ad after 'adInsertIndex' products (e.g., after the 4th card) */}
++                                        {index === adInsertIndex && (
++                                            <div key="mid-ad-banner" style={{ gridColumn: '1 / -1', margin: '2rem 0' }}>
++                                                <AdPlacementZone
++                                                    type="banner"
++                                                    config={adConfig.collection.midContentBanner}
++                                                    zoneName="Mid-Content Banner"
++                                                />
++                                            </div>
++                                        )}
++
++                                        <div key={p._id} className="product-card hover-lift">
++                                            <Link to={`/product/${p._id}`} className="product-image-link">
++                                                <div className="product-image-placeholder">
++                                                    <img
++                                                        src={p.image}
++                                                        alt={p.name}
++                                                        onError={(e) => e.currentTarget.src = FALLBACK_IMAGE}
++                                                    />
++                                                </div>
++                                            </Link>
++                                            <div className="product-info">
++                                                <Link to={`/product/${p._id}`} className="product-title">
++                                                    {p.name}
++                                                    {p.isNew && <span style={{
++                                                        marginLeft: '0.5rem',
++                                                        fontSize: '0.75rem',
++                                                        padding: '0.25rem 0.5rem',
++                                                        background: 'var(--color-aqua)',
++                                                        color: 'var(--color-bg-dark)',
++                                                        borderRadius: '0.25rem',
++                                                        fontWeight: 700
++                                                    }}>NEW</span>}
++                                                    {p.isFeatured && <span style={{
++                                                        marginLeft: '0.5rem',
++                                                        fontSize: '0.75rem',
++                                                        padding: '0.25rem 0.5rem',
++                                                        background: 'var(--color-silver)',
++                                                        color: 'var(--color-bg-dark)',
++                                                        borderRadius: '0.25rem',
++                                                        fontWeight: 700
++                                                    }}>Γÿà</span>}
++                                                </Link>
++                                                {p.description && (
++                                                    <p className="product-description">{p.description}</p>
++                                                )}
++                                                <p className="product-price">PKR **{p.price.toLocaleString()}**</p>
++                                                <button
++                                                    onClick={() => addToCart(p)}
++                                                    className="add-to-cart-btn hover-scale"
++                                                >
++                                                    Add to Bag
++                                                </button>
++                                            </div>
++                                        </div>
++                                    </>
++                                ))}
++                            </div>
++                        )}
++                    </div>
++
++                    {/* Sidebar Ad Zone - Hidden on mobile */}
++                    <div style={{ display: 'none' }} className="sidebar-ad-desktop">
++                        <AdPlacementZone
++                            type="sidebar"
++                            config={adConfig.collection.sidebarAd}
++                            zoneName="Collection Sidebar Ad"
++                        />
++                    </div>
++                </div>
++            </div>
++
++            <Footer />
++        </>
++    )
++}
+\ No newline at end of file

@@ -1,0 +1,243 @@
+/* ============================================================ 
+    ORDER CONFIRMATION PAGE - LUXURY THEME
+   ============================================================ */
+
+.confirmation-luxury {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    padding: 2rem;
+}
+
+.confirmation-card-luxury {
+    max-width: 550px;
+    width: 100%;
+    text-align: center;
+    padding: 4rem 3rem;
+    border: 1px solid #eee;
+    background: #fff;
+    box-shadow: 0 40px 100px rgba(0, 0, 0, 0.05);
+}
+
+/* --- Header --- */
+.success-header-lux {
+    margin-bottom: 3.5rem;
+}
+
+.icon-pulse-wrapper {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.success-icon-gold {
+    color: var(--gold);
+    z-index: 2;
+}
+
+.icon-pulse-ring-gold {
+    position: absolute;
+    inset: 0;
+    border: 1px solid var(--gold);
+    border-radius: 50%;
+    animation: ripple-lux 3s infinite;
+}
+
+@keyframes ripple-lux {
+    0% {
+        transform: scale(0.8);
+        opacity: 0.8;
+    }
+
+    100% {
+        transform: scale(2);
+        opacity: 0;
+    }
+}
+
+.success-sub-lux {
+    color: #666;
+    margin-top: 1rem;
+    font-size: 0.95rem;
+}
+
+/* --- Details Grid --- */
+.details-grid-luxury {
+    display: grid;
+    gap: 1.5rem;
+    margin-bottom: 3.5rem;
+    text-align: left;
+}
+
+.detail-row-lux {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    background: #fafafa;
+    border: 1px solid #eee;
+}
+
+.detail-label-lux {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    color: #999;
+}
+
+.detail-value-lux {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 600;
+    color: var(--royal-blue);
+    cursor: pointer;
+}
+
+.detail-value-lux.text-gold {
+    color: var(--gold);
+    font-family: var(--font-serif);
+    font-size: 1.2rem;
+}
+
+.copy-icon-lux {
+    color: #999;
+}
+
+/* --- WhatsApp Section --- */
+.whatsapp-section-luxury {
+    background: var(--blush);
+    border: 1px solid #e5d5cf;
+    padding: 2.5rem;
+    margin-bottom: 3rem;
+    text-align: left;
+}
+
+.wa-header-lux {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.wa-header-lux h3 {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.badge-luxury {
+    font-size: 0.6rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    padding: 0.2rem 0.6rem;
+    background: var(--royal-blue);
+    color: #fff;
+}
+
+.wa-desc-lux {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 2rem;
+    line-height: 1.6;
+}
+
+.btn-luxury-wa {
+    width: 100%;
+    padding: 1.2rem;
+    background: #25D366;
+    color: #fff;
+    border: none;
+    font-weight: 700;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    cursor: pointer;
+    transition: opacity 0.3s ease;
+}
+
+.btn-luxury-wa:hover {
+    opacity: 0.9;
+}
+
+/* --- Back Link --- */
+.back-link-luxury {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    color: var(--gold);
+    text-decoration: none;
+    transition: transform 0.3s ease;
+}
+
+.back-link-luxury:hover {
+    transform: translateX(-5px);
+}
+
+.payment-instructions-lux {
+    margin: 2rem 0;
+    padding: 2rem;
+    background: rgba(251, 191, 36, 0.03);
+    border: 1px solid rgba(251, 191, 36, 0.1);
+    border-radius: 12px;
+    text-align: left;
+}
+
+.instruction-box {
+    margin-top: 1.5rem;
+}
+
+.instruction-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 1.5rem;
+}
+
+.inst-label {
+    font-size: 0.65rem;
+    font-weight: 800;
+    color: #999;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.inst-value {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--gold, #fbbf24);
+}
+
+.inst-sub {
+    font-size: 0.75rem;
+    color: #666;
+}
+
+.inst-note {
+    font-size: 0.8rem;
+    color: #888;
+    line-height: 1.5;
+    font-style: italic;
+}
+
+/* --- Loading --- */
+.loading-luxury {
+    text-align: center;
+}
+
+@media (max-width: 600px) {
+    .confirmation-card-luxury {
+        padding: 3rem 1.5rem;
+    }
+}

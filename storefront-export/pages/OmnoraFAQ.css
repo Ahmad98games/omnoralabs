@@ -1,0 +1,227 @@
+/* ============================================================ 
+    FAQ PAGE - LUXURY THEME
+   ============================================================ */
+
+.faq-luxury-page {
+    background: #fff;
+    color: var(--royal-blue);
+    overflow-x: hidden;
+}
+
+/* --- Hero --- */
+.faq-hero-section {
+    min-height: 50vh;
+    display: flex;
+    align-items: center;
+    background: var(--royal-blue);
+    color: #fff;
+    padding: 6rem 0;
+    background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('/images/home/hero.png');
+    background-size: cover;
+    background-position: center;
+}
+
+.hero-content {
+    max-width: 800px;
+}
+
+.editorial-title {
+    font-size: clamp(3rem, 7vw, 5rem);
+    line-height: 1;
+    margin-bottom: 3rem;
+    letter-spacing: -0.03em;
+    font-family: var(--font-sans);
+}
+
+.font-serif {
+    font-family: var(--font-serif);
+}
+
+.italic {
+    font-style: italic;
+}
+
+.text-gold {
+    color: var(--gold);
+}
+
+/* --- Layout --- */
+.faq-layout-grid {
+    display: grid;
+    grid-template-columns: 0.7fr 1.3fr;
+    gap: 5rem;
+    align-items: start;
+}
+
+.section-padding {
+    padding: clamp(5rem, 10vw, 8rem) 0;
+}
+
+/* --- Sidebar --- */
+.atelier-note-card {
+    background: var(--blush, #F5EAE6);
+    padding: 3rem;
+    border: 1px solid rgba(197, 160, 89, 0.1);
+}
+
+.subtitle-serif-small {
+    font-family: var(--font-serif);
+    font-size: 1.5rem;
+    font-weight: 400;
+}
+
+.note-description {
+    font-size: 0.9rem;
+    line-height: 1.8;
+    color: var(--text-secondary);
+}
+
+.btn-atelier-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--royal-blue);
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.btn-atelier-link:hover {
+    color: var(--gold);
+}
+
+.breadcrumbs-luxury {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.breadcrumb-link-luxury {
+    color: var(--text-secondary);
+    text-decoration: none;
+}
+
+.sep-gold {
+    color: var(--gold);
+}
+
+/* --- Accordion --- */
+.faq-list-luxury {
+    margin-top: 3rem;
+}
+
+.faq-item-luxury {
+    border-bottom: 1px solid #eee;
+    padding: 1.5rem 0;
+}
+
+.faq-trigger-luxury {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    background: none;
+    border: none;
+    padding: 1rem 0;
+    cursor: pointer;
+    text-align: left;
+}
+
+.faq-q-text-luxury {
+    font-family: var(--font-serif);
+    font-size: 1.25rem;
+    color: var(--royal-blue);
+    font-weight: 400;
+}
+
+.faq-icon-box-luxury {
+    color: var(--gold);
+}
+
+.faq-content-luxury {
+    max-height: 0;
+    overflow: hidden;
+    transition: all 0.5s var(--ease-out);
+    opacity: 0;
+}
+
+.faq-content-luxury.expanded {
+    max-height: 500px;
+    opacity: 1;
+    padding-bottom: 2rem;
+}
+
+.faq-inner-luxury {
+    font-size: 1rem;
+    line-height: 1.8;
+    color: var(--text-secondary);
+}
+
+.note-text-luxury {
+    margin-top: 1.5rem;
+    font-style: italic;
+    font-size: 0.9rem;
+    color: var(--gold);
+}
+
+/* --- Contact Prompt --- */
+.contact-prompt-luxury {
+    padding: 4rem;
+    background: #fafafa;
+    border: 1px solid #eee;
+    text-align: center;
+}
+
+.btn-luxury-outline {
+    display: inline-flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 2rem;
+    border: 1px solid var(--royal-blue);
+    color: var(--royal-blue);
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    transition: all 0.3s ease;
+}
+
+.btn-luxury-outline:hover {
+    background: var(--royal-blue);
+    color: #fff;
+}
+
+.concierge-meta {
+    font-size: 0.8rem;
+    color: #999;
+    letter-spacing: 0.05em;
+}
+
+/* --- Utils --- */
+.mb-4 {
+    margin-bottom: 1rem;
+}
+
+.mb-8 {
+    margin-bottom: 2rem;
+}
+
+.mt-8 {
+    margin-top: 2rem;
+}
+
+.mt-16 {
+    margin-top: 4rem;
+}
+
+@media (max-width: 768px) {
+    .faq-layout-grid {
+        grid-template-columns: 1fr;
+        gap: 4rem;
+    }
+}

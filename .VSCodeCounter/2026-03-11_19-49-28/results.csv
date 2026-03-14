@@ -1,0 +1,738 @@
+"filename", "language", "JavaScript", "JSON", "Markdown", "TypeScript", "TypeScript JSX", "CSS", "HTML", "XML", "PowerShell", "MS SQL", "JSON with Comments", "comment", "blank", "total"
+"c:\E-Commerce Website (Full) - Copy (3)\QUICK_START.md", "Markdown", 0, 0, 142, 0, 0, 0, 0, 0, 0, 0, 0, 0, 78, 220
+"c:\E-Commerce Website (Full) - Copy (3)\api\index.js", "JavaScript", 54, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 12, 81
+"c:\E-Commerce Website (Full) - Copy (3)\backend\BULLMQ_STATUS.md", "Markdown", 0, 0, 104, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32, 136
+"c:\E-Commerce Website (Full) - Copy (3)\backend\COLLECTION_PAGE_FIX.md", "Markdown", 0, 0, 99, 0, 0, 0, 0, 0, 0, 0, 0, 0, 22, 121
+"c:\E-Commerce Website (Full) - Copy (3)\backend\MONGODB_SETUP.md", "Markdown", 0, 0, 112, 0, 0, 0, 0, 0, 0, 0, 0, 0, 53, 165
+"c:\E-Commerce Website (Full) - Copy (3)\backend\PRODUCTION_READINESS.md", "Markdown", 0, 0, 112, 0, 0, 0, 0, 0, 0, 0, 0, 0, 34, 146
+"c:\E-Commerce Website (Full) - Copy (3)\backend\README.md", "Markdown", 0, 0, 82, 0, 0, 0, 0, 0, 0, 0, 0, 0, 29, 111
+"c:\E-Commerce Website (Full) - Copy (3)\backend\SECURITY_FIXES.md", "Markdown", 0, 0, 86, 0, 0, 0, 0, 0, 0, 0, 0, 0, 22, 108
+"c:\E-Commerce Website (Full) - Copy (3)\backend\bootstrap.js", "JavaScript", 79, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14, 19, 112
+"c:\E-Commerce Website (Full) - Copy (3)\backend\check_products.js", "JavaScript", 31, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 41
+"c:\E-Commerce Website (Full) - Copy (3)\backend\check_status.js", "JavaScript", 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 8
+"c:\E-Commerce Website (Full) - Copy (3)\backend\check_users.js", "JavaScript", 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 18
+"c:\E-Commerce Website (Full) - Copy (3)\backend\config\db.js", "JavaScript", 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 14
+"c:\E-Commerce Website (Full) - Copy (3)\backend\config\env.js", "JavaScript", 118, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 18, 137
+"c:\E-Commerce Website (Full) - Copy (3)\backend\controllers\adminController.js", "JavaScript", 196, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 30, 228
+"c:\E-Commerce Website (Full) - Copy (3)\backend\controllers\analyticsController.js", "JavaScript", 57, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 9, 69
+"c:\E-Commerce Website (Full) - Copy (3)\backend\controllers\authController.js", "JavaScript", 214, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 28, 30, 272
+"c:\E-Commerce Website (Full) - Copy (3)\backend\controllers\cartController.js", "JavaScript", 217, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32, 249
+"c:\E-Commerce Website (Full) - Copy (3)\backend\controllers\contactController.js", "JavaScript", 67, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 14, 83
+"c:\E-Commerce Website (Full) - Copy (3)\backend\controllers\domainController.js", "JavaScript", 62, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 9, 74
+"c:\E-Commerce Website (Full) - Copy (3)\backend\controllers\inventoryController.js", "JavaScript", 356, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 48, 406
+"c:\E-Commerce Website (Full) - Copy (3)\backend\controllers\mediaController.js", "JavaScript", 73, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 13, 87
+"c:\E-Commerce Website (Full) - Copy (3)\backend\controllers\newsletterController.js", "JavaScript", 78, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 15, 98
+"c:\E-Commerce Website (Full) - Copy (3)\backend\controllers\orderController.js", "JavaScript", 608, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 47, 93, 748
+"c:\E-Commerce Website (Full) - Copy (3)\backend\controllers\paymentController.js", "JavaScript", 97, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 10, 108
+"c:\E-Commerce Website (Full) - Copy (3)\backend\controllers\phase1Controller.js", "JavaScript", 474, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 93, 572
+"c:\E-Commerce Website (Full) - Copy (3)\backend\controllers\phase2Controller.js", "JavaScript", 688, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 35, 131, 854
+"c:\E-Commerce Website (Full) - Copy (3)\backend\controllers\phase3Controller.js", "JavaScript", 809, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 53, 155, 1017
+"c:\E-Commerce Website (Full) - Copy (3)\backend\controllers\productController.js", "JavaScript", 330, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 42, 383
+"c:\E-Commerce Website (Full) - Copy (3)\backend\controllers\recommendationController.js", "JavaScript", 213, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 32, 246
+"c:\E-Commerce Website (Full) - Copy (3)\backend\controllers\reviewController.js", "JavaScript", 335, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 51, 390
+"c:\E-Commerce Website (Full) - Copy (3)\backend\controllers\searchController.js", "JavaScript", 203, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 24, 229
+"c:\E-Commerce Website (Full) - Copy (3)\backend\controllers\userController.js", "JavaScript", 201, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 34, 236
+"c:\E-Commerce Website (Full) - Copy (3)\backend\controllers\webhookController.js", "JavaScript", 120, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 17, 146
+"c:\E-Commerce Website (Full) - Copy (3)\backend\controllers\wishlistController.js", "JavaScript", 359, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 52, 411
+"c:\E-Commerce Website (Full) - Copy (3)\backend\data\admin_action_logs.json", "JSON", 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1
+"c:\E-Commerce Website (Full) - Copy (3)\backend\data\defaultProducts.js", "JavaScript", 87, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 3, 92
+"c:\E-Commerce Website (Full) - Copy (3)\backend\data\event.json", "JSON", 0, 9520, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9520
+"c:\E-Commerce Website (Full) - Copy (3)\backend\data\orders.json", "JSON", 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1
+"c:\E-Commerce Website (Full) - Copy (3)\backend\data\product.json", "JSON", 0, 10687, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10687
+"c:\E-Commerce Website (Full) - Copy (3)\backend\data\products.json", "JSON", 0, 80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 80
+"c:\E-Commerce Website (Full) - Copy (3)\backend\data\sitecontent.json", "JSON", 0, 574, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 574
+"c:\E-Commerce Website (Full) - Copy (3)\backend\data\user.json", "JSON", 0, 290, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 290
+"c:\E-Commerce Website (Full) - Copy (3)\backend\data\users.json", "JSON", 0, 26, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 26
+"c:\E-Commerce Website (Full) - Copy (3)\backend\docs\API_OPERATIONS.md", "Markdown", 0, 0, 42, 0, 0, 0, 0, 0, 0, 0, 0, 0, 18, 60
+"c:\E-Commerce Website (Full) - Copy (3)\backend\docs\RUNBOOK_ARCHITECTURE.md", "Markdown", 0, 0, 32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 19, 51
+"c:\E-Commerce Website (Full) - Copy (3)\backend\ecosystem.config.js", "JavaScript", 53, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 55
+"c:\E-Commerce Website (Full) - Copy (3)\backend\email-templates\order-cancelled.html", "HTML", 0, 0, 0, 0, 0, 0, 60, 0, 0, 0, 0, 0, 11, 71
+"c:\E-Commerce Website (Full) - Copy (3)\backend\email-templates\order-delivered.html", "HTML", 0, 0, 0, 0, 0, 0, 60, 0, 0, 0, 0, 0, 10, 70
+"c:\E-Commerce Website (Full) - Copy (3)\backend\email-templates\order-placed.html", "HTML", 0, 0, 0, 0, 0, 0, 71, 0, 0, 0, 0, 0, 12, 83
+"c:\E-Commerce Website (Full) - Copy (3)\backend\email-templates\order-shipped.html", "HTML", 0, 0, 0, 0, 0, 0, 69, 0, 0, 0, 0, 0, 12, 81
+"c:\E-Commerce Website (Full) - Copy (3)\backend\email-templates\payment-approved.html", "HTML", 0, 0, 0, 0, 0, 0, 69, 0, 0, 0, 0, 0, 12, 81
+"c:\E-Commerce Website (Full) - Copy (3)\backend\jobs\cleanupInitiatedOrders.js", "JavaScript", 97, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 19, 121
+"c:\E-Commerce Website (Full) - Copy (3)\backend\lib\dbConnect.js", "JavaScript", 39, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 50
+"c:\E-Commerce Website (Full) - Copy (3)\backend\middleware\auth.js", "JavaScript", 104, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 19, 127
+"c:\E-Commerce Website (Full) - Copy (3)\backend\middleware\authEnhanced.js", "JavaScript", 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2
+"c:\E-Commerce Website (Full) - Copy (3)\backend\middleware\authMiddleware.js", "JavaScript", 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1
+"c:\E-Commerce Website (Full) - Copy (3)\backend\middleware\gatekeeper.js", "JavaScript", 102, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 22, 135
+"c:\E-Commerce Website (Full) - Copy (3)\backend\middleware\rateLimiter.js", "JavaScript", 28, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 35
+"c:\E-Commerce Website (Full) - Copy (3)\backend\middleware\tenantContext.js", "JavaScript", 46, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 9, 59
+"c:\E-Commerce Website (Full) - Copy (3)\backend\middleware\validate.js", "JavaScript", 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 19
+"c:\E-Commerce Website (Full) - Copy (3)\backend\models\AbandonedCart.js", "JavaScript", 389, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 45, 445
+"c:\E-Commerce Website (Full) - Copy (3)\backend\models\AdminActionLog.js", "JavaScript", 18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 23
+"c:\E-Commerce Website (Full) - Copy (3)\backend\models\AiContent.js", "JavaScript", 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 19
+"c:\E-Commerce Website (Full) - Copy (3)\backend\models\Bundle.js", "JavaScript", 340, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 39, 394
+"c:\E-Commerce Website (Full) - Copy (3)\backend\models\Contact.js", "JavaScript", 29, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 31
+"c:\E-Commerce Website (Full) - Copy (3)\backend\models\Event.js", "JavaScript", 17, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 20
+"c:\E-Commerce Website (Full) - Copy (3)\backend\models\Inventory.js", "JavaScript", 85, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 12, 98
+"c:\E-Commerce Website (Full) - Copy (3)\backend\models\MessageLog.js", "JavaScript", 31, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 34
+"c:\E-Commerce Website (Full) - Copy (3)\backend\models\Newsletter.js", "JavaScript", 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 17
+"c:\E-Commerce Website (Full) - Copy (3)\backend\models\OneClickCheckout.js", "JavaScript", 140, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 14, 165
+"c:\E-Commerce Website (Full) - Copy (3)\backend\models\Order.js", "JavaScript", 63, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 5, 71
+"c:\E-Commerce Website (Full) - Copy (3)\backend\models\PaymentMethod.js", "JavaScript", 27, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 8, 39
+"c:\E-Commerce Website (Full) - Copy (3)\backend\models\Phase1Models.js", "JavaScript", 521, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 61, 73, 655
+"c:\E-Commerce Website (Full) - Copy (3)\backend\models\Phase2Models.js", "JavaScript", 696, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 79, 134, 909
+"c:\E-Commerce Website (Full) - Copy (3)\backend\models\Phase3Models.js", "JavaScript", 709, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 91, 176, 976
+"c:\E-Commerce Website (Full) - Copy (3)\backend\models\Product.js", "JavaScript", 30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 33
+"c:\E-Commerce Website (Full) - Copy (3)\backend\models\Recommendation.js", "JavaScript", 18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 22
+"c:\E-Commerce Website (Full) - Copy (3)\backend\models\Review.js", "JavaScript", 17, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 20
+"c:\E-Commerce Website (Full) - Copy (3)\backend\models\Shipment.js", "JavaScript", 21, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 24
+"c:\E-Commerce Website (Full) - Copy (3)\backend\models\SiteContent.js", "JavaScript", 51, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 7, 60
+"c:\E-Commerce Website (Full) - Copy (3)\backend\models\User.js", "JavaScript", 61, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 5, 67
+"c:\E-Commerce Website (Full) - Copy (3)\backend\models\WaOptOut.js", "JavaScript", 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 15
+"c:\E-Commerce Website (Full) - Copy (3)\backend\models\WhatsAppTemplate.js", "JavaScript", 28, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 5, 35
+"c:\E-Commerce Website (Full) - Copy (3)\backend\models\Wishlist.js", "JavaScript", 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 17
+"c:\E-Commerce Website (Full) - Copy (3)\backend\package-lock.json", "JSON", 0, 9276, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 9277
+"c:\E-Commerce Website (Full) - Copy (3)\backend\package-production.json", "JSON", 0, 71, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 72
+"c:\E-Commerce Website (Full) - Copy (3)\backend\package.json", "JSON", 0, 55, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 55
+"c:\E-Commerce Website (Full) - Copy (3)\backend\routes\adminRoutes.js", "JavaScript", 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 7, 32
+"c:\E-Commerce Website (Full) - Copy (3)\backend\routes\aiContentRoutes.js", "JavaScript", 37, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 10, 51
+"c:\E-Commerce Website (Full) - Copy (3)\backend\routes\analyticsRoutes.js", "JavaScript", 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 10
+"c:\E-Commerce Website (Full) - Copy (3)\backend\routes\authRoutes.js", "JavaScript", 13, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 4, 19
+"c:\E-Commerce Website (Full) - Copy (3)\backend\routes\cartRoutes.js", "JavaScript", 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4, 20
+"c:\E-Commerce Website (Full) - Copy (3)\backend\routes\cmsRoutes.js", "JavaScript", 149, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 19, 35, 203
+"c:\E-Commerce Website (Full) - Copy (3)\backend\routes\contactRoutes.js", "JavaScript", 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 3, 14
+"c:\E-Commerce Website (Full) - Copy (3)\backend\routes\domainRoutes.js", "JavaScript", 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 10
+"c:\E-Commerce Website (Full) - Copy (3)\backend\routes\healthRoutes.js", "JavaScript", 57, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 8, 68
+"c:\E-Commerce Website (Full) - Copy (3)\backend\routes\inventoryRoutes.js", "JavaScript", 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 6, 29
+"c:\E-Commerce Website (Full) - Copy (3)\backend\routes\mediaRoutes.js", "JavaScript", 45, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 8, 57
+"c:\E-Commerce Website (Full) - Copy (3)\backend\routes\newsletterRoutes.js", "JavaScript", 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 3, 14
+"c:\E-Commerce Website (Full) - Copy (3)\backend\routes\onboardingRoutes.js", "JavaScript", 67, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 11, 86
+"c:\E-Commerce Website (Full) - Copy (3)\backend\routes\orderRoutes.js", "JavaScript", 90, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 17, 21, 128
+"c:\E-Commerce Website (Full) - Copy (3)\backend\routes\paymentMethodRoutes.js", "JavaScript", 90, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 16, 113
+"c:\E-Commerce Website (Full) - Copy (3)\backend\routes\paymentRoutes.js", "JavaScript", 13, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 7, 25
+"c:\E-Commerce Website (Full) - Copy (3)\backend\routes\performanceHubRoutes.js", "JavaScript", 52, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 13, 73
+"c:\E-Commerce Website (Full) - Copy (3)\backend\routes\phase1Routes.js", "JavaScript", 68, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 33, 23, 124
+"c:\E-Commerce Website (Full) - Copy (3)\backend\routes\phase2Routes.js", "JavaScript", 62, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 28, 14, 104
+"c:\E-Commerce Website (Full) - Copy (3)\backend\routes\phase3Routes.js", "JavaScript", 84, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 46, 20, 150
+"c:\E-Commerce Website (Full) - Copy (3)\backend\routes\productRoutes.js", "JavaScript", 21, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 25
+"c:\E-Commerce Website (Full) - Copy (3)\backend\routes\recommendationRoutes.js", "JavaScript", 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 6, 25
+"c:\E-Commerce Website (Full) - Copy (3)\backend\routes\reviewRoutes.js", "JavaScript", 18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 6, 27
+"c:\E-Commerce Website (Full) - Copy (3)\backend\routes\searchRoutes.js", "JavaScript", 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 5, 21
+"c:\E-Commerce Website (Full) - Copy (3)\backend\routes\sellerAnalyticsRoutes.js", "JavaScript", 44, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 7, 55
+"c:\E-Commerce Website (Full) - Copy (3)\backend\routes\sellerRoutes.js", "JavaScript", 70, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 80
+"c:\E-Commerce Website (Full) - Copy (3)\backend\routes\userRoutes.js", "JavaScript", 21, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4, 26
+"c:\E-Commerce Website (Full) - Copy (3)\backend\routes\webhookRoutes.js", "JavaScript", 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 9
+"c:\E-Commerce Website (Full) - Copy (3)\backend\routes\whatsappTemplateRoutes.js", "JavaScript", 56, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 11, 73
+"c:\E-Commerce Website (Full) - Copy (3)\backend\routes\wishlistRoutes.js", "JavaScript", 19, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 6, 28
+"c:\E-Commerce Website (Full) - Copy (3)\backend\scripts\check-env-leaks.js", "JavaScript", 35, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 43
+"c:\E-Commerce Website (Full) - Copy (3)\backend\scripts\cleanup-port.js", "JavaScript", 44, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 54
+"c:\E-Commerce Website (Full) - Copy (3)\backend\scripts\createAdmin.js", "JavaScript", 61, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 12, 77
+"c:\E-Commerce Website (Full) - Copy (3)\backend\scripts\precheck.js", "JavaScript", 59, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 69
+"c:\E-Commerce Website (Full) - Copy (3)\backend\scripts\seed-products-remote.js", "JavaScript", 47, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 11, 61
+"c:\E-Commerce Website (Full) - Copy (3)\backend\scripts\seed-remote.js", "JavaScript", 53, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 10, 65
+"c:\E-Commerce Website (Full) - Copy (3)\backend\scripts\seedProducts.js", "JavaScript", 148, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 13, 169
+"c:\E-Commerce Website (Full) - Copy (3)\backend\scripts\set-admin.js", "JavaScript", 57, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 69
+"c:\E-Commerce Website (Full) - Copy (3)\backend\scripts\start-dev.js", "JavaScript", 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 7, 25
+"c:\E-Commerce Website (Full) - Copy (3)\backend\scripts\test-approval-system.js", "JavaScript", 130, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 25, 27, 182
+"c:\E-Commerce Website (Full) - Copy (3)\backend\scripts\test-whatsapp.js", "JavaScript", 31, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 35
+"c:\E-Commerce Website (Full) - Copy (3)\backend\scripts\verify-system.js", "JavaScript", 109, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 23, 141
+"c:\E-Commerce Website (Full) - Copy (3)\backend\server.js", "JavaScript", 163, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16, 18, 197
+"c:\E-Commerce Website (Full) - Copy (3)\backend\services\aiContentService.js", "JavaScript", 91, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 24, 127
+"c:\E-Commerce Website (Full) - Copy (3)\backend\services\aiQuotaService.js", "JavaScript", 75, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 16, 98
+"c:\E-Commerce Website (Full) - Copy (3)\backend\services\analyticsService.js", "JavaScript", 125, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 32, 166
+"c:\E-Commerce Website (Full) - Copy (3)\backend\services\cartService.js", "JavaScript", 320, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 39, 364
+"c:\E-Commerce Website (Full) - Copy (3)\backend\services\dbService.js", "JavaScript", 60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 72
+"c:\E-Commerce Website (Full) - Copy (3)\backend\services\emailService.js", "JavaScript", 198, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 23, 222
+"c:\E-Commerce Website (Full) - Copy (3)\backend\services\logger.js", "JavaScript", 25, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 31
+"c:\E-Commerce Website (Full) - Copy (3)\backend\services\mailblusterService.js", "JavaScript", 69, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 81
+"c:\E-Commerce Website (Full) - Copy (3)\backend\services\manifestService.js", "JavaScript", 34, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 7, 42
+"c:\E-Commerce Website (Full) - Copy (3)\backend\services\memoryDbService.js", "JavaScript", 45, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 55
+"c:\E-Commerce Website (Full) - Copy (3)\backend\services\onboardingService.js", "JavaScript", 108, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 15, 126
+"c:\E-Commerce Website (Full) - Copy (3)\backend\services\paymentService.js", "JavaScript", 329, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 54, 57, 440
+"c:\E-Commerce Website (Full) - Copy (3)\backend\services\preflightService.js", "JavaScript", 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 7, 61
+"c:\E-Commerce Website (Full) - Copy (3)\backend\services\queueService.js", "JavaScript", 169, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 23, 201
+"c:\E-Commerce Website (Full) - Copy (3)\backend\services\recommendationService.js", "JavaScript", 230, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 36, 278
+"c:\E-Commerce Website (Full) - Copy (3)\backend\services\searchService.js", "JavaScript", 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, 47, 322
+"c:\E-Commerce Website (Full) - Copy (3)\backend\services\shippingService.js", "JavaScript", 89, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 24, 123
+"c:\E-Commerce Website (Full) - Copy (3)\backend\services\shipping\leopardsProvider.js", "JavaScript", 57, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 9, 67
+"c:\E-Commerce Website (Full) - Copy (3)\backend\services\shipping\tcsProvider.js", "JavaScript", 23, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 31
+"c:\E-Commerce Website (Full) - Copy (3)\backend\services\shipping\traxProvider.js", "JavaScript", 58, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 67
+"c:\E-Commerce Website (Full) - Copy (3)\backend\services\stateService.js", "JavaScript", 147, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 29, 184
+"c:\E-Commerce Website (Full) - Copy (3)\backend\services\waRateGuard.js", "JavaScript", 87, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 23, 121
+"c:\E-Commerce Website (Full) - Copy (3)\backend\services\whatsappAutomationService.js", "JavaScript", 132, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 27, 171
+"c:\E-Commerce Website (Full) - Copy (3)\backend\services\whatsappService.js", "JavaScript", 27, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4, 32
+"c:\E-Commerce Website (Full) - Copy (3)\backend\templates\home\electronics.json", "JSON", 0, 67, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 67
+"c:\E-Commerce Website (Full) - Copy (3)\backend\templates\home\fashion.json", "JSON", 0, 75, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 75
+"c:\E-Commerce Website (Full) - Copy (3)\backend\templates\home\general.json", "JSON", 0, 59, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 59
+"c:\E-Commerce Website (Full) - Copy (3)\backend\test-boundaries.js", "JavaScript", 93, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 19, 120
+"c:\E-Commerce Website (Full) - Copy (3)\backend\test_db.js", "JavaScript", 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 28
+"c:\E-Commerce Website (Full) - Copy (3)\backend\test_subscription.js", "JavaScript", 25, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 29
+"c:\E-Commerce Website (Full) - Copy (3)\backend\tests\QA-SECURITY-CHECKLIST.md", "Markdown", 0, 0, 315, 0, 0, 0, 0, 0, 0, 0, 0, 0, 117, 432
+"c:\E-Commerce Website (Full) - Copy (3)\backend\tests\integration\bootstrap.test.js", "JavaScript", 62, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 10, 73
+"c:\E-Commerce Website (Full) - Copy (3)\backend\tests\integration\payment-security.test.js", "JavaScript", 219, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 26, 51, 296
+"c:\E-Commerce Website (Full) - Copy (3)\backend\tests\security\jwt.test.js", "JavaScript", 88, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 24, 115
+"c:\E-Commerce Website (Full) - Copy (3)\backend\tests\test_approval_flow.js", "JavaScript", 104, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 20, 132
+"c:\E-Commerce Website (Full) - Copy (3)\backend\tests\unit\config.test.js", "JavaScript", 38, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 48
+"c:\E-Commerce Website (Full) - Copy (3)\backend\utils\LocalDB.js", "JavaScript", 230, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 17, 46, 293
+"c:\E-Commerce Website (Full) - Copy (3)\backend\utils\inventoryService.js", "JavaScript", 137, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 23, 163
+"c:\E-Commerce Website (Full) - Copy (3)\backend\utils\modelFactory.js", "JavaScript", 67, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14, 18, 99
+"c:\E-Commerce Website (Full) - Copy (3)\backend\utils\orderHashService.js", "JavaScript", 40, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 8, 51
+"c:\E-Commerce Website (Full) - Copy (3)\backend\utils\phoneFormatter.js", "JavaScript", 56, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 17, 83
+"c:\E-Commerce Website (Full) - Copy (3)\backend\utils\retryWithBackoff.js", "JavaScript", 62, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 72
+"c:\E-Commerce Website (Full) - Copy (3)\backend\utils\tenantStorage.js", "JavaScript", 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 6
+"c:\E-Commerce Website (Full) - Copy (3)\backend\utils\tokenService.js", "JavaScript", 74, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 11, 87
+"c:\E-Commerce Website (Full) - Copy (3)\backend\utils\whatsappService.js", "JavaScript", 142, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 28, 170
+"c:\E-Commerce Website (Full) - Copy (3)\backend\validators\orderValidators.js", "JavaScript", 36, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 44
+"c:\E-Commerce Website (Full) - Copy (3)\backend\validators\productValidators.js", "JavaScript", 28, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 36
+"c:\E-Commerce Website (Full) - Copy (3)\backend\validators\userValidator.js", "JavaScript", 23, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 28
+"c:\E-Commerce Website (Full) - Copy (3)\backend\validators\userValidators.js", "JavaScript", 41, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 49
+"c:\E-Commerce Website (Full) - Copy (3)\backend\verify-mongodb.js", "JavaScript", 96, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 23, 122
+"c:\E-Commerce Website (Full) - Copy (3)\backend\verify-order-fix.js", "JavaScript", 42, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 9, 52
+"c:\E-Commerce Website (Full) - Copy (3)\backend\verify-serverless.js", "JavaScript", 69, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 19, 98
+"c:\E-Commerce Website (Full) - Copy (3)\backend\workers\notificationWorker.js", "JavaScript", 157, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16, 37, 210
+"c:\E-Commerce Website (Full) - Copy (3)\check_cms.js", "JavaScript", 21, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 23
+"c:\E-Commerce Website (Full) - Copy (3)\check_cms_deep.js", "JavaScript", 37, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 42
+"c:\E-Commerce Website (Full) - Copy (3)\check_cms_dump.js", "JavaScript", 17, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 22
+"c:\E-Commerce Website (Full) - Copy (3)\check_cms_native.js", "JavaScript", 28, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 30
+"c:\E-Commerce Website (Full) - Copy (3)\check_cms_raw.js", "JavaScript", 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 12
+"c:\E-Commerce Website (Full) - Copy (3)\check_products.js", "JavaScript", 25, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 27
+"c:\E-Commerce Website (Full) - Copy (3)\check_products_full.js", "JavaScript", 23, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 27
+"c:\E-Commerce Website (Full) - Copy (3)\check_products_raw.js", "JavaScript", 17, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 19
+"c:\E-Commerce Website (Full) - Copy (3)\database\omnora_schema.sql", "MS SQL", 0, 0, 0, 0, 0, 0, 0, 0, 0, 420, 0, 90, 117, 627
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\check_users.js", "JavaScript", 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 18
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\index.html", "HTML", 0, 0, 0, 0, 0, 0, 110, 0, 0, 0, 0, 0, 18, 128
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\package-lock.json", "JSON", 0, 8789, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 8790
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\package.json", "JSON", 0, 40, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 41
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\postcss.config.js", "JavaScript", 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 7
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\public\manifest.json", "JSON", 0, 26, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 26
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\public\pwa-icon.svg", "XML", 0, 0, 0, 0, 0, 0, 0, 28, 0, 0, 0, 0, 7, 35
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\App.tsx", "TypeScript JSX", 0, 0, 0, 0, 134, 0, 0, 0, 0, 0, 0, 12, 13, 159
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\api\client.ts", "TypeScript", 0, 0, 0, 118, 0, 0, 0, 0, 0, 0, 0, 29, 23, 170
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\AdPlacement.css", "CSS", 0, 0, 0, 0, 0, 266, 0, 0, 0, 0, 0, 0, 48, 314
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\AdPlacementZone.tsx", "TypeScript JSX", 0, 0, 0, 0, 123, 0, 0, 0, 0, 0, 0, 5, 10, 138
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\AdminLayout.css", "CSS", 0, 0, 0, 0, 0, 249, 0, 0, 0, 0, 0, 0, 33, 282
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\AdminLayout.tsx", "TypeScript JSX", 0, 0, 0, 0, 84, 0, 0, 0, 0, 0, 0, 4, 12, 100
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\Carousel.tsx", "TypeScript JSX", 0, 0, 0, 0, 96, 0, 0, 0, 0, 0, 0, 10, 15, 121
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\DynamicSection.tsx", "TypeScript JSX", 0, 0, 0, 0, 328, 0, 0, 0, 0, 0, 0, 10, 38, 376
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\ErrorBoundary.css", "CSS", 0, 0, 0, 0, 0, 124, 0, 0, 0, 0, 0, 0, 17, 141
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\ErrorBoundary.tsx", "TypeScript JSX", 0, 0, 0, 0, 69, 0, 0, 0, 0, 0, 0, 3, 14, 86
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\Footer.css", "CSS", 0, 0, 0, 0, 0, 248, 0, 0, 0, 0, 0, 0, 39, 287
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\Footer.tsx", "TypeScript JSX", 0, 0, 0, 0, 120, 0, 0, 0, 0, 0, 0, 10, 15, 145
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\GlobalErrorBoundary.tsx", "TypeScript JSX", 0, 0, 0, 0, 60, 0, 0, 0, 0, 0, 0, 1, 12, 73
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\HostnameInterceptor.tsx", "TypeScript JSX", 0, 0, 0, 0, 89, 0, 0, 0, 0, 0, 0, 5, 14, 108
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\Layout.css", "CSS", 0, 0, 0, 0, 0, 379, 0, 0, 0, 0, 0, 0, 58, 437
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\Layout.tsx", "TypeScript JSX", 0, 0, 0, 0, 249, 0, 0, 0, 0, 0, 0, 29, 31, 309
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\LoadingWrapper.css", "CSS", 0, 0, 0, 0, 0, 20, 0, 0, 0, 0, 0, 0, 2, 22
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\LoadingWrapper.tsx", "TypeScript JSX", 0, 0, 0, 0, 32, 0, 0, 0, 0, 0, 0, 2, 5, 39
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\OmnoraCarousel.css", "CSS", 0, 0, 0, 0, 0, 207, 0, 0, 0, 0, 0, 0, 28, 235
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\OmnoraLayout.css", "CSS", 0, 0, 0, 0, 0, 418, 0, 0, 0, 0, 0, 0, 64, 482
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\OmnoraPosterGallery.css", "CSS", 0, 0, 0, 0, 0, 236, 0, 0, 0, 0, 0, 0, 36, 272
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\Payment.css", "CSS", 0, 0, 0, 0, 0, 119, 0, 0, 0, 0, 0, 0, 21, 140
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\PosterGallery.tsx", "TypeScript JSX", 0, 0, 0, 0, 103, 0, 0, 0, 0, 0, 0, 8, 11, 122
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\ProtectedRoute.css", "CSS", 0, 0, 0, 0, 0, 88, 0, 0, 0, 0, 0, 0, 12, 100
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\ProtectedRoute.tsx", "TypeScript JSX", 0, 0, 0, 0, 35, 0, 0, 0, 0, 0, 0, 5, 6, 46
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\RequireAdmin.tsx", "TypeScript JSX", 0, 0, 0, 0, 17, 0, 0, 0, 0, 0, 0, 4, 6, 27
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\Skeleton.css", "CSS", 0, 0, 0, 0, 0, 109, 0, 0, 0, 0, 0, 0, 19, 128
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\Skeleton.tsx", "TypeScript JSX", 0, 0, 0, 0, 57, 0, 0, 0, 0, 0, 0, 12, 15, 84
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\SkeletonProductCard.tsx", "TypeScript JSX", 0, 0, 0, 0, 46, 0, 0, 0, 0, 0, 0, 9, 7, 62
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\SmartImage.css", "CSS", 0, 0, 0, 0, 0, 62, 0, 0, 0, 0, 0, 0, 7, 69
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\SmartImage.tsx", "TypeScript JSX", 0, 0, 0, 0, 56, 0, 0, 0, 0, 0, 0, 4, 8, 68
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\StripePayment.tsx", "TypeScript JSX", 0, 0, 0, 0, 82, 0, 0, 0, 0, 0, 0, 2, 13, 97
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\WhatsAppConfirmationDialog.css", "CSS", 0, 0, 0, 0, 0, 191, 0, 0, 0, 0, 0, 0, 27, 218
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\WhatsAppConfirmationDialog.tsx", "TypeScript JSX", 0, 0, 0, 0, 78, 0, 0, 0, 0, 0, 0, 4, 11, 93
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\admin\AdminBillingManager.tsx", "TypeScript JSX", 0, 0, 0, 0, 177, 0, 0, 0, 0, 0, 0, 11, 22, 210
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\admin\AdminDashboard.tsx", "TypeScript JSX", 0, 0, 0, 0, 276, 0, 0, 0, 0, 0, 0, 10, 21, 307
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\admin\AdminPaymentSettings.tsx", "TypeScript JSX", 0, 0, 0, 0, 143, 0, 0, 0, 0, 0, 0, 1, 13, 157
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\admin\OrderManager.tsx", "TypeScript JSX", 0, 0, 0, 0, 264, 0, 0, 0, 0, 0, 0, 18, 29, 311
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\auth\AuthModal.tsx", "TypeScript JSX", 0, 0, 0, 0, 143, 0, 0, 0, 0, 0, 0, 5, 20, 168
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\blocks\AnnouncementBar.tsx", "TypeScript JSX", 0, 0, 0, 0, 94, 0, 0, 0, 0, 0, 0, 3, 14, 111
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\blocks\CountdownTimer.tsx", "TypeScript JSX", 0, 0, 0, 0, 169, 0, 0, 0, 0, 0, 0, 5, 19, 193
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\blocks\CustomerReviews.tsx", "TypeScript JSX", 0, 0, 0, 0, 174, 0, 0, 0, 0, 0, 0, 12, 22, 208
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\blocks\FAQAccordion.tsx", "TypeScript JSX", 0, 0, 0, 0, 146, 0, 0, 0, 0, 0, 0, 6, 19, 171
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\blocks\FeaturesGrid.tsx", "TypeScript JSX", 0, 0, 0, 0, 129, 0, 0, 0, 0, 0, 0, 6, 17, 152
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\blocks\HeroBanner.tsx", "TypeScript JSX", 0, 0, 0, 0, 165, 0, 0, 0, 0, 0, 0, 7, 16, 188
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\blocks\NewsletterSignup.tsx", "TypeScript JSX", 0, 0, 0, 0, 221, 0, 0, 0, 0, 0, 0, 5, 21, 247
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\blocks\SiteFooter.tsx", "TypeScript JSX", 0, 0, 0, 0, 186, 0, 0, 0, 0, 0, 0, 12, 22, 220
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\blocks\SplitHero.tsx", "TypeScript JSX", 0, 0, 0, 0, 143, 0, 0, 0, 0, 0, 0, 5, 16, 164
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\blocks\TrustBadges.tsx", "TypeScript JSX", 0, 0, 0, 0, 183, 0, 0, 0, 0, 0, 0, 8, 17, 208
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\blocks\UpsellWidget.tsx", "TypeScript JSX", 0, 0, 0, 0, 188, 0, 0, 0, 0, 0, 0, 7, 22, 217
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\builder\AICopilotModal.tsx", "TypeScript JSX", 0, 0, 0, 0, 148, 0, 0, 0, 0, 0, 0, 10, 23, 181
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cart\BuyButton.tsx", "TypeScript JSX", 0, 0, 0, 0, 187, 0, 0, 0, 0, 0, 0, 2, 20, 209
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cart\CartDrawer.tsx", "TypeScript JSX", 0, 0, 0, 0, 392, 0, 0, 0, 0, 0, 0, 22, 30, 444
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cart\CheckoutBlock.tsx", "TypeScript JSX", 0, 0, 0, 0, 417, 0, 0, 0, 0, 0, 0, 16, 42, 475
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cart\OrderConfirmationBlock.tsx", "TypeScript JSX", 0, 0, 0, 0, 225, 0, 0, 0, 0, 0, 0, 16, 22, 263
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cart\ProductCard.tsx", "TypeScript JSX", 0, 0, 0, 0, 208, 0, 0, 0, 0, 0, 0, 9, 17, 234
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cart\ProductGrid.tsx", "TypeScript JSX", 0, 0, 0, 0, 176, 0, 0, 0, 0, 0, 0, 11, 21, 208
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cart\ProductOptions.tsx", "TypeScript JSX", 0, 0, 0, 0, 237, 0, 0, 0, 0, 0, 0, 13, 22, 272
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cart\SearchBar.tsx", "TypeScript JSX", 0, 0, 0, 0, 204, 0, 0, 0, 0, 0, 0, 6, 16, 226
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cart\StoreHeader.tsx", "TypeScript JSX", 0, 0, 0, 0, 203, 0, 0, 0, 0, 0, 0, 10, 18, 231
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\AdminDiscountManager.tsx", "TypeScript JSX", 0, 0, 0, 0, 235, 0, 0, 0, 0, 0, 0, 7, 26, 268
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\AdminNavigationManager.tsx", "TypeScript JSX", 0, 0, 0, 0, 203, 0, 0, 0, 0, 0, 0, 18, 30, 251
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\AdminPageManager.tsx", "TypeScript JSX", 0, 0, 0, 0, 227, 0, 0, 0, 0, 0, 0, 9, 26, 262
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\AdminProductManager.tsx", "TypeScript JSX", 0, 0, 0, 0, 450, 0, 0, 0, 0, 0, 0, 31, 59, 540
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\BuilderHealthOverlay.tsx", "TypeScript JSX", 0, 0, 0, 0, 176, 0, 0, 0, 0, 0, 0, 5, 15, 196
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\BuilderRegistry.ts", "TypeScript", 0, 0, 0, 466, 0, 0, 0, 0, 0, 0, 0, 29, 32, 527
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\BuilderToolbar.tsx", "TypeScript JSX", 0, 0, 0, 0, 411, 0, 0, 0, 0, 0, 0, 23, 44, 478
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\BuilderWrapper.tsx", "TypeScript JSX", 0, 0, 0, 0, 647, 0, 0, 0, 0, 0, 0, 34, 73, 754
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\CanvasOverlay.tsx", "TypeScript JSX", 0, 0, 0, 0, 820, 0, 0, 0, 0, 0, 0, 56, 100, 976
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\ComponentRegistry.tsx", "TypeScript JSX", 0, 0, 0, 0, 115, 0, 0, 0, 0, 0, 0, 1, 12, 128
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\ComponentWrapper.tsx", "TypeScript JSX", 0, 0, 0, 0, 264, 0, 0, 0, 0, 0, 0, 30, 51, 345
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\DevicePresetPanel.tsx", "TypeScript JSX", 0, 0, 0, 0, 187, 0, 0, 0, 0, 0, 0, 11, 14, 212
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\DiagnosticsPanel.tsx", "TypeScript JSX", 0, 0, 0, 0, 80, 0, 0, 0, 0, 0, 0, 0, 9, 89
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\DynamicButton.tsx", "TypeScript JSX", 0, 0, 0, 0, 147, 0, 0, 0, 0, 0, 0, 14, 22, 183
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\DynamicSection.tsx", "TypeScript JSX", 0, 0, 0, 0, 48, 0, 0, 0, 0, 0, 0, 1, 7, 56
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\EditMode.css", "CSS", 0, 0, 0, 0, 0, 192, 0, 0, 0, 0, 0, 0, 29, 221
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\EditModeOverlay.tsx", "TypeScript JSX", 0, 0, 0, 0, 311, 0, 0, 0, 0, 0, 0, 0, 22, 333
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\EditableComponents.tsx", "TypeScript JSX", 0, 0, 0, 0, 647, 0, 0, 0, 0, 0, 0, 34, 73, 754
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\ElementLibrary.tsx", "TypeScript JSX", 0, 0, 0, 0, 478, 0, 0, 0, 0, 0, 0, 20, 24, 522
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\GlobalSettingsPanel.tsx", "TypeScript JSX", 0, 0, 0, 0, 285, 0, 0, 0, 0, 0, 0, 12, 24, 321
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\GranularErrorBoundary.tsx", "TypeScript JSX", 0, 0, 0, 0, 136, 0, 0, 0, 0, 0, 0, 6, 14, 156
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\LiveCanvas.tsx", "TypeScript JSX", 0, 0, 0, 0, 437, 0, 0, 0, 0, 0, 0, 29, 37, 503
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\LocalCopilotPanel.tsx", "TypeScript JSX", 0, 0, 0, 0, 197, 0, 0, 0, 0, 0, 0, 9, 22, 228
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\MagneticTiltCard.tsx", "TypeScript JSX", 0, 0, 0, 0, 145, 0, 0, 0, 0, 0, 0, 12, 32, 189
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\MediaLibraryModal.tsx", "TypeScript JSX", 0, 0, 0, 0, 296, 0, 0, 0, 0, 0, 0, 18, 31, 345
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\OmnoraRenderer.tsx", "TypeScript JSX", 0, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 6, 19, 125
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\PageSettingsPanel.tsx", "TypeScript JSX", 0, 0, 0, 0, 112, 0, 0, 0, 0, 0, 0, 8, 17, 137
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\SmartSidebar.tsx", "TypeScript JSX", 0, 0, 0, 0, 201, 0, 0, 0, 0, 0, 0, 11, 16, 228
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\SovereignWidget.tsx", "TypeScript JSX", 0, 0, 0, 0, 199, 0, 0, 0, 0, 0, 0, 0, 14, 213
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\StyleEditorPanel.tsx", "TypeScript JSX", 0, 0, 0, 0, 270, 0, 0, 0, 0, 0, 0, 19, 28, 317
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\ThemeManager.tsx", "TypeScript JSX", 0, 0, 0, 0, 51, 0, 0, 0, 0, 0, 0, 1, 9, 61
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\editors\IntelligenceEditor.tsx", "TypeScript JSX", 0, 0, 0, 0, 68, 0, 0, 0, 0, 0, 0, 2, 9, 79
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\help\SuggestionBubble.tsx", "TypeScript JSX", 0, 0, 0, 0, 138, 0, 0, 0, 0, 0, 0, 0, 7, 145
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\help\TourOverlay.tsx", "TypeScript JSX", 0, 0, 0, 0, 167, 0, 0, 0, 0, 0, 0, 3, 15, 185
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\home\ErrorBoundary.css", "CSS", 0, 0, 0, 0, 0, 124, 0, 0, 0, 0, 0, 0, 17, 141
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\home\HowItWorks.tsx", "TypeScript JSX", 0, 0, 0, 0, 40, 0, 0, 0, 0, 0, 0, 4, 5, 49
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\home\Newsletter.tsx", "TypeScript JSX", 0, 0, 0, 0, 69, 0, 0, 0, 0, 0, 0, 1, 8, 78
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\home\TechStack.css", "CSS", 0, 0, 0, 0, 0, 389, 0, 0, 0, 0, 0, 0, 54, 443
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\home\Testimonials.tsx", "TypeScript JSX", 0, 0, 0, 0, 71, 0, 0, 0, 0, 0, 0, 4, 7, 82
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\home\TrustSection.tsx", "TypeScript JSX", 0, 0, 0, 0, 32, 0, 0, 0, 0, 0, 0, 0, 2, 34
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\home\WhyUs.tsx", "TypeScript JSX", 0, 0, 0, 0, 28, 0, 0, 0, 0, 0, 0, 0, 3, 31
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\home\tech.tsx", "TypeScript JSX", 0, 0, 0, 0, 147, 0, 0, 0, 0, 0, 0, 9, 18, 174
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\home\testimonials.css", "CSS", 0, 0, 0, 0, 0, 185, 0, 0, 0, 0, 0, 0, 25, 210
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\media\LogoPicker.tsx", "TypeScript JSX", 0, 0, 0, 0, 304, 0, 0, 0, 0, 0, 0, 4, 25, 333
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\onboarding\StoreSetupWizard.tsx", "TypeScript JSX", 0, 0, 0, 0, 208, 0, 0, 0, 0, 0, 0, 9, 29, 246
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\orders\OrderTracking.css", "CSS", 0, 0, 0, 0, 0, 81, 0, 0, 0, 0, 0, 0, 12, 93
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\orders\OrderTracking.tsx", "TypeScript JSX", 0, 0, 0, 0, 54, 0, 0, 0, 0, 0, 0, 0, 7, 61
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\pwa\PwaInstallPrompt.tsx", "TypeScript JSX", 0, 0, 0, 0, 94, 0, 0, 0, 0, 0, 0, 8, 19, 121
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\seller\AdminOrderManager.tsx", "TypeScript JSX", 0, 0, 0, 0, 210, 0, 0, 0, 0, 0, 0, 3, 12, 225
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\seller\AdminOverview.tsx", "TypeScript JSX", 0, 0, 0, 0, 212, 0, 0, 0, 0, 0, 0, 4, 14, 230
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\seller\AdminProductManager.tsx", "TypeScript JSX", 0, 0, 0, 0, 333, 0, 0, 0, 0, 0, 0, 9, 24, 366
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\seller\AiContentPanel.tsx", "TypeScript JSX", 0, 0, 0, 0, 121, 0, 0, 0, 0, 0, 0, 13, 24, 158
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\seller\DomainSettings.tsx", "TypeScript JSX", 0, 0, 0, 0, 173, 0, 0, 0, 0, 0, 0, 1, 18, 192
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\seller\PaymentSettingsPanel.tsx", "TypeScript JSX", 0, 0, 0, 0, 156, 0, 0, 0, 0, 0, 0, 9, 24, 189
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\seller\PaymentVerificationQueue.tsx", "TypeScript JSX", 0, 0, 0, 0, 108, 0, 0, 0, 0, 0, 0, 0, 11, 119
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\seller\ProductEditor.tsx", "TypeScript JSX", 0, 0, 0, 0, 543, 0, 0, 0, 0, 0, 0, 26, 44, 613
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\seller\SellerAnalytics.css", "CSS", 0, 0, 0, 0, 0, 151, 0, 0, 0, 0, 0, 0, 26, 177
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\seller\SellerAnalytics.tsx", "TypeScript JSX", 0, 0, 0, 0, 249, 0, 0, 0, 0, 0, 0, 1, 14, 264
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\seller\SellerAnalyticsDashboard.tsx", "TypeScript JSX", 0, 0, 0, 0, 176, 0, 0, 0, 0, 0, 0, 11, 23, 210
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\seller\SellerInventory.css", "CSS", 0, 0, 0, 0, 0, 181, 0, 0, 0, 0, 0, 0, 30, 211
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\seller\SellerInventory.tsx", "TypeScript JSX", 0, 0, 0, 0, 285, 0, 0, 0, 0, 0, 0, 0, 16, 301
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\seller\WhatsAppTemplatesPanel.tsx", "TypeScript JSX", 0, 0, 0, 0, 123, 0, 0, 0, 0, 0, 0, 8, 26, 157
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\storefront\CartDrawer.tsx", "TypeScript JSX", 0, 0, 0, 0, 160, 0, 0, 0, 0, 0, 0, 11, 15, 186
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\storefront\CustomerDashboard.tsx", "TypeScript JSX", 0, 0, 0, 0, 206, 0, 0, 0, 0, 0, 0, 6, 24, 236
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\storefront\OmnoraBanner.tsx", "TypeScript JSX", 0, 0, 0, 0, 47, 0, 0, 0, 0, 0, 0, 3, 9, 59
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\storefront\OmnoraNotification.tsx", "TypeScript JSX", 0, 0, 0, 0, 96, 0, 0, 0, 0, 0, 0, 0, 8, 104
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\storefront\ThankYouPage.tsx", "TypeScript JSX", 0, 0, 0, 0, 199, 0, 0, 0, 0, 0, 0, 2, 23, 224
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\superadmin\GodModeDashboard.tsx", "TypeScript JSX", 0, 0, 0, 0, 116, 0, 0, 0, 0, 0, 0, 5, 13, 134
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\superadmin\MerchantLedger.tsx", "TypeScript JSX", 0, 0, 0, 0, 109, 0, 0, 0, 0, 0, 0, 0, 6, 115
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\superadmin\SuperAdminRoute.tsx", "TypeScript JSX", 0, 0, 0, 0, 34, 0, 0, 0, 0, 0, 0, 0, 8, 42
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\ui\CinematicLoader.tsx", "TypeScript JSX", 0, 0, 0, 0, 54, 0, 0, 0, 0, 0, 0, 4, 6, 64
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\useMinimumLoadingTime.ts", "TypeScript", 0, 0, 0, 33, 0, 0, 0, 0, 0, 0, 0, 5, 5, 43
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\config\adConfig.json", "JSON", 0, 109, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 111
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\config\firebase.ts", "TypeScript", 0, 0, 0, 60, 0, 0, 0, 0, 0, 0, 0, 4, 5, 69
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\constants.ts", "TypeScript", 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\context\AuthContext.tsx", "TypeScript JSX", 0, 0, 0, 0, 161, 0, 0, 0, 0, 0, 0, 16, 22, 199
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\context\BuilderContext.tsx", "TypeScript JSX", 0, 0, 0, 0, 955, 0, 0, 0, 0, 0, 0, 57, 126, 1138
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\context\CartContext.tsx", "TypeScript JSX", 0, 0, 0, 0, 95, 0, 0, 0, 0, 0, 0, 1, 16, 112
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\context\CustomerAuthContext.tsx", "TypeScript JSX", 0, 0, 0, 0, 125, 0, 0, 0, 0, 0, 0, 6, 26, 157
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\context\MediaStoreContext.tsx", "TypeScript JSX", 0, 0, 0, 0, 93, 0, 0, 0, 0, 0, 0, 8, 14, 115
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\context\MerchantAuthContext.tsx", "TypeScript JSX", 0, 0, 0, 0, 86, 0, 0, 0, 0, 0, 0, 3, 14, 103
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\context\OmnoraContext.tsx", "TypeScript JSX", 0, 0, 0, 0, 66, 0, 0, 0, 0, 0, 0, 1, 9, 76
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\context\StorefrontContext.tsx", "TypeScript JSX", 0, 0, 0, 0, 421, 0, 0, 0, 0, 0, 0, 9, 55, 485
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\context\ThemeContext.tsx", "TypeScript JSX", 0, 0, 0, 0, 48, 0, 0, 0, 0, 0, 0, 1, 13, 62
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\context\Toast.css", "CSS", 0, 0, 0, 0, 0, 121, 0, 0, 0, 0, 0, 0, 18, 139
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\context\ToastContext.tsx", "TypeScript JSX", 0, 0, 0, 0, 70, 0, 0, 0, 0, 0, 0, 3, 14, 87
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\data\fallbackProducts.ts", "TypeScript", 0, 0, 0, 92, 0, 0, 0, 0, 0, 0, 0, 0, 0, 92
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\hooks\BindResolver.ts", "TypeScript", 0, 0, 0, 122, 0, 0, 0, 0, 0, 0, 0, 8, 25, 155
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\hooks\useBuilderInteractionStore.ts", "TypeScript", 0, 0, 0, 91, 0, 0, 0, 0, 0, 0, 0, 5, 20, 116
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\hooks\useCart.ts", "TypeScript", 0, 0, 0, 45, 0, 0, 0, 0, 0, 0, 0, 0, 4, 49
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\hooks\useImageLoader.ts", "TypeScript", 0, 0, 0, 73, 0, 0, 0, 0, 0, 0, 0, 27, 23, 123
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\hooks\useMinimumLoadingTime.ts", "TypeScript", 0, 0, 0, 31, 0, 0, 0, 0, 0, 0, 0, 0, 6, 37
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\hooks\useNodeSelector.ts", "TypeScript", 0, 0, 0, 68, 0, 0, 0, 0, 0, 0, 0, 5, 14, 87
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\hooks\useScrollReveal.ts", "TypeScript", 0, 0, 0, 26, 0, 0, 0, 0, 0, 0, 0, 1, 7, 34
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\hooks\useStorefront.ts", "TypeScript", 0, 0, 0, 61, 0, 0, 0, 0, 0, 0, 0, 6, 13, 80
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\index.css", "CSS", 0, 0, 0, 0, 0, 517, 0, 0, 0, 0, 0, 0, 83, 600
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\lib\CommandExecutor.ts", "TypeScript", 0, 0, 0, 47, 0, 0, 0, 0, 0, 0, 0, 1, 6, 54
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\lib\GeoService.ts", "TypeScript", 0, 0, 0, 31, 0, 0, 0, 0, 0, 0, 0, 1, 7, 39
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\lib\LocalAIEngine.ts", "TypeScript", 0, 0, 0, 238, 0, 0, 0, 0, 0, 0, 0, 9, 58, 305
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\lib\SuperAdminClient.ts", "TypeScript", 0, 0, 0, 51, 0, 0, 0, 0, 0, 0, 0, 2, 11, 64
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\lib\cinematicStyles.ts", "TypeScript", 0, 0, 0, 251, 0, 0, 0, 0, 0, 0, 0, 15, 41, 307
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\lib\loadingManager.ts", "TypeScript", 0, 0, 0, 135, 0, 0, 0, 0, 0, 0, 0, 20, 27, 182
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\lib\mediaUploader.ts", "TypeScript", 0, 0, 0, 95, 0, 0, 0, 0, 0, 0, 0, 9, 20, 124
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\lib\supabaseClient.ts", "TypeScript", 0, 0, 0, 18, 0, 0, 0, 0, 0, 0, 0, 0, 5, 23
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\main.tsx", "TypeScript JSX", 0, 0, 0, 0, 48, 0, 0, 0, 0, 0, 0, 2, 6, 56
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\About.css", "CSS", 0, 0, 0, 0, 0, 202, 0, 0, 0, 0, 0, 0, 39, 241
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\About.tsx", "TypeScript JSX", 0, 0, 0, 0, 138, 0, 0, 0, 0, 0, 0, 6, 15, 159
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\AdminAnalytics.css", "CSS", 0, 0, 0, 0, 0, 241, 0, 0, 0, 0, 0, 0, 35, 276
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\AdminAnalytics.tsx", "TypeScript JSX", 0, 0, 0, 0, 152, 0, 0, 0, 0, 0, 0, 9, 15, 176
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\AdminApprove.css", "CSS", 0, 0, 0, 0, 0, 207, 0, 0, 0, 0, 0, 0, 30, 237
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\AdminApprove.tsx", "TypeScript JSX", 0, 0, 0, 0, 94, 0, 0, 0, 0, 0, 0, 1, 18, 113
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\AdminDashboard.css", "CSS", 0, 0, 0, 0, 0, 1118, 0, 0, 0, 0, 0, 0, 172, 1290
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\AdminDashboard.tsx", "TypeScript JSX", 0, 0, 0, 0, 194, 0, 0, 0, 0, 0, 0, 9, 24, 227
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\AdminOrders.css", "CSS", 0, 0, 0, 0, 0, 307, 0, 0, 0, 0, 0, 0, 49, 356
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\AdminOrders.tsx", "TypeScript JSX", 0, 0, 0, 0, 223, 0, 0, 0, 0, 0, 0, 1, 16, 240
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\AdminProducts.css", "CSS", 0, 0, 0, 0, 0, 331, 0, 0, 0, 0, 0, 0, 53, 384
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\AdminProducts.tsx", "TypeScript JSX", 0, 0, 0, 0, 220, 0, 0, 0, 0, 0, 0, 0, 20, 240
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\AdminUsers.css", "CSS", 0, 0, 0, 0, 0, 225, 0, 0, 0, 0, 0, 0, 32, 257
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\AdminUsers.tsx", "TypeScript JSX", 0, 0, 0, 0, 163, 0, 0, 0, 0, 0, 0, 1, 17, 181
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\Cart.css", "CSS", 0, 0, 0, 0, 0, 222, 0, 0, 0, 0, 0, 0, 36, 258
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\Cart.tsx", "TypeScript JSX", 0, 0, 0, 0, 177, 0, 0, 0, 0, 0, 0, 0, 179, 356
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\Checkout.css", "CSS", 0, 0, 0, 0, 0, 322, 0, 0, 0, 0, 0, 0, 41, 363
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\Checkout.tsx", "TypeScript JSX", 0, 0, 0, 0, 467, 0, 0, 0, 0, 0, 0, 10, 43, 520
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\Collection.css", "CSS", 0, 0, 0, 0, 0, 554, 0, 0, 0, 0, 0, 0, 91, 645
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\Collection.tsx", "TypeScript JSX", 0, 0, 0, 0, 239, 0, 0, 0, 0, 0, 0, 9, 28, 276
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\Contact.css", "CSS", 0, 0, 0, 0, 0, 136, 0, 0, 0, 0, 0, 0, 22, 158
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\FAQ.css", "CSS", 0, 0, 0, 0, 0, 148, 0, 0, 0, 0, 0, 0, 25, 173
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\Home.tsx", "TypeScript JSX", 0, 0, 0, 0, 388, 0, 0, 0, 0, 0, 0, 9, 36, 433
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\HomeWithAds.tsx", "TypeScript JSX", 0, 0, 0, 0, 14, 0, 0, 0, 0, 0, 0, 4, 4, 22
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\LegalPages.css", "CSS", 0, 0, 0, 0, 0, 94, 0, 0, 0, 0, 0, 0, 16, 110
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\Login.css", "CSS", 0, 0, 0, 0, 0, 215, 0, 0, 0, 0, 0, 0, 31, 246
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\Login.tsx", "TypeScript JSX", 0, 0, 0, 0, 248, 0, 0, 0, 0, 0, 0, 26, 187, 461
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\NotFound.css", "CSS", 0, 0, 0, 0, 0, 42, 0, 0, 0, 0, 0, 0, 7, 49
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\NotFound.tsx", "TypeScript JSX", 0, 0, 0, 0, 28, 0, 0, 0, 0, 0, 0, 0, 3, 31
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\OmnoraCollection.css", "CSS", 0, 0, 0, 0, 0, 348, 0, 0, 0, 0, 0, 0, 56, 404
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\OmnoraContact.css", "CSS", 0, 0, 0, 0, 0, 201, 0, 0, 0, 0, 0, 0, 36, 237
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\OmnoraContact.tsx", "TypeScript JSX", 0, 0, 0, 0, 162, 0, 0, 0, 0, 0, 0, 5, 20, 187
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\OmnoraFAQ.css", "CSS", 0, 0, 0, 0, 0, 192, 0, 0, 0, 0, 0, 0, 35, 227
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\OmnoraFAQ.tsx", "TypeScript JSX", 0, 0, 0, 0, 123, 0, 0, 0, 0, 0, 0, 5, 18, 146
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\OmnoraFinal.css", "CSS", 0, 0, 0, 0, 0, 800, 0, 0, 0, 0, 0, 0, 112, 912
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\OrderConfirmation.css", "CSS", 0, 0, 0, 0, 0, 210, 0, 0, 0, 0, 0, 0, 33, 243
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\OrderConfirmation.tsx", "TypeScript JSX", 0, 0, 0, 0, 149, 0, 0, 0, 0, 0, 0, 13, 19, 181
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\OrderDetail.css", "CSS", 0, 0, 0, 0, 0, 213, 0, 0, 0, 0, 0, 0, 34, 247
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\OrderDetail.tsx", "TypeScript JSX", 0, 0, 0, 0, 231, 0, 0, 0, 0, 0, 0, 11, 23, 265
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\PaymentSuccess.css", "CSS", 0, 0, 0, 0, 0, 126, 0, 0, 0, 0, 0, 0, 20, 146
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\PaymentSuccess.tsx", "TypeScript JSX", 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 3, 9, 62
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\Privacy.tsx", "TypeScript JSX", 0, 0, 0, 0, 41, 0, 0, 0, 0, 0, 0, 0, 5, 46
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\Product.css", "CSS", 0, 0, 0, 0, 0, 241, 0, 0, 0, 0, 0, 0, 37, 278
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\Product.tsx", "TypeScript JSX", 0, 0, 0, 0, 242, 0, 0, 0, 0, 0, 0, 8, 34, 284
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\Profile.css", "CSS", 0, 0, 0, 0, 0, 226, 0, 0, 0, 0, 0, 0, 35, 261
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\Profile.tsx", "TypeScript JSX", 0, 0, 0, 0, 266, 0, 0, 0, 0, 0, 0, 7, 21, 294
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\Register.tsx", "TypeScript JSX", 0, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 1, 4, 14
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\RoleSelector.css", "CSS", 0, 0, 0, 0, 0, 43, 0, 0, 0, 0, 0, 0, 5, 48
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\SellerDashboard.css", "CSS", 0, 0, 0, 0, 0, 514, 0, 0, 0, 0, 0, 0, 74, 588
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\SellerDashboard.tsx", "TypeScript JSX", 0, 0, 0, 0, 364, 0, 0, 0, 0, 0, 0, 33, 45, 442
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\SizeGuide.tsx", "TypeScript JSX", 0, 0, 0, 0, 78, 0, 0, 0, 0, 0, 0, 0, 5, 83
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\StorefrontTestPage.tsx", "TypeScript JSX", 0, 0, 0, 0, 60, 0, 0, 0, 0, 0, 0, 1, 6, 67
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\Terms.tsx", "TypeScript JSX", 0, 0, 0, 0, 45, 0, 0, 0, 0, 0, 0, 0, 6, 51
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\Wishlist.css", "CSS", 0, 0, 0, 0, 0, 126, 0, 0, 0, 0, 0, 0, 20, 146
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\Wishlist.tsx", "TypeScript JSX", 0, 0, 0, 0, 141, 0, 0, 0, 0, 0, 0, 6, 17, 164
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\builder\BuilderHelpPage.tsx", "TypeScript JSX", 0, 0, 0, 0, 301, 0, 0, 0, 0, 0, 0, 5, 12, 318
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\index.css", "CSS", 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 2, 7
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\marketing\LandingPage.tsx", "TypeScript JSX", 0, 0, 0, 0, 108, 0, 0, 0, 0, 0, 0, 5, 12, 125
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\service.js", "JavaScript", 154, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 14, 173
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\client\AssetContext.tsx", "TypeScript JSX", 0, 0, 0, 0, 108, 0, 0, 0, 0, 0, 0, 1, 10, 119
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\client\ComponentWrapper.tsx", "TypeScript JSX", 0, 0, 0, 0, 111, 0, 0, 0, 0, 0, 0, 2, 12, 125
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\client\OmnoraContext.tsx", "TypeScript JSX", 0, 0, 0, 0, 66, 0, 0, 0, 0, 0, 0, 1, 9, 76
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\client\OmnoraRenderer.tsx", "TypeScript JSX", 0, 0, 0, 0, 161, 0, 0, 0, 0, 0, 0, 10, 25, 196
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\client\bootstrap.tsx", "TypeScript JSX", 0, 0, 0, 0, 263, 0, 0, 0, 0, 0, 0, 9, 25, 297
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\components\OmnoraBlocks.tsx", "TypeScript JSX", 0, 0, 0, 0, 554, 0, 0, 0, 0, 0, 0, 9, 70, 633
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\core\AnalyticsClient.ts", "TypeScript", 0, 0, 0, 93, 0, 0, 0, 0, 0, 0, 0, 8, 22, 123
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\core\CartStore.ts", "TypeScript", 0, 0, 0, 227, 0, 0, 0, 0, 0, 0, 0, 12, 41, 280
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\core\DataLink.ts", "TypeScript", 0, 0, 0, 33, 0, 0, 0, 0, 0, 0, 0, 0, 5, 38
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\core\DatabaseClient.ts", "TypeScript", 0, 0, 0, 479, 0, 0, 0, 0, 0, 0, 0, 32, 74, 585
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\core\Dispatcher.ts", "TypeScript", 0, 0, 0, 116, 0, 0, 0, 0, 0, 0, 0, 3, 28, 147
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\core\DomainRouter.ts", "TypeScript", 0, 0, 0, 115, 0, 0, 0, 0, 0, 0, 0, 8, 16, 139
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\core\Logger.ts", "TypeScript", 0, 0, 0, 21, 0, 0, 0, 0, 0, 0, 0, 0, 4, 25
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\core\NodeStore.ts", "TypeScript", 0, 0, 0, 69, 0, 0, 0, 0, 0, 0, 0, 1, 16, 86
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\core\OrderStore.ts", "TypeScript", 0, 0, 0, 152, 0, 0, 0, 0, 0, 0, 0, 7, 38, 197
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\core\Registry.ts", "TypeScript", 0, 0, 0, 156, 0, 0, 0, 0, 0, 0, 0, 3, 16, 175
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\core\StorageClient.ts", "TypeScript", 0, 0, 0, 91, 0, 0, 0, 0, 0, 0, 0, 5, 26, 122
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\core\SupabaseDatabaseClient.ts", "TypeScript", 0, 0, 0, 561, 0, 0, 0, 0, 0, 0, 0, 19, 94, 674
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\core\SupabaseStorageClient.ts", "TypeScript", 0, 0, 0, 82, 0, 0, 0, 0, 0, 0, 0, 4, 20, 106
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\core\SymbolManager.ts", "TypeScript", 0, 0, 0, 127, 0, 0, 0, 0, 0, 0, 0, 9, 26, 162
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\core\TemplateResolver.ts", "TypeScript", 0, 0, 0, 162, 0, 0, 0, 0, 0, 0, 0, 3, 24, 189
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\core\normalize.ts", "TypeScript", 0, 0, 0, 97, 0, 0, 0, 0, 0, 0, 0, 3, 12, 112
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\core\types.ts", "TypeScript", 0, 0, 0, 66, 0, 0, 0, 0, 0, 0, 0, 3, 7, 76
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\library\Blocks.tsx", "TypeScript JSX", 0, 0, 0, 0, 140, 0, 0, 0, 0, 0, 0, 1, 12, 153
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\library\EditableComponents.tsx", "TypeScript JSX", 0, 0, 0, 0, 551, 0, 0, 0, 0, 0, 0, 13, 66, 630
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\library\modules\DiscoveryEngine.tsx", "TypeScript JSX", 0, 0, 0, 0, 169, 0, 0, 0, 0, 0, 0, 2, 20, 191
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\library\modules\ElementControlLayer.tsx", "TypeScript JSX", 0, 0, 0, 0, 1338, 0, 0, 0, 0, 0, 0, 46, 124, 1508
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\library\modules\FeatureGridv5.tsx", "TypeScript JSX", 0, 0, 0, 0, 167, 0, 0, 0, 0, 0, 0, 5, 12, 184
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\library\modules\FeatureModule.tsx", "TypeScript JSX", 0, 0, 0, 0, 103, 0, 0, 0, 0, 0, 0, 3, 11, 117
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\library\modules\HeaderModule.tsx", "TypeScript JSX", 0, 0, 0, 0, 116, 0, 0, 0, 0, 0, 0, 3, 9, 128
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\library\modules\HeroModule.tsx", "TypeScript JSX", 0, 0, 0, 0, 157, 0, 0, 0, 0, 0, 0, 10, 22, 189
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\library\modules\IntelligenceModules.tsx", "TypeScript JSX", 0, 0, 0, 0, 113, 0, 0, 0, 0, 0, 0, 2, 14, 129
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\library\modules\ProductModule.tsx", "TypeScript JSX", 0, 0, 0, 0, 155, 0, 0, 0, 0, 0, 0, 9, 23, 187
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\library\modules\PromoModule.tsx", "TypeScript JSX", 0, 0, 0, 0, 107, 0, 0, 0, 0, 0, 0, 3, 11, 121
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\library\modules\ReviewModule.tsx", "TypeScript JSX", 0, 0, 0, 0, 94, 0, 0, 0, 0, 0, 0, 2, 10, 106
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\library\modules\SelectionEngine.tsx", "TypeScript JSX", 0, 0, 0, 0, 154, 0, 0, 0, 0, 0, 0, 0, 17, 171
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\library\modules\SocialProofModule.tsx", "TypeScript JSX", 0, 0, 0, 0, 66, 0, 0, 0, 0, 0, 0, 0, 10, 76
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\library\modules\StockScarcityModule.tsx", "TypeScript JSX", 0, 0, 0, 0, 41, 0, 0, 0, 0, 0, 0, 0, 6, 47
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\library\modules\TransactionModule.tsx", "TypeScript JSX", 0, 0, 0, 0, 139, 0, 0, 0, 0, 0, 0, 3, 11, 153
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\library\modules\TransactionPipeline.tsx", "TypeScript JSX", 0, 0, 0, 0, 122, 0, 0, 0, 0, 0, 0, 0, 15, 137
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\library\modules\TrustEngine.tsx", "TypeScript JSX", 0, 0, 0, 0, 53, 0, 0, 0, 0, 0, 0, 0, 10, 63
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\library\modules\TrustModule.tsx", "TypeScript JSX", 0, 0, 0, 0, 148, 0, 0, 0, 0, 0, 0, 7, 19, 174
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\library\modules\UrgencyTimerModule.tsx", "TypeScript JSX", 0, 0, 0, 0, 104, 0, 0, 0, 0, 0, 0, 4, 19, 127
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\navigation\LinkResolver.tsx", "TypeScript JSX", 0, 0, 0, 0, 73, 0, 0, 0, 0, 0, 0, 1, 10, 84
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\publish\CleanRenderer.tsx", "TypeScript JSX", 0, 0, 0, 0, 178, 0, 0, 0, 0, 0, 0, 10, 31, 219
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\publish\Publisher.ts", "TypeScript", 0, 0, 0, 141, 0, 0, 0, 0, 0, 0, 0, 6, 25, 172
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\publish\StorefrontApp.tsx", "TypeScript JSX", 0, 0, 0, 0, 193, 0, 0, 0, 0, 0, 0, 15, 35, 243
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\services\CheckoutService.ts", "TypeScript", 0, 0, 0, 39, 0, 0, 0, 0, 0, 0, 0, 7, 10, 56
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\stores\useGlobalThemeStore.ts", "TypeScript", 0, 0, 0, 252, 0, 0, 0, 0, 0, 0, 0, 14, 45, 311
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\stores\useProductDraftStore.ts", "TypeScript", 0, 0, 0, 144, 0, 0, 0, 0, 0, 0, 0, 15, 33, 192
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\styles\Animations.css", "CSS", 0, 0, 0, 0, 0, 140, 0, 0, 0, 0, 0, 0, 31, 171
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\styles\Home.css", "CSS", 0, 0, 0, 0, 0, 335, 0, 0, 0, 0, 0, 0, 52, 387
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\styles\collection.css", "CSS", 0, 0, 0, 0, 0, 165, 0, 0, 0, 0, 0, 0, 28, 193
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\styles\product.css", "CSS", 0, 0, 0, 0, 0, 209, 0, 0, 0, 0, 0, 0, 33, 242
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\styles\theme.css", "CSS", 0, 0, 0, 0, 0, 235, 0, 0, 0, 0, 0, 0, 41, 276
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\utils\builderUtils.ts", "TypeScript", 0, 0, 0, 109, 0, 0, 0, 0, 0, 0, 0, 3, 21, 133
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\utils\imageAnalysis.ts", "TypeScript", 0, 0, 0, 63, 0, 0, 0, 0, 0, 0, 0, 7, 9, 79
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\utils\stressTest.ts", "TypeScript", 0, 0, 0, 46, 0, 0, 0, 0, 0, 0, 0, 4, 11, 61
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\utils\whatsappOrderService.ts", "TypeScript", 0, 0, 0, 130, 0, 0, 0, 0, 0, 0, 0, 6, 25, 161
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\src\vite-env.d.ts", "TypeScript", 0, 0, 0, 24, 0, 0, 0, 0, 0, 0, 0, 1, 7, 32
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\tailwind.config.js", "JavaScript", 22, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 23
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\tsconfig.json", "JSON with Comments", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 17, 0, 2, 19
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\vercel.json", "JSON", 0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12
+"c:\E-Commerce Website (Full) - Copy (3)\frontend\vite.config.ts", "TypeScript", 0, 0, 0, 173, 0, 0, 0, 0, 0, 0, 0, 3, 2, 178
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\BULLMQ_STATUS.md", "Markdown", 0, 0, 104, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32, 136
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\COLLECTION_PAGE_FIX.md", "Markdown", 0, 0, 99, 0, 0, 0, 0, 0, 0, 0, 0, 0, 22, 121
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\MONGODB_SETUP.md", "Markdown", 0, 0, 112, 0, 0, 0, 0, 0, 0, 0, 0, 0, 53, 165
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\PRODUCTION_READINESS.md", "Markdown", 0, 0, 112, 0, 0, 0, 0, 0, 0, 0, 0, 0, 34, 146
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\README.md", "Markdown", 0, 0, 82, 0, 0, 0, 0, 0, 0, 0, 0, 0, 29, 111
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\SECURITY_FIXES.md", "Markdown", 0, 0, 86, 0, 0, 0, 0, 0, 0, 0, 0, 0, 22, 108
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\bootstrap.js", "JavaScript", 79, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14, 19, 112
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\check_products.js", "JavaScript", 31, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 41
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\check_status.js", "JavaScript", 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 8
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\config\db.js", "JavaScript", 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 14
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\config\env.js", "JavaScript", 118, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 18, 137
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\controllers\adminController.js", "JavaScript", 196, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 30, 228
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\controllers\analyticsController.js", "JavaScript", 57, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 9, 69
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\controllers\authController.js", "JavaScript", 214, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 28, 30, 272
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\controllers\cartController.js", "JavaScript", 217, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32, 249
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\controllers\contactController.js", "JavaScript", 67, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 14, 83
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\controllers\domainController.js", "JavaScript", 62, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 9, 74
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\controllers\inventoryController.js", "JavaScript", 356, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 48, 406
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\controllers\mediaController.js", "JavaScript", 73, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 13, 87
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\controllers\newsletterController.js", "JavaScript", 78, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 15, 98
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\controllers\orderController.js", "JavaScript", 608, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 47, 93, 748
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\controllers\paymentController.js", "JavaScript", 97, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 10, 108
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\controllers\phase1Controller.js", "JavaScript", 474, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 93, 572
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\controllers\phase2Controller.js", "JavaScript", 688, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 35, 131, 854
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\controllers\phase3Controller.js", "JavaScript", 809, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 53, 155, 1017
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\controllers\productController.js", "JavaScript", 283, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 35, 325
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\controllers\recommendationController.js", "JavaScript", 213, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 32, 246
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\controllers\reviewController.js", "JavaScript", 335, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 51, 390
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\controllers\searchController.js", "JavaScript", 203, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 24, 229
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\controllers\userController.js", "JavaScript", 201, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 34, 236
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\controllers\webhookController.js", "JavaScript", 120, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 17, 146
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\controllers\wishlistController.js", "JavaScript", 359, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 52, 411
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\data\admin_action_logs.json", "JSON", 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\data\defaultProducts.js", "JavaScript", 87, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 3, 92
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\data\event.json", "JSON", 0, 8872, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8872
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\data\orders.json", "JSON", 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\data\product.json", "JSON", 0, 10686, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10686
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\data\products.json", "JSON", 0, 80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 80
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\data\sitecontent.json", "JSON", 0, 520, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 520
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\data\user.json", "JSON", 0, 257, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 257
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\data\users.json", "JSON", 0, 26, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 26
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\docs\API_OPERATIONS.md", "Markdown", 0, 0, 42, 0, 0, 0, 0, 0, 0, 0, 0, 0, 18, 60
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\docs\RUNBOOK_ARCHITECTURE.md", "Markdown", 0, 0, 32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 19, 51
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\ecosystem.config.js", "JavaScript", 53, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 55
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\email-templates\order-cancelled.html", "HTML", 0, 0, 0, 0, 0, 0, 60, 0, 0, 0, 0, 0, 11, 71
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\email-templates\order-delivered.html", "HTML", 0, 0, 0, 0, 0, 0, 60, 0, 0, 0, 0, 0, 10, 70
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\email-templates\order-placed.html", "HTML", 0, 0, 0, 0, 0, 0, 71, 0, 0, 0, 0, 0, 12, 83
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\email-templates\order-shipped.html", "HTML", 0, 0, 0, 0, 0, 0, 69, 0, 0, 0, 0, 0, 12, 81
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\email-templates\payment-approved.html", "HTML", 0, 0, 0, 0, 0, 0, 69, 0, 0, 0, 0, 0, 12, 81
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\jobs\cleanupInitiatedOrders.js", "JavaScript", 97, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 19, 121
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\lib\dbConnect.js", "JavaScript", 39, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 50
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\middleware\auth.js", "JavaScript", 104, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 19, 127
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\middleware\authEnhanced.js", "JavaScript", 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\middleware\authMiddleware.js", "JavaScript", 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\middleware\gatekeeper.js", "JavaScript", 102, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 22, 135
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\middleware\rateLimiter.js", "JavaScript", 28, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 35
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\middleware\tenantContext.js", "JavaScript", 46, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 9, 59
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\middleware\validate.js", "JavaScript", 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 19
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\models\AbandonedCart.js", "JavaScript", 389, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 45, 445
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\models\AdminActionLog.js", "JavaScript", 18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 23
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\models\AiContent.js", "JavaScript", 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 19
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\models\Bundle.js", "JavaScript", 340, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 39, 394
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\models\Contact.js", "JavaScript", 29, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 31
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\models\Event.js", "JavaScript", 17, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 20
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\models\Inventory.js", "JavaScript", 85, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 12, 98
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\models\MessageLog.js", "JavaScript", 31, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 34
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\models\Newsletter.js", "JavaScript", 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 17
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\models\OneClickCheckout.js", "JavaScript", 140, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 14, 165
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\models\Order.js", "JavaScript", 63, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 5, 71
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\models\PaymentMethod.js", "JavaScript", 27, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 8, 39
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\models\Phase1Models.js", "JavaScript", 521, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 61, 73, 655
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\models\Phase2Models.js", "JavaScript", 696, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 79, 134, 909
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\models\Phase3Models.js", "JavaScript", 709, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 91, 176, 976
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\models\Product.js", "JavaScript", 30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 33
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\models\Recommendation.js", "JavaScript", 18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 22
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\models\Review.js", "JavaScript", 17, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 20
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\models\Shipment.js", "JavaScript", 21, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 24
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\models\SiteContent.js", "JavaScript", 51, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 7, 60
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\models\User.js", "JavaScript", 61, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 5, 67
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\models\WaOptOut.js", "JavaScript", 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 15
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\models\WhatsAppTemplate.js", "JavaScript", 28, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 5, 35
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\models\Wishlist.js", "JavaScript", 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 17
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\package-lock.json", "JSON", 0, 9276, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 9277
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\package-production.json", "JSON", 0, 71, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 72
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\package.json", "JSON", 0, 55, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 55
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\routes\adminRoutes.js", "JavaScript", 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 7, 32
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\routes\aiContentRoutes.js", "JavaScript", 37, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 10, 51
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\routes\analyticsRoutes.js", "JavaScript", 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 10
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\routes\authRoutes.js", "JavaScript", 13, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 4, 19
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\routes\cartRoutes.js", "JavaScript", 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4, 20
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\routes\cmsRoutes.js", "JavaScript", 149, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 19, 35, 203
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\routes\contactRoutes.js", "JavaScript", 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 3, 14
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\routes\domainRoutes.js", "JavaScript", 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 10
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\routes\healthRoutes.js", "JavaScript", 57, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 8, 68
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\routes\inventoryRoutes.js", "JavaScript", 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 6, 29
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\routes\mediaRoutes.js", "JavaScript", 45, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 8, 57
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\routes\newsletterRoutes.js", "JavaScript", 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 3, 14
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\routes\onboardingRoutes.js", "JavaScript", 67, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 11, 86
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\routes\orderRoutes.js", "JavaScript", 90, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 17, 21, 128
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\routes\paymentMethodRoutes.js", "JavaScript", 90, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 16, 113
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\routes\paymentRoutes.js", "JavaScript", 13, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 7, 25
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\routes\performanceHubRoutes.js", "JavaScript", 52, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 13, 73
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\routes\phase1Routes.js", "JavaScript", 68, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 33, 23, 124
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\routes\phase2Routes.js", "JavaScript", 62, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 28, 14, 104
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\routes\phase3Routes.js", "JavaScript", 84, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 46, 20, 150
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\routes\productRoutes.js", "JavaScript", 21, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 25
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\routes\recommendationRoutes.js", "JavaScript", 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 6, 25
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\routes\reviewRoutes.js", "JavaScript", 18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 6, 27
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\routes\searchRoutes.js", "JavaScript", 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 5, 21
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\routes\sellerAnalyticsRoutes.js", "JavaScript", 44, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 7, 55
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\routes\sellerRoutes.js", "JavaScript", 70, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 80
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\routes\userRoutes.js", "JavaScript", 21, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4, 26
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\routes\webhookRoutes.js", "JavaScript", 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 9
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\routes\whatsappTemplateRoutes.js", "JavaScript", 56, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 11, 73
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\routes\wishlistRoutes.js", "JavaScript", 19, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 6, 28
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\scripts\check-env-leaks.js", "JavaScript", 35, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 43
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\scripts\cleanup-port.js", "JavaScript", 44, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 54
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\scripts\createAdmin.js", "JavaScript", 61, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 12, 77
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\scripts\precheck.js", "JavaScript", 59, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 69
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\scripts\seed-products-remote.js", "JavaScript", 47, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 11, 61
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\scripts\seed-remote.js", "JavaScript", 53, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 10, 65
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\scripts\seedProducts.js", "JavaScript", 148, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 13, 169
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\scripts\set-admin.js", "JavaScript", 57, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 69
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\scripts\start-dev.js", "JavaScript", 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 7, 25
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\scripts\test-approval-system.js", "JavaScript", 130, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 25, 27, 182
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\scripts\test-whatsapp.js", "JavaScript", 31, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 35
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\scripts\verify-system.js", "JavaScript", 109, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 23, 141
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\server.js", "JavaScript", 163, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16, 18, 197
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\services\aiContentService.js", "JavaScript", 91, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 24, 127
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\services\aiQuotaService.js", "JavaScript", 75, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 16, 98
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\services\analyticsService.js", "JavaScript", 125, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 32, 166
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\services\cartService.js", "JavaScript", 320, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 39, 364
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\services\dbService.js", "JavaScript", 60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 72
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\services\emailService.js", "JavaScript", 198, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 23, 222
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\services\logger.js", "JavaScript", 25, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 31
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\services\mailblusterService.js", "JavaScript", 69, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 81
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\services\manifestService.js", "JavaScript", 34, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 7, 42
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\services\memoryDbService.js", "JavaScript", 45, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 55
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\services\onboardingService.js", "JavaScript", 108, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 15, 126
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\services\paymentService.js", "JavaScript", 329, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 54, 57, 440
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\services\preflightService.js", "JavaScript", 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 7, 61
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\services\queueService.js", "JavaScript", 169, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 23, 201
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\services\recommendationService.js", "JavaScript", 230, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 36, 278
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\services\searchService.js", "JavaScript", 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, 47, 322
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\services\shippingService.js", "JavaScript", 89, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 24, 123
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\services\shipping\leopardsProvider.js", "JavaScript", 57, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 9, 67
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\services\shipping\tcsProvider.js", "JavaScript", 23, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 31
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\services\shipping\traxProvider.js", "JavaScript", 58, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 67
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\services\stateService.js", "JavaScript", 147, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 29, 184
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\services\waRateGuard.js", "JavaScript", 87, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 23, 121
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\services\whatsappAutomationService.js", "JavaScript", 132, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 27, 171
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\services\whatsappService.js", "JavaScript", 27, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4, 32
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\templates\home\electronics.json", "JSON", 0, 67, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 67
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\templates\home\fashion.json", "JSON", 0, 75, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 75
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\templates\home\general.json", "JSON", 0, 59, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 59
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\test-boundaries.js", "JavaScript", 93, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 19, 120
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\test_subscription.js", "JavaScript", 25, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 29
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\tests\QA-SECURITY-CHECKLIST.md", "Markdown", 0, 0, 315, 0, 0, 0, 0, 0, 0, 0, 0, 0, 117, 432
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\tests\integration\bootstrap.test.js", "JavaScript", 62, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 10, 73
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\tests\integration\payment-security.test.js", "JavaScript", 219, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 26, 51, 296
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\tests\security\jwt.test.js", "JavaScript", 88, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 24, 115
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\tests\test_approval_flow.js", "JavaScript", 104, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 20, 132
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\tests\unit\config.test.js", "JavaScript", 38, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 48
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\utils\LocalDB.js", "JavaScript", 230, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 17, 46, 293
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\utils\inventoryService.js", "JavaScript", 137, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 23, 163
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\utils\modelFactory.js", "JavaScript", 67, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14, 18, 99
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\utils\orderHashService.js", "JavaScript", 40, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 8, 51
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\utils\phoneFormatter.js", "JavaScript", 56, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 17, 83
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\utils\retryWithBackoff.js", "JavaScript", 62, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 72
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\utils\tenantStorage.js", "JavaScript", 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 6
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\utils\tokenService.js", "JavaScript", 74, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 11, 87
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\utils\whatsappService.js", "JavaScript", 142, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 28, 170
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\validators\orderValidators.js", "JavaScript", 36, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 44
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\validators\productValidators.js", "JavaScript", 28, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 36
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\validators\userValidator.js", "JavaScript", 23, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 28
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\validators\userValidators.js", "JavaScript", 41, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 49
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\verify-mongodb.js", "JavaScript", 96, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 23, 122
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\verify-order-fix.js", "JavaScript", 42, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 9, 52
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\verify-serverless.js", "JavaScript", 69, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 19, 98
+"c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\workers\notificationWorker.js", "JavaScript", 157, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16, 37, 210
+"c:\E-Commerce Website (Full) - Copy (3)\list_all_events.js", "JavaScript", 19, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 21
+"c:\E-Commerce Website (Full) - Copy (3)\list_errors.js", "JavaScript", 19, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 21
+"c:\E-Commerce Website (Full) - Copy (3)\package-lock.json", "JSON", 0, 466, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 467
+"c:\E-Commerce Website (Full) - Copy (3)\package.json", "JSON", 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20
+"c:\E-Commerce Website (Full) - Copy (3)\scripts\check-environment.ps1", "PowerShell", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1
+"c:\E-Commerce Website (Full) - Copy (3)\scripts\start-backend.ps1", "PowerShell", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1
+"c:\E-Commerce Website (Full) - Copy (3)\sitemap.xml", "XML", 0, 0, 0, 0, 0, 0, 0, 18, 0, 0, 0, 0, 2, 20
+"c:\E-Commerce Website (Full) - Copy (3)\start-dev.ps1", "PowerShell", 0, 0, 0, 0, 0, 0, 0, 0, 42, 0, 0, 8, 12, 62
+"c:\E-Commerce Website (Full) - Copy (3)\storefront-export\components\Footer.css", "CSS", 0, 0, 0, 0, 0, 248, 0, 0, 0, 0, 0, 0, 39, 287
+"c:\E-Commerce Website (Full) - Copy (3)\storefront-export\components\Footer.tsx", "TypeScript JSX", 0, 0, 0, 0, 120, 0, 0, 0, 0, 0, 0, 10, 15, 145
+"c:\E-Commerce Website (Full) - Copy (3)\storefront-export\components\GlobalErrorBoundary.tsx", "TypeScript JSX", 0, 0, 0, 0, 60, 0, 0, 0, 0, 0, 0, 1, 12, 73
+"c:\E-Commerce Website (Full) - Copy (3)\storefront-export\components\Layout.css", "CSS", 0, 0, 0, 0, 0, 379, 0, 0, 0, 0, 0, 0, 58, 437
+"c:\E-Commerce Website (Full) - Copy (3)\storefront-export\components\Layout.tsx", "TypeScript JSX", 0, 0, 0, 0, 241, 0, 0, 0, 0, 0, 0, 27, 32, 300
+"c:\E-Commerce Website (Full) - Copy (3)\storefront-export\components\StripePayment.tsx", "TypeScript JSX", 0, 0, 0, 0, 82, 0, 0, 0, 0, 0, 0, 2, 13, 97
+"c:\E-Commerce Website (Full) - Copy (3)\storefront-export\components\cart\BuyButton.tsx", "TypeScript JSX", 0, 0, 0, 0, 187, 0, 0, 0, 0, 0, 0, 2, 20, 209
+"c:\E-Commerce Website (Full) - Copy (3)\storefront-export\components\cart\CartDrawer.tsx", "TypeScript JSX", 0, 0, 0, 0, 392, 0, 0, 0, 0, 0, 0, 22, 30, 444
+"c:\E-Commerce Website (Full) - Copy (3)\storefront-export\components\cart\CheckoutBlock.tsx", "TypeScript JSX", 0, 0, 0, 0, 417, 0, 0, 0, 0, 0, 0, 16, 42, 475
+"c:\E-Commerce Website (Full) - Copy (3)\storefront-export\components\cart\OrderConfirmationBlock.tsx", "TypeScript JSX", 0, 0, 0, 0, 225, 0, 0, 0, 0, 0, 0, 16, 22, 263
+"c:\E-Commerce Website (Full) - Copy (3)\storefront-export\components\cart\ProductCard.tsx", "TypeScript JSX", 0, 0, 0, 0, 208, 0, 0, 0, 0, 0, 0, 9, 17, 234
+"c:\E-Commerce Website (Full) - Copy (3)\storefront-export\components\cart\ProductGrid.tsx", "TypeScript JSX", 0, 0, 0, 0, 150, 0, 0, 0, 0, 0, 0, 10, 18, 178
+"c:\E-Commerce Website (Full) - Copy (3)\storefront-export\components\cart\ProductOptions.tsx", "TypeScript JSX", 0, 0, 0, 0, 237, 0, 0, 0, 0, 0, 0, 13, 22, 272
+"c:\E-Commerce Website (Full) - Copy (3)\storefront-export\components\cart\SearchBar.tsx", "TypeScript JSX", 0, 0, 0, 0, 204, 0, 0, 0, 0, 0, 0, 6, 16, 226
+"c:\E-Commerce Website (Full) - Copy (3)\storefront-export\components\cart\StoreHeader.tsx", "TypeScript JSX", 0, 0, 0, 0, 203, 0, 0, 0, 0, 0, 0, 10, 18, 231
+"c:\E-Commerce Website (Full) - Copy (3)\storefront-export\components\home\ErrorBoundary.css", "CSS", 0, 0, 0, 0, 0, 124, 0, 0, 0, 0, 0, 0, 17, 141
+"c:\E-Commerce Website (Full) - Copy (3)\storefront-export\components\home\HowItWorks.tsx", "TypeScript JSX", 0, 0, 0, 0, 40, 0, 0, 0, 0, 0, 0, 4, 5, 49
+"c:\E-Commerce Website (Full) - Copy (3)\storefront-export\components\home\Newsletter.tsx", "TypeScript JSX", 0, 0, 0, 0, 69, 0, 0, 0, 0, 0, 0, 1, 8, 78
+"c:\E-Commerce Website (Full) - Copy (3)\storefront-export\components\home\TechStack.css", "CSS", 0, 0, 0, 0, 0, 389, 0, 0, 0, 0, 0, 0, 54, 443
+"c:\E-Commerce Website (Full) - Copy (3)\storefront-export\components\home\Testimonials.tsx", "TypeScript JSX", 0, 0, 0, 0, 71, 0, 0, 0, 0, 0, 0, 4, 7, 82
+"c:\E-Commerce Website (Full) - Copy (3)\storefront-export\components\home\TrustSection.tsx", "TypeScript JSX", 0, 0, 0, 0, 32, 0, 0, 0, 0, 0, 0, 0, 2, 34
+"c:\E-Commerce Website (Full) - Copy (3)\storefront-export\components\home\WhyUs.tsx", "TypeScript JSX", 0, 0, 0, 0, 28, 0, 0, 0, 0, 0, 0, 0, 3, 31
+"c:\E-Commerce Website (Full) - Copy (3)\storefront-export\components\home\tech.tsx", "TypeScript JSX", 0, 0, 0, 0, 147, 0, 0, 0, 0, 0, 0, 9, 18, 174
+"c:\E-Commerce Website (Full) - Copy (3)\storefront-export\components\home\testimonials.css", "CSS", 0, 0, 0, 0, 0, 185, 0, 0, 0, 0, 0, 0, 25, 210
+"c:\E-Commerce Website (Full) - Copy (3)\storefront-export\components\storefront\CustomerDashboard.tsx", "TypeScript JSX", 0, 0, 0, 0, 206, 0, 0, 0, 0, 0, 0, 6, 24, 236
+"c:\E-Commerce Website (Full) - Copy (3)\storefront-export\components\storefront\OmnoraBanner.tsx", "TypeScript JSX", 0, 0, 0, 0, 47, 0, 0, 0, 0, 0, 0, 3, 9, 59
+"c:\E-Commerce Website (Full) - Copy (3)\storefront-export\components\storefront\ThankYouPage.tsx", "TypeScript JSX", 0, 0, 0, 0, 199, 0, 0, 0, 0, 0, 0, 2, 23, 224
+"c:\E-Commerce Website (Full) - Copy (3)\storefront-export\context\CustomerAuthContext.tsx", "TypeScript JSX", 0, 0, 0, 0, 125, 0, 0, 0, 0, 0, 0, 6, 26, 157
+"c:\E-Commerce Website (Full) - Copy (3)\storefront-export\context\StorefrontContext.tsx", "TypeScript JSX", 0, 0, 0, 0, 421, 0, 0, 0, 0, 0, 0, 9, 55, 485
+"c:\E-Commerce Website (Full) - Copy (3)\storefront-export\pages\About.css", "CSS", 0, 0, 0, 0, 0, 202, 0, 0, 0, 0, 0, 0, 39, 241
+"c:\E-Commerce Website (Full) - Copy (3)\storefront-export\pages\About.tsx", "TypeScript JSX", 0, 0, 0, 0, 138, 0, 0, 0, 0, 0, 0, 6, 15, 159
+"c:\E-Commerce Website (Full) - Copy (3)\storefront-export\pages\Cart.css", "CSS", 0, 0, 0, 0, 0, 222, 0, 0, 0, 0, 0, 0, 36, 258
+"c:\E-Commerce Website (Full) - Copy (3)\storefront-export\pages\Cart.tsx", "TypeScript JSX", 0, 0, 0, 0, 177, 0, 0, 0, 0, 0, 0, 0, 179, 356
+"c:\E-Commerce Website (Full) - Copy (3)\storefront-export\pages\Checkout.css", "CSS", 0, 0, 0, 0, 0, 322, 0, 0, 0, 0, 0, 0, 41, 363
+"c:\E-Commerce Website (Full) - Copy (3)\storefront-export\pages\Checkout.tsx", "TypeScript JSX", 0, 0, 0, 0, 467, 0, 0, 0, 0, 0, 0, 10, 43, 520
+"c:\E-Commerce Website (Full) - Copy (3)\storefront-export\pages\Collection.css", "CSS", 0, 0, 0, 0, 0, 554, 0, 0, 0, 0, 0, 0, 91, 645
+"c:\E-Commerce Website (Full) - Copy (3)\storefront-export\pages\Collection.tsx", "TypeScript JSX", 0, 0, 0, 0, 139, 0, 0, 0, 0, 0, 0, 9, 25, 173
+"c:\E-Commerce Website (Full) - Copy (3)\storefront-export\pages\Home.tsx", "TypeScript JSX", 0, 0, 0, 0, 261, 0, 0, 0, 0, 0, 0, 14, 30, 305
+"c:\E-Commerce Website (Full) - Copy (3)\storefront-export\pages\HomeWithAds.tsx", "TypeScript JSX", 0, 0, 0, 0, 12, 0, 0, 0, 0, 0, 0, 4, 6, 22
+"c:\E-Commerce Website (Full) - Copy (3)\storefront-export\pages\OmnoraContact.css", "CSS", 0, 0, 0, 0, 0, 201, 0, 0, 0, 0, 0, 0, 36, 237
+"c:\E-Commerce Website (Full) - Copy (3)\storefront-export\pages\OmnoraContact.tsx", "TypeScript JSX", 0, 0, 0, 0, 162, 0, 0, 0, 0, 0, 0, 5, 20, 187
+"c:\E-Commerce Website (Full) - Copy (3)\storefront-export\pages\OmnoraFAQ.css", "CSS", 0, 0, 0, 0, 0, 192, 0, 0, 0, 0, 0, 0, 35, 227
+"c:\E-Commerce Website (Full) - Copy (3)\storefront-export\pages\OmnoraFAQ.tsx", "TypeScript JSX", 0, 0, 0, 0, 123, 0, 0, 0, 0, 0, 0, 5, 18, 146
+"c:\E-Commerce Website (Full) - Copy (3)\storefront-export\pages\OrderConfirmation.css", "CSS", 0, 0, 0, 0, 0, 210, 0, 0, 0, 0, 0, 0, 33, 243
+"c:\E-Commerce Website (Full) - Copy (3)\storefront-export\pages\OrderConfirmation.tsx", "TypeScript JSX", 0, 0, 0, 0, 149, 0, 0, 0, 0, 0, 0, 13, 19, 181
+"c:\E-Commerce Website (Full) - Copy (3)\storefront-export\pages\Privacy.tsx", "TypeScript JSX", 0, 0, 0, 0, 41, 0, 0, 0, 0, 0, 0, 0, 5, 46
+"c:\E-Commerce Website (Full) - Copy (3)\storefront-export\pages\Product.css", "CSS", 0, 0, 0, 0, 0, 241, 0, 0, 0, 0, 0, 0, 37, 278
+"c:\E-Commerce Website (Full) - Copy (3)\storefront-export\pages\Product.tsx", "TypeScript JSX", 0, 0, 0, 0, 250, 0, 0, 0, 0, 0, 0, 9, 35, 294
+"c:\E-Commerce Website (Full) - Copy (3)\storefront-export\pages\SizeGuide.tsx", "TypeScript JSX", 0, 0, 0, 0, 78, 0, 0, 0, 0, 0, 0, 0, 5, 83
+"c:\E-Commerce Website (Full) - Copy (3)\storefront-export\pages\Terms.tsx", "TypeScript JSX", 0, 0, 0, 0, 45, 0, 0, 0, 0, 0, 0, 0, 6, 51
+"c:\E-Commerce Website (Full) - Copy (3)\storefront-export\pages\Wishlist.css", "CSS", 0, 0, 0, 0, 0, 126, 0, 0, 0, 0, 0, 0, 20, 146
+"c:\E-Commerce Website (Full) - Copy (3)\storefront-export\pages\Wishlist.tsx", "TypeScript JSX", 0, 0, 0, 0, 141, 0, 0, 0, 0, 0, 0, 6, 17, 164
+"c:\E-Commerce Website (Full) - Copy (3)\supabase\functions\create-checkout-session\index.ts", "TypeScript", 0, 0, 0, 76, 0, 0, 0, 0, 0, 0, 0, 5, 13, 94
+"c:\E-Commerce Website (Full) - Copy (3)\supabase\functions\fetch-platform-stats\index.ts", "TypeScript", 0, 0, 0, 56, 0, 0, 0, 0, 0, 0, 0, 6, 15, 77
+"c:\E-Commerce Website (Full) - Copy (3)\supabase\functions\merchant-stripe-webhook\index.ts", "TypeScript", 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 0, 8, 26, 134
+"c:\E-Commerce Website (Full) - Copy (3)\supabase\functions\process-merchant-checkout\index.ts", "TypeScript", 0, 0, 0, 80, 0, 0, 0, 0, 0, 0, 0, 6, 16, 102
+"c:\E-Commerce Website (Full) - Copy (3)\supabase\functions\stripe-webhook\index.ts", "TypeScript", 0, 0, 0, 82, 0, 0, 0, 0, 0, 0, 0, 5, 19, 106
+"c:\E-Commerce Website (Full) - Copy (3)\test_api.js", "JavaScript", 41, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 48
+"c:\E-Commerce Website (Full) - Copy (3)\test_db.js", "JavaScript", 18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 26
+"c:\E-Commerce Website (Full) - Copy (3)\vercel.json", "JSON", 0, 49, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 49
+"Total", "-", 34130, 70339, 2110, 6315, 39382, 16945, 768, 46, 42, 420, 17, 4477, 15768, 190759

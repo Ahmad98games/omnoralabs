@@ -1,0 +1,574 @@
+[
+  {
+    "_id": "sc_default_seller",
+    "seller": "hj1bxb5pg",
+    "tenant_id": "default_tenant",
+    "tenant_slug": "default-store",
+    "isActive": true,
+    "published": {
+      "pages": {
+        "home": {
+          "headlineText": "The New Era of Luxury",
+          "subHeadline": "Experience unmatched quality and timeless design",
+          "heroImage": "/images/home/hero.png"
+        }
+      },
+      "globalStyles": {
+        "primaryColor": "#C0C0C0",
+        "accentColor": "#FFFFFF",
+        "fontFamilyHeading": "'Inter', sans-serif",
+        "fontFamilyBody": "'Inter', sans-serif"
+      },
+      "configuration": {
+        "ui": {
+          "spatialPadding": "2rem"
+        },
+        "commerce": {
+          "taxRate": 0.17,
+          "currency": "PKR"
+        }
+      }
+    },
+    "draft": {
+      "pages": {
+        "home": {
+          "headlineText": "The New Era of Luxury (Draft)",
+          "subHeadline": "Experience unmatched quality and timeless design",
+          "heroImage": "/images/home/hero.png"
+        }
+      },
+      "globalStyles": {
+        "primaryColor": "#C0C0C0",
+        "accentColor": "#FFFFFF",
+        "fontFamilyHeading": "'Inter', sans-serif",
+        "fontFamilyBody": "'Inter', sans-serif"
+      },
+      "configuration": {
+        "ui": {
+          "spatialPadding": "2rem"
+        },
+        "commerce": {
+          "taxRate": 0.17,
+          "currency": "PKR"
+        }
+      }
+    },
+    "createdAt": "2026-02-20T18:00:00.000Z",
+    "updatedAt": "2026-02-20T18:00:00.000Z"
+  },
+  {
+    "_id": "sudomf27z",
+    "seller": "SYSTEM",
+    "tenant_id": "pakahmad915",
+    "tenant_slug": "new-store",
+    "draft": {},
+    "published": {},
+    "isActive": true,
+    "timestamp": 1771601014492,
+    "createdAt": "2026-02-20T15:23:34.492Z",
+    "updatedAt": "2026-02-20T15:23:34.492Z",
+    "__v": 0
+  },
+  {
+    "_id": "009blmm39",
+    "seller": "lc5k737z9",
+    "tenant_id": "lc5k737z9",
+    "tenant_slug": "delta",
+    "published": {
+      "configuration": {
+        "name": "delta's Imperial Store",
+        "assets": {
+          "logo": "/images/omnora.jpg",
+          "favicon": "/favicon.ico"
+        }
+      },
+      "pages": {
+        "home": {
+          "heroHeadline": "Welcome to delta's Collection",
+          "heroSubheadline": "Experience Independent Luxury"
+        }
+      }
+    },
+    "isActive": true,
+    "timestamp": 1771601149108,
+    "createdAt": "2026-02-20T15:25:49.108Z",
+    "updatedAt": "2026-02-20T15:25:49.108Z",
+    "__v": 0
+  },
+  {
+    "_id": "ctlwpf857",
+    "seller": "SYSTEM",
+    "tenant_id": "pakahmad815",
+    "tenant_slug": "new-store",
+    "draft": {},
+    "published": {},
+    "isActive": true,
+    "timestamp": 1771601149185,
+    "createdAt": "2026-02-20T15:25:49.185Z",
+    "updatedAt": "2026-02-20T15:25:49.185Z",
+    "__v": 0
+  },
+  {
+    "_id": "rhqwuv3d3",
+    "seller": "SYSTEM",
+    "tenant_id": "tenant_127",
+    "tenant_slug": "127",
+    "draft": {},
+    "published": {},
+    "isActive": true,
+    "timestamp": 1771605230924,
+    "createdAt": "2026-02-20T16:33:50.924Z",
+    "updatedAt": "2026-02-20T16:33:50.924Z",
+    "__v": 0
+  },
+  {
+    "_id": "poyy5t3fm",
+    "seller": "fe2wiw8q0",
+    "tenant_id": "fe2wiw8q0",
+    "tenant_slug": "ahmad",
+    "published": {
+      "configuration": {
+        "name": "ahmad's Imperial Store",
+        "assets": {
+          "logo": "/images/omnora.jpg",
+          "favicon": "/favicon.ico"
+        }
+      },
+      "pages": {
+        "home": {
+          "heroHeadline": "Welcome to ahmad's Collection",
+          "heroSubheadline": "Experience Independent Luxury"
+        }
+      }
+    },
+    "isActive": true,
+    "timestamp": 1771606410005,
+    "createdAt": "2026-02-20T16:53:30.005Z",
+    "updatedAt": "2026-02-20T16:53:30.005Z",
+    "__v": 0
+  },
+  {
+    "_id": "t8bjjwkzh",
+    "seller": "4ffk9jvvn",
+    "tenant_id": "4ffk9jvvn",
+    "tenant_slug": "ahmad",
+    "published": {
+      "configuration": {
+        "name": "ahmad's Imperial Store",
+        "assets": {
+          "logo": "/images/omnora.jpg",
+          "favicon": "/favicon.ico"
+        }
+      },
+      "pages": {
+        "home": {
+          "heroHeadline": "Welcome to ahmad's Collection",
+          "heroSubheadline": "Experience Independent Luxury"
+        }
+      }
+    },
+    "isActive": true,
+    "timestamp": 1771609620733,
+    "createdAt": "2026-02-20T17:47:00.734Z",
+    "updatedAt": "2026-02-20T17:47:00.734Z",
+    "__v": 0
+  },
+  {
+    "_id": "brpqg9oka",
+    "seller": "twpahby1j",
+    "tenant_id": "twpahby1j",
+    "tenant_slug": "ahmad",
+    "published": {
+      "configuration": {
+        "name": "ahmad's Imperial Store",
+        "assets": {
+          "logo": "/images/omnora.jpg",
+          "favicon": "/favicon.ico"
+        }
+      },
+      "pages": {
+        "home": {
+          "heroHeadline": "Welcome to ahmad's Collection",
+          "heroSubheadline": "Experience Independent Luxury"
+        }
+      }
+    },
+    "isActive": true,
+    "timestamp": 1771681121915,
+    "createdAt": "2026-02-21T13:38:41.915Z",
+    "updatedAt": "2026-02-21T13:38:41.915Z",
+    "__v": 0
+  },
+  {
+    "_id": "1a53rnr07",
+    "seller": "r1gajfdwh",
+    "tenant_id": "r1gajfdwh",
+    "tenant_slug": "ahmad",
+    "published": {
+      "configuration": {
+        "name": "ahmad's Imperial Store",
+        "assets": {
+          "logo": "/images/omnora.jpg",
+          "favicon": "/favicon.ico"
+        }
+      },
+      "pages": {
+        "home": {
+          "heroHeadline": "Welcome to ahmad's Collection",
+          "heroSubheadline": "Experience Independent Luxury"
+        }
+      }
+    },
+    "isActive": true,
+    "timestamp": 1771682211883,
+    "createdAt": "2026-02-21T13:56:51.884Z",
+    "updatedAt": "2026-02-21T13:56:51.884Z",
+    "__v": 0
+  },
+  {
+    "_id": "td8zm4aow",
+    "seller": "je736epfr",
+    "tenant_id": "je736epfr",
+    "tenant_slug": "ahmad",
+    "published": {
+      "configuration": {
+        "name": "ahmad's Imperial Store",
+        "assets": {
+          "logo": "/images/omnora.jpg",
+          "favicon": "/favicon.ico"
+        }
+      },
+      "pages": {
+        "home": {
+          "heroHeadline": "Welcome to ahmad's Collection",
+          "heroSubheadline": "Experience Independent Luxury"
+        }
+      }
+    },
+    "isActive": true,
+    "timestamp": 1771767178238,
+    "createdAt": "2026-02-22T13:32:58.238Z",
+    "updatedAt": "2026-02-22T13:32:58.238Z",
+    "__v": 0
+  },
+  {
+    "_id": "fn1n1ljny",
+    "seller": "7wvfhyhg9",
+    "tenant_id": "7wvfhyhg9",
+    "tenant_slug": "ahmad",
+    "published": {
+      "configuration": {
+        "name": "ahmad's Imperial Store",
+        "assets": {
+          "logo": "/images/omnora.jpg",
+          "favicon": "/favicon.ico"
+        }
+      },
+      "pages": {
+        "home": {
+          "heroHeadline": "Welcome to ahmad's Collection",
+          "heroSubheadline": "Experience Independent Luxury"
+        }
+      }
+    },
+    "isActive": true,
+    "timestamp": 1771781928564,
+    "createdAt": "2026-02-22T17:38:48.564Z",
+    "updatedAt": "2026-02-22T17:38:48.564Z",
+    "__v": 0
+  },
+  {
+    "_id": "rv3a8vs0p",
+    "seller": "eyx7arm1m",
+    "tenant_id": "eyx7arm1m",
+    "tenant_slug": "ahmad",
+    "published": {
+      "configuration": {
+        "name": "ahmad's Imperial Store",
+        "assets": {
+          "logo": "/images/omnora.jpg",
+          "favicon": "/favicon.ico"
+        }
+      },
+      "pages": {
+        "home": {
+          "heroHeadline": "Welcome to ahmad's Collection",
+          "heroSubheadline": "Experience Independent Luxury"
+        }
+      }
+    },
+    "isActive": true,
+    "timestamp": 1771858308744,
+    "createdAt": "2026-02-23T14:51:48.744Z",
+    "updatedAt": "2026-02-23T14:51:48.744Z",
+    "__v": 0
+  },
+  {
+    "_id": "us34qvq7h",
+    "seller": "dszhjhrh9",
+    "tenant_id": "dszhjhrh9",
+    "tenant_slug": "omnora",
+    "published": {
+      "configuration": {
+        "name": "omnora's Imperial Store",
+        "assets": {
+          "logo": "/images/omnora.jpg",
+          "favicon": "/favicon.ico"
+        }
+      },
+      "pages": {
+        "home": {
+          "heroHeadline": "Welcome to omnora's Collection",
+          "heroSubheadline": "Experience Independent Luxury"
+        }
+      }
+    },
+    "isActive": true,
+    "timestamp": 1771931807205,
+    "createdAt": "2026-02-24T11:16:47.205Z",
+    "updatedAt": "2026-02-24T11:16:47.205Z",
+    "__v": 0
+  },
+  {
+    "_id": "uamosewoy",
+    "seller": "wp5it1qzi",
+    "tenant_id": "wp5it1qzi",
+    "tenant_slug": "ahmad",
+    "published": {
+      "configuration": {
+        "name": "ahmad's Imperial Store",
+        "assets": {
+          "logo": "/images/omnora.jpg",
+          "favicon": "/favicon.ico"
+        }
+      },
+      "pages": {
+        "home": {
+          "heroHeadline": "Welcome to ahmad's Collection",
+          "heroSubheadline": "Experience Independent Luxury"
+        }
+      }
+    },
+    "isActive": true,
+    "timestamp": 1771952065670,
+    "createdAt": "2026-02-24T16:54:25.670Z",
+    "updatedAt": "2026-02-24T16:54:25.670Z",
+    "__v": 0
+  },
+  {
+    "_id": "m0wra9151",
+    "seller": "ojwwu1wuh",
+    "tenant_id": "ojwwu1wuh",
+    "tenant_slug": "game",
+    "published": {
+      "configuration": {
+        "name": "game's Imperial Store",
+        "assets": {
+          "logo": "/images/omnora.jpg",
+          "favicon": "/favicon.ico"
+        }
+      },
+      "pages": {
+        "home": {
+          "heroHeadline": "Welcome to game's Collection",
+          "heroSubheadline": "Experience Independent Luxury"
+        }
+      }
+    },
+    "history": [],
+    "isActive": true,
+    "timestamp": 1772114292010,
+    "createdAt": "2026-02-26T13:58:12.010Z",
+    "updatedAt": "2026-02-26T13:58:12.010Z",
+    "__v": 0
+  },
+  {
+    "_id": "3a0ginehk",
+    "seller": "s8wu1zwqm",
+    "tenant_id": "s8wu1zwqm",
+    "tenant_slug": "rocket",
+    "published": {
+      "configuration": {
+        "name": "rocket's Imperial Store",
+        "assets": {
+          "logo": "/images/omnora.jpg",
+          "favicon": "/favicon.ico"
+        }
+      },
+      "pages": {
+        "home": {
+          "heroHeadline": "Welcome to rocket's Collection",
+          "heroSubheadline": "Experience Independent Luxury"
+        }
+      }
+    },
+    "history": [],
+    "isActive": true,
+    "timestamp": 1772186284549,
+    "createdAt": "2026-02-27T09:58:04.549Z",
+    "updatedAt": "2026-02-27T09:58:04.549Z",
+    "__v": 0
+  },
+  {
+    "_id": "lxl8u407u",
+    "seller": "gz5lxpi2l",
+    "tenant_id": "gz5lxpi2l",
+    "tenant_slug": "ahmad",
+    "published": {
+      "configuration": {
+        "name": "ahmad's Imperial Store",
+        "assets": {
+          "logo": "/images/omnora.jpg",
+          "favicon": "/favicon.ico"
+        }
+      },
+      "pages": {
+        "home": {
+          "heroHeadline": "Welcome to ahmad's Collection",
+          "heroSubheadline": "Experience Independent Luxury"
+        }
+      }
+    },
+    "history": [],
+    "isActive": true,
+    "timestamp": 1772200518420,
+    "createdAt": "2026-02-27T13:55:18.420Z",
+    "updatedAt": "2026-02-27T13:55:18.420Z",
+    "__v": 0
+  },
+  {
+    "_id": "v4pauh69k",
+    "seller": "stmp7kxna",
+    "tenant_id": "stmp7kxna",
+    "tenant_slug": "rocket",
+    "published": {
+      "configuration": {
+        "name": "rocket's Imperial Store",
+        "assets": {
+          "logo": "/images/omnora.jpg",
+          "favicon": "/favicon.ico"
+        }
+      },
+      "pages": {
+        "home": {
+          "heroHeadline": "Welcome to rocket's Collection",
+          "heroSubheadline": "Experience Independent Luxury"
+        }
+      }
+    },
+    "history": [],
+    "isActive": true,
+    "timestamp": 1772369035866,
+    "createdAt": "2026-03-01T12:43:55.866Z",
+    "updatedAt": "2026-03-01T12:43:55.866Z",
+    "__v": 0
+  },
+  {
+    "_id": "39slp6wse",
+    "seller": "ogp78ljkq",
+    "tenant_id": "ogp78ljkq",
+    "tenant_slug": "game",
+    "published": {
+      "configuration": {
+        "name": "game's Imperial Store",
+        "assets": {
+          "logo": "/images/omnora.jpg",
+          "favicon": "/favicon.ico"
+        }
+      },
+      "pages": {
+        "home": {
+          "heroHeadline": "Welcome to game's Collection",
+          "heroSubheadline": "Experience Independent Luxury"
+        }
+      }
+    },
+    "history": [],
+    "isActive": true,
+    "timestamp": 1772382865176,
+    "createdAt": "2026-03-01T16:34:25.176Z",
+    "updatedAt": "2026-03-01T16:34:25.176Z",
+    "__v": 0
+  },
+  {
+    "_id": "b8yu324la",
+    "seller": "otslsxq9w",
+    "tenant_id": "otslsxq9w",
+    "tenant_slug": "chamomile",
+    "published": {
+      "configuration": {
+        "name": "Chamomile's Imperial Store",
+        "assets": {
+          "logo": "/images/omnora.jpg",
+          "favicon": "/favicon.ico"
+        }
+      },
+      "pages": {
+        "home": {
+          "heroHeadline": "Welcome to Chamomile's Collection",
+          "heroSubheadline": "Experience Independent Luxury"
+        }
+      }
+    },
+    "history": [],
+    "isActive": true,
+    "timestamp": 1772462121094,
+    "createdAt": "2026-03-02T14:35:21.094Z",
+    "updatedAt": "2026-03-02T14:35:21.094Z",
+    "__v": 0
+  },
+  {
+    "_id": "4qhymxr9m",
+    "seller": "h8o1poqvv",
+    "tenant_id": "h8o1poqvv",
+    "tenant_slug": "rose",
+    "published": {
+      "configuration": {
+        "name": "Rose's Imperial Store",
+        "assets": {
+          "logo": "/images/omnora.jpg",
+          "favicon": "/favicon.ico"
+        }
+      },
+      "pages": {
+        "home": {
+          "heroHeadline": "Welcome to Rose's Collection",
+          "heroSubheadline": "Experience Independent Luxury"
+        }
+      }
+    },
+    "history": [],
+    "isActive": true,
+    "timestamp": 1773008883962,
+    "createdAt": "2026-03-08T22:28:03.962Z",
+    "updatedAt": "2026-03-08T22:28:03.962Z",
+    "__v": 0
+  },
+  {
+    "_id": "v0b8wl2gk",
+    "seller": "bv50yv6zl",
+    "tenant_id": "bv50yv6zl",
+    "tenant_slug": "rose",
+    "published": {
+      "configuration": {
+        "name": "Rose's Imperial Store",
+        "assets": {
+          "logo": "/images/omnora.jpg",
+          "favicon": "/favicon.ico"
+        }
+      },
+      "pages": {
+        "home": {
+          "heroHeadline": "Welcome to Rose's Collection",
+          "heroSubheadline": "Experience Independent Luxury"
+        }
+      }
+    },
+    "history": [],
+    "isActive": true,
+    "timestamp": 1773081341258,
+    "createdAt": "2026-03-09T18:35:41.258Z",
+    "updatedAt": "2026-03-09T18:35:41.258Z",
+    "__v": 0
+  }
+]

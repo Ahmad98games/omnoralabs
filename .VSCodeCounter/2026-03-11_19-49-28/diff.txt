@@ -1,0 +1,555 @@
+Date : 2026-03-11 19:49:28
+Directory : c:\E-Commerce Website (Full) - Copy (3)
+Total : 433 files,  93653 codes, 2505 comments, 7859 blanks, all 104017 lines
+
+Languages
++----------------+------------+------------+------------+------------+------------+
+| language       | files      | code       | comment    | blank      | total      |
++----------------+------------+------------+------------+------------+------------+
+| JSON           |         20 |     43,203 |          0 |          2 |     43,205 |
+| TypeScript JSX |        177 |     22,221 |        989 |      2,711 |     25,921 |
+| JavaScript     |        160 |     16,912 |      1,139 |      3,038 |     21,089 |
+| TypeScript     |         41 |      5,342 |        287 |        929 |      6,558 |
+| CSS            |         19 |      4,214 |          0 |        652 |      4,866 |
+| Markdown       |          9 |        984 |          0 |        346 |      1,330 |
+| MS SQL         |          1 |        420 |         90 |        117 |        627 |
+| HTML           |          5 |        329 |          0 |         57 |        386 |
+| XML            |          1 |         28 |          0 |          7 |         35 |
++----------------+------------+------------+------------+------------+------------+
+
+Directories
++-------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                                                  | files      | code       | comment    | blank      | total      |
++-------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                                                     |        433 |     93,653 |      2,505 |      7,859 |    104,017 |
+| . (Files)                                                                                             |          1 |         18 |          0 |          8 |         26 |
+| backend                                                                                               |         10 |      8,968 |          5 |         33 |      9,006 |
+| backend (Files)                                                                                       |          3 |         65 |          0 |         22 |         87 |
+| backend\controllers                                                                                   |          1 |         49 |          4 |          8 |         61 |
+| backend\data                                                                                          |          4 |      8,850 |          0 |          0 |      8,850 |
+| backend\models                                                                                        |          1 |         -3 |          0 |          0 |         -3 |
+| backend\utils                                                                                         |          1 |          7 |          1 |          3 |         11 |
+| database                                                                                              |          1 |        420 |         90 |        117 |        627 |
+| frontend                                                                                              |        184 |     25,843 |        977 |      2,773 |     29,593 |
+| frontend (Files)                                                                                      |          4 |      4,452 |          1 |          4 |      4,457 |
+| frontend\public                                                                                       |          1 |         28 |          0 |          7 |         35 |
+| frontend\src                                                                                          |        179 |     21,363 |        976 |      2,762 |     25,101 |
+| frontend\src (Files)                                                                                  |          3 |         25 |          6 |          8 |         39 |
+| frontend\src\api                                                                                      |          1 |          7 |          8 |          3 |         18 |
+| frontend\src\components                                                                               |         92 |      9,174 |        510 |        993 |     10,677 |
+| frontend\src\components (Files)                                                                       |          6 |        157 |         11 |         29 |        197 |
+| frontend\src\components\admin                                                                         |          4 |        860 |         40 |         85 |        985 |
+| frontend\src\components\auth                                                                          |          1 |        143 |          5 |         20 |        168 |
+| frontend\src\components\blocks                                                                        |         11 |      1,798 |         76 |        205 |      2,079 |
+| frontend\src\components\builder                                                                       |          1 |        148 |         10 |         23 |        181 |
+| frontend\src\components\cart                                                                          |          9 |      2,249 |        105 |        208 |      2,562 |
+| frontend\src\components\cms                                                                           |         45 |      1,233 |        181 |        180 |      1,594 |
+| frontend\src\components\cms (Files)                                                                   |         25 |      3,871 |        263 |        479 |      4,613 |
+| frontend\src\components\cms\editors                                                                   |          1 |         68 |          2 |          9 |         79 |
+| frontend\src\components\cms\help                                                                      |          1 |          8 |          0 |          1 |          9 |
+| frontend\src\components\cms\modules                                                                   |         18 |     -2,714 |        -84 |       -309 |     -3,107 |
+| frontend\src\components\pwa                                                                           |          1 |         94 |          8 |         19 |        121 |
+| frontend\src\components\seller                                                                        |          5 |      1,471 |         43 |        112 |      1,626 |
+| frontend\src\components\storefront                                                                    |          5 |        708 |         22 |         79 |        809 |
+| frontend\src\components\superadmin                                                                    |          3 |        259 |          5 |         27 |        291 |
+| frontend\src\components\ui                                                                            |          1 |         54 |          4 |          6 |         64 |
+| frontend\src\context                                                                                  |          7 |      1,110 |         50 |        163 |      1,323 |
+| frontend\src\hooks                                                                                    |          3 |        235 |         13 |         43 |        291 |
+| frontend\src\lib                                                                                      |          7 |        731 |         37 |        148 |        916 |
+| frontend\src\pages                                                                                    |         14 |        959 |         12 |        122 |      1,093 |
+| frontend\src\pages (Files)                                                                            |         13 |        851 |          7 |        110 |        968 |
+| frontend\src\pages\marketing                                                                          |          1 |        108 |          5 |         12 |        125 |
+| frontend\src\platform                                                                                 |         47 |      8,532 |        297 |      1,162 |      9,991 |
+| frontend\src\platform\client                                                                          |          5 |        709 |         23 |         81 |        813 |
+| frontend\src\platform\components                                                                      |          1 |        554 |          9 |         70 |        633 |
+| frontend\src\platform\core                                                                            |         17 |      2,647 |        120 |        469 |      3,236 |
+| frontend\src\platform\library                                                                         |         20 |      4,037 |        113 |        441 |      4,591 |
+| frontend\src\platform\library (Files)                                                                 |          2 |        691 |         14 |         78 |        783 |
+| frontend\src\platform\library\modules                                                                 |         18 |      3,346 |         99 |        363 |      3,808 |
+| frontend\src\platform\navigation                                                                      |          1 |         73 |          1 |         10 |         84 |
+| frontend\src\platform\publish                                                                         |          3 |        512 |         31 |         91 |        634 |
+| frontend\src\services                                                                                 |          1 |         39 |          7 |         10 |         56 |
+| frontend\src\stores                                                                                   |          2 |        396 |         29 |         78 |        503 |
+| frontend\src\utils                                                                                    |          2 |        155 |          7 |         32 |        194 |
+| gsgbackend                                                                                            |        180 |     48,121 |      1,134 |      3,398 |     52,653 |
+| gsgbackend (Files)                                                                                    |         19 |     10,655 |         52 |        318 |     11,025 |
+| gsgbackend\config                                                                                     |          2 |        129 |          1 |         21 |        151 |
+| gsgbackend\controllers                                                                                |         21 |      5,710 |        211 |        927 |      6,848 |
+| gsgbackend\data                                                                                       |          9 |     20,530 |          2 |          3 |     20,535 |
+| gsgbackend\docs                                                                                       |          2 |         74 |          0 |         37 |        111 |
+| gsgbackend\email-templates                                                                            |          5 |        329 |          0 |         57 |        386 |
+| gsgbackend\jobs                                                                                       |          1 |         97 |          5 |         19 |        121 |
+| gsgbackend\lib                                                                                        |          1 |         39 |          0 |         11 |         50 |
+| gsgbackend\middleware                                                                                 |          7 |        297 |         19 |         62 |        378 |
+| gsgbackend\models                                                                                     |         24 |      3,348 |        281 |        560 |      4,189 |
+| gsgbackend\routes                                                                                     |         30 |      1,198 |        219 |        282 |      1,699 |
+| gsgbackend\scripts                                                                                    |         12 |        789 |         59 |        142 |        990 |
+| gsgbackend\services                                                                                   |         24 |      2,803 |        182 |        497 |      3,482 |
+| gsgbackend\services (Files)                                                                           |         21 |      2,665 |        179 |        473 |      3,317 |
+| gsgbackend\services\shipping                                                                          |          3 |        138 |          3 |         24 |        165 |
+| gsgbackend\templates                                                                                  |          3 |        201 |          0 |          0 |        201 |
+| gsgbackend\templates\home                                                                             |          3 |        201 |          0 |          0 |        201 |
+| gsgbackend\tests                                                                                      |          6 |        826 |         38 |        232 |      1,096 |
+| gsgbackend\tests (Files)                                                                              |          2 |        419 |          8 |        137 |        564 |
+| gsgbackend\tests\integration                                                                          |          2 |        281 |         27 |         61 |        369 |
+| gsgbackend\tests\security                                                                             |          1 |         88 |          3 |         24 |        115 |
+| gsgbackend\tests\unit                                                                                 |          1 |         38 |          0 |         10 |         48 |
+| gsgbackend\utils                                                                                      |          9 |        811 |         49 |        164 |      1,024 |
+| gsgbackend\validators                                                                                 |          4 |        128 |          0 |         29 |        157 |
+| gsgbackend\workers                                                                                    |          1 |        157 |         16 |         37 |        210 |
+| storefront-export                                                                                     |         52 |      9,889 |        269 |      1,441 |     11,599 |
+| storefront-export\components                                                                          |         27 |      4,890 |        173 |        569 |      5,632 |
+| storefront-export\components (Files)                                                                  |          6 |      1,130 |         40 |        169 |      1,339 |
+| storefront-export\components\cart                                                                     |          9 |      2,223 |        104 |        205 |      2,532 |
+| storefront-export\components\home                                                                     |          9 |      1,085 |         18 |        139 |      1,242 |
+| storefront-export\components\storefront                                                               |          3 |        452 |         11 |         56 |        519 |
+| storefront-export\context                                                                             |          2 |        546 |         15 |         81 |        642 |
+| storefront-export\pages                                                                               |         23 |      4,453 |         81 |        791 |      5,325 |
+| supabase                                                                                              |          5 |        394 |         30 |         89 |        513 |
+| supabase\functions                                                                                    |          5 |        394 |         30 |         89 |        513 |
+| supabase\functions\create-checkout-session                                                            |          1 |         76 |          5 |         13 |         94 |
+| supabase\functions\fetch-platform-stats                                                               |          1 |         56 |          6 |         15 |         77 |
+| supabase\functions\merchant-stripe-webhook                                                            |          1 |        100 |          8 |         26 |        134 |
+| supabase\functions\process-merchant-checkout                                                          |          1 |         80 |          6 |         16 |        102 |
+| supabase\functions\stripe-webhook                                                                     |          1 |         82 |          5 |         19 |        106 |
++-------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++-------------------------------------------------------------------------------------------------------+----------------+------------+------------+------------+------------+
+| filename                                                                                              | language       | code       | comment    | blank      | total      |
++-------------------------------------------------------------------------------------------------------+----------------+------------+------------+------------+------------+
+| c:\E-Commerce Website (Full) - Copy (3)\backend\check_products.js                                     | JavaScript     |         31 |          0 |         10 |         41 |
+| c:\E-Commerce Website (Full) - Copy (3)\backend\check_users.js                                        | JavaScript     |         14 |          0 |          4 |         18 |
+| c:\E-Commerce Website (Full) - Copy (3)\backend\controllers\productController.js                      | JavaScript     |         49 |          4 |          8 |         61 |
+| c:\E-Commerce Website (Full) - Copy (3)\backend\data\event.json                                       | JSON           |      4,197 |          0 |          0 |      4,197 |
+| c:\E-Commerce Website (Full) - Copy (3)\backend\data\product.json                                     | JSON           |      4,376 |          0 |          0 |      4,376 |
+| c:\E-Commerce Website (Full) - Copy (3)\backend\data\sitecontent.json                                 | JSON           |        189 |          0 |          0 |        189 |
+| c:\E-Commerce Website (Full) - Copy (3)\backend\data\user.json                                        | JSON           |         88 |          0 |          0 |         88 |
+| c:\E-Commerce Website (Full) - Copy (3)\backend\models\Phase3Models.js                                | JavaScript     |         -3 |          0 |          0 |         -3 |
+| c:\E-Commerce Website (Full) - Copy (3)\backend\test_db.js                                            | JavaScript     |         20 |          0 |          8 |         28 |
+| c:\E-Commerce Website (Full) - Copy (3)\backend\utils\LocalDB.js                                      | JavaScript     |          7 |          1 |          3 |         11 |
+| c:\E-Commerce Website (Full) - Copy (3)\database\omnora_schema.sql                                    | MS SQL         |        420 |         90 |        117 |        627 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\check_users.js                                       | JavaScript     |         14 |          0 |          4 |         18 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\package-lock.json                                    | JSON           |      4,303 |          0 |          0 |      4,303 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\package.json                                         | JSON           |          4 |          0 |          0 |          4 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\public\pwa-icon.svg                                  | XML            |         28 |          0 |          7 |         35 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\App.tsx                                          | TypeScript JSX |         31 |          6 |          6 |         43 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\api\client.ts                                    | TypeScript     |          7 |          8 |          3 |         18 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\AdminLayout.tsx                       | TypeScript JSX |          0 |          0 |          1 |          1 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\DynamicSection.tsx                    | TypeScript JSX |         55 |          4 |         14 |         73 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\Footer.tsx                            | TypeScript JSX |          1 |          0 |          0 |          1 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\HostnameInterceptor.tsx               | TypeScript JSX |         89 |          5 |         14 |        108 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\Layout.tsx                            | TypeScript JSX |         12 |          3 |          0 |         15 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\RequireAdmin.tsx                      | TypeScript JSX |          0 |         -1 |          0 |         -1 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\admin\AdminBillingManager.tsx         | TypeScript JSX |        177 |         11 |         22 |        210 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\admin\AdminDashboard.tsx              | TypeScript JSX |        276 |         10 |         21 |        307 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\admin\AdminPaymentSettings.tsx        | TypeScript JSX |        143 |          1 |         13 |        157 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\admin\OrderManager.tsx                | TypeScript JSX |        264 |         18 |         29 |        311 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\auth\AuthModal.tsx                    | TypeScript JSX |        143 |          5 |         20 |        168 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\blocks\AnnouncementBar.tsx            | TypeScript JSX |         94 |          3 |         14 |        111 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\blocks\CountdownTimer.tsx             | TypeScript JSX |        169 |          5 |         19 |        193 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\blocks\CustomerReviews.tsx            | TypeScript JSX |        174 |         12 |         22 |        208 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\blocks\FAQAccordion.tsx               | TypeScript JSX |        146 |          6 |         19 |        171 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\blocks\FeaturesGrid.tsx               | TypeScript JSX |        129 |          6 |         17 |        152 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\blocks\HeroBanner.tsx                 | TypeScript JSX |        165 |          7 |         16 |        188 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\blocks\NewsletterSignup.tsx           | TypeScript JSX |        221 |          5 |         21 |        247 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\blocks\SiteFooter.tsx                 | TypeScript JSX |        186 |         12 |         22 |        220 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\blocks\SplitHero.tsx                  | TypeScript JSX |        143 |          5 |         16 |        164 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\blocks\TrustBadges.tsx                | TypeScript JSX |        183 |          8 |         17 |        208 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\blocks\UpsellWidget.tsx               | TypeScript JSX |        188 |          7 |         22 |        217 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\builder\AICopilotModal.tsx            | TypeScript JSX |        148 |         10 |         23 |        181 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cart\BuyButton.tsx                    | TypeScript JSX |        187 |          2 |         20 |        209 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cart\CartDrawer.tsx                   | TypeScript JSX |        392 |         22 |         30 |        444 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cart\CheckoutBlock.tsx                | TypeScript JSX |        417 |         16 |         42 |        475 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cart\OrderConfirmationBlock.tsx       | TypeScript JSX |        225 |         16 |         22 |        263 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cart\ProductCard.tsx                  | TypeScript JSX |        208 |          9 |         17 |        234 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cart\ProductGrid.tsx                  | TypeScript JSX |        176 |         11 |         21 |        208 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cart\ProductOptions.tsx               | TypeScript JSX |        237 |         13 |         22 |        272 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cart\SearchBar.tsx                    | TypeScript JSX |        204 |          6 |         16 |        226 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cart\StoreHeader.tsx                  | TypeScript JSX |        203 |         10 |         18 |        231 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\AdminDiscountManager.tsx          | TypeScript JSX |        235 |          7 |         26 |        268 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\AdminNavigationManager.tsx        | TypeScript JSX |        203 |         18 |         30 |        251 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\AdminPageManager.tsx              | TypeScript JSX |        227 |          9 |         26 |        262 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\AdminProductManager.tsx           | TypeScript JSX |        450 |         31 |         59 |        540 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\BuilderHealthOverlay.tsx          | TypeScript JSX |        176 |          5 |         15 |        196 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\BuilderRegistry.ts                | TypeScript     |        466 |         29 |         32 |        527 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\BuilderToolbar.tsx                | TypeScript JSX |        162 |          8 |         16 |        186 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\BuilderWrapper.tsx                | TypeScript JSX |        531 |         32 |         60 |        623 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\CanvasOverlay.tsx                 | TypeScript JSX |          0 |          2 |          5 |          7 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\ComponentRegistry.tsx             | TypeScript JSX |         76 |         -1 |          3 |         78 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\ComponentWrapper.tsx              | TypeScript JSX |        264 |         30 |         51 |        345 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\DynamicButton.tsx                 | TypeScript JSX |        147 |         14 |         22 |        183 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\EditModeOverlay.tsx               | TypeScript JSX |         32 |         -1 |          0 |         31 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\EditableComponents.tsx            | TypeScript JSX |         91 |         17 |          5 |        113 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\ElementLibrary.tsx                | TypeScript JSX |         27 |          0 |          0 |         27 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\GlobalSettingsPanel.tsx           | TypeScript JSX |        285 |         12 |         24 |        321 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\LiveCanvas.tsx                    | TypeScript JSX |         -8 |         -2 |          2 |         -8 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\LocalCopilotPanel.tsx             | TypeScript JSX |        197 |          9 |         22 |        228 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\MagneticTiltCard.tsx              | TypeScript JSX |        145 |         12 |         32 |        189 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\MediaLibraryModal.tsx             | TypeScript JSX |        296 |         18 |         31 |        345 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\OmnoraRenderer.tsx                | TypeScript JSX |        100 |          6 |         19 |        125 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\PageSettingsPanel.tsx             | TypeScript JSX |        112 |          8 |         17 |        137 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\SmartSidebar.tsx                  | TypeScript JSX |       -664 |        -20 |        -55 |       -739 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\StyleEditorPanel.tsx              | TypeScript JSX |        270 |         19 |         28 |        317 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\ThemeManager.tsx                  | TypeScript JSX |         51 |          1 |          9 |         61 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\editors\IntelligenceEditor.tsx    | TypeScript JSX |         68 |          2 |          9 |         79 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\help\TourOverlay.tsx              | TypeScript JSX |          8 |          0 |          1 |          9 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\modules\CommerceModule.tsx        | TypeScript JSX |       -128 |         -3 |         -9 |       -140 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\modules\DiscoveryEngine.tsx       | TypeScript JSX |       -169 |         -2 |        -20 |       -191 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\modules\ElementControlLayer.tsx   | TypeScript JSX |       -744 |        -33 |        -73 |       -850 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\modules\FeatureModule.tsx         | TypeScript JSX |       -103 |         -3 |        -11 |       -117 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\modules\HeaderModule.tsx          | TypeScript JSX |       -116 |         -3 |         -9 |       -128 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\modules\HeroModule.tsx            | TypeScript JSX |       -157 |        -10 |        -22 |       -189 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\modules\IntelligenceModules.tsx   | TypeScript JSX |       -113 |         -2 |        -14 |       -129 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\modules\ProductModule.tsx         | TypeScript JSX |       -155 |         -9 |        -23 |       -187 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\modules\PromoModule.tsx           | TypeScript JSX |       -107 |         -3 |        -11 |       -121 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\modules\ReviewModule.tsx          | TypeScript JSX |        -94 |         -2 |        -10 |       -106 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\modules\SelectionEngine.tsx       | TypeScript JSX |       -155 |          0 |        -17 |       -172 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\modules\SocialProofModule.tsx     | TypeScript JSX |        -66 |          0 |        -10 |        -76 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\modules\StockScarcityModule.tsx   | TypeScript JSX |        -41 |          0 |         -6 |        -47 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\modules\TransactionModule.tsx     | TypeScript JSX |       -139 |         -3 |        -11 |       -153 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\modules\TransactionPipeline.tsx   | TypeScript JSX |       -122 |          0 |        -15 |       -137 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\modules\TrustEngine.tsx           | TypeScript JSX |        -53 |          0 |        -10 |        -63 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\modules\TrustModule.tsx           | TypeScript JSX |       -148 |         -7 |        -19 |       -174 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\cms\modules\UrgencyTimerModule.tsx    | TypeScript JSX |       -104 |         -4 |        -19 |       -127 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\pwa\PwaInstallPrompt.tsx              | TypeScript JSX |         94 |          8 |         19 |        121 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\seller\AdminOrderManager.tsx          | TypeScript JSX |        210 |          3 |         12 |        225 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\seller\AdminOverview.tsx              | TypeScript JSX |        212 |          4 |         14 |        230 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\seller\AdminProductManager.tsx        | TypeScript JSX |        333 |          9 |         24 |        366 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\seller\DomainSettings.tsx             | TypeScript JSX |        173 |          1 |         18 |        192 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\seller\ProductEditor.tsx              | TypeScript JSX |        543 |         26 |         44 |        613 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\storefront\CartDrawer.tsx             | TypeScript JSX |        160 |         11 |         15 |        186 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\storefront\CustomerDashboard.tsx      | TypeScript JSX |        206 |          6 |         24 |        236 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\storefront\OmnoraBanner.tsx           | TypeScript JSX |         47 |          3 |          9 |         59 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\storefront\OmnoraNotification.tsx     | TypeScript JSX |         96 |          0 |          8 |        104 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\storefront\ThankYouPage.tsx           | TypeScript JSX |        199 |          2 |         23 |        224 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\superadmin\GodModeDashboard.tsx       | TypeScript JSX |        116 |          5 |         13 |        134 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\superadmin\MerchantLedger.tsx         | TypeScript JSX |        109 |          0 |          6 |        115 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\superadmin\SuperAdminRoute.tsx        | TypeScript JSX |         34 |          0 |          8 |         42 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\components\ui\CinematicLoader.tsx                | TypeScript JSX |         54 |          4 |          6 |         64 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\context\AuthContext.tsx                          | TypeScript JSX |         15 |          0 |          1 |         16 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\context\BuilderContext.tsx                       | TypeScript JSX |        302 |         30 |         42 |        374 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\context\CartContext.tsx                          | TypeScript JSX |         95 |          1 |         16 |        112 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\context\CustomerAuthContext.tsx                  | TypeScript JSX |        125 |          6 |         26 |        157 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\context\MerchantAuthContext.tsx                  | TypeScript JSX |         86 |          3 |         14 |        103 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\context\OmnoraContext.tsx                        | TypeScript JSX |         66 |          1 |          9 |         76 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\context\StorefrontContext.tsx                    | TypeScript JSX |        421 |          9 |         55 |        485 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\hooks\BindResolver.ts                            | TypeScript     |        122 |          8 |         25 |        155 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\hooks\useCart.ts                                 | TypeScript     |         45 |          0 |          4 |         49 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\hooks\useNodeSelector.ts                         | TypeScript     |         68 |          5 |         14 |         87 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\index.css                                        | CSS            |          3 |          0 |          1 |          4 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\lib\CommandExecutor.ts                           | TypeScript     |         47 |          1 |          6 |         54 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\lib\GeoService.ts                                | TypeScript     |         31 |          1 |          7 |         39 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\lib\LocalAIEngine.ts                             | TypeScript     |        238 |          9 |         58 |        305 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\lib\SuperAdminClient.ts                          | TypeScript     |         51 |          2 |         11 |         64 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\lib\cinematicStyles.ts                           | TypeScript     |        251 |         15 |         41 |        307 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\lib\mediaUploader.ts                             | TypeScript     |         95 |          9 |         20 |        124 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\lib\supabaseClient.ts                            | TypeScript     |         18 |          0 |          5 |         23 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\main.tsx                                         | TypeScript JSX |         -9 |          0 |          1 |         -8 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\AdminDashboard.css                         | CSS            |         16 |          0 |          3 |         19 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\AdminDashboard.tsx                         | TypeScript JSX |        -59 |          2 |         -1 |        -58 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\AdminProducts.css                          | CSS            |         85 |          0 |         13 |         98 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\AdminProducts.tsx                          | TypeScript JSX |         10 |          0 |          0 |         10 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\Checkout.css                               | CSS            |          1 |          0 |          0 |          1 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\Checkout.tsx                               | TypeScript JSX |          4 |          0 |          0 |          4 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\Collection.tsx                             | TypeScript JSX |        100 |          0 |          3 |        103 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\Home.tsx                                   | TypeScript JSX |        127 |         -5 |          6 |        128 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\HomeWithAds.tsx                            | TypeScript JSX |          2 |          0 |         -2 |          0 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\Product.tsx                                | TypeScript JSX |          4 |         -1 |         -1 |          2 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\SellerDashboard.css                        | CSS            |        514 |          0 |         74 |        588 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\SellerDashboard.tsx                        | TypeScript JSX |        -13 |         10 |          9 |          6 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\StorefrontTestPage.tsx                     | TypeScript JSX |         60 |          1 |          6 |         67 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\pages\marketing\LandingPage.tsx                  | TypeScript JSX |        108 |          5 |         12 |        125 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\client\AssetContext.tsx                 | TypeScript JSX |        108 |          1 |         10 |        119 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\client\ComponentWrapper.tsx             | TypeScript JSX |        111 |          2 |         12 |        125 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\client\OmnoraContext.tsx                | TypeScript JSX |         66 |          1 |          9 |         76 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\client\OmnoraRenderer.tsx               | TypeScript JSX |        161 |         10 |         25 |        196 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\client\bootstrap.tsx                    | TypeScript JSX |        263 |          9 |         25 |        297 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\components\OmnoraBlocks.tsx             | TypeScript JSX |        554 |          9 |         70 |        633 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\core\AnalyticsClient.ts                 | TypeScript     |         93 |          8 |         22 |        123 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\core\CartStore.ts                       | TypeScript     |        227 |         12 |         41 |        280 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\core\DataLink.ts                        | TypeScript     |         33 |          0 |          5 |         38 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\core\DatabaseClient.ts                  | TypeScript     |        479 |         32 |         74 |        585 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\core\Dispatcher.ts                      | TypeScript     |        116 |          3 |         28 |        147 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\core\DomainRouter.ts                    | TypeScript     |        115 |          8 |         16 |        139 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\core\Logger.ts                          | TypeScript     |         21 |          0 |          4 |         25 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\core\NodeStore.ts                       | TypeScript     |         69 |          1 |         16 |         86 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\core\OrderStore.ts                      | TypeScript     |        152 |          7 |         38 |        197 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\core\Registry.ts                        | TypeScript     |        156 |          3 |         16 |        175 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\core\StorageClient.ts                   | TypeScript     |         91 |          5 |         26 |        122 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\core\SupabaseDatabaseClient.ts          | TypeScript     |        561 |         19 |         94 |        674 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\core\SupabaseStorageClient.ts           | TypeScript     |         82 |          4 |         20 |        106 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\core\SymbolManager.ts                   | TypeScript     |        127 |          9 |         26 |        162 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\core\TemplateResolver.ts                | TypeScript     |        162 |          3 |         24 |        189 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\core\normalize.ts                       | TypeScript     |         97 |          3 |         12 |        112 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\core\types.ts                           | TypeScript     |         66 |          3 |          7 |         76 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\library\Blocks.tsx                      | TypeScript JSX |        140 |          1 |         12 |        153 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\library\EditableComponents.tsx          | TypeScript JSX |        551 |         13 |         66 |        630 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\library\modules\DiscoveryEngine.tsx     | TypeScript JSX |        169 |          2 |         20 |        191 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\library\modules\ElementControlLayer.tsx | TypeScript JSX |      1,338 |         46 |        124 |      1,508 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\library\modules\FeatureGridv5.tsx       | TypeScript JSX |        167 |          5 |         12 |        184 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\library\modules\FeatureModule.tsx       | TypeScript JSX |        103 |          3 |         11 |        117 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\library\modules\HeaderModule.tsx        | TypeScript JSX |        116 |          3 |          9 |        128 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\library\modules\HeroModule.tsx          | TypeScript JSX |        157 |         10 |         22 |        189 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\library\modules\IntelligenceModules.tsx | TypeScript JSX |        113 |          2 |         14 |        129 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\library\modules\ProductModule.tsx       | TypeScript JSX |        155 |          9 |         23 |        187 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\library\modules\PromoModule.tsx         | TypeScript JSX |        107 |          3 |         11 |        121 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\library\modules\ReviewModule.tsx        | TypeScript JSX |         94 |          2 |         10 |        106 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\library\modules\SelectionEngine.tsx     | TypeScript JSX |        154 |          0 |         17 |        171 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\library\modules\SocialProofModule.tsx   | TypeScript JSX |         66 |          0 |         10 |         76 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\library\modules\StockScarcityModule.tsx | TypeScript JSX |         41 |          0 |          6 |         47 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\library\modules\TransactionModule.tsx   | TypeScript JSX |        139 |          3 |         11 |        153 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\library\modules\TransactionPipeline.tsx | TypeScript JSX |        122 |          0 |         15 |        137 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\library\modules\TrustEngine.tsx         | TypeScript JSX |         53 |          0 |         10 |         63 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\library\modules\TrustModule.tsx         | TypeScript JSX |        148 |          7 |         19 |        174 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\library\modules\UrgencyTimerModule.tsx  | TypeScript JSX |        104 |          4 |         19 |        127 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\navigation\LinkResolver.tsx             | TypeScript JSX |         73 |          1 |         10 |         84 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\publish\CleanRenderer.tsx               | TypeScript JSX |        178 |         10 |         31 |        219 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\publish\Publisher.ts                    | TypeScript     |        141 |          6 |         25 |        172 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\platform\publish\StorefrontApp.tsx               | TypeScript JSX |        193 |         15 |         35 |        243 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\services\CheckoutService.ts                      | TypeScript     |         39 |          7 |         10 |         56 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\stores\useGlobalThemeStore.ts                    | TypeScript     |        252 |         14 |         45 |        311 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\stores\useProductDraftStore.ts                   | TypeScript     |        144 |         15 |         33 |        192 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\utils\builderUtils.ts                            | TypeScript     |        109 |          3 |         21 |        133 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\src\utils\stressTest.ts                              | TypeScript     |         46 |          4 |         11 |         61 |
+| c:\E-Commerce Website (Full) - Copy (3)\frontend\vite.config.ts                                       | TypeScript     |        131 |          1 |          0 |        132 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\BULLMQ_STATUS.md                                   | Markdown       |        104 |          0 |         32 |        136 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\COLLECTION_PAGE_FIX.md                             | Markdown       |         99 |          0 |         22 |        121 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\MONGODB_SETUP.md                                   | Markdown       |        112 |          0 |         53 |        165 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\PRODUCTION_READINESS.md                            | Markdown       |        112 |          0 |         34 |        146 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\README.md                                          | Markdown       |         82 |          0 |         29 |        111 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\SECURITY_FIXES.md                                  | Markdown       |         86 |          0 |         22 |        108 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\bootstrap.js                                       | JavaScript     |         79 |         14 |         19 |        112 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\check_products.js                                  | JavaScript     |         31 |          0 |         10 |         41 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\check_status.js                                    | JavaScript     |          7 |          0 |          1 |          8 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\config\db.js                                       | JavaScript     |         11 |          0 |          3 |         14 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\config\env.js                                      | JavaScript     |        118 |          1 |         18 |        137 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\controllers\adminController.js                     | JavaScript     |        196 |          2 |         30 |        228 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\controllers\analyticsController.js                 | JavaScript     |         57 |          3 |          9 |         69 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\controllers\authController.js                      | JavaScript     |        214 |         28 |         30 |        272 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\controllers\cartController.js                      | JavaScript     |        217 |          0 |         32 |        249 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\controllers\contactController.js                   | JavaScript     |         67 |          2 |         14 |         83 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\controllers\domainController.js                    | JavaScript     |         62 |          3 |          9 |         74 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\controllers\inventoryController.js                 | JavaScript     |        356 |          2 |         48 |        406 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\controllers\mediaController.js                     | JavaScript     |         73 |          1 |         13 |         87 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\controllers\newsletterController.js                | JavaScript     |         78 |          5 |         15 |         98 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\controllers\orderController.js                     | JavaScript     |        608 |         47 |         93 |        748 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\controllers\paymentController.js                   | JavaScript     |         97 |          1 |         10 |        108 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\controllers\phase1Controller.js                    | JavaScript     |        474 |          5 |         93 |        572 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\controllers\phase2Controller.js                    | JavaScript     |        688 |         35 |        131 |        854 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\controllers\phase3Controller.js                    | JavaScript     |        809 |         53 |        155 |      1,017 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\controllers\productController.js                   | JavaScript     |        283 |          7 |         35 |        325 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\controllers\recommendationController.js            | JavaScript     |        213 |          1 |         32 |        246 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\controllers\reviewController.js                    | JavaScript     |        335 |          4 |         51 |        390 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\controllers\searchController.js                    | JavaScript     |        203 |          2 |         24 |        229 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\controllers\userController.js                      | JavaScript     |        201 |          1 |         34 |        236 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\controllers\webhookController.js                   | JavaScript     |        120 |          9 |         17 |        146 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\controllers\wishlistController.js                  | JavaScript     |        359 |          0 |         52 |        411 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\data\admin_action_logs.json                        | JSON           |          1 |          0 |          0 |          1 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\data\defaultProducts.js                            | JavaScript     |         87 |          2 |          3 |         92 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\data\event.json                                    | JSON           |      8,872 |          0 |          0 |      8,872 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\data\orders.json                                   | JSON           |          1 |          0 |          0 |          1 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\data\product.json                                  | JSON           |     10,686 |          0 |          0 |     10,686 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\data\products.json                                 | JSON           |         80 |          0 |          0 |         80 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\data\sitecontent.json                              | JSON           |        520 |          0 |          0 |        520 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\data\user.json                                     | JSON           |        257 |          0 |          0 |        257 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\data\users.json                                    | JSON           |         26 |          0 |          0 |         26 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\docs\API_OPERATIONS.md                             | Markdown       |         42 |          0 |         18 |         60 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\docs\RUNBOOK_ARCHITECTURE.md                       | Markdown       |         32 |          0 |         19 |         51 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\ecosystem.config.js                                | JavaScript     |         53 |          0 |          2 |         55 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\email-templates\order-cancelled.html               | HTML           |         60 |          0 |         11 |         71 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\email-templates\order-delivered.html               | HTML           |         60 |          0 |         10 |         70 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\email-templates\order-placed.html                  | HTML           |         71 |          0 |         12 |         83 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\email-templates\order-shipped.html                 | HTML           |         69 |          0 |         12 |         81 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\email-templates\payment-approved.html              | HTML           |         69 |          0 |         12 |         81 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\jobs\cleanupInitiatedOrders.js                     | JavaScript     |         97 |          5 |         19 |        121 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\lib\dbConnect.js                                   | JavaScript     |         39 |          0 |         11 |         50 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\middleware\auth.js                                 | JavaScript     |        104 |          4 |         19 |        127 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\middleware\authEnhanced.js                         | JavaScript     |          1 |          0 |          1 |          2 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\middleware\authMiddleware.js                       | JavaScript     |          1 |          0 |          0 |          1 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\middleware\gatekeeper.js                           | JavaScript     |        102 |         11 |         22 |        135 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\middleware\rateLimiter.js                          | JavaScript     |         28 |          0 |          7 |         35 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\middleware\tenantContext.js                        | JavaScript     |         46 |          4 |          9 |         59 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\middleware\validate.js                             | JavaScript     |         15 |          0 |          4 |         19 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\models\AbandonedCart.js                            | JavaScript     |        389 |         11 |         45 |        445 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\models\AdminActionLog.js                           | JavaScript     |         18 |          0 |          5 |         23 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\models\AiContent.js                                | JavaScript     |         16 |          0 |          3 |         19 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\models\Bundle.js                                   | JavaScript     |        340 |         15 |         39 |        394 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\models\Contact.js                                  | JavaScript     |         29 |          0 |          2 |         31 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\models\Event.js                                    | JavaScript     |         17 |          0 |          3 |         20 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\models\Inventory.js                                | JavaScript     |         85 |          1 |         12 |         98 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\models\MessageLog.js                               | JavaScript     |         31 |          0 |          3 |         34 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\models\Newsletter.js                               | JavaScript     |         15 |          0 |          2 |         17 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\models\OneClickCheckout.js                         | JavaScript     |        140 |         11 |         14 |        165 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\models\Order.js                                    | JavaScript     |         63 |          3 |          5 |         71 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\models\PaymentMethod.js                            | JavaScript     |         27 |          4 |          8 |         39 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\models\Phase1Models.js                             | JavaScript     |        521 |         61 |         73 |        655 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\models\Phase2Models.js                             | JavaScript     |        696 |         79 |        134 |        909 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\models\Phase3Models.js                             | JavaScript     |        709 |         91 |        176 |        976 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\models\Product.js                                  | JavaScript     |         30 |          0 |          3 |         33 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\models\Recommendation.js                           | JavaScript     |         18 |          0 |          4 |         22 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\models\Review.js                                   | JavaScript     |         17 |          0 |          3 |         20 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\models\Shipment.js                                 | JavaScript     |         21 |          0 |          3 |         24 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\models\SiteContent.js                              | JavaScript     |         51 |          2 |          7 |         60 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\models\User.js                                     | JavaScript     |         61 |          1 |          5 |         67 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\models\WaOptOut.js                                 | JavaScript     |         12 |          0 |          3 |         15 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\models\WhatsAppTemplate.js                         | JavaScript     |         28 |          2 |          5 |         35 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\models\Wishlist.js                                 | JavaScript     |         14 |          0 |          3 |         17 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\package-lock.json                                  | JSON           |      9,276 |          0 |          1 |      9,277 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\package-production.json                            | JSON           |         71 |          0 |          1 |         72 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\package.json                                       | JSON           |         55 |          0 |          0 |         55 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\routes\adminRoutes.js                              | JavaScript     |         20 |          5 |          7 |         32 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\routes\aiContentRoutes.js                          | JavaScript     |         37 |          4 |         10 |         51 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\routes\analyticsRoutes.js                          | JavaScript     |          6 |          0 |          4 |         10 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\routes\authRoutes.js                               | JavaScript     |         13 |          2 |          4 |         19 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\routes\cartRoutes.js                               | JavaScript     |         15 |          1 |          4 |         20 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\routes\cmsRoutes.js                                | JavaScript     |        149 |         19 |         35 |        203 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\routes\contactRoutes.js                            | JavaScript     |          9 |          2 |          3 |         14 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\routes\domainRoutes.js                             | JavaScript     |          7 |          0 |          3 |         10 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\routes\healthRoutes.js                             | JavaScript     |         57 |          3 |          8 |         68 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\routes\inventoryRoutes.js                          | JavaScript     |         20 |          3 |          6 |         29 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\routes\mediaRoutes.js                              | JavaScript     |         45 |          4 |          8 |         57 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\routes\newsletterRoutes.js                         | JavaScript     |          9 |          2 |          3 |         14 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\routes\onboardingRoutes.js                         | JavaScript     |         67 |          8 |         11 |         86 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\routes\orderRoutes.js                              | JavaScript     |         90 |         17 |         21 |        128 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\routes\paymentMethodRoutes.js                      | JavaScript     |         90 |          7 |         16 |        113 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\routes\paymentRoutes.js                            | JavaScript     |         13 |          5 |          7 |         25 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\routes\performanceHubRoutes.js                     | JavaScript     |         52 |          8 |         13 |         73 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\routes\phase1Routes.js                             | JavaScript     |         68 |         33 |         23 |        124 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\routes\phase2Routes.js                             | JavaScript     |         62 |         28 |         14 |        104 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\routes\phase3Routes.js                             | JavaScript     |         84 |         46 |         20 |        150 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\routes\productRoutes.js                            | JavaScript     |         21 |          0 |          4 |         25 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\routes\recommendationRoutes.js                     | JavaScript     |         16 |          3 |          6 |         25 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\routes\reviewRoutes.js                             | JavaScript     |         18 |          3 |          6 |         27 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\routes\searchRoutes.js                             | JavaScript     |         14 |          2 |          5 |         21 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\routes\sellerAnalyticsRoutes.js                    | JavaScript     |         44 |          4 |          7 |         55 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\routes\sellerRoutes.js                             | JavaScript     |         70 |          0 |         10 |         80 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\routes\userRoutes.js                               | JavaScript     |         21 |          1 |          4 |         26 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\routes\webhookRoutes.js                            | JavaScript     |          6 |          0 |          3 |          9 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\routes\whatsappTemplateRoutes.js                   | JavaScript     |         56 |          6 |         11 |         73 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\routes\wishlistRoutes.js                           | JavaScript     |         19 |          3 |          6 |         28 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\scripts\check-env-leaks.js                         | JavaScript     |         35 |          0 |          8 |         43 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\scripts\cleanup-port.js                            | JavaScript     |         44 |          5 |          5 |         54 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\scripts\createAdmin.js                             | JavaScript     |         61 |          4 |         12 |         77 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\scripts\precheck.js                                | JavaScript     |         59 |          0 |         10 |         69 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\scripts\seed-products-remote.js                    | JavaScript     |         47 |          3 |         11 |         61 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\scripts\seed-remote.js                             | JavaScript     |         53 |          2 |         10 |         65 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\scripts\seedProducts.js                            | JavaScript     |        148 |          8 |         13 |        169 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\scripts\set-admin.js                               | JavaScript     |         57 |          0 |         12 |         69 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\scripts\start-dev.js                               | JavaScript     |         15 |          3 |          7 |         25 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\scripts\test-approval-system.js                    | JavaScript     |        130 |         25 |         27 |        182 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\scripts\test-whatsapp.js                           | JavaScript     |         31 |          0 |          4 |         35 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\scripts\verify-system.js                           | JavaScript     |        109 |          9 |         23 |        141 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\server.js                                          | JavaScript     |        163 |         16 |         18 |        197 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\services\aiContentService.js                       | JavaScript     |         91 |         12 |         24 |        127 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\services\aiQuotaService.js                         | JavaScript     |         75 |          7 |         16 |         98 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\services\analyticsService.js                       | JavaScript     |        125 |          9 |         32 |        166 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\services\cartService.js                            | JavaScript     |        320 |          5 |         39 |        364 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\services\dbService.js                              | JavaScript     |         60 |          0 |         12 |         72 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\services\emailService.js                           | JavaScript     |        198 |          1 |         23 |        222 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\services\logger.js                                 | JavaScript     |         25 |          0 |          6 |         31 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\services\mailblusterService.js                     | JavaScript     |         69 |          0 |         12 |         81 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\services\manifestService.js                        | JavaScript     |         34 |          1 |          7 |         42 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\services\memoryDbService.js                        | JavaScript     |         45 |          0 |         10 |         55 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\services\onboardingService.js                      | JavaScript     |        108 |          3 |         15 |        126 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\services\paymentService.js                         | JavaScript     |        329 |         54 |         57 |        440 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\services\preflightService.js                       | JavaScript     |         50 |          4 |          7 |         61 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\services\queueService.js                           | JavaScript     |        169 |          9 |         23 |        201 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\services\recommendationService.js                  | JavaScript     |        230 |         12 |         36 |        278 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\services\searchService.js                          | JavaScript     |        255 |         20 |         47 |        322 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\services\shippingService.js                        | JavaScript     |         89 |         10 |         24 |        123 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\services\shipping\leopardsProvider.js              | JavaScript     |         57 |          1 |          9 |         67 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\services\shipping\tcsProvider.js                   | JavaScript     |         23 |          2 |          6 |         31 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\services\shipping\traxProvider.js                  | JavaScript     |         58 |          0 |          9 |         67 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\services\stateService.js                           | JavaScript     |        147 |          8 |         29 |        184 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\services\waRateGuard.js                            | JavaScript     |         87 |         11 |         23 |        121 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\services\whatsappAutomationService.js              | JavaScript     |        132 |         12 |         27 |        171 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\services\whatsappService.js                        | JavaScript     |         27 |          1 |          4 |         32 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\templates\home\electronics.json                    | JSON           |         67 |          0 |          0 |         67 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\templates\home\fashion.json                        | JSON           |         75 |          0 |          0 |         75 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\templates\home\general.json                        | JSON           |         59 |          0 |          0 |         59 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\test-boundaries.js                                 | JavaScript     |         93 |          8 |         19 |        120 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\test_subscription.js                               | JavaScript     |         25 |          0 |          4 |         29 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\tests\QA-SECURITY-CHECKLIST.md                     | Markdown       |        315 |          0 |        117 |        432 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\tests\integration\bootstrap.test.js                | JavaScript     |         62 |          1 |         10 |         73 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\tests\integration\payment-security.test.js         | JavaScript     |        219 |         26 |         51 |        296 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\tests\security\jwt.test.js                         | JavaScript     |         88 |          3 |         24 |        115 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\tests\test_approval_flow.js                        | JavaScript     |        104 |          8 |         20 |        132 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\tests\unit\config.test.js                          | JavaScript     |         38 |          0 |         10 |         48 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\utils\LocalDB.js                                   | JavaScript     |        230 |         17 |         46 |        293 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\utils\inventoryService.js                          | JavaScript     |        137 |          3 |         23 |        163 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\utils\modelFactory.js                              | JavaScript     |         67 |         14 |         18 |         99 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\utils\orderHashService.js                          | JavaScript     |         40 |          3 |          8 |         51 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\utils\phoneFormatter.js                            | JavaScript     |         56 |         10 |         17 |         83 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\utils\retryWithBackoff.js                          | JavaScript     |         62 |          0 |         10 |         72 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\utils\tenantStorage.js                             | JavaScript     |          3 |          0 |          3 |          6 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\utils\tokenService.js                              | JavaScript     |         74 |          2 |         11 |         87 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\utils\whatsappService.js                           | JavaScript     |        142 |          0 |         28 |        170 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\validators\orderValidators.js                      | JavaScript     |         36 |          0 |          8 |         44 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\validators\productValidators.js                    | JavaScript     |         28 |          0 |          8 |         36 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\validators\userValidator.js                        | JavaScript     |         23 |          0 |          5 |         28 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\validators\userValidators.js                       | JavaScript     |         41 |          0 |          8 |         49 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\verify-mongodb.js                                  | JavaScript     |         96 |          3 |         23 |        122 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\verify-order-fix.js                                | JavaScript     |         42 |          1 |          9 |         52 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\verify-serverless.js                               | JavaScript     |         69 |         10 |         19 |         98 |
+| c:\E-Commerce Website (Full) - Copy (3)\gsgbackend\workers\notificationWorker.js                      | JavaScript     |        157 |         16 |         37 |        210 |
+| c:\E-Commerce Website (Full) - Copy (3)\storefront-export\components\Footer.css                       | CSS            |        248 |          0 |         39 |        287 |
+| c:\E-Commerce Website (Full) - Copy (3)\storefront-export\components\Footer.tsx                       | TypeScript JSX |        120 |         10 |         15 |        145 |
+| c:\E-Commerce Website (Full) - Copy (3)\storefront-export\components\GlobalErrorBoundary.tsx          | TypeScript JSX |         60 |          1 |         12 |         73 |
+| c:\E-Commerce Website (Full) - Copy (3)\storefront-export\components\Layout.css                       | CSS            |        379 |          0 |         58 |        437 |
+| c:\E-Commerce Website (Full) - Copy (3)\storefront-export\components\Layout.tsx                       | TypeScript JSX |        241 |         27 |         32 |        300 |
+| c:\E-Commerce Website (Full) - Copy (3)\storefront-export\components\StripePayment.tsx                | TypeScript JSX |         82 |          2 |         13 |         97 |
+| c:\E-Commerce Website (Full) - Copy (3)\storefront-export\components\cart\BuyButton.tsx               | TypeScript JSX |        187 |          2 |         20 |        209 |
+| c:\E-Commerce Website (Full) - Copy (3)\storefront-export\components\cart\CartDrawer.tsx              | TypeScript JSX |        392 |         22 |         30 |        444 |
+| c:\E-Commerce Website (Full) - Copy (3)\storefront-export\components\cart\CheckoutBlock.tsx           | TypeScript JSX |        417 |         16 |         42 |        475 |
+| c:\E-Commerce Website (Full) - Copy (3)\storefront-export\components\cart\OrderConfirmationBlock.tsx  | TypeScript JSX |        225 |         16 |         22 |        263 |
+| c:\E-Commerce Website (Full) - Copy (3)\storefront-export\components\cart\ProductCard.tsx             | TypeScript JSX |        208 |          9 |         17 |        234 |
+| c:\E-Commerce Website (Full) - Copy (3)\storefront-export\components\cart\ProductGrid.tsx             | TypeScript JSX |        150 |         10 |         18 |        178 |
+| c:\E-Commerce Website (Full) - Copy (3)\storefront-export\components\cart\ProductOptions.tsx          | TypeScript JSX |        237 |         13 |         22 |        272 |
+| c:\E-Commerce Website (Full) - Copy (3)\storefront-export\components\cart\SearchBar.tsx               | TypeScript JSX |        204 |          6 |         16 |        226 |
+| c:\E-Commerce Website (Full) - Copy (3)\storefront-export\components\cart\StoreHeader.tsx             | TypeScript JSX |        203 |         10 |         18 |        231 |
+| c:\E-Commerce Website (Full) - Copy (3)\storefront-export\components\home\ErrorBoundary.css           | CSS            |        124 |          0 |         17 |        141 |
+| c:\E-Commerce Website (Full) - Copy (3)\storefront-export\components\home\HowItWorks.tsx              | TypeScript JSX |         40 |          4 |          5 |         49 |
+| c:\E-Commerce Website (Full) - Copy (3)\storefront-export\components\home\Newsletter.tsx              | TypeScript JSX |         69 |          1 |          8 |         78 |
+| c:\E-Commerce Website (Full) - Copy (3)\storefront-export\components\home\TechStack.css               | CSS            |        389 |          0 |         54 |        443 |
+| c:\E-Commerce Website (Full) - Copy (3)\storefront-export\components\home\Testimonials.tsx            | TypeScript JSX |         71 |          4 |          7 |         82 |
+| c:\E-Commerce Website (Full) - Copy (3)\storefront-export\components\home\TrustSection.tsx            | TypeScript JSX |         32 |          0 |          2 |         34 |
+| c:\E-Commerce Website (Full) - Copy (3)\storefront-export\components\home\WhyUs.tsx                   | TypeScript JSX |         28 |          0 |          3 |         31 |
+| c:\E-Commerce Website (Full) - Copy (3)\storefront-export\components\home\tech.tsx                    | TypeScript JSX |        147 |          9 |         18 |        174 |
+| c:\E-Commerce Website (Full) - Copy (3)\storefront-export\components\home\testimonials.css            | CSS            |        185 |          0 |         25 |        210 |
+| c:\E-Commerce Website (Full) - Copy (3)\storefront-export\components\storefront\CustomerDashboard.tsx | TypeScript JSX |        206 |          6 |         24 |        236 |
+| c:\E-Commerce Website (Full) - Copy (3)\storefront-export\components\storefront\OmnoraBanner.tsx      | TypeScript JSX |         47 |          3 |          9 |         59 |
+| c:\E-Commerce Website (Full) - Copy (3)\storefront-export\components\storefront\ThankYouPage.tsx      | TypeScript JSX |        199 |          2 |         23 |        224 |
+| c:\E-Commerce Website (Full) - Copy (3)\storefront-export\context\CustomerAuthContext.tsx             | TypeScript JSX |        125 |          6 |         26 |        157 |
+| c:\E-Commerce Website (Full) - Copy (3)\storefront-export\context\StorefrontContext.tsx               | TypeScript JSX |        421 |          9 |         55 |        485 |
+| c:\E-Commerce Website (Full) - Copy (3)\storefront-export\pages\About.css                             | CSS            |        202 |          0 |         39 |        241 |
+| c:\E-Commerce Website (Full) - Copy (3)\storefront-export\pages\About.tsx                             | TypeScript JSX |        138 |          6 |         15 |        159 |
+| c:\E-Commerce Website (Full) - Copy (3)\storefront-export\pages\Cart.css                              | CSS            |        222 |          0 |         36 |        258 |
+| c:\E-Commerce Website (Full) - Copy (3)\storefront-export\pages\Cart.tsx                              | TypeScript JSX |        177 |          0 |        179 |        356 |
+| c:\E-Commerce Website (Full) - Copy (3)\storefront-export\pages\Checkout.css                          | CSS            |        322 |          0 |         41 |        363 |
+| c:\E-Commerce Website (Full) - Copy (3)\storefront-export\pages\Checkout.tsx                          | TypeScript JSX |        467 |         10 |         43 |        520 |
+| c:\E-Commerce Website (Full) - Copy (3)\storefront-export\pages\Collection.css                        | CSS            |        554 |          0 |         91 |        645 |
+| c:\E-Commerce Website (Full) - Copy (3)\storefront-export\pages\Collection.tsx                        | TypeScript JSX |        139 |          9 |         25 |        173 |
+| c:\E-Commerce Website (Full) - Copy (3)\storefront-export\pages\Home.tsx                              | TypeScript JSX |        261 |         14 |         30 |        305 |
+| c:\E-Commerce Website (Full) - Copy (3)\storefront-export\pages\HomeWithAds.tsx                       | TypeScript JSX |         12 |          4 |          6 |         22 |
+| c:\E-Commerce Website (Full) - Copy (3)\storefront-export\pages\OmnoraContact.css                     | CSS            |        201 |          0 |         36 |        237 |
+| c:\E-Commerce Website (Full) - Copy (3)\storefront-export\pages\OmnoraContact.tsx                     | TypeScript JSX |        162 |          5 |         20 |        187 |
+| c:\E-Commerce Website (Full) - Copy (3)\storefront-export\pages\OmnoraFAQ.css                         | CSS            |        192 |          0 |         35 |        227 |
+| c:\E-Commerce Website (Full) - Copy (3)\storefront-export\pages\OmnoraFAQ.tsx                         | TypeScript JSX |        123 |          5 |         18 |        146 |
+| c:\E-Commerce Website (Full) - Copy (3)\storefront-export\pages\OrderConfirmation.css                 | CSS            |        210 |          0 |         33 |        243 |
+| c:\E-Commerce Website (Full) - Copy (3)\storefront-export\pages\OrderConfirmation.tsx                 | TypeScript JSX |        149 |         13 |         19 |        181 |
+| c:\E-Commerce Website (Full) - Copy (3)\storefront-export\pages\Privacy.tsx                           | TypeScript JSX |         41 |          0 |          5 |         46 |
+| c:\E-Commerce Website (Full) - Copy (3)\storefront-export\pages\Product.css                           | CSS            |        241 |          0 |         37 |        278 |
+| c:\E-Commerce Website (Full) - Copy (3)\storefront-export\pages\Product.tsx                           | TypeScript JSX |        250 |          9 |         35 |        294 |
+| c:\E-Commerce Website (Full) - Copy (3)\storefront-export\pages\SizeGuide.tsx                         | TypeScript JSX |         78 |          0 |          5 |         83 |
+| c:\E-Commerce Website (Full) - Copy (3)\storefront-export\pages\Terms.tsx                             | TypeScript JSX |         45 |          0 |          6 |         51 |
+| c:\E-Commerce Website (Full) - Copy (3)\storefront-export\pages\Wishlist.css                          | CSS            |        126 |          0 |         20 |        146 |
+| c:\E-Commerce Website (Full) - Copy (3)\storefront-export\pages\Wishlist.tsx                          | TypeScript JSX |        141 |          6 |         17 |        164 |
+| c:\E-Commerce Website (Full) - Copy (3)\supabase\functions\create-checkout-session\index.ts           | TypeScript     |         76 |          5 |         13 |         94 |
+| c:\E-Commerce Website (Full) - Copy (3)\supabase\functions\fetch-platform-stats\index.ts              | TypeScript     |         56 |          6 |         15 |         77 |
+| c:\E-Commerce Website (Full) - Copy (3)\supabase\functions\merchant-stripe-webhook\index.ts           | TypeScript     |        100 |          8 |         26 |        134 |
+| c:\E-Commerce Website (Full) - Copy (3)\supabase\functions\process-merchant-checkout\index.ts         | TypeScript     |         80 |          6 |         16 |        102 |
+| c:\E-Commerce Website (Full) - Copy (3)\supabase\functions\stripe-webhook\index.ts                    | TypeScript     |         82 |          5 |         19 |        106 |
+| c:\E-Commerce Website (Full) - Copy (3)\test_db.js                                                    | JavaScript     |         18 |          0 |          8 |         26 |
+| Total                                                                                                 |                |     93,653 |      2,505 |      7,859 |    104,017 |
++-------------------------------------------------------------------------------------------------------+----------------+------------+------------+------------+------------+

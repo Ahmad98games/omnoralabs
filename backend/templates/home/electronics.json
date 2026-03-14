@@ -1,0 +1,67 @@
+{
+    "layout": [
+        {
+            "id": "hero_electronics",
+            "type": "hero",
+            "data": {
+                "headline": "Top Electronics — Best Prices",
+                "subheadline": "Genuine products, fast delivery across Pakistan",
+                "buttonText": "Browse Products",
+                "buttonLink": "/collection",
+                "backgroundImage": "/placeholder-hero-electronics.jpg"
+            }
+        },
+        {
+            "id": "promo_electronics",
+            "type": "promo_banner",
+            "data": {
+                "text": "⚡ COD Available • Free Delivery on orders above PKR 3,000 • Warranty included",
+                "style": "accent"
+            }
+        },
+        {
+            "id": "categories_electronics",
+            "type": "category_grid",
+            "data": {
+                "heading": "Shop by Category",
+                "columns": 4
+            }
+        },
+        {
+            "id": "featured_electronics",
+            "type": "product_grid",
+            "data": {
+                "heading": "Featured Products",
+                "columns": 4,
+                "showFilters": false
+            }
+        },
+        {
+            "id": "trust_electronics",
+            "type": "trust_badges",
+            "data": {
+                "badges": [
+                    "genuine-products",
+                    "secure-checkout",
+                    "fast-shipping",
+                    "warranty"
+                ]
+            }
+        }
+    ],
+    "configuration": {
+        "colors": {
+            "primary": "#0a0f1e",
+            "accentPrimary": "#3b82f6",
+            "surface": "#111827",
+            "textPrimary": "#ffffff"
+        },
+        "typography": {
+            "pair": "clean"
+        },
+        "spacing": {
+            "sectionPadding": 60,
+            "containerMaxWidth": 1280
+        }
+    }
+}

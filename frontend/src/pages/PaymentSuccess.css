@@ -1,0 +1,146 @@
+/* ============================================================ 
+    PAYMENT SUCCESS PAGE - LUXURY THEME
+   ============================================================ */
+
+.payment-success-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    padding: 2rem;
+}
+
+.success-container {
+    max-width: 500px;
+    width: 100%;
+    text-align: center;
+}
+
+/* --- Icon --- */
+.success-icon-wrapper {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.success-icon {
+    color: var(--gold);
+    z-index: 2;
+}
+
+.pulse-ring {
+    position: absolute;
+    inset: 0;
+    border: 1px solid var(--gold);
+    border-radius: 50%;
+    animation: ripple-lux 3s infinite;
+}
+
+@keyframes ripple-lux {
+    0% {
+        transform: scale(0.8);
+        opacity: 0.8;
+    }
+
+    100% {
+        transform: scale(2);
+        opacity: 0;
+    }
+}
+
+/* --- Content --- */
+.success-message {
+    color: #666;
+    margin-top: 1rem;
+    margin-bottom: 4rem;
+}
+
+/* --- Ticket --- */
+.order-ticket-luxury {
+    background: #fafafa;
+    border: 1px solid #eee;
+    padding: 2.5rem;
+    margin-bottom: 3rem;
+    text-align: left;
+}
+
+.ticket-row-lux {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.ticket-label-lux {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    color: #999;
+}
+
+.ticket-value-lux {
+    font-weight: 600;
+    color: var(--royal-blue);
+}
+
+.ticket-divider-lux {
+    height: 1px;
+    background: #eee;
+    margin: 1.5rem 0;
+}
+
+.status-pill-success {
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 0.4rem 0.8rem;
+    background: #e6f6ee;
+    color: #1a7f4e;
+    letter-spacing: 0.05em;
+}
+
+.email-note {
+    font-size: 0.8rem;
+    color: #999;
+    margin-bottom: 3rem;
+}
+
+/* --- Buttons --- */
+.action-buttons-luxury {
+    display: grid;
+    gap: 1rem;
+}
+
+.btn-luxury-action {
+    padding: 1.2rem;
+    background: var(--royal-blue);
+    color: #fff;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    transition: background 0.3s ease;
+}
+
+.btn-luxury-action:hover {
+    background: #122846;
+}
+
+.btn-luxury-outline {
+    padding: 1.2rem;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    transition: all 0.3s ease;
+}
+
+.btn-luxury-outline:hover {
+    background: var(--gold);
+    color: #fff;
+}

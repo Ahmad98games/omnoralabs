@@ -1,0 +1,59 @@
+{
+    "layout": [
+        {
+            "id": "hero_general",
+            "type": "hero",
+            "data": {
+                "headline": "Welcome to Our Store",
+                "subheadline": "Quality products delivered to your doorstep",
+                "buttonText": "Shop Now",
+                "buttonLink": "/collection",
+                "backgroundImage": "/placeholder-hero-general.jpg"
+            }
+        },
+        {
+            "id": "promo_general",
+            "type": "promo_banner",
+            "data": {
+                "text": "🚚 Free Delivery Available • Cash on Delivery • Easy Returns",
+                "style": "accent"
+            }
+        },
+        {
+            "id": "products_general",
+            "type": "product_grid",
+            "data": {
+                "heading": "Our Products",
+                "columns": 3,
+                "showFilters": true
+            }
+        },
+        {
+            "id": "trust_general",
+            "type": "trust_badges",
+            "data": {
+                "badges": [
+                    "free-shipping",
+                    "secure-checkout",
+                    "easy-returns",
+                    "cod-available"
+                ]
+            }
+        }
+    ],
+    "configuration": {
+        "colors": {
+            "primary": "#ffffff",
+            "accentPrimary": "#111827",
+            "surface": "#f9fafb",
+            "textPrimary": "#111827"
+        },
+        "typography": {
+            "pair": "minimal"
+        },
+        "spacing": {
+            "sectionPadding": 60,
+            "containerMaxWidth": 1200
+        }
+    }
+}

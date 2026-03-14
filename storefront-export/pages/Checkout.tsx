@@ -1,0 +1,520 @@
+
+import { useEffect, useMemo, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import client, { trackEvent } from '../api/client'
+import './Checkout.css'
+import { useToast } from '../context/ToastContext'
+import { useScrollReveal } from '../hooks/useScrollReveal'
+
+type CartItem = { id: string; name: string; price: number; image?: string; quantity: number }
+
+export default function Checkout() {
+    const [items, setItems] = useState<CartItem[]>([])
+    const [submitting, setSubmitting] = useState(false)
+    const [error, setError] = useState<string | null>(null)
+    const [success, setSuccess] = useState<string | null>(null)
+    const [paymentTab, setPaymentTab] = useState<'local' | 'international'>('local')
+    const [paymentMethod, setPaymentMethod] = useState('cod')
+    const { showToast } = useToast()
+    const formRef = useScrollReveal()
+    const summaryRef = useScrollReveal()
+
+    const [form, setForm] = useState(() => {
+        const saved = localStorage.getItem('checkout_form')
+        return saved ? JSON.parse(saved) : {
+            firstName: '',
+            lastName: '',
+            email: '',
+            phone: '',
+            address: '',
+            city: '',
+            state: '',
+            postalCode: '',
+            country: 'Pakistan',
+            notes: ''
+        }
+    })
+
+    const navigate = useNavigate()
+
+    useEffect(() => {
+        localStorage.setItem('checkout_form', JSON.stringify(form))
+    }, [form])
+
+    useEffect(() => {
+        const data = JSON.parse(localStorage.getItem('cart') || '[]') as CartItem[]
+        setItems(data)
+        if (data.length === 0) {
+            navigate('/cart')
+        }
+    }, [navigate])
+
+    const subtotal = useMemo(() => items.reduce((s, i) => s + i.price * i.quantity, 0), [items])
+    const tax = useMemo(() => subtotal * 0.05, [subtotal])
+    const shipping = useMemo(() => form.country === 'Pakistan' ? 250 : 5000, [form.country])
+    const total = subtotal + tax + shipping
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+        setForm({ ...form, [e.target.name]: e.target.value })
+    }
+
+    const validateForm = () => {
+        const errors: string[] = []
+        if (!form.firstName?.trim()) errors.push('First name is required')
+        if (!form.lastName?.trim()) errors.push('Last name is required')
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+        if (!form.email?.trim()) {
+            errors.push('Email is required')
+        } else if (!emailRegex.test(form.email)) {
+            errors.push('Invalid email format')
+        }
+
+        const phoneRegex = /^(\+92|0|92)[0-9]{10}$/
+        if (!form.phone?.trim()) {
+            errors.push('Phone number is required')
+        } else if (form.country === 'Pakistan' && !phoneRegex.test(form.phone.replace(/[\s-]/g, ''))) {
+            errors.push('Invalid Pakistani phone format (e.g., 03001234567)')
+        }
+
+        if (!form.address?.trim()) errors.push('Street address is required')
+        if (!form.city?.trim()) errors.push('City is required')
+
+        if (form.country === 'International' && !form.postalCode?.trim()) {
+            errors.push('Postal code is required for international shipping')
+        }
+
+        return errors.length > 0 ? errors[0] : null
+    }
+
+    /* --- Instant Feedback & Safety Lock --- */
+    const [isProcessing, setIsProcessing] = useState(false); // Controls button state immediately
+
+    const placeOrder = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        // 1. Immediate Lock (Prevent Double-Tap)
+        if (isProcessing || submitting) return;
+        setIsProcessing(true); // Locks UI immediately
+
+        setError(null);
+        setSuccess(null);
+
+        if (items.length === 0) {
+            setError('Your cart is empty');
+            setIsProcessing(false);
+            return;
+        }
+
+        // Validation
+        const validationError = validateForm();
+        if (validationError) {
+            setError(validationError);
+            showToast(validationError, 'error');
+            setIsProcessing(false);
+            return;
+        }
+
+        setSubmitting(true);
+        try {
+            const payload = {
+                customerInfo: {
+                    name: `${form.firstName} ${form.lastName}`,
+                    email: form.email,
+                    phone: form.phone
+                },
+                shippingAddress: {
+                    address: form.address,
+                    city: form.city,
+                    state: form.state,
+                    postalCode: form.postalCode,
+                    country: form.country
+                },
+                paymentMethod: paymentMethod,
+                items: items.map(i => ({
+                    productId: i.id,
+                    name: i.name,
+                    price: i.price,
+                    quantity: i.quantity
+                })),
+                totalAmount: total,
+                notes: form.notes
+            }
+
+            // Create order in backend with INITIATED status
+            const res = await client.post('/orders', payload);
+
+            if (res.data?.success && res.data?.order) {
+                const { _id, orderNumber } = res.data.order;
+
+                // Direct navigation with state to ensure immediate loading
+                navigate(`/order-confirmation/${_id}`, {
+                    state: {
+                        order: res.data.order,
+                        source: 'checkout'
+                    }
+                });
+
+                // Clear cart immediately since order is created
+                localStorage.removeItem('cart');
+                window.dispatchEvent(new Event('cart-updated'));
+
+                showToast(`Order #${orderNumber} placed successfully!`, 'success');
+            } else {
+                const msg = res.data?.error || 'Failed to create order';
+                setError(msg);
+                showToast(msg, 'error');
+                setIsProcessing(false); // Unlock on failure
+            }
+        } catch (e: any) {
+            console.error('Order error:', e);
+            const msg = e?.response?.data?.error || e?.message || 'Failed to create order. Please try again.';
+            setError(msg);
+            showToast(msg, 'error');
+            setIsProcessing(false); // Unlock on failure
+        } finally {
+            setSubmitting(false);
+            // Note: We do NOT set isProcessing(false) on success to keep it locked during navigation
+        }
+    }
+
+    const getPaymentMethodName = () => {
+        const methods: Record<string, string> = {
+            cod: 'Cash on Delivery',
+            meezan: 'Meezan Bank Transfer',
+            jazzcash: 'JazzCash',
+            easypaisa: 'EasyPaisa',
+            payoneer: 'Payoneer'
+        }
+        return methods[paymentMethod] || paymentMethod
+    }
+
+    return (
+        <div className="checkout-luxury">
+            <header className="checkout-hero-mini">
+                <div className="container">
+                    <span className="eyebrow">FINAL STEP</span>
+                    <h1 className="h1 subtitle-serif">Secure Checkout</h1>
+                    <p className="text-muted italic">Complete your selection from the Gold She Atelier</p>
+                </div>
+            </header>
+
+            <div className="checkout-container">
+                <div className="breadcrumbs">
+                    <ul className="breadcrumbs-list">
+                        <li className="breadcrumbs-item">
+                            <Link to="/" className="breadcrumbs-link">Home</Link>
+                        </li>
+                        <li className="breadcrumbs-item">
+                            <Link to="/cart" className="breadcrumbs-link">Shopping Bag</Link>
+                        </li>
+                        <li className="breadcrumbs-item">Checkout</li>
+                    </ul>
+                </div>
+
+                <div className="checkout-content">
+                    <div className="checkout-form-container reveal" ref={formRef}>
+                        <form id="checkoutForm" onSubmit={placeOrder} noValidate>
+
+                            {/* Customer Info */}
+                            <div className="form-section reveal delay-100">
+                                <h2 className="form-section-title">Customer Information</h2>
+                                <div className="form-row">
+                                    <div className="form-group">
+                                        <label htmlFor="firstName">First Name *</label>
+                                        <input
+                                            id="firstName"
+                                            name="firstName"
+                                            value={form.firstName}
+                                            onChange={handleInputChange}
+                                            className="form-input"
+                                            required
+                                            aria-required="true"
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label htmlFor="lastName">Last Name *</label>
+                                        <input
+                                            id="lastName"
+                                            name="lastName"
+                                            value={form.lastName}
+                                            onChange={handleInputChange}
+                                            className="form-input"
+                                            required
+                                            aria-required="true"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="form-group">
+                                    <label htmlFor="email">Email Address *</label>
+                                    <input
+                                        id="email"
+                                        type="email"
+                                        name="email"
+                                        value={form.email}
+                                        onChange={handleInputChange}
+                                        className="form-input"
+                                        required
+                                        aria-required="true"
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label htmlFor="phone">Phone Number *</label>
+                                    <input
+                                        id="phone"
+                                        type="tel"
+                                        name="phone"
+                                        value={form.phone}
+                                        onChange={handleInputChange}
+                                        className="form-input"
+                                        placeholder="+92 300 1234567"
+                                        required
+                                        aria-required="true"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Shipping Info */}
+                            <div className="form-section reveal delay-200">
+                                <h2 className="form-section-title">Shipping Information</h2>
+                                <div className="form-group">
+                                    <label htmlFor="address">Street Address *</label>
+                                    <input
+                                        id="address"
+                                        name="address"
+                                        value={form.address}
+                                        onChange={handleInputChange}
+                                        className="form-input"
+                                        required
+                                        aria-required="true"
+                                    />
+                                </div>
+                                <div className="form-row">
+                                    <div className="form-group">
+                                        <label htmlFor="city">City *</label>
+                                        <input
+                                            id="city"
+                                            name="city"
+                                            value={form.city}
+                                            onChange={handleInputChange}
+                                            className="form-input"
+                                            required
+                                            aria-required="true"
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label htmlFor="state">State/Province</label>
+                                        <input
+                                            id="state"
+                                            name="state"
+                                            value={form.state}
+                                            onChange={handleInputChange}
+                                            className="form-input"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="form-row">
+                                    <div className="form-group">
+                                        <label htmlFor="postalCode">Postal Code</label>
+                                        <input
+                                            id="postalCode"
+                                            name="postalCode"
+                                            value={form.postalCode}
+                                            onChange={handleInputChange}
+                                            className="form-input"
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label htmlFor="country">Country *</label>
+                                        <select
+                                            id="country"
+                                            name="country"
+                                            value={form.country}
+                                            onChange={handleInputChange}
+                                            className="form-input"
+                                            required
+                                        >
+                                            <option value="Pakistan">Pakistan</option>
+                                            <option value="International">International</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div className="form-group">
+                                    <label htmlFor="notes">Delivery Notes (Optional)</label>
+                                    <textarea
+                                        id="notes"
+                                        name="notes"
+                                        value={form.notes}
+                                        onChange={handleInputChange}
+                                        className="form-input"
+                                        rows={3}
+                                        placeholder="Any special delivery instructions..."
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Payment Info */}
+                            <div className="form-section reveal delay-300">
+                                <h2 className="form-section-title">Payment Information</h2>
+
+                                <div className="payment-tabs" role="tablist">
+                                    <button
+                                        id="tab-local"
+                                        type="button"
+                                        role="tab"
+                                        aria-selected={paymentTab === 'local' ? 'true' : 'false'}
+                                        aria-controls="local-payment-panel"
+                                        className={`payment-tab ${paymentTab === 'local' ? 'active' : ''}`}
+                                        onClick={() => setPaymentTab('local')}
+                                    >
+                                        Pakistani Methods
+                                    </button>
+                                    <button
+                                        id="tab-international"
+                                        type="button"
+                                        role="tab"
+                                        aria-selected={paymentTab === 'international' ? 'true' : 'false'}
+                                        aria-controls="international-payment-panel"
+                                        className={`payment-tab ${paymentTab === 'international' ? 'active' : ''}`}
+                                        onClick={() => setPaymentTab('international')}
+                                    >
+                                        International Methods
+                                    </button>
+                                </div>
+
+                                {paymentTab === 'local' ? (
+                                    <div id="local-payment-panel" className="payment-options" role="tabpanel" aria-labelledby="tab-local">
+                                        {[
+                                            { value: 'cod', name: 'Cash on Delivery', desc: 'Pay when you receive your order' },
+                                            { value: 'meezan', name: 'Meezan Bank Transfer', desc: 'Pay via bank transfer to our Meezan Bank account' },
+                                            { value: 'jazzcash', name: 'JazzCash', desc: 'Pay with your JazzCash mobile account' },
+                                            { value: 'easypaisa', name: 'EasyPaisa', desc: 'Pay with your EasyPaisa mobile account' }
+                                        ].map(method => (
+                                            <div key={method.value} className="payment-option">
+                                                <label>
+                                                    <div className="payment-option-header">
+                                                        <input
+                                                            type="radio"
+                                                            name="paymentMethod"
+                                                            value={method.value}
+                                                            checked={paymentMethod === method.value}
+                                                            onChange={(e) => setPaymentMethod(e.target.value)}
+                                                            aria-label={method.name}
+                                                        />
+                                                        <span className="payment-option-name">{method.name}</span>
+                                                    </div>
+                                                    <span className="payment-option-description">{method.desc}</span>
+                                                </label>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div id="international-payment-panel" className="payment-options" role="tabpanel" aria-labelledby="tab-international">
+                                        <div className="payment-option">
+                                            <label>
+                                                <div className="payment-option-header">
+                                                    <input
+                                                        type="radio"
+                                                        name="paymentMethod"
+                                                        value="payoneer"
+                                                        checked={paymentMethod === 'payoneer'}
+                                                        onChange={(e) => setPaymentMethod(e.target.value)}
+                                                        aria-label="Payoneer"
+                                                    />
+                                                    <span className="payment-option-name">Payoneer</span>
+                                                </div>
+                                                <span className="payment-option-description">Pay securely via Payoneer</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Dynamic Payment Details - SIMPLIFIED */}
+                                {paymentMethod !== 'cod' && (
+                                    <div className="payment-details animate-fade-in">
+                                        <h3>Payment Instructions</h3>
+                                       <div className="bank-details bank-details-wrapper">
+    <div className="secure-icon-large">🔒</div>
+    <p className="payment-highlight-text">
+        You have selected <strong className="text-royal">{getPaymentMethodName()}</strong>.
+    </p>
+    <p className="payment-instruction-text">
+        Complete your order securely now. You will receive precise payment details (Account Number/IBAN) and a receipt submission link on the order confirmation page.
+    </p>
+</div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {error && (
+                                <div style={{ color: 'crimson', marginBottom: '1rem' }} role="alert">
+                                    {error}
+                                </div>
+                            )}
+                            {success && (
+                                <div style={{ color: 'seagreen', marginBottom: '1rem' }} role="alert">
+                                    {success}
+                                </div>
+                            )}
+
+
+
+                            <button
+                                type="submit"
+                                disabled={isProcessing || submitting}
+                                className="place-order-btn"
+                                aria-label={`Place order for PKR ${(total || 0).toLocaleString()}`}
+                                style={{ opacity: isProcessing ? 0.7 : 1, transition: 'opacity 0.2s' }}
+                            >
+                                {isProcessing ? 'Processing Order...' : `Place Order · PKR ${(total || 0).toLocaleString()}`}
+                            </button>
+                        </form>
+                    </div>
+
+                    <div className="order-summary-container reveal delay-200" ref={summaryRef}>
+                        <h2 className="form-section-title">Order Summary</h2>
+                        <div className="summary-items">
+                            {items.map(i => (
+                                <div key={i.id} className="summary-item">
+                                    <span>{i.name} ×{i.quantity}</span>
+                                    <span>PKR {((i.price || 0) * (i.quantity || 1)).toLocaleString()}</span>
+                                </div>
+                            ))}
+                        </div>
+                        <div className="summary-totals">
+                            <div className="summary-row">
+                                <span>Subtotal</span>
+                                <span>PKR {(subtotal || 0).toLocaleString()}</span>
+                            </div>
+                            <div className="summary-row">
+                                <span>Tax (5%)</span>
+                                <span>PKR {Number(tax || 0).toFixed(0).toLocaleString()}</span>
+                            </div>
+                            <div className="summary-row">
+                                <span>Shipping</span>
+                                <span>PKR {(shipping || 0).toLocaleString()}</span>
+                            </div>
+                            <div className="summary-total">
+                                <span>Total</span>
+                                <span>PKR {Number(total || 0).toFixed(0).toLocaleString()}</span>
+                            </div>
+                        </div>
+
+                        <div style={{
+                            marginTop: '1.5rem',
+                            padding: '1rem',
+                            background: 'rgba(27, 54, 93, 0.05)',
+                            border: '1px solid rgba(27, 54, 93, 0.2)',
+                            fontSize: '0.85rem',
+                            color: '#475569'
+                        }}>
+                            <p style={{ margin: 0 }}>
+                                <strong style={{ color: 'var(--royal-blue)' }}>Payment Method:</strong> {getPaymentMethodName()}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
+}

@@ -1,0 +1,10 @@
+--- Debugging Login Logic ---
+Mode: MongoDB
+Attempting to find user: pakahmad9815@gmail.com
+Testing User.findOne().select('+password')...
+.select() function exists.
+CRITICAL ERROR CAUGHT: Operation `users.findOne()` buffering timed out after 10000ms
+MongooseError: Operation `users.findOne()` buffering timed out after 10000ms
+    at Timeout.<anonymous> (C:\E-Commerce Website (Full)\backend\node_modules\mongoose\lib\drivers\node-mongodb-native\collection.js:185:23)
+    at listOnTimeout (node:internal/timers:605:17)
+    at process.processTimers (node:internal/timers:541:7)

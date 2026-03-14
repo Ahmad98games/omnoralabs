@@ -1,0 +1,49 @@
+/* ============================================================ 
+    NOT FOUND PAGE - LUXURY THEME
+   ============================================================ */
+
+.not-found-luxury {
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: #fff;
+}
+
+.not-found-content {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.error-code-lux {
+    font-size: 10rem;
+    color: var(--gold);
+    opacity: 0.15;
+    line-height: 0.8;
+    margin-bottom: 2rem;
+}
+
+.not-found-actions {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+    margin-top: 3rem;
+}
+
+.not-found-actions .btn-luxury-action,
+.not-found-actions .btn-luxury-outline {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+@media (max-width: 600px) {
+    .error-code-lux {
+        font-size: 6rem;
+    }
+
+    .not-found-actions {
+        flex-direction: column;
+    }
+}

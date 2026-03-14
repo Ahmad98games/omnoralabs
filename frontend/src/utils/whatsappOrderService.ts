@@ -1,0 +1,161 @@
+/**
+ * OMNORA WHATSAPP UPLINK
+ * Handles message generation and API redirects.
+ */
+
+interface OrderItem {
+    id?: string;
+    name: string;
+    price: number;
+    quantity: number;
+}
+
+// Flexible interface to handle both Backend Response and Local State
+export interface OrderData {
+    _id?: string;
+    orderNumber: string; // Required now
+    customerInfo?: { name: string; email: string; phone: string; };
+    guestCustomer?: { name: string; email: string; phone: string; };
+    customer?: { name: string; email: string; phone: string; }; // BACKEND FORMAT
+    shippingAddress?: {
+        address: string;
+        city: string;
+        state?: string;
+        postalCode?: string;
+        country: string;
+    };
+    items?: OrderItem[];
+    paymentMethod?: string;
+    total?: number;       // Frontend State
+    totalAmount?: number; // Backend DB
+    notes?: string;
+}
+
+const WHATSAPP_BUSINESS_NUMBER = '923097613611'; // Omnora Official Line
+
+/**
+ * Format Currency
+ */
+const formatPrice = (amount: number) => `PKR ${amount.toLocaleString()}`;
+
+/**
+ * Format Payment Method for Human Reading
+ */
+function formatPaymentMethod(method?: string): string {
+    if (!method) return 'Pending Selection';
+    const methods: Record<string, string> = {
+        cod: 'Cash on Delivery (COD)',
+        meezan: 'Meezan Bank Transfer',
+        jazzcash: 'JazzCash Mobile',
+        easypaisa: 'EasyPaisa Mobile',
+        payoneer: 'Payoneer / Wise'
+    };
+    return methods[method] || method.toUpperCase();
+}
+
+/**
+ * Get Total Amount Safely
+ */
+function getOrderTotal(orderData: OrderData): string {
+    const amount = orderData.totalAmount ?? orderData.total ?? 0;
+    return formatPrice(amount);
+}
+
+/**
+ * Generate Core Message Body
+ */
+function formatOrderDetailsBody(orderData: OrderData): string {
+    const { orderNumber, customerInfo, guestCustomer, customer, shippingAddress, items, paymentMethod, notes } = orderData;
+
+    // Fallbacks - PRIORITIZE 'customer' (Backend Format)
+    const name = customer?.name || customerInfo?.name || guestCustomer?.name || 'Guest';
+    const email = customer?.email || customerInfo?.email || guestCustomer?.email || 'N/A';
+    const phone = customer?.phone || customerInfo?.phone || guestCustomer?.phone || 'N/A';
+
+    // Address Composition
+    const addr = shippingAddress?.address || 'N/A';
+    const city = shippingAddress?.city || 'Unknown';
+    const state = shippingAddress?.state || '';
+    const country = shippingAddress?.country || 'Pakistan';
+    // const fullAddress = `${addr}, ${city}${state ? `, ${state}` : ''}, ${country}`;
+
+    // Items List
+    const itemsList = items?.map(i => `• ${i.name} (x${i.quantity})`).join('\n') || 'No items listed';
+
+    return `*ORDER ID:* ${orderNumber}
+*AMOUNT:* ${getOrderTotal(orderData)}
+--------------------------------
+*STATUS:* 🟡 Pending Confirmation
+*DATE:* ${new Date().toLocaleString()}
+--------------------------------
+*CUSTOMER DATA*
+👤 Name: ${name}
+📧 Email: ${email}
+📞 Contact: ${phone}
+
+*SHIPPING DETAILS*
+🏠 Address: ${addr}
+📍 City: ${city}
+🌍 Country: ${country}
+
+*MANIFEST*
+${itemsList}
+
+*PAYMENT CHANNEL*
+💳 Method: ${formatPaymentMethod(paymentMethod)}
+${notes ? `\n📝 *NOTES:* ${notes}` : ''}`;
+}
+
+/**
+ * SCENARIO A: User clicks "I've Paid"
+ */
+export function generatePaymentReceiptMessage(orderData: OrderData): string {
+    return `✅ *PAYMENT NOTIFICATION*
+    
+I have completed the transfer for this order.
+Please verify and process.
+
+${formatOrderDetailsBody(orderData)}
+
+*ATTACHMENT:* [Sending Receipt Image...]`;
+}
+
+/**
+ * SCENARIO B: User clicks "Continue on WhatsApp" (Automation)
+ */
+export function generateNewOrderMessage(orderData: OrderData): string {
+    return `🚀 *NEW ORDER REQUEST*
+
+I would like to finalize this order via WhatsApp.
+
+${formatOrderDetailsBody(orderData)}
+
+Please confirm availability and shipping timeline.`;
+}
+
+/**
+ * Build the URL
+ * HARDENED: Using absolute wa.me link with fully encoded text parameter
+ */
+export function generateWhatsAppURL(message: string): string {
+    // We already encode but we ensure no double encoding or weird characters slip through
+    return `https://wa.me/${WHATSAPP_BUSINESS_NUMBER}?text=${encodeURIComponent(message.trim())}`;
+}
+
+/**
+ * Execute Redirect
+ */
+export function openWhatsApp(orderData: OrderData, type: 'payment' | 'automation' = 'automation'): boolean {
+    try {
+        const message = type === 'payment'
+            ? generatePaymentReceiptMessage(orderData)
+            : generateNewOrderMessage(orderData);
+
+        const url = generateWhatsAppURL(message);
+        window.open(url, '_blank');
+        return true;
+    } catch (error) {
+        console.error('WhatsApp Uplink Failed:', error);
+        return false;
+    }
+}

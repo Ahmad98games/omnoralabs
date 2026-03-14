@@ -1,0 +1,237 @@
+/* ============================================================ 
+    CONTACT PAGE - LUXURY THEME
+   ============================================================ */
+
+.contact-luxury-page {
+    background: #fff;
+    color: var(--royal-blue);
+    overflow-x: hidden;
+}
+
+/* --- Hero --- */
+.contact-hero-section {
+    min-height: 60vh;
+    display: flex;
+    align-items: center;
+    background: var(--royal-blue);
+    color: #fff;
+    padding: 6rem 0;
+    background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('/images/home/hero.png');
+    background-size: cover;
+    background-position: center;
+}
+
+.hero-content {
+    max-width: 800px;
+}
+
+.editorial-title {
+    font-size: clamp(3rem, 7vw, 5rem);
+    line-height: 1;
+    margin-bottom: 3rem;
+    letter-spacing: -0.03em;
+    font-family: var(--font-sans);
+}
+
+.font-serif {
+    font-family: var(--font-serif);
+}
+
+.italic {
+    font-style: italic;
+}
+
+.text-gold {
+    color: var(--gold);
+}
+
+/* --- Layout --- */
+.contact-layout-grid {
+    display: grid;
+    grid-template-columns: 0.8fr 1.2fr;
+    gap: 5rem;
+    align-items: start;
+}
+
+.section-padding {
+    padding: clamp(5rem, 10vw, 8rem) 0;
+}
+
+/* --- Detail Blocks --- */
+.subtitle-serif-small {
+    font-family: var(--font-serif);
+    font-size: 1.5rem;
+    font-weight: 400;
+}
+
+.detail-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+}
+
+.social-links-luxury {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.social-links-luxury a {
+    color: var(--gold);
+    text-decoration: none;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    border-bottom: 1px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.social-links-luxury a:hover {
+    border-bottom-color: var(--gold);
+}
+
+.breadcrumbs-luxury {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.breadcrumb-link-luxury {
+    color: var(--text-secondary);
+    text-decoration: none;
+}
+
+.sep-gold {
+    color: var(--gold);
+}
+
+/* --- Form Card --- */
+.form-card-luxury {
+    background: #fafafa;
+    padding: 4rem;
+    border: 1px solid #eee;
+}
+
+.subtitle-serif {
+    font-family: var(--font-serif);
+    font-size: 2.2rem;
+    color: var(--royal-blue);
+}
+
+.luxury-form-box {
+    display: grid;
+    gap: 2rem;
+}
+
+.form-group-luxury label {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    color: #999;
+    margin-bottom: 0.75rem;
+}
+
+.lux-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid #ddd;
+    padding: 1rem 0;
+    font-size: 1rem;
+    font-family: inherit;
+    transition: border-color 0.3s ease;
+}
+
+.lux-input:focus {
+    outline: none;
+    border-bottom-color: var(--gold);
+}
+
+.lux-textarea {
+    resize: none;
+}
+
+.btn-luxury-full {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    width: 100%;
+    padding: 1.5rem;
+    background: var(--royal-blue);
+    color: #fff;
+    border: none;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.btn-luxury-full:hover {
+    background: #122846;
+}
+
+.success-banner-gold {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: var(--blush);
+    color: var(--gold);
+    font-size: 0.9rem;
+    font-style: italic;
+    border-left: 3px solid var(--gold);
+}
+
+/* --- Map --- */
+.map-luxury-section {
+    background: #fff;
+    padding-bottom: 8rem;
+}
+
+.map-frame-wrapper {
+    width: 100%;
+    aspect-ratio: 21/9;
+    border: 1px solid #eee;
+    padding: 1rem;
+}
+
+.map-frame-luxury {
+    width: 100%;
+    height: 100%;
+    border: none;
+    filter: grayscale(1) contrast(1.1);
+}
+
+/* --- Utils --- */
+.mb-4 {
+    margin-bottom: 1rem;
+}
+
+.mb-8 {
+    margin-bottom: 2rem;
+}
+
+.mt-12 {
+    margin-top: 3rem;
+}
+
+@media (max-width: 992px) {
+    .contact-layout-grid {
+        grid-template-columns: 1fr;
+        gap: 4rem;
+    }
+
+    .form-card-luxury {
+        padding: 2rem;
+    }
+
+    .map-frame-wrapper {
+        aspect-ratio: 16/9;
+    }
+}

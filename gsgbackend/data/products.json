@@ -1,0 +1,80 @@
+[
+  {
+    "_id": "1",
+    "name": "Calm Lavender Bath Bomb",
+    "price": 899,
+    "stock": 50,
+    "reservedStock": 0,
+    "category": "bath-bombs",
+    "image": "/images/main/calm lavender.png",
+    "description": "Soothing lavender with chamomile for a restful soak",
+    "createdAt": "2026-01-09T12:51:51.135Z",
+    "updatedAt": "2026-01-09T12:51:51.135Z",
+    "__v": 0
+  },
+  {
+    "_id": "2",
+    "name": "Breathe Eucalyptus Bath Bomb",
+    "price": 949,
+    "stock": 50,
+    "reservedStock": 0,
+    "category": "bath-bombs",
+    "image": "/images/main/breath bath.png",
+    "description": "Eucalyptus and peppermint for clarity and refresh",
+    "createdAt": "2026-01-09T12:51:51.136Z",
+    "updatedAt": "2026-01-09T12:51:51.136Z",
+    "__v": 0
+  },
+  {
+    "_id": "3",
+    "name": "Glow Citrus Bath Bomb",
+    "price": 899,
+    "stock": 50,
+    "reservedStock": 0,
+    "category": "bath-bombs",
+    "image": "/images/main/Glow Citrus Bath Bomb.png",
+    "description": "Bright citrus with vitamin E for a mood lift",
+    "createdAt": "2026-01-09T12:51:51.137Z",
+    "updatedAt": "2026-01-09T12:51:51.137Z",
+    "__v": 0
+  },
+  {
+    "_id": "4",
+    "name": "Rose Comfort Bath Bomb",
+    "price": 999,
+    "stock": 50,
+    "reservedStock": 0,
+    "category": "bath-bombs",
+    "image": "/images/main/rose.png",
+    "description": "Soft rose and vanilla for gentle comfort",
+    "createdAt": "2026-01-09T12:51:51.150Z",
+    "updatedAt": "2026-01-09T12:51:51.150Z",
+    "__v": 0
+  },
+  {
+    "_id": "5",
+    "name": "Balance Green Tea Bath Bomb",
+    "price": 949,
+    "stock": 50,
+    "reservedStock": 0,
+    "category": "bath-bombs",
+    "image": "/images/main/green tea.png",
+    "description": "Green tea antioxidants for balanced skin",
+    "createdAt": "2026-01-09T12:51:51.160Z",
+    "updatedAt": "2026-01-09T12:51:51.160Z",
+    "__v": 0
+  },
+  {
+    "_id": "6",
+    "name": "Chamomile Bath Bomb",
+    "price": 899,
+    "stock": 50,
+    "reservedStock": 0,
+    "category": "bath-bombs",
+    "image": "/images/main/unvind.png",
+    "description": "Chamomile and calendula for calming downtime",
+    "createdAt": "2026-01-09T12:51:51.161Z",
+    "updatedAt": "2026-01-10T07:50:07.011Z",
+    "__v": 0
+  }
+]

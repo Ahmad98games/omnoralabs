@@ -1,0 +1,75 @@
+{
+    "layout": [
+        {
+            "id": "hero_fashion",
+            "type": "hero",
+            "data": {
+                "headline": "New Collection — Limited Edition",
+                "subheadline": "Elevate your style with handpicked pieces",
+                "buttonText": "Shop Now",
+                "buttonLink": "/collection",
+                "backgroundImage": "/placeholder-hero-fashion.jpg"
+            }
+        },
+        {
+            "id": "promo_banner_fashion",
+            "type": "promo_banner",
+            "data": {
+                "text": "Free delivery on orders above PKR 2,500 — COD Available nationwide",
+                "style": "accent"
+            }
+        },
+        {
+            "id": "collection_fashion",
+            "type": "product_grid",
+            "data": {
+                "heading": "Shop the Collection",
+                "columns": 3,
+                "showFilters": true
+            }
+        },
+        {
+            "id": "trust_fashion",
+            "type": "trust_badges",
+            "data": {
+                "badges": [
+                    "free-shipping",
+                    "secure-checkout",
+                    "easy-returns",
+                    "cod-available"
+                ]
+            }
+        },
+        {
+            "id": "social_proof_fashion",
+            "type": "social_proof",
+            "data": {
+                "type": "orders",
+                "timeframe": "today"
+            }
+        },
+        {
+            "id": "reviews_fashion",
+            "type": "reviews",
+            "data": {
+                "heading": "What Our Customers Say",
+                "count": 3
+            }
+        }
+    ],
+    "configuration": {
+        "colors": {
+            "primary": "#0e0e1a",
+            "accentPrimary": "#C5A059",
+            "surface": "#13131f",
+            "textPrimary": "#ffffff"
+        },
+        "typography": {
+            "pair": "luxury"
+        },
+        "spacing": {
+            "sectionPadding": 80,
+            "containerMaxWidth": 1200
+        }
+    }
+}

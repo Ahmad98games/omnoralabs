@@ -1,0 +1,247 @@
+/* ============================================================ 
+    ORDER DETAIL PAGE - LUXURY THEME
+   ============================================================ */
+
+.order-detail-luxury {
+    background: #fff;
+    min-height: 100vh;
+    padding: 6rem 0;
+}
+
+.order-header-luxury {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 5rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid #eee;
+}
+
+.back-link-lux {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    text-decoration: none;
+    margin-bottom: 1.5rem;
+}
+
+.order-title-group {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    cursor: pointer;
+}
+
+.order-date-lux {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 0.75rem;
+    color: #999;
+    letter-spacing: 0.1em;
+}
+
+.status-pill-lg {
+    padding: 0.8rem 1.5rem;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    background: #f8f8f8;
+    border: 1px solid #eee;
+}
+
+.status-pill-lg.delivered {
+    background: #e6f6ee;
+    color: #1a7f4e;
+    border-color: #c6e9d7;
+}
+
+.status-pill-lg.pending {
+    background: #fff8e6;
+    color: #b7791f;
+    border-color: #faf0d7;
+}
+
+/* --- Layout --- */
+.order-grid {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 5rem;
+}
+
+.panel-luxury {
+    background: #fff;
+    margin-bottom: 4rem;
+}
+
+.panel-title-lux {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    color: #999;
+    margin-bottom: 2.5rem;
+    border-bottom: 1px solid #f0f0f0;
+    padding-bottom: 1rem;
+}
+
+/* --- Timeline --- */
+.timeline-lux {
+    padding-left: 2rem;
+    border-left: 1px solid #eee;
+    margin-left: 1rem;
+}
+
+.track-step {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 2.5rem;
+    opacity: 0.4;
+    transition: opacity 0.3s ease;
+}
+
+.track-step.completed,
+.track-step.pending {
+    opacity: 1;
+}
+
+.step-icon {
+    width: 24px;
+    height: 24px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    color: #ddd;
+}
+
+.track-step.completed .step-icon {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: #fff;
+}
+
+.track-step.pending .step-icon {
+    border-color: var(--gold);
+    color: var(--gold);
+}
+
+.step-label {
+    display: block;
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 0.2rem;
+}
+
+.step-time,
+.step-desc {
+    font-size: 0.8rem;
+    color: #999;
+}
+
+/* --- Manifest --- */
+.manifest-item-lux {
+    display: grid;
+    grid-template-columns: 80px 1fr auto;
+    gap: 2rem;
+    align-items: center;
+    padding: 2rem 0;
+    border-bottom: 1px solid #f8f8f8;
+}
+
+.item-thumb-lux {
+    width: 80px;
+    height: 80px;
+    background: #f9f9f9;
+}
+
+.item-thumb-lux img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.item-qty-lux {
+    display: block;
+    font-size: 0.75rem;
+    color: #999;
+    margin-top: 0.5rem;
+}
+
+.item-cost-lux {
+    font-weight: 600;
+}
+
+/* --- Summary & Details --- */
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+}
+
+.summary-divider {
+    height: 1px;
+    background: #eee;
+    margin: 1.5rem 0;
+}
+
+.summary-row.total {
+    font-family: var(--font-serif);
+    font-size: 1.5rem;
+    font-weight: 400;
+}
+
+.detail-header-lux {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    color: #999;
+    margin-bottom: 1rem;
+}
+
+.detail-divider {
+    height: 1px;
+    background: #f0f0f0;
+    margin: 2rem 0;
+}
+
+.payment-badge-lux {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background: #fafafa;
+    border: 1px solid #eee;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--royal-blue);
+}
+
+/* --- Loading & Empty --- */
+.loading-luxury {
+    height: 60vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+}
+
+.order-not-found-luxury {
+    text-align: center;
+    padding: 10rem 0;
+}
+
+.order-not-found-luxury p {
+    color: #999;
+    margin: 1rem 0 2.5rem;
+}
+
+@media (max-width: 992px) {
+    .order-grid {
+        grid-template-columns: 1fr;
+    }
+}
