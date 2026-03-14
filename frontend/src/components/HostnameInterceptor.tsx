@@ -9,6 +9,7 @@ import Checkout from '../pages/Checkout';
 import About from '../pages/About';
 import { ThankYouPage } from './storefront/ThankYouPage';
 import { CustomerDashboard } from './storefront/CustomerDashboard';
+import OmnoraContact from '../pages/OmnoraContact';
 import { Routes, Route, useLocation, Outlet } from 'react-router-dom';
 import { CustomerAuthProvider } from '../context/CustomerAuthContext';
 import { Store, Globe } from 'lucide-react';
@@ -17,6 +18,7 @@ import { SEOHead } from './cms/SEOHead';
 import { useStorefront } from '../hooks/useStorefront';
 import { useQuery } from '@tanstack/react-query';
 import { databaseClient } from '../platform/core/DatabaseClient';
+import { ROUTES } from '../routes';
 
 const PLATFORM_DOMAINS = [
     'localhost', 
@@ -153,13 +155,14 @@ const StorefrontRouter: React.FC<{ storeId: string }> = ({ storeId }) => {
             />
             <Routes>
                 <Route element={<Layout children={<Outlet />} />}>
-                    <Route path="/" element={<Home />} />
-                    <Route path="collection" element={<Collection />} />
-                    <Route path="product/:id" element={<Product />} />
-                    <Route path="cart" element={<Cart />} />
-                    <Route path="checkout" element={<Checkout />} />
-                    <Route path="about" element={<About onBack={() => window.history.back()} />} />
-                    <Route path="thank-you" element={<ThankYouPage />} />
+                    <Route path={ROUTES.HOME} element={<Home />} />
+                    <Route path={ROUTES.COLLECTION} element={<Collection />} />
+                    <Route path={ROUTES.PRODUCT} element={<Product />} />
+                    <Route path={ROUTES.CART} element={<Cart />} />
+                    <Route path={ROUTES.CHECKOUT} element={<Checkout />} />
+                    <Route path={ROUTES.ABOUT} element={<About onBack={() => window.history.back()} />} />
+                    <Route path={ROUTES.CONTACT} element={<OmnoraContact />} />
+                    <Route path={ROUTES.THANK_YOU} element={<ThankYouPage />} />
                     <Route path="account" element={<CustomerDashboard />} />
                     <Route path="*" element={<Home />} />
                 </Route>

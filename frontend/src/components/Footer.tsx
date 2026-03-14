@@ -3,6 +3,7 @@ import { Instagram, Twitter, Facebook, ArrowRight, Loader2, ShieldCheck } from '
 import { useState } from 'react';
 // import client from '../api/client'; // Uncomment this when API is ready
 import './Footer.css'; // Don't forget this!
+import { ROUTES } from '../routes';
 
 export default function Footer() {
     const [email, setEmail] = useState('');
@@ -46,7 +47,7 @@ export default function Footer() {
 
                 {/* 1. BRAND COLUMN */}
                 <div className="footer-brand-col">
-                    <Link to="/" className="footer-logo">
+                    <Link to={ROUTES.HOME} className="footer-logo">
                         <div className="logo-icon-box">
                             <span style={{
                                 fontFamily: 'var(--font-serif)',
@@ -76,11 +77,11 @@ export default function Footer() {
                 <div className="footer-links-col">
                     <h4>Collections</h4>
                     <nav>
-                        <Link to="/collection" className="footer-link">New Arrivals</Link>
-                        <Link to="/collection?category=unstitched" className="footer-link">Unstitched</Link>
-                        <Link to="/collection?category=stitched" className="footer-link">Ready-to-Wear</Link>
-                        <Link to="/collection?category=formal" className="footer-link">Formal Wear</Link>
-                        <Link to="/about" className="footer-link">Our Story</Link>
+                        <Link to={ROUTES.COLLECTION} className="footer-link">New Arrivals</Link>
+                        <Link to={`${ROUTES.COLLECTION}?category=unstitched`} className="footer-link">Unstitched</Link>
+                        <Link to={`${ROUTES.COLLECTION}?category=stitched`} className="footer-link">Ready-to-Wear</Link>
+                        <Link to={`${ROUTES.COLLECTION}?category=formal`} className="footer-link">Formal Wear</Link>
+                        <Link to={ROUTES.ABOUT} className="footer-link">Our Story</Link>
                     </nav>
                 </div>
 
@@ -88,11 +89,11 @@ export default function Footer() {
                 <div className="footer-links-col">
                     <h4>Customer Care</h4>
                     <nav>
-                        <Link to="/contact" className="footer-link">Contact Us</Link>
+                        <Link to={ROUTES.CONTACT} className="footer-link">Contact Us</Link>
                         <Link to="/shipping" className="footer-link">Shipping Information</Link>
                         <Link to="/size-guide" className="footer-link">Size Guide</Link>
                         <Link to="/returns" className="footer-link">Returns & Exchange</Link>
-                        <Link to="/builder/help" className="footer-link">Builder Guide</Link>
+                        <Link to={ROUTES.BUILDER_HELP} className="footer-link">Builder Guide</Link>
                         <Link to="/privacy" className="footer-link">Privacy Policy</Link>
                     </nav>
                 </div>

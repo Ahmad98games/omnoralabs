@@ -3,9 +3,6 @@ const logger = require('../services/logger');
 const stateService = require('../services/stateService');
 const { LIFECYCLE } = require('../services/stateService');
 
-/**
- * CAPABILITY Enum
- */
 const CAPABILITIES = {
     READ_ONLY: 'READ_ONLY',
     STATE_MUTATING: 'STATE_MUTATING',
@@ -93,10 +90,11 @@ const gatekeeper = (capability) => {
 
         // 1. Universal Version Check
         const clientVersion = req.headers['x-api-version'];
-        if (clientVersion !== API_VERSION) {
+        // Imperial Hardening: Flexible version check for migration
+        if (clientVersion && clientVersion !== '1') {
             return res.status(503).json({
                 error: 'SERVICE_UNAVAILABLE',
-                message: `System is not ready for current operation mode (${snapshot.lifecycle})`, // Using snapshot.lifecycle as 'lifecycle' is undefined here
+                message: `API Version Mismatch (Expected: 1, Received: ${clientVersion})`,
                 retryAfter: 5
             });
         }
@@ -107,17 +105,14 @@ const gatekeeper = (capability) => {
         }
 
         // 3. Infrastructure Check: DB
-        if (capability === CAPABILITIES.STATE_MUTATING && !snapshot.infra.db) {
-            logger.warn('GATEKEEPER: Blocked mutating request due to DB unavailability', {
+        // Imperial Hardening: Relaxed check for Supabase transition
+        if (capability === CAPABILITIES.STATE_MUTATING && snapshot.lifecycle === LIFECYCLE.BOOTING) {
+            logger.warn('GATEKEEPER: Blocked mutating request during BOOTING', {
                 path: req.path,
                 fingerprint: getFingerprint(req, capability)
             });
 
-            // Inject Diagnostic Headers
-            res.setHeader('X-System-Mode', snapshot.lifecycle);
-            res.setHeader('X-Request-Fingerprint', getFingerprint(req, capability));
-
-            return res.status(503).json(createErrorResponse('Database disconnected. State mutation is currently disabled.', false));
+            return res.status(503).json(createErrorResponse('System is still initializing.', true));
         }
 
         // 4. Rate Limiting for gated/degraded requests (Implicit here, can be extended)

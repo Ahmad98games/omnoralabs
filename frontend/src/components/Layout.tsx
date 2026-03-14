@@ -14,6 +14,7 @@ import { OmnoraNotification } from './storefront/OmnoraNotification';
 import { useCartStore } from '../store/cartStore';
 import { useStoreHydration } from '../hooks/useStoreHydration';
 import { PwaInstallPrompt } from './pwa/PwaInstallPrompt';
+import { ROUTES } from '../routes';
 
 export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const isHydrated = useStoreHydration(useCartStore);
@@ -111,7 +112,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
             <header className={`header ${scrolled ? 'scrolled' : ''}`}>
                 <div className="header-container">
                     {/* Brand Sovereignty */}
-                    <Link to={getBaseUrl() || '/'} className="brand" onClick={closeMenu}>
+                    <Link to={getBaseUrl() || ROUTES.HOME} className="brand" onClick={closeMenu}>
                         <div className="brand-logo">
                             <img
                                 src={content?.configuration?.assets?.logo || "/images/omnora.jpg"}
@@ -144,11 +145,11 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                         ) : (
                             // FIXED PLATFORM MENU
                             <>
-                                <Link to="/" className={`nav-link ${isActive('/') ? 'active' : ''}`}>Home</Link>
-                                <Link to="/collection" className={`nav-link ${isActive('/collection') ? 'active' : ''}`}>Shop All</Link>
-                                <Link to="/about" className={`nav-link ${isActive('/about') ? 'active' : ''}`}>About</Link>
-                                <Link to="/contact" className={`nav-link ${isActive('/contact') ? 'active' : ''}`}>Contact</Link>
-                                <Link to="/builder/help" className={`nav-link ${isActive('/builder/help') ? 'active' : ''}`}>How to Build</Link>
+                                <Link to={ROUTES.HOME} className={`nav-link ${isActive(ROUTES.HOME) ? 'active' : ''}`}>Home</Link>
+                                <Link to={ROUTES.COLLECTION} className={`nav-link ${isActive(ROUTES.COLLECTION) ? 'active' : ''}`}>Shop All</Link>
+                                <Link to={ROUTES.ABOUT} className={`nav-link ${isActive(ROUTES.ABOUT) ? 'active' : ''}`}>About</Link>
+                                <Link to={ROUTES.CONTACT} className={`nav-link ${isActive(ROUTES.CONTACT) ? 'active' : ''}`}>Contact</Link>
+                                <Link to={ROUTES.BUILDER_HELP} className={`nav-link ${isActive(ROUTES.BUILDER_HELP) ? 'active' : ''}`}>How to Build</Link>
                             </>
                         )}
 

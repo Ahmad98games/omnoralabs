@@ -9,18 +9,12 @@ import { useTheme } from '../context/ThemeContext';
 import { BuilderProvider } from '../context/BuilderContext';
 // import SovereignWidget from '../components/cms/SovereignWidget';
 import '../styles/collection.css';
+import { transformProductList, IGSGProduct as IProduct } from '../utils/productTransformer';
+import { ROUTES } from '../routes';
 
 // Types
 // Hardened Data Contract
-interface IGSGProduct {
-    id: string;
-    name: string;
-    price: number;
-    image?: string;
-    category?: string;
-    isNew?: boolean;
-    stock?: number;
-}
+// Hardened Data Contract moved to productTransformer
 
 const BRAND_PLACEHOLDER = '/images/placeholder_gsg.png';
 
@@ -42,7 +36,6 @@ const PRICE_RANGES = [
 
 export default function Collection() {
     const [searchParams, setSearchParams] = useSearchParams();
-    const [products, setProducts] = useState<IGSGProduct[]>([]);
     const [loadingLegacy, setLoadingLegacy] = useState(true);
     const [errorLegacy, setErrorLegacy] = useState<{ message: string; code?: string } | null>(null);
     const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -79,13 +72,15 @@ export default function Collection() {
         staleTime: 60 * 1000,
     });
 
+    // ─── Phase 49: Catalog RAM Caching ──────────────────────────────────────
+    const products = useMemo(() => transformProductList(fetchedProducts), [fetchedProducts]);
+
     useEffect(() => {
-        if (fetchedProducts) setProducts(fetchedProducts);
         if (cmsData?.success && cmsData?.content) {
             setSiteContent(cmsData.content);
             if (cmsData.content.globalStyles) updateSellerStyles(cmsData.content.globalStyles);
         }
-    }, [fetchedProducts, cmsData, updateSellerStyles]);
+    }, [cmsData, updateSellerStyles]);
 
     // Derived states from Query
     const loading = productsLoading;
@@ -128,7 +123,7 @@ export default function Collection() {
         setSearchParams(nextParams);
     };
 
-    const handleAddToCart = (e: React.MouseEvent, product: IGSGProduct) => {
+    const handleAddToCart = (e: React.MouseEvent, product: IProduct) => {
         e.preventDefault();
         e.stopPropagation();
         const cart = JSON.parse(localStorage.getItem('cart') || '[]');

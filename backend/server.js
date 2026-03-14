@@ -7,7 +7,7 @@ dotenv.config();
 const app = express();
 
 app.use(cors({ origin: true, credentials: true }));
-app.use(express.json({ limit: '10mb' })); // Increased for complex components
+app.use(express.json({ limit: '10mb' })); 
 
 const { tenantContext } = require('./shared/middleware/tenantContext');
 const analyticsController = require('./controllers/analyticsController');
@@ -30,11 +30,29 @@ try {
 app.post('/api/track', analyticsController.track);
 app.get('/api/cms/performance-hub', (req, res) => res.json({ success: true, stats: { status: 'Optimized' } }));
 
+// 🔴 GLOBAL ERROR MIDDLEWARE (Imperial Hardening)
+app.use((err, req, res, next) => {
+    console.error(' [OMNORA_CORE_ERROR]:', err);
+    res.status(err.status || 500).json({
+        success: false,
+        error: 'Imperial Core Exception',
+        message: process.env.NODE_ENV === 'production' ? 'Unrecoverable error occurred' : err.message,
+        diagnostic: {
+            path: req.path,
+            timestamp: new Date().toISOString()
+        }
+    });
+});
+
 // 🚀 START SERVER
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, '127.0.0.1', () => {
-    console.log(`\n=========================================`);
-    console.log(`🚀 OMNORA IMPERIAL ENGINE: RESTORED`);
-    console.log(`🌐 Gateway: http://127.0.0.1:${PORT}`);
-    console.log(`=========================================\n`);
-});
+if (require.main === module) {
+    app.listen(PORT, '127.0.0.1', () => {
+        console.log(`\n=========================================`);
+        console.log(`🚀 OMNORA IMPERIAL ENGINE: RESTORED`);
+        console.log(`🌐 Gateway: http://127.0.0.1:${PORT}`);
+        console.log(`=========================================\n`);
+    });
+}
+
+module.exports = app;

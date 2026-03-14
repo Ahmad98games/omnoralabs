@@ -9,6 +9,8 @@ import { useTheme } from '../context/ThemeContext';
 import { BuilderProvider } from '../context/BuilderContext';
 import { useCartStore } from '../store/cartStore';
 import '../styles/product.css';
+import { transformProduct, IGSGProduct as IProduct } from '../utils/productTransformer';
+import { ROUTES } from '../routes';
 
 const BRAND_PLACEHOLDER = '/images/placeholder_gsg.png';
 
@@ -18,28 +20,13 @@ interface Variant {
     priceOverride?: number;
 }
 
-interface IGSGProduct {
-    id: string;
-    name: string;
-    price: number;
-    image?: string;
-    category?: string;
-    description?: string;
-    stock?: number;
-    fabric?: string;
-    work?: string;
-    isBestseller?: boolean;
-    showLowStockWarning?: boolean;
-    variants?: Variant[];
-}
-
-const Product: React.FC = () => {
+const ProductPage: React.FC = () => {
     const { slug } = useParams<{ slug: string }>();
     const navigate = useNavigate();
     const { showToast } = useToast();
     const { addItem } = useCartStore();
 
-    const [product, setProduct] = useState<IGSGProduct | null>(null);
+    const [product, setProduct] = useState<IProduct | null>(null);
     const [loadingLegacy, setLoadingLegacy] = useState(true);
     const [siteContent, setSiteContent] = useState<any>(null);
     const { updateSellerStyles } = useTheme();
@@ -75,7 +62,7 @@ const Product: React.FC = () => {
 
     useEffect(() => {
         if (productData) {
-            setProduct(productData);
+            setProduct(transformProduct(productData));
             if (productData.variants?.length > 0 && !selectedSize) {
                 setSelectedSize(productData.variants[0].label);
             }
@@ -159,13 +146,11 @@ Please confirm availability and shipping timeline.`;
         </div>
     );
 
-    const isOutOfStock = (product.variants?.length ?? 0) > 0
-        ? (product.variants?.find(v => v.label === selectedSize)?.stock ?? 0) === 0
-        : (product.stock ?? 0) === 0;
-
     const availableStock = (product.variants?.length ?? 0) > 0
         ? (product.variants?.find(v => v.label === selectedSize)?.stock ?? 0)
         : (product.stock ?? 0);
+
+    const isOutOfStock = availableStock === 0;
 
     const isPreview = window.location.search.includes('preview=true');
 
@@ -280,9 +265,5 @@ Please confirm availability and shipping timeline.`;
         </BuilderProvider>
     );
 }
-export const ProductPage = () => {
-    // ... rest of the component
-    return <p>Product Page</p>;
-};
 
 export default ProductPage;

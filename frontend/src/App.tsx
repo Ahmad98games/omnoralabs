@@ -9,8 +9,9 @@ import { ToastProvider } from './context/ToastContext';
 import { AuthModal } from './components/auth/AuthModal';
 import { CartDrawer } from './components/storefront/CartDrawer';
 import { CinematicLoader } from './components/ui/CinematicLoader';
+import { ThankYouPage } from './components/storefront/ThankYouPage';
 
-import { Routes, Route, Outlet } from 'react-router-dom';
+import { Routes, Route, useLocation, Outlet } from 'react-router-dom';
 import { Layout } from './components/Layout';
 import Home from './pages/HomeWithAds';
 import Collection from './pages/Collection';
@@ -21,8 +22,10 @@ import About from './pages/About';
 import Login from './pages/Login';
 import Profile from './pages/Profile';
 import AdminDashboard from './pages/AdminDashboard';
+import OmnoraContact from './pages/OmnoraContact';
+import { BuilderHelpPage } from './pages/builder/BuilderHelpPage';
 import SellerDashboard from './pages/SellerDashboard';
-import { ThankYouPage } from './components/storefront/ThankYouPage';
+import { ROUTES } from './routes';
 
 // Hardened Cache Configuration
 const queryClient = new QueryClient({
@@ -47,21 +50,23 @@ export default function App() {
                 <ToastProvider>
                   <AuthModal />
                   <CartDrawer />
-                  <Suspense fallback={<CinematicLoader />}>
+                    <Suspense fallback={<CinematicLoader />}>
                     <Routes>
                       <Route element={<Layout children={<Outlet />} />}>
-                        <Route path="/" element={<Home />} />
-                        <Route path="/collection" element={<Collection />} />
-                        <Route path="/product/:id" element={<Product />} />
-                        <Route path="/cart" element={<Cart />} />
-                        <Route path="/checkout" element={<Checkout />} />
-                        <Route path="/about" element={<About onBack={() => window.history.back()} />} />
-                        <Route path="/login" element={<Login />} />
-                        <Route path="/register" element={<Login />} /> {/* Login handles both */}
-                        <Route path="/profile" element={<Profile />} />
-                        <Route path="/admin/*" element={<AdminDashboard />} />
-                        <Route path="/seller/*" element={<SellerDashboard />} />
-                        <Route path="/thank-you" element={<ThankYouPage />} />
+                        <Route path={ROUTES.HOME} element={<Home />} />
+                        <Route path={ROUTES.COLLECTION} element={<Collection />} />
+                        <Route path={ROUTES.PRODUCT} element={<Product />} />
+                        <Route path={ROUTES.CART} element={<Cart />} />
+                        <Route path={ROUTES.CHECKOUT} element={<Checkout />} />
+                        <Route path={ROUTES.ABOUT} element={<About onBack={() => window.history.back()} />} />
+                        <Route path={ROUTES.CONTACT} element={<OmnoraContact />} />
+                        <Route path={ROUTES.BUILDER_HELP} element={<BuilderHelpPage />} />
+                        <Route path={ROUTES.LOGIN} element={<Login />} />
+                        <Route path={ROUTES.REGISTER} element={<Login />} /> 
+                        <Route path={ROUTES.PROFILE} element={<Profile />} />
+                        <Route path={ROUTES.ADMIN} element={<AdminDashboard />} />
+                        <Route path={ROUTES.SELLER} element={<SellerDashboard />} />
+                        <Route path={ROUTES.THANK_YOU} element={<ThankYouPage />} />
                         <Route path="*" element={<Home />} />
                       </Route>
                     </Routes>

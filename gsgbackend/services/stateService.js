@@ -172,8 +172,8 @@ class SystemStateManager extends EventEmitter {
 
     // Helper for readiness check
     isReady() {
-        return (this._lifecycle === LIFECYCLE.READY || this._lifecycle === LIFECYCLE.DEGRADED) &&
-            this._infra[INFRA.DB];
+        // Imperial Hardening: Supabase is our source of truth now
+        return (this._lifecycle === LIFECYCLE.READY || this._lifecycle === LIFECYCLE.DEGRADED);
     }
 }
 

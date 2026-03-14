@@ -41,9 +41,10 @@ async function bootstrap() {
             if (process.env.NODE_ENV === 'production') process.exit(1);
         }
     } else {
-        // FORCE LOCAL MODE: Skipping MongoDB connection since we are using LocalDB adapter
-        logger.info('SYSTEM: Using LocalDB (File-based persistence). MongoDB connection skipped.');
-        stateService.setInfraStatus(INFRA.DB, true); // Mark DB as ready immediately
+        // FORCE LOCAL MODE: Skipping MongoDB connection since we are using Supabase/LocalDB
+        logger.info('SYSTEM: Using Supabase/LocalDB. Legacy DB connection skipped.');
+        stateService.setInfraStatus(INFRA.DB, true); 
+        stateService.setLifecycle(LIFECYCLE.READY);
     }
 
     // 3. Finalize Lifecycle (Async health checks will update stateService)

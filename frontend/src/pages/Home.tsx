@@ -21,14 +21,7 @@ import { useStorefront } from '../hooks/useStorefront';
 import { DynamicSection } from '../components/DynamicSection';
 import { BuilderProvider } from '../context/BuilderContext';
 import { DiagnosticsPanel } from '../components/cms/DiagnosticsPanel';
-
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-  image?: string;
-  category?: string;
-}
+import { transformProductList, IGSGProduct as IProduct } from '../utils/productTransformer';
 
 // ==========================================
 // REVIEWS DATA (EASILY UPDATABLE)
@@ -62,7 +55,7 @@ const CUSTOMER_REVIEWS = [
 
 export default function Home() {
   const { content: siteContent, loading: cmsLoading } = useStorefront();
-  const [featured, setFeatured] = useState<Product[]>([]);
+  const [featured, setFeatured] = useState<IProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const scrollRefs = useRef<(HTMLElement | null)[]>([]);
   const navigate = useNavigate();
@@ -76,7 +69,7 @@ export default function Home() {
         setLoading(true);
         const res = await client.get('/products?limit=4');
         const list = res.data?.data || res.data?.products || [];
-        setFeatured(list.slice(0, 4));
+        setFeatured(transformProductList(list.slice(0, 4)));
       } catch (err) {
         if (!axios.isCancel(err)) {
           console.error('Failed to fetch featured products', err);
@@ -334,7 +327,7 @@ export default function Home() {
                   </div>
                 ))
                 : featured.map((p, idx) => (
-                  <div key={p._id} className="group cursor-pointer" onClick={() => navigate(`product/${p._id}`)}>
+                  <div key={p.id} className="group cursor-pointer" onClick={() => navigate(`product/${p.id}`)}>
                     <div className="w-full h-[380px] bg-[#0A0A0A] rounded-xl overflow-hidden mb-4 relative">
                       {p.image ? (
                         <img src={p.image} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />

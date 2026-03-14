@@ -31,6 +31,7 @@ export default defineConfig({
         ]
       },
       workbox: {
+        navigateFallback: 'offline.html',
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
         globIgnores: [
           '**/node_modules/**/*', 
