@@ -18,6 +18,8 @@
     "node": ">=18.0.0"
   },
   "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "jsonwebtoken": "^9.0.3",
     "winston": "^3.19.0"
   }
 }

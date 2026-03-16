@@ -25,7 +25,7 @@ const attachUser = async (decoded) => {
   }
   
   const { data: user, error } = await supabase
-    .from('merchants')
+    .from('users')
     .select('*')
     .eq('id', userId)
     .single();
@@ -128,6 +128,7 @@ const authorize = (...roles) => {
 
 module.exports = {
   protect,
+  verifyToken: protect, // Manual JWT Alias
   admin,
   seller,
   superAdmin,

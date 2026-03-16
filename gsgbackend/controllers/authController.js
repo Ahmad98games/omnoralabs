@@ -9,8 +9,8 @@ const { validateEnv } = require('../config/env');
 const config = validateEnv();
 
 // Generate JWT Token
-const generateToken = (id) => {
-    return jwt.sign({ id }, config.jwt.secret, {
+const generateToken = (id, role) => {
+    return jwt.sign({ userId: id, role }, config.jwt.secret, {
         expiresIn: config.jwt.expiresIn
     });
 };
@@ -24,7 +24,7 @@ exports.register = async (req, res) => {
 
         // Check if user exists
         const { data: userExists } = await supabase
-            .from('merchants')
+            .from('users')
             .select('id')
             .eq('email', email)
             .maybeSingle();
@@ -44,7 +44,7 @@ exports.register = async (req, res) => {
 
         // Create user in merchants table
         const { data: user, error: registerError } = await supabase
-            .from('merchants')
+            .from('users')
             .insert([{
                 email,
                 password_hash,
@@ -86,7 +86,7 @@ exports.register = async (req, res) => {
         }
 
         // Generate token
-        const token = generateToken(user.id);
+        const token = generateToken(user.id, user.metadata?.role || 'customer');
 
         res.status(201).json({
             success: true,
@@ -113,7 +113,7 @@ exports.login = async (req, res) => {
 
         // Check for user
         const { data: user, error: loginError } = await supabase
-            .from('merchants')
+            .from('users')
             .select('*')
             .eq('email', email)
             .maybeSingle();
@@ -129,7 +129,7 @@ exports.login = async (req, res) => {
         }
 
         // Generate token
-        const token = generateToken(user.id);
+        const token = generateToken(user.id, user.metadata?.role || user.role);
 
         res.json({
             success: true,
@@ -198,7 +198,7 @@ exports.refreshToken = async (req, res) => {
         if (!token) return res.status(401).json({ error: 'No token provided' });
 
         const decoded = jwt.verify(token, config.jwt.secret);
-        const { data: user } = await supabase.from('merchants').select('*').eq('id', decoded.id).single();
+        const { data: user } = await supabase.from('users').select('*').eq('id', decoded.id).single();
         if (!user) return res.status(401).json({ error: 'User not found' });
 
         const newToken = generateToken(user.id);
@@ -213,7 +213,7 @@ exports.forgotPassword = async (req, res) => {
     try {
         const { email } = req.body;
         const { data: user, error } = await supabase
-            .from('merchants')
+            .from('users')
             .select('id')
             .eq('email', email)
             .maybeSingle();
@@ -238,7 +238,7 @@ exports.resetPassword = async (req, res) => {
         const password_hash = await bcrypt.hash(password, salt);
 
         const { error } = await supabase
-            .from('merchants')
+            .from('users')
             .update({ password_hash })
             .eq('id', decoded.id);
 
