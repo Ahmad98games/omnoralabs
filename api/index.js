@@ -78,6 +78,16 @@ module.exports = (req, res) => {
             }
 
             return app(req, res);
+        }).catch(err => {
+            console.error('Loader Promise Reject:', err);
+            enableCors();
+            res.setHeader('Content-Type', 'application/json');
+            return res.status(500).send(JSON.stringify({
+                error: 'LOADER_PROMISE_REJECT',
+                message: err.message,
+                stack: err.stack ? err.stack.split('\n')[0] : null,
+                tip: 'This error happened during Cold-Start initialization of server.js'
+            }, null, 2));
         });
 
     } catch (e) {
