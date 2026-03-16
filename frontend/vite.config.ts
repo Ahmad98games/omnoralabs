@@ -37,7 +37,7 @@ export default defineConfig({
           '**/node_modules/**/*', 
           '**/images/**/*', 
           '**/videos/**/*',
-          '**/assets/ai-engine-*.js' // Exclude large AI chunk from precache
+          '**/assets/ai-*.js' // Exclude large split AI chunks from precache
         ],
         runtimeCaching: [
           {
@@ -80,8 +80,8 @@ export default defineConfig({
             }
           },
           {
-            // Cache the large AI engine chunk at runtime instead of precaching
-            urlPattern: /assets\/ai-engine-.*\.js$/,
+            // Cache the large AI engine chunks at runtime instead of precaching
+            urlPattern: /assets\/ai-.*\.js$/,
             handler: 'CacheFirst',
             options: {
               cacheName: 'ai-engine-cache',
