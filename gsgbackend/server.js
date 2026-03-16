@@ -171,8 +171,6 @@ if (require.main === module) {
   });
 }
 
-module.exports = app;
-
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // ─── ERROR HANDLER ───────────────────────────────────────────────────────────
@@ -191,3 +189,5 @@ process.on('uncaughtException', (error) => {
     process.exit(1);
   }, 1000);
 });
+
+module.exports = app;
