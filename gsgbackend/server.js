@@ -1,7 +1,7 @@
 const express = require('express');
 // Force Restart 3 // restart trigger 3
 const cors = require('cors');
-const dotenv = require('dotenv');
+// Dotenv loaded in config/env.js securely
 const path = require('path');
 const fs = require('fs');
 const helmet = require('helmet');

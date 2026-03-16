@@ -5,7 +5,11 @@
  * It enforces strict validation and redacts secrets from logs.
  */
 
-require('dotenv').config();
+try {
+    require('dotenv').config();
+} catch (e) {
+    // dotenv is missing in production bundles, which is normal on Vercel
+}
 
 const ERRORS = {
     MISSING_SECRET: 'ERR_ENV_MISSING_CRITICAL_SECRET',

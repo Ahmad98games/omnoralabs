@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Full stack luxury e-commerce application",
   "scripts": {
-    "install:all": "npm install && cd frontend && npm install && cd ../backend && npm install",
+    "install:all": "npm install && cd frontend && npm install && cd ../backend && npm install && cd ../gsgbackend && npm install",
     "dev": "concurrently \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\"",
     "dev:memory": "concurrently \"cross-env USE_MEMORY_DB=true npm run dev --prefix backend\" \"npm run dev --prefix frontend\"",
     "build": "npm run build --prefix frontend",
