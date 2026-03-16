@@ -136,25 +136,25 @@ export const AICopilotModal: React.FC<Props> = ({ isOpen, onClose }) => {
                                 <Loader2 size={24} className="text-[#C9A063] animate-spin" />
                                 <div>
                                     <p className="text-sm font-bold text-white mb-1">[SYSTEM]: Synthesizing Content...</p>
-                                    <p className="text-xs text-[#C9A063] font-mono">&gt; {progress?.text || 'Processing neural pathways...'}</p>
+                                    <p className="text-xs text-[#C9A063] font-mono">{" > "}{progress?.text || 'Processing neural pathways...'}</p>
                                 </div>
                             </div>
                         ) : generatedContent ? (
                             <>
                                 <div className="bg-[#010101] border border-[#C9A063]/30 rounded-lg p-5 space-y-4 shadow-[inset_0_0_20px_rgba(201,160,99,0.03)]">
                                     <div>
-                                        <p className="text-xs font-bold text-[#C9A063] uppercase tracking-wider mb-1">&gt; Hero Headline</p>
+                                        <p className="text-xs font-bold text-[#C9A063] uppercase tracking-wider mb-1">{" > "}Hero Headline</p>
                                         <p className="text-sm font-semibold text-white">{generatedContent.heroHeadline}</p>
                                     </div>
                                     <div className="h-px bg-white/5 w-full" />
                                     <div>
-                                        <p className="text-xs font-bold text-[#C9A063] uppercase tracking-wider mb-1">&gt; Hero Subtext</p>
+                                        <p className="text-xs font-bold text-[#C9A063] uppercase tracking-wider mb-1">{" > "}Hero Subtext</p>
                                         <p className="text-sm text-gray-300 leading-relaxed">{generatedContent.heroSubtext}</p>
                                     </div>
                                 </div>
 
                                 <div className="mt-4">
-                                    <label className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 block">&gt; Refine Output (The Prompt Bypass)</label>
+                                    <label className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 block">{" > "}Refine Output (The Prompt Bypass)</label>
                                     <input
                                         type="text"
                                         value={refinement}
@@ -167,7 +167,7 @@ export const AICopilotModal: React.FC<Props> = ({ isOpen, onClose }) => {
                         ) : errorMsg ? (
                             <div className="bg-[#050000] border border-red-500/30 rounded-lg p-5 space-y-2">
                                 <p className="text-xs font-bold text-red-400 uppercase tracking-wider">[SYSTEM ERROR]</p>
-                                <p className="text-sm text-red-100 font-mono">&gt; {errorMsg}</p>
+                                <p className="text-sm text-red-100 font-mono">{" > "}{errorMsg}</p>
                             </div>
                         ) : null}
                     </div>
