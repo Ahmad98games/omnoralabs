@@ -141,7 +141,13 @@ export default defineConfig({
               return 'firebase-bundle';
             }
             if (id.includes('@mlc-ai')) {
-              return 'ai-engine';
+              if (id.includes('tokenizer') || id.includes('sentencepiece')) {
+                return 'ai-tokenizer';
+              }
+              if (id.includes('wasm') || id.includes('tvm')) {
+                return 'ai-wasm';
+              }
+              return 'ai-core';
             }
             if (id.includes('recharts')) {
               return 'viz-bundle';

@@ -18,7 +18,8 @@ const { gatekeeper, CAPABILITIES } = require('./middleware/gatekeeper');
 
 // Load Validated Config
 const config = validateEnv();
-console.log(process.env.SUPABASE_URL ? "[Supabase Startup] Env Loaded" : "[Supabase Startup] Env MISSING");
+const sbUrl = process.env.SUPABASE_URL || '';
+console.log(sbUrl ? `[Supabase Startup] URL Loaded: ${sbUrl.substring(0, 10)}...` : "[Supabase Startup] URL MISSING");
 const API_PREFIX = config.apiPrefix;
 
 const app = express();
