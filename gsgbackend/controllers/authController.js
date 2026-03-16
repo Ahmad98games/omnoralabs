@@ -10,7 +10,7 @@ const config = validateEnv();
 
 // Generate JWT Token
 const generateToken = (id, role) => {
-    return jwt.sign({ userId: id, role }, config.jwt.secret, {
+    return jwt.sign({ id, role }, config.jwt.secret, {
         expiresIn: config.jwt.expiresIn
     });
 };
@@ -102,7 +102,7 @@ exports.register = async (req, res) => {
         });
     } catch (error) {
         logger.error('Registration error', { error: error.message });
-        res.status(503).json({ error: 'Service Unavailable' });
+        res.status(500).json({ error: error.message });
     }
 };
 
@@ -144,13 +144,8 @@ exports.login = async (req, res) => {
             }
         });
     } catch (error) {
-        try {
-            require('fs').writeFileSync(require('path').join(__dirname, '../../backend/login_error_debug.txt'), error.stack || error.message);
-        } catch (e) {
-            console.error('Failed to write debug log:', e);
-        }
         logger.error('Login error', { error: error.message });
-        res.status(503).json({ error: 'Service Unavailable' });
+        res.status(500).json({ error: error.message });
     }
 };
 
