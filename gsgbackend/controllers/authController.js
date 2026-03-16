@@ -102,7 +102,7 @@ exports.register = async (req, res) => {
         });
     } catch (error) {
         logger.error('Registration error', { error: error.message });
-        res.status(500).json({ error: 'Registration failed' });
+        res.status(503).json({ error: 'Service Unavailable' });
     }
 };
 
@@ -144,8 +144,13 @@ exports.login = async (req, res) => {
             }
         });
     } catch (error) {
+        try {
+            require('fs').writeFileSync(require('path').join(__dirname, '../../backend/login_error_debug.txt'), error.stack || error.message);
+        } catch (e) {
+            console.error('Failed to write debug log:', e);
+        }
         logger.error('Login error', { error: error.message });
-        res.status(500).json({ error: error.message });
+        res.status(503).json({ error: 'Service Unavailable' });
     }
 };
 
@@ -173,7 +178,7 @@ exports.getMe = async (req, res) => {
         });
     } catch (error) {
         logger.error('Get user error', { error: error.message });
-        res.status(500).json({ error: 'Failed to get user' });
+        res.status(503).json({ error: 'Service Unavailable' });
     }
 };
 
@@ -207,13 +212,18 @@ exports.refreshToken = async (req, res) => {
 exports.forgotPassword = async (req, res) => {
     try {
         const { email } = req.body;
-        const user = await User.findOne({ email });
-        if (!user) return res.status(404).json({ error: 'User not found' });
+        const { data: user, error } = await supabase
+            .from('merchants')
+            .select('id')
+            .eq('email', email)
+            .maybeSingle();
 
-        const resetToken = jwt.sign({ id: user._id }, config.jwt.secret, { expiresIn: '1h' });
+        if (error || !user) return res.status(404).json({ error: 'User not found' });
+
+        const resetToken = jwt.sign({ id: user.id }, config.jwt.secret, { expiresIn: '1h' });
         res.json({ success: true, message: 'Password reset email sent', resetToken });
     } catch (error) {
-        res.status(500).json({ error: 'Failed' });
+        res.status(503).json({ error: 'Service Unavailable' });
     }
 };
 
@@ -223,13 +233,19 @@ exports.resetPassword = async (req, res) => {
         const { token } = req.params;
         const { password } = req.body;
         const decoded = jwt.verify(token, config.jwt.secret);
-        const user = await User.findById(decoded.id);
-        if (!user) return res.status(404).json({ error: 'Invalid token' });
+        
+        const salt = await bcrypt.genSalt(10);
+        const password_hash = await bcrypt.hash(password, salt);
 
-        user.password = password;
-        await user.save();
+        const { error } = await supabase
+            .from('merchants')
+            .update({ password_hash })
+            .eq('id', decoded.id);
+
+        if (error) throw error;
+
         res.json({ success: true, message: 'Password reset successful' });
     } catch (error) {
-        res.status(500).json({ error: 'Failed' });
+        res.status(503).json({ error: 'Service Unavailable' });
     }
 };

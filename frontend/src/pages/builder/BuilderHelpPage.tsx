@@ -6,6 +6,16 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '../../lib/supabaseClient';
+
+const ICON_MAP: Record<string, any> = { MousePointer2, Layers, ImageIcon, Zap };
+
+const DEFAULT_GUIDES = [
+    { icon: 'MousePointer2', title: "Editing Content", description: "Modify any text, button, or link directly on the canvas with immediate visual feedback.", steps: ["Click any component to select it", "Use the floating toolbar for settings", "Double-click text to edit inline", "Hit Enter or Esc to finish editing"] },
+    { icon: 'Layers', title: "Layout Basics", description: "Build your page structure using premium pre-designed sections and modular blocks.", steps: ["Drag new sections from the sidebar", "Reorder layers via the Layers panel", "Adjust section padding and height", "Hide specific blocks on mobile devices"] },
+    { icon: 'ImageIcon', title: "Media & Logo", description: "Manage your brand assets with our intelligent diagnostic-aware upload system.", steps: ["Upload PNG, JPG, or SVG logos", "Ensure dimensions are at least 512px", "Verify image integrity via diagnostics", "Browse your gallery for existing assets"] },
+    { icon: 'Zap', title: "Saving & Publishing", description: "Ready to go live? Learn how to stage your changes and publish to your domain.", steps: ["Builder auto-saves your progress", "Preview across Mobile, Tablet, Desktop", "Click Publish to deploy changes", "Review SEO and Social meta tags"] }
+];
 
 const ACCENT = '#6366F1';
 const DARK = '#0F172A';
@@ -72,6 +82,19 @@ const SectionCard = ({ icon: Icon, title, description, steps }: any) => {
 
 export const BuilderHelpPage: React.FC = () => {
     const navigate = useNavigate();
+    const [pageData, setPageData] = React.useState<any>(null);
+
+    React.useEffect(() => {
+        const fetchPage = async () => {
+            const { data } = await supabase
+                .from('store_pages')
+                .select('*')
+                .eq('slug', 'how-to-build')
+                .maybeSingle();
+            if (data && data.content) setPageData(data.content);
+        };
+        fetchPage();
+    }, []);
 
     return (
         <div style={{
@@ -148,7 +171,7 @@ export const BuilderHelpPage: React.FC = () => {
                             marginBottom: 20,
                             letterSpacing: '-0.02em'
                         }}>
-                            Master the Omnora Builder
+                            {pageData?.hero?.title || 'Master the Omnora Builder'}
                         </h1>
                         <p style={{
                             fontSize: 18,
@@ -157,11 +180,17 @@ export const BuilderHelpPage: React.FC = () => {
                             margin: '0 auto 40px',
                             lineHeight: 1.6
                         }}>
-                            Everything you need to know about designing, customizing, and publishing your premium store.
+                            {pageData?.hero?.subtitle || 'Everything you need to know about designing, customizing, and publishing your premium store.'}
                         </p>
                         <div style={{ display: 'flex', justifyContent: 'center', gap: 16 }}>
                             <button
-                                onClick={() => navigate('/seller/dashboard?tab=builder&tour=true')}
+                                onClick={() => {
+                                    if (!localStorage.getItem('token')) {
+                                        navigate('/login');
+                                    } else {
+                                        navigate('/seller?tab=builder&tour=true');
+                                    }
+                                }}
                                 style={{
                                     background: ACCENT,
                                     color: '#FFFFFF',
@@ -190,50 +219,15 @@ export const BuilderHelpPage: React.FC = () => {
                     gap: 32,
                     marginBottom: 80
                 }}>
-                    <SectionCard
-                        icon={MousePointer2}
-                        title="Editing Content"
-                        description="Modify any text, button, or link directly on the canvas with immediate visual feedback."
-                        steps={[
-                            "Click any component to select it",
-                            "Use the floating toolbar for settings",
-                            "Double-click text to edit inline",
-                            "Hit Enter or Esc to finish editing"
-                        ]}
-                    />
-                    <SectionCard
-                        icon={Layers}
-                        title="Layout Basics"
-                        description="Build your page structure using premium pre-designed sections and modular blocks."
-                        steps={[
-                            "Drag new sections from the sidebar",
-                            "Reorder layers via the Layers panel",
-                            "Adjust section padding and height",
-                            "Hide specific blocks on mobile devices"
-                        ]}
-                    />
-                    <SectionCard
-                        icon={ImageIcon}
-                        title="Media & Logo"
-                        description="Manage your brand assets with our intelligent diagnostic-aware upload system."
-                        steps={[
-                            "Upload PNG, JPG, or SVG logos",
-                            "Ensure dimensions are at least 512px",
-                            "Verify image integrity via diagnostics",
-                            "Browse your gallery for existing assets"
-                        ]}
-                    />
-                    <SectionCard
-                        icon={Zap}
-                        title="Saving & Publishing"
-                        description="Ready to go live? Learn how to stage your changes and publish to your domain."
-                        steps={[
-                            "Builder auto-saves your progress",
-                            "Preview across Mobile, Tablet, Desktop",
-                            "Click Publish to deploy changes",
-                            "Review SEO and Social meta tags"
-                        ]}
-                    />
+                    {(pageData?.guideGrid || DEFAULT_GUIDES).map((item: any, i: number) => (
+                        <SectionCard
+                            key={i}
+                            icon={ICON_MAP[item.icon] || MousePointer2}
+                            title={item.title}
+                            description={item.description}
+                            steps={item.steps}
+                        />
+                    ))}
                 </div>
 
                 {/* Common Mistakes */}

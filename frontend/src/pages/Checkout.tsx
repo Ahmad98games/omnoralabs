@@ -13,6 +13,7 @@ export default function Checkout() {
     const [submitting, setSubmitting] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [success, setSuccess] = useState<string | null>(null)
+    const [isSuccess, setIsSuccess] = useState(false)
     const [paymentTab, setPaymentTab] = useState<'local' | 'international'>('local')
     const [paymentMethod, setPaymentMethod] = useState('cod')
     const { showToast } = useToast()
@@ -145,19 +146,20 @@ export default function Checkout() {
             const res = await client.post('/orders', payload);
 
             if (res.data?.success && res.data?.order) {
-                const { _id, orderNumber } = res.data.order;
-
-                // Direct navigation with state to ensure immediate loading
-                navigate(`/order-confirmation/${_id}`, {
-                    state: {
-                        order: res.data.order,
-                        source: 'checkout'
-                    }
-                });
-
+                setIsSuccess(true); // Cinematic trigger
+                
                 // Clear cart immediately since order is created
                 localStorage.removeItem('cart');
                 window.dispatchEvent(new Event('cart-updated'));
+
+                setTimeout(() => {
+                    navigate(`/order-confirmation/${_id}`, {
+                        state: {
+                            order: res.data.order,
+                            source: 'checkout'
+                        }
+                    });
+                }, 2500);
 
                 showToast(`Order #${orderNumber} placed successfully!`, 'success');
             } else {
@@ -515,6 +517,21 @@ export default function Checkout() {
                     </div>
                 </div>
             </div>
+
+            {/* Cinematic Success State Overlay */}
+            {isSuccess && (
+                <div className="fixed inset-0 bg-[#0A0A0A] flex flex-col items-center justify-center z-[20000] font-mono animate-fade-in">
+                    <div className="relative">
+                        {/* Gold Pulse Ring */}
+                        <div className="absolute inset-0 rounded-full bg-[#C9A063]/20 animate-ping" style={{ animationDuration: '2s' }} />
+                        <div className="w-20 h-20 rounded-full border-2 border-[#C9A063] flex items-center justify-center bg-[#0A0A0A] z-10 relative">
+                            <span className="text-[#C9A063] text-2xl">✓</span>
+                        </div>
+                    </div>
+                    <h1 className="text-3xl text-[#C9A063] font-bold tracking-widest mt-6 animate-pulse">ORDER CONFIRMED</h1>
+                    <p className="text-gray-400 mt-2 text-sm lowercase tracking-wider opacity-70">> Initializing fulfillment sequence...</p>
+                </div>
+            )}
         </div>
     )
 }

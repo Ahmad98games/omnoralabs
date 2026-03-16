@@ -1,38 +1,34 @@
-﻿/* ============================================================ 
+/* ============================================================ 
     CHECKOUT PAGE - REFINED LUXURY THEME
    ============================================================ */
 
 :root {
-  --gold: #D4AF37;
-  /* More vibrant gold */
-  --royal-blue: #0A192F;
-  /* Deeper navy */
-  --accent-rose: #E0AFA0;
-  /* Obsidian Rose accent */
-  --text-secondary: #475569;
-  /* Darker slate for labels */
-  --bg-soft: #F8FAFC;
+  --gold: #C9A063;
+  --royal-blue: #0A0A0A;
+  --accent-rose: #C9A063;
+  --text-secondary: #94A3B8;
+  --bg-soft: #050505;
   --font-serif: 'Playfair Display', serif;
-  --transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  --glass: rgba(255, 255, 255, 0.95);
-  /* Slightly more opaque */
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --glass: rgba(0, 0, 0, 0.8);
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .checkout-luxury {
-  background: #fff;
+  background: #0A0A0A;
   min-height: 100vh;
-  color: #1E293B;
+  color: #fff;
   overflow-x: hidden;
 }
 
 /* Hero Section Refinement */
 .checkout-hero-mini {
-  background: linear-gradient(135deg, #FDFCFB 0%, #E2D1C3 100%);
-  padding: 10rem 0 6rem;
+  background: #0A0A0A;
+  padding: 8rem 0 4rem;
   text-align: center;
   position: relative;
   overflow: hidden;
+  border-bottom: 1px solid rgba(201,160,99,0.1);
 }
 
 .checkout-hero-mini::after {
@@ -48,10 +44,10 @@
 
 .subtitle-serif {
   font-family: var(--font-serif);
-  font-size: clamp(2.8rem, 7vw, 4.5rem);
-  color: var(--royal-blue);
-  letter-spacing: -0.03em;
-  margin-bottom: 1.5rem;
+  font-size: clamp(2.4rem, 6vw, 4rem);
+  color: #fff;
+  letter-spacing: -0.01em;
+  margin-bottom: 1rem;
   position: relative;
   z-index: 1;
 }
@@ -74,13 +70,13 @@
 
 /* --- Form Sections --- */
 .form-section {
-  margin-bottom: 6rem;
-  background: #fff;
-  padding: 4rem;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.04);
-  border-radius: 12px;
-  transition: transform 0.4s var(--ease-out-expo), box-shadow 0.4s var(--ease-out-expo);
+  margin-bottom: 4rem;
+  background: #000000;
+  padding: 3rem;
+  border: 1px solid rgba(201,160,99,0.1);
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
+  border-radius: 2px;
+  transition: transform 0.4s var(--ease-out-expo);
 }
 
 .form-section:hover {
@@ -90,13 +86,13 @@
 
 .form-section-title {
   font-family: var(--font-serif);
-  font-size: 2.8rem;
+  font-size: 2rem;
   font-weight: 700;
-  color: var(--royal-blue);
-  margin-bottom: 4rem;
+  color: #fff;
+  margin-bottom: 3rem;
   position: relative;
   display: block;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
 }
 
 .form-section-title::after {
@@ -127,49 +123,36 @@
 }
 
 .form-group label {
-  font-size: 0.9rem;
-  /* Increased for better presence */
+  font-size: 0.8rem;
   text-transform: uppercase;
-  letter-spacing: 0.15em;
-  font-weight: 800;
-  color: #000000 !important;
-  /* Pure black for maximum visibility */
-  margin-bottom: 1.2rem;
+  letter-spacing: 0.12em;
+  font-weight: 600;
+  color: #94A3B8 !important;
+  margin-bottom: 0.8rem;
   display: block;
 }
 
 .checkout-luxury .form-input {
-  border-radius: 6px;
-  border: 2px solid #475569 !important;
-  /* Dark slate border, using !important to be absolutely sure */
-  padding: 1.4rem;
-  font-size: 1.05rem;
+  border-radius: 2px;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  padding: 1.2rem;
+  font-size: 1rem;
   transition: var(--transition);
-  background: #ffffff !important;
-  color: #1E293B;
+  background: #000000 !important;
+  color: #fff !important;
   width: 100%;
   display: block;
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .checkout-luxury .form-input:focus {
-  border-color: var(--royal-blue) !important;
-  background: #fff !important;
+  border-color: var(--gold) !important;
   outline: none;
-  box-shadow:
-    0 10px 25px rgba(10, 25, 47, 0.05),
-    inset 0 1px 2px rgba(0, 0, 0, 0.05);
-  transform: translateY(-2px);
-  border-left: 6px solid var(--gold) !important;
-  /* Premium left accent on focus */
+  background: #000 !important;
 }
 
 .checkout-luxury .form-input::placeholder {
-  color: #334155;
-  /* Dark Slate for maximum visibility */
-  opacity: 0.8;
-  font-weight: 500;
-  transition: opacity 0.3s ease;
+  color: #64748B;
+  opacity: 0.6;
 }
 
 .checkout-luxury .form-input:focus::placeholder {
@@ -178,19 +161,14 @@
 
 /* --- Order Summary (Refined Glassmorphism) --- */
 .order-summary-container {
-  background: rgba(255, 255, 255, 0.92);
-  -webkit-backdrop-filter: blur(30px);
-  backdrop-filter: blur(30px);
-  padding: 4rem;
+  background: #000000;
+  padding: 3rem;
   position: sticky;
   top: 100px;
   height: fit-content;
-  border: 1px solid rgba(27, 54, 93, 0.15);
-  box-shadow:
-    0 4px 6px -1px rgba(0, 0, 0, 0.1),
-    0 10px 15px -3px rgba(0, 0, 0, 0.1),
-    0 40px 80px -20px rgba(27, 54, 93, 0.12);
-  border-radius: 12px;
+  border: 1px solid rgba(201,160,99,0.1);
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
+  border-radius: 2px;
   transition: var(--transition);
 }
 
@@ -203,28 +181,21 @@
 .summary-item {
   display: flex;
   justify-content: space-between;
-  padding: 1.5rem 0;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-  /* Darker border */
-  font-size: 1.1rem;
-  color: #334155;
-  transition: var(--transition);
-}
-
-.summary-item:hover {
-  transform: translateX(5px);
-  color: var(--royal-blue);
+  padding: 1.2rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  font-size: 1rem;
+  color: #94A3B8;
 }
 
 .summary-total {
   display: flex;
   justify-content: space-between;
-  padding-top: 3rem;
-  margin-top: 2rem;
-  font-size: 1.8rem;
+  padding-top: 2rem;
+  margin-top: 1.5rem;
+  font-size: 1.6rem;
   font-family: var(--font-serif);
-  color: var(--royal-blue);
-  border-top: 2px solid var(--gold);
+  color: #fff;
+  border-top: 1px solid var(--gold);
 }
 
 /* --- Payment Enhancements --- */
@@ -237,90 +208,73 @@
 }
 
 .payment-tab {
-  padding: 1.2rem 0;
+  padding: 1rem 0;
   background: none;
   border: none;
   border-bottom: 2px solid transparent;
   cursor: pointer;
-  font-weight: 700;
-  font-size: 0.95rem;
+  font-weight: 600;
+  font-size: 0.85rem;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   color: #64748B;
-  /* Darker inactive state */
   transition: var(--transition);
 }
 
 .payment-tab.active {
-  color: var(--royal-blue);
+  color: var(--gold);
   border-bottom-color: var(--gold);
 }
 
 .checkout-luxury .payment-option {
-  padding: 2.2rem;
-  border: 2.5px solid #475569;
-  /* Matching input border weight and color */
-  margin-bottom: 1.5rem;
+  padding: 1.8rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 1.2rem;
   transition: var(--transition);
-  border-radius: 8px;
-  background: #fff;
+  border-radius: 2px;
+  background: #000;
 }
 
 .checkout-luxury .payment-option:hover {
   border-color: var(--gold);
-  background: #FFFBF0;
 }
 
 .checkout-luxury .payment-option:has(input:checked) {
   border-color: var(--gold);
-  border-width: 3px;
-  background: #FFFDF5;
-  box-shadow: 0 15px 35px rgba(212, 175, 55, 0.12);
+  background: rgba(201,160,99,0.02);
 }
 
 /* --- Button Refinement --- */
 .place-order-btn {
   width: 100%;
-  padding: 2.2rem;
-  background: var(--royal-blue);
-  color: #fff;
-  border: 1px solid var(--royal-blue);
-  font-size: 0.9rem;
+  padding: 1.8rem;
+  background: var(--gold);
+  color: #000;
+  border: none;
+  font-size: 0.85rem;
   font-weight: 800;
-  letter-spacing: 0.3em;
+  letter-spacing: 0.2rem;
   text-transform: uppercase;
   cursor: pointer;
-  transition: all 0.4s var(--ease-out-expo);
-  margin-top: 3rem;
-  border-radius: 6px;
-  position: relative;
-  overflow: hidden;
-}
-
-.place-order-btn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: 0.6s;
-}
-
-.place-order-btn:hover::before {
-  left: 100%;
+  transition: all 0.3s ease;
+  margin-top: 2rem;
+  border-radius: 2px;
+  font-family: monospace;
 }
 
 .place-order-btn:hover {
-  background: #122846;
-  border-color: #122846;
-  transform: translateY(-5px);
-  box-shadow: 0 20px 40px rgba(10, 25, 47, 0.25);
+  background: #B18952;
+  transform: translateY(-2px);
 }
 
-.place-order-btn:active {
-  transform: translateY(-2px);
+/* --- Focus Blur Effect (Cinematic) --- */
+.form-section:focus-within .form-group:not(:focus-within) {
+  filter: blur(2px);
+  opacity: 0.6;
+}
+
+.form-section .form-group {
+  transition: filter 0.3s ease, opacity 0.3s ease;
 }
 
 /* --- Mobile Fixes --- */

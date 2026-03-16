@@ -10,7 +10,12 @@ const aiQuota = require('./aiQuotaService');
 
 // ─── Prompt builder ───────────────────────────────────────────────────────────
 
-function buildPrompt({ type, niche, tone, language, length, storeName, extraContext = '' }) {
+function buildPrompt({ type, niche, tone, brandSoul = 'luxury', language, length, storeName, extraContext = '', refinement = '' }) {
+    const SOUL_INST = {
+        luxury: 'Exude absolute commanding authority, understated elegance, and high-ticket exclusivity. Avoid generic advertising adjectives; use authoritative phrasing describing heritage, scarcity, and craftsmanship.',
+        dark: 'Be rebellious, mysterious, and high-impact. Focus on raw authenticity, cinematic edges, and edge-design aesthetic.',
+        friendly: 'Be warm, welcoming, and accessible. Use conversational language that builds absolute trust and common ground.'
+    };
     const LANG_INST = {
         english: 'Write in fluent English.',
         urdu: 'اردو میں لکھیں۔ صرف اردو زبان استعمال کریں۔',
@@ -28,15 +33,19 @@ function buildPrompt({ type, niche, tone, language, length, storeName, extraCont
         'promo-banner': `Write a promotional banner message for a ${niche} store.`,
     };
 
+    const soulInstruction = SOUL_INST[brandSoul] || `[Creative Partner Mode] Adapt tone and layout instructions strictly to this custom vision: "${brandSoul}".`;
+
     return `ROLE: Professional e-commerce copywriter specializing in Pakistani market.
 STORE: ${storeName || 'Online Store'}
 NICHE: ${niche}
 TONE: ${tone}
+BRAND SOUL: ${soulInstruction}
 TARGET: Pakistani online shoppers
 LANGUAGE: ${LANG_INST[language] || LANG_INST.english}
 LENGTH: ${LENGTH_INST[length] || LENGTH_INST.medium}
 TASK: ${TYPE_INST[type] || `Write ${type} copy.`}
 ${extraContext ? `EXTRA CONTEXT: ${extraContext}` : ''}
+${refinement ? `REFINEMENT REQUEST: ${refinement}` : ''}
 OUTPUT: Only the copy text. No labels, no explanations, no quotes around the output.`;
 }
 
@@ -63,7 +72,7 @@ async function getCached(sellerId, type, contextHash) {
 
 // ─── Queue job (async generation) ────────────────────────────────────────────
 
-async function generateContent(sellerId, { type, niche, tone = 'professional', language = 'english', length = 'medium', storeName = 'My Store', extraContext = '', forceRegenerate = false }) {
+async function generateContent(sellerId, { type, niche, tone = 'professional', brandSoul = 'luxury', language = 'english', length = 'medium', storeName = 'My Store', extraContext = '', refinement = '', forceRegenerate = false }) {
     const queueService = require('./queueService');
 
     // ── Quota & rate guard ────────────────────────────────────────────────────
@@ -73,7 +82,7 @@ async function generateContent(sellerId, { type, niche, tone = 'professional', l
         return { allowed: false, reason: quota.reason, used: quota.used, limit: quota.limit, retryAfterSec: quota.retryAfterSec };
     }
 
-    const context = { type, niche, tone, language, length, storeName, extraContext };
+    const context = { type, niche, tone, brandSoul, language, length, storeName, extraContext, refinement };
     const contextHash = hashContext(context);
 
     // Return cached result if available and not forcing regenerate
@@ -86,7 +95,7 @@ async function generateContent(sellerId, { type, niche, tone = 'professional', l
     }
 
     // Build prompt and queue job
-    const prompt = buildPrompt({ type, niche, tone, language, length, storeName, extraContext });
+    const prompt = buildPrompt({ type, niche, tone, brandSoul, language, length, storeName, extraContext, refinement });
 
     // Upsert a pending record
     const { data: record, error } = await supabase
@@ -143,4 +152,89 @@ async function getResult(sellerId, type) {
     return AiContent.findOne({ sellerId, type });
 }
 
-module.exports = { generateContent, getCached, clearCache, getResult, buildPrompt, hashContext };
+/**
+ * conversionInsights: Analyze dummy JSON behavioral data and return 3 actionable tips.
+ */
+async function generateConversionInsights(behavioralData) {
+    try {
+        const clicks = behavioralData.clicks || 0;
+        const bounceRate = behavioralData.bounceRate || 0;
+        const cartAdds = behavioralData.cartAdds || 0;
+        const dropOffs = behavioralData.dropOffs || 0;
+
+        const tips = [];
+
+        if (bounceRate > 60) {
+            tips.push({
+                title: "Optimize Hero Text Above Fold",
+                description: "High Bounce Rate detected. Adjust phrasing to trigger immediate interest above the fold triggers.",
+                why: "Based on typical user attention models, users assess trust in under 3 seconds. Unclear headlines increase exits immediately."
+            });
+        } else {
+            tips.push({
+                title: "Immersive Sub-Fold Interaction",
+                description: "Focus on keeping users engaged down-page with rich parallax/mesh triggers.",
+                why: "A low bounce rate proves primary interest; down-page animations retain cognitive triggers making shoppers browse deep layouts."
+            });
+        }
+
+        if (cartAdds - dropOffs > 5) {
+            tips.push({
+                title: "Simplify Checkout Steps",
+                description: "Cart addition is strong. Remove optional inputs fields to seal quick deals buffers.",
+                why: "When purchasing intent hits peak thresholds, any transactional Friction node drops total checkouts by 10% averages."
+            });
+        } else {
+            tips.push({
+                title: "High Contrast Product CTAs",
+                description: "Add to Cart conversion is slightly low. Contrast items with glowing depth weights to draw focus.",
+                why: "Visual hierarchy guides action. Submerged nodes blend with backgrounds reducing item pickup metrics securely."
+            });
+        }
+
+        if (clicks > 500 && cartAdds < 20) {
+            tips.push({
+                title: "Premium Contrast Theme Canvas",
+                description: "Traffic is high but commitment is low. Test darker atmospheric overlays for retail glow weights.",
+                why: "Deep themes frame product images with higher luxury depth values, increasing visual justification pricing ratios."
+            });
+        } else {
+             tips.push({
+                title: "Retain Current Multi Grid Setup",
+                description: "Continue leveraging current metrics; visual harmony is keeping customers browsing.",
+                why: "Grid alignment distributes ocular weight equally keeping total viewport buffers scrolling safely."
+            });
+        }
+
+        return tips.slice(0, 3); // Guarantee 3 tips
+    } catch (e) {
+        return [{ title: "Optimize conversion", description: "Standard load triggers", why: "E-Commerce standards" }];
+    }
+}
+
+/**
+ * generateCommandSummary: Analyze dashboard stats and return 1-sentence commanding authority summary.
+ */
+async function generateCommandSummary(stats) {
+    try {
+        const axios = require('axios');
+        const apiKey = process.env.OPENAI_API_KEY;
+        if (!apiKey) return "Empire growth node sustained. Focus on high-intent luxury segments.";
+
+        const prompt = `You are an elite e-commerce advisor commanding absolute authority. Review these metrics and return exactly ONE sentence of strategic command or summary. Be concise, authoritative, and direct. Omit explanations.
+        
+        Metrics: ${JSON.stringify(stats)}`;
+
+        const response = await axios.post('https://api.openai.com/v1/chat/completions', {
+            model: 'gpt-3.5-turbo',
+            messages: [{ role: 'system', content: 'Return ONLY the sentence output.' }, { role: 'user', content: prompt }],
+            temperature: 0.4
+        }, { headers: { Authorization: `Bearer ${apiKey}` } });
+
+        return response.data.choices[0].message.content.trim();
+    } catch (e) {
+        return "Command cycle active. Maintain focus on revenue generation metrics.";
+    }
+}
+
+module.exports = { generateContent, getCached, clearCache, getResult, buildPrompt, hashContext, generateConversionInsights, generateCommandSummary };

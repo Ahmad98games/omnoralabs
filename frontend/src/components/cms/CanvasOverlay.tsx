@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState, useRef, useCallback } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useBuilder } from '../../context/BuilderContext';
 import {
     Trash2, Copy, ChevronUp, ChevronDown,
@@ -14,6 +14,8 @@ import { ElementToolbar, ElementResizeHandles, SmartGuides, ImageControlsFloater
 import { useBuilderInteractionStore } from '../../hooks/useBuilderInteractionStore';
 import { useNodeSelector } from '../../hooks/useNodeSelector';
 import { SuggestionBubble } from './help/SuggestionBubble';
+import { FloatingParticles } from '../ui/FloatingParticles';
+import { LayerManager } from '../ui/LayerManager';
 
 // ─── Tokens ───────────────────────────────────────────────────────────────────
 const ACCENT = '#6366F1';
@@ -956,6 +958,12 @@ const CanvasOverlayInner: React.FC = () => {
 
             {/* Smart Suggestion Bubble */}
             <SuggestionBubble />
+
+            {/* Cinematic Ghost Particles */}
+            <FloatingParticles />
+
+            {/* Visual Layers Manager */}
+            <LayerManager />
         </div >
     );
 };

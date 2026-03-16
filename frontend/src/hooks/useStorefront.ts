@@ -30,7 +30,7 @@ export function useStorefront() {
         gcTime: 5 * 60 * 1000, // 5 minutes: keep in memory
     });
 
-    const content = contentResponse?.content || null;
+    const content = (Array.isArray(contentResponse) ? contentResponse[0]?.content : contentResponse?.content) || null;
 
     // Optional: Fetch stats only if not in preview (cached separately)
     const { data: statsResponse } = useQuery({

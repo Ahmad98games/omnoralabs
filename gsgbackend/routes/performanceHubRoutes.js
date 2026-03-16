@@ -37,11 +37,27 @@ router.get('/', protect, seller, async (req, res) => {
 
         const analyticsConfig = pageData?.ast_manifest?.configuration?.analytics || { targetMonthlySales: 10000 };
 
+        const { generateCommandSummary } = require('../services/aiContentService');
+        const summary = await generateCommandSummary(stats);
+
         res.json({
             success: true,
             stats,
-            config: analyticsConfig
+            config: analyticsConfig,
+            summary
         });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// @desc    Get AI Command Summary based on submitted stats
+// @route   POST /api/cms/performance-hub/summary
+router.post('/summary', protect, seller, async (req, res) => {
+    try {
+        const { generateCommandSummary } = require('../services/aiContentService');
+        const summary = await generateCommandSummary(req.body.stats || {});
+        res.json({ success: true, summary });
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });
     }

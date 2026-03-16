@@ -1,0 +1,39 @@
+/* ==========================================================
+   OMNORA RENDER PIPELINE: ATMOSPHERICS & VIEWPORT GRADIENTS
+   ========================================================== */
+
+   .render-pipeline-overlay {
+    transition: opacity 0.5s ease-in-out;
+    pointer-events: none;
+}
+
+/* ─── 1. GLOBAL LIGHT SCATTERING (Ambient Glow) ──────────────────── */
+
+:root[data-pipeline="lit"] .render-pipeline-overlay {
+    background: radial-gradient(circle at 50% 50%, var(--ambient-glow) 0%, transparent 80%);
+}
+
+:root[data-pipeline="cyber"] .render-pipeline-overlay {
+    background: 
+        radial-gradient(circle at 50% 50%, var(--ambient-glow) 0%, transparent 65%),
+        linear-gradient(rgba(0, 255, 204, 0.04) 1px, transparent 1px);
+    background-size: 100% 100%, 100% 3px; /* Cinematic Scanlines */
+}
+
+:root[data-pipeline="ethereal"] .render-pipeline-overlay {
+    background: radial-gradient(circle at 50% 40%, var(--ambient-glow) 0%, transparent 70%);
+}
+
+/* ─── 2. VIEWPORT COLOR GRADING & CHROMATIC EFFECT ──────────────────── */
+
+:root[data-pipeline="lit"] body {
+    filter: hue-rotate(2deg) saturate(1.05);
+}
+
+:root[data-pipeline="cyber"] body {
+    filter: hue-rotate(-5deg) saturate(1.2) contrast(1.1);
+}
+
+:root[data-pipeline="ethereal"] body {
+    filter: contrast(0.98) saturate(0.9) sepia(0.05);
+}

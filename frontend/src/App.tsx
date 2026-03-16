@@ -11,8 +11,11 @@ import { CartDrawer } from './components/storefront/CartDrawer';
 import { CinematicLoader } from './components/ui/CinematicLoader';
 import { ThankYouPage } from './components/storefront/ThankYouPage';
 
-import { Routes, Route, useLocation, Outlet } from 'react-router-dom';
+import { Routes, Route, useLocation, Outlet, Navigate } from 'react-router-dom';
 import { Layout } from './components/Layout';
+import ProtectedRoute from './components/ProtectedRoute';
+import { RenderPipelineProvider } from './context/RenderPipelineContext';
+import { RenderPipelineOverlay } from './components/ui/RenderPipelineOverlay';
 import Home from './pages/HomeWithAds';
 import Collection from './pages/Collection';
 import Product from './pages/Product';
@@ -44,37 +47,41 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <HelmetProvider>
         <ErrorBoundary>
-          <ThemeProvider>
-            <AuthProvider>
+          <RenderPipelineProvider>
+            <ThemeProvider>
+              <AuthProvider>
               <HostnameInterceptor>
                 <ToastProvider>
                   <AuthModal />
                   <CartDrawer />
+                  <RenderPipelineOverlay />
                     <Suspense fallback={<CinematicLoader />}>
                     <Routes>
-                      <Route element={<Layout children={<Outlet />} />}>
-                        <Route path={ROUTES.HOME} element={<Home />} />
-                        <Route path={ROUTES.COLLECTION} element={<Collection />} />
-                        <Route path={ROUTES.PRODUCT} element={<Product />} />
-                        <Route path={ROUTES.CART} element={<Cart />} />
-                        <Route path={ROUTES.CHECKOUT} element={<Checkout />} />
-                        <Route path={ROUTES.ABOUT} element={<About onBack={() => window.history.back()} />} />
-                        <Route path={ROUTES.CONTACT} element={<OmnoraContact />} />
-                        <Route path={ROUTES.BUILDER_HELP} element={<BuilderHelpPage />} />
-                        <Route path={ROUTES.LOGIN} element={<Login />} />
-                        <Route path={ROUTES.REGISTER} element={<Login />} /> 
-                        <Route path={ROUTES.PROFILE} element={<Profile />} />
-                        <Route path={ROUTES.ADMIN} element={<AdminDashboard />} />
-                        <Route path={ROUTES.SELLER} element={<SellerDashboard />} />
-                        <Route path={ROUTES.THANK_YOU} element={<ThankYouPage />} />
-                        <Route path="*" element={<Home />} />
-                      </Route>
+                        <Route element={<Layout children={<Outlet />} />}>
+                          <Route path={ROUTES.HOME} element={<Home />} />
+                          <Route path={ROUTES.COLLECTION} element={<Collection />} />
+                          <Route path={ROUTES.PRODUCT} element={<Product />} />
+                          <Route path={ROUTES.CART} element={<Cart />} />
+                          <Route path={ROUTES.CHECKOUT} element={<Checkout />} />
+                          <Route path={ROUTES.ABOUT} element={<About onBack={() => window.history.back()} />} />
+                          <Route path={ROUTES.CONTACT} element={<OmnoraContact />} />
+                          <Route path={ROUTES.BUILDER_HELP} element={<ProtectedRoute><BuilderHelpPage /></ProtectedRoute>} />
+                          <Route path="/builder" element={<ProtectedRoute><Navigate to="/seller?tab=builder" replace /></ProtectedRoute>} />
+                          <Route path={ROUTES.LOGIN} element={<Login />} />
+                          <Route path={ROUTES.REGISTER} element={<Login />} /> 
+                          <Route path={ROUTES.PROFILE} element={<Profile />} />
+                          <Route path={ROUTES.ADMIN} element={<AdminDashboard />} />
+                          <Route path={ROUTES.SELLER} element={<ProtectedRoute><SellerDashboard /></ProtectedRoute>} />
+                          <Route path={ROUTES.THANK_YOU} element={<ThankYouPage />} />
+                          <Route path="*" element={<Home />} />
+                        </Route>
                     </Routes>
                   </Suspense>
                 </ToastProvider>
               </HostnameInterceptor>
             </AuthProvider>
           </ThemeProvider>
+          </RenderPipelineProvider>
         </ErrorBoundary>
       </HelmetProvider>
     </QueryClientProvider>

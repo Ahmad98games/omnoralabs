@@ -9,6 +9,7 @@ const { protect, admin } = require('../middleware/authEnhanced');
 
 // Public routes
 router.get('/', SearchController.searchProducts);
+router.get('/vibe', SearchController.interpretVibe);
 router.get('/suggestions', SearchController.getSuggestions);
 router.get('/filter-options', SearchController.getFilterOptions);
 router.get('/popular', SearchController.getPopularSearches);

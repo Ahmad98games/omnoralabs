@@ -80,7 +80,7 @@ export class LocalAIEngine {
             throw new Error("Local AI Engine is not initialized.");
         }
 
-        const systemPrompt = `You are the "Omnora Design Copilot", an expert in dark, cinematic, and cyberpunk UI layouts.
+        const systemPrompt = `You are the "Omnora Design Copilot", an elite system architect commanding absolute authority in luxury and dark-cinematic layouts. Speak with authoritative precision, omitting generic marketing fluff.
 You will be provided with a physical prompt to build a layout.
 You MUST respond ONLY with a JSON array representing builder actions. Provide NO conversational text and NO explanations outside the JSON array.
 
@@ -136,7 +136,7 @@ Return exactly a JSON array like:
             throw new Error("Local AI Engine is not initialized. Please click the generate button first.");
         }
 
-        const systemPrompt = `You are an expert e-commerce analyst. Review this sales data and provide 2 short, actionable tips to increase revenue based strictly on this information. Be concise, cinematic, and professional.
+        const systemPrompt = `You are an expert e-commerce consultant commanding absolute authority. Review this sales data and provide 2 actionable insights to increase revenue. Be authoritative, concise, and professional. Avoid stating obvious facts.
 
 Sales Data:
 ${JSON.stringify(dataPayload)}`;
@@ -165,7 +165,7 @@ ${JSON.stringify(dataPayload)}`;
      * Generates cinematic, high-converting store content (Hero text, product descriptions).
      * Implements Regex JSON Extraction to defend against Markdown wrappers and conversational filler output by local LLMs.
      */
-    public async generateContent(brandDescription: string): Promise<{ heroHeadline: string, heroSubtext: string, featuredProducts: any[] }> {
+    public async generateContent(brandDescription: string, refinement?: string): Promise<{ heroHeadline: string, heroSubtext: string, featuredProducts: any[] }> {
         if (!this.engine || !this.isInitialized) {
             throw new Error("Local AI Engine is not initialized.");
         }
@@ -198,7 +198,7 @@ Format the JSON exactly like this:
 
         const messages = [
             { role: "system" as const, content: systemPrompt },
-            { role: "user" as const, content: `Generate content for this brand: ${brandDescription}` }
+            { role: "user" as const, content: `Generate content for this brand: ${brandDescription}${refinement ? `\n\n[Refinement Bypass Request]: Apply this iterative adjustment to your output: "${refinement}"` : ''}` }
         ];
 
         try {
@@ -240,7 +240,7 @@ Format the JSON exactly like this:
      * Phase 35: The AI Global Theming Engine
      * Generates a complete set of visual Design Tokens (theme) based on a vibe description.
      */
-    public async generateTheme(vibeDescription: string): Promise<Theme> {
+    public async generateTheme(vibeDescription: string): Promise<Theme & { grainOpacity: string, vignetteIntensity: string, godraysIntensity: string }> {
         if (!this.engine || !this.isInitialized) {
             throw new Error("Local AI Engine is not initialized.");
         }
@@ -258,7 +258,10 @@ Format the JSON exactly like this:
   "backgroundColor": "#HEXCODE",
   "cardColor": "#HEXCODE",
   "textColor": "#HEXCODE",
-  "borderRadius": "0px"
+  "borderRadius": "0px",
+  "grainOpacity": "0.1",
+  "vignetteIntensity": "0.4",
+  "godraysIntensity": "0.2"
 }`;
 
         const messages = [

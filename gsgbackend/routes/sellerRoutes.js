@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 // 🛑 Mongoose Removed. Using Supabase Backend Client
 const { supabase } = require('../../backend/shared/lib/supabaseClient'); 
-const { protect, seller } = require('../middleware/auth');
+const { requireAuth, seller } = require('../../backend/middleware/authMiddleware');
 const logger = require('../services/logger');
 const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -10,7 +10,7 @@ const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[
  * @desc    Get all products for the authenticated seller
  * @route   GET /api/seller/inventory
  */
-router.get('/inventory', protect, seller, async (req, res) => {
+router.get('/inventory', requireAuth, seller, async (req, res) => {
     try {
         const merchantId = req.user.id || req.user._id;
         if (!uuidRegex.test(merchantId)) {
@@ -34,7 +34,7 @@ router.get('/inventory', protect, seller, async (req, res) => {
  * @desc    Create new product for seller
  * @route   POST /api/seller/inventory
  */
-router.post('/inventory', protect, seller, async (req, res) => {
+router.post('/inventory', requireAuth, seller, async (req, res) => {
     try {
         const { data: product, error } = await supabase
             .from('products')
@@ -57,7 +57,7 @@ router.post('/inventory', protect, seller, async (req, res) => {
  * @desc    Update product (ownership check enforced by query)
  * @route   PUT /api/seller/inventory/:id
  */
-router.put('/inventory/:id', protect, seller, async (req, res) => {
+router.put('/inventory/:id', requireAuth, seller, async (req, res) => {
     try {
         const { data: product, error } = await supabase
             .from('products')
@@ -81,7 +81,7 @@ router.put('/inventory/:id', protect, seller, async (req, res) => {
  * @desc    Delete product
  * @route   DELETE /api/seller/inventory/:id
  */
-router.delete('/inventory/:id', protect, seller, async (req, res) => {
+router.delete('/inventory/:id', requireAuth, seller, async (req, res) => {
     try {
         const { error } = await supabase
             .from('products')

@@ -5,7 +5,7 @@ import { Plus, Edit3, Trash2, X, Image as ImageIcon, Search } from 'lucide-react
 import './AdminProducts.css';
 
 interface Product {
-    _id: string;
+    id: string;
     name: string;
     description: string;
     price: number;
@@ -16,7 +16,7 @@ interface Product {
     isNew?: boolean;
 }
 
-const INITIAL_FORM_STATE: Omit<Product, '_id'> = {
+const INITIAL_FORM_STATE: Omit<Product, 'id'> = {
     name: '',
     description: '',
     price: 0,
@@ -32,7 +32,7 @@ const AdminProducts: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingId, setEditingId] = useState<string | null>(null);
-    const [formData, setFormData] = useState<Omit<Product, '_id'>>(INITIAL_FORM_STATE);
+    const [formData, setFormData] = useState<Omit<Product, 'id'>>(INITIAL_FORM_STATE);
     const { showToast } = useToast();
 
     const fetchProducts = useCallback(async () => {
@@ -51,8 +51,8 @@ const AdminProducts: React.FC = () => {
     }, [fetchProducts]);
 
     const handleEdit = (product: Product) => {
-        setEditingId(product._id);
-        const { _id, ...rest } = product;
+        setEditingId(product.id);
+        const { id, ...rest } = product;
         setFormData(rest);
         setIsModalOpen(true);
     };
@@ -62,7 +62,7 @@ const AdminProducts: React.FC = () => {
         try {
             await client.delete(`/products/${id}`);
             showToast('Product removed from database', 'success');
-            setProducts(prev => prev.filter(p => p._id !== id));
+            setProducts(prev => prev.filter(p => p.id !== id));
         } catch (error) {
             showToast('Deletion failed', 'error');
         }
@@ -123,7 +123,7 @@ const AdminProducts: React.FC = () => {
                     </thead>
                     <tbody>
                         {products.map(product => (
-                            <tr key={product._id}>
+                            <tr key={product.id}>
                                 <td>
                                     <div className="product-cell">
                                         <div className="img-wrapper">
@@ -162,7 +162,7 @@ const AdminProducts: React.FC = () => {
                                         <button
                                             type="button"
                                             className="icon-btn delete-btn"
-                                            onClick={() => handleDelete(product._id)}
+                                            onClick={() => handleDelete(product.id)}
                                             aria-label={`Delete ${product.name}`}
                                         >
                                             <Trash2 size={16} />

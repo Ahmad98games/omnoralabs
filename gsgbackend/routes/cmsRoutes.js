@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 // 🛑 Mongoose Removed. Using Supabase Backend Client
 const { supabase } = require('../../backend/shared/lib/supabaseClient'); 
-const { protect, seller } = require('../../backend/middleware/auth');
+const { requireAuth, seller } = require('../../backend/middleware/authMiddleware');
 const { sanitizeManifest } = require('../../backend/services/manifestService');
 const { validateManifest } = require('../../backend/services/preflightService');
 
@@ -142,7 +142,7 @@ router.get('/content', async (req, res) => {
 
 // @desc    Update DRAFT (Tenant-Specific Sandbox)
 // @route   POST /api/cms/content
-router.post('/content', protect, seller, async (req, res) => {
+router.post('/content', requireAuth, seller, async (req, res) => {
     try {
         const targetTenant = req.tenantId || 'default_tenant';
 
@@ -239,7 +239,7 @@ router.post('/content', protect, seller, async (req, res) => {
 
 // @desc    ATOMIC SYNC: Publish DRAFT to LIVE
 // @route   POST /api/cms/content/publish
-router.post('/content/publish', protect, seller, async (req, res) => {
+router.post('/content/publish', requireAuth, seller, async (req, res) => {
     try {
         const targetTenant = req.tenantId || 'default_tenant';
 
@@ -293,7 +293,7 @@ router.post('/content/publish', protect, seller, async (req, res) => {
 
 // @desc    ROLLBACK: Revert Live site to previous snapshot
 // @route   POST /api/cms/content/rollback
-router.post('/content/rollback', protect, seller, async (req, res) => {
+router.post('/content/rollback', requireAuth, seller, async (req, res) => {
     try {
         const targetTenant = req.tenantId || 'default_tenant';
         

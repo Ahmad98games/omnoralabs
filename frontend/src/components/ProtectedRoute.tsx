@@ -32,6 +32,9 @@ export default function ProtectedRoute({ children, requireAdmin = false }: Prote
 
     // 2. ACCESS DENIED (Not Logged In)
     if (!isAuthenticated) {
+        if (location.pathname.startsWith('/builder') || location.pathname.startsWith('/seller')) {
+            return <Navigate to="/login" state={{ from: location }} replace />;
+        }
         // Redirect to Landing Page and trigger Auth Modal overlay
         return <Navigate to="/" state={{ requireAuth: true, from: location }} replace />;
     }

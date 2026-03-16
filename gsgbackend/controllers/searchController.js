@@ -223,6 +223,57 @@ class SearchController {
       });
     }
   }
+  /**
+   * Interpret descriptive shopping vibe via AI
+   * GET /api/search/vibe
+   */
+  static async interpretVibe(req, res) {
+    try {
+      const { q = '' } = req.query;
+      if (!q || q.trim().length < 2) {
+        return res.status(400).json({ success: false, error: 'Query too short' });
+      }
+
+      const axios = require('axios');
+      const apiKey = process.env.OPENAI_API_KEY;
+
+      if (!apiKey) {
+        // Fallback: simple text splitting if no AI key
+        const tags = q.toLowerCase()
+          .replace(/[^\w\s]/g, '')
+          .split(' ')
+          .filter(word => word.length > 3);
+        return res.json({ success: true, tags, fallback: true });
+      }
+
+      const response = await axios.post('https://api.openai.com/v1/chat/completions', {
+        model: 'gpt-3.5-turbo',
+        messages: [
+          { 
+            role: 'system', 
+            content: 'You are an AI interpreting descriptive shopping queries. Return ONLY a JSON array of 3-4 keywords or tags that match this vibe (e.g., ["dark", "leather", "streetwear"]).' 
+          },
+          { role: 'user', content: `Interpret: "${q}"` }
+        ],
+        temperature: 0.3
+      }, {
+        headers: { Authorization: `Bearer ${apiKey}` }
+      });
+
+      const text = response.data.choices[0].message.content;
+      let tags = [];
+      try {
+        tags = JSON.parse(text);
+      } catch (e) {
+        tags = text.replace(/[\[\]"]/g, '').split(',').map(s => s.trim());
+      }
+
+      return res.json({ success: true, tags });
+    } catch (error) {
+      console.error('interpretVibe Error:', error);
+      return res.status(500).json({ success: false, error: 'Vibe interpretation failed' });
+    }
+  }
 }
 
 module.exports = SearchController;

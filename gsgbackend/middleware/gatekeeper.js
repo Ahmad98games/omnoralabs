@@ -106,6 +106,7 @@ const gatekeeper = (capability) => {
 
         // 3. Infrastructure Check: DB
         // Imperial Hardening: Relaxed check for Supabase transition
+        /*
         if (capability === CAPABILITIES.STATE_MUTATING && snapshot.lifecycle === LIFECYCLE.BOOTING) {
             logger.warn('GATEKEEPER: Blocked mutating request during BOOTING', {
                 path: req.path,
@@ -114,6 +115,7 @@ const gatekeeper = (capability) => {
 
             return res.status(503).json(createErrorResponse('System is still initializing.', true));
         }
+        */
 
         // 4. Rate Limiting for gated/degraded requests (Implicit here, can be extended)
         // ... handled externally or by middleware wrapper
