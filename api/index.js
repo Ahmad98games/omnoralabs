@@ -48,6 +48,16 @@ module.exports = async (req, res) => {
             app = expressApp;
         }
 
+        if (req.query && req.query._diagnostics) {
+            enableCors();
+            const routes = app._router.stack.map(r => {
+                if (r.route) return `[${r.route.stack[0].method.toUpperCase()}] ${r.route.path}`;
+                if (r.name === 'router') return `[MOUNT] ${r.regexp}`;
+                return r.name;
+            });
+            return res.status(200).json({ routes, url: req.url, originalUrl: req.originalUrl });
+        }
+
         // 3. Forward to Express
         return app(req, res);
 
