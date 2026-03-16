@@ -149,6 +149,17 @@ app.use((err, req, res, _next) => {
   });
 });
 
+// --- ASYNC IIFE FOR BACKGROUND BOOTSTRAP ---
+(async () => {
+  try {
+    const bootstrap = require('./bootstrap');
+    await bootstrap();
+  } catch (err) {
+    logger.error('IIFE_BOOTSTRAP_FAILURE', { error: err.message });
+  }
+})();
+
+/*
 // Only start server if running directly
 if (require.main === module) {
   const bootstrap = require('./bootstrap');
@@ -170,6 +181,7 @@ if (require.main === module) {
     process.exit(1);
   });
 }
+*/
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
