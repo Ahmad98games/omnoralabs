@@ -1,5 +1,5 @@
 // 🛑 Mongoose Removed. Using Supabase Backend Client
-const { supabase } = require('../../backend/shared/lib/supabaseClient'); 
+const { supabase } = require('../config/supabaseClient'); 
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const logger = require('../services/logger');

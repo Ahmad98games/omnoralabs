@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const { supabase } = require('../../backend/shared/lib/supabaseClient');
+const { supabase } = require('../config/supabaseClient');
 const logger = require('../services/logger');
 
 const { validateEnv } = require('../config/env');
