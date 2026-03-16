@@ -9,7 +9,7 @@ const config = validateEnv();
 
 // Redis connection instance (Private to module)
 let connection = null;
-if (config.isProduction) {
+if (config.isProduction && !process.env.VERCEL) {
     connection = new IORedis({
         host: config.redis.host,
         port: config.redis.port,
