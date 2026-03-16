@@ -1,3 +1,5 @@
+const express = require('express');
+const router = express.Router();
 // 🛑 Mongoose Removed. Using Supabase Backend Client
 const { supabase } = require('../../backend/shared/lib/supabaseClient'); 
 const { protect, seller } = require('../middleware/auth');
