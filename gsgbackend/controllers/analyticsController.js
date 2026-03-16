@@ -11,6 +11,7 @@ exports.track = async (req, res) => {
   const startTime = Date.now();
   try {
     const { type, path, sessionId, userId, referrer, userAgent, screen, payload } = req.body || {};
+    const tenantId = req.headers['x-tenant-id'] || req.tenantId || 'default_tenant';
     const ip = req.ip;
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 

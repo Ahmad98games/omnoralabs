@@ -9,6 +9,10 @@ export const RenderPipelineOverlay: React.FC = () => {
     const hasGrain = parseFloat(styleVariables['--grain-opacity'] || '0') > 0;
     const hasGodrays = parseFloat(styleVariables['--godrays-intensity'] || '0') > 0;
 
+    // Fix SVG filter attributes (Must be numbers, not CSS variables)
+    const blurRadius = parseFloat(styleVariables['--blur-radius'] || '4');
+    const chromaticAberration = parseFloat(styleVariables['--chromatic-aberration'] || '2');
+
     return (
         <svg 
             className="render-pipeline-overlay pointer-events-none fixed inset-0 w-full h-full z-[9999]" 
@@ -21,12 +25,12 @@ export const RenderPipelineOverlay: React.FC = () => {
                 {/* 1. Chromatic Aberration Core */}
                 <filter id="pipeline-aberration" x="-10%" y="-10%" width="120%" height="120%">
                     <feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="1" result="noise" />
-                    <feDisplacementMap in="SourceGraphic" in2="noise" scale="var(--chromatic-aberration)" xChannelSelector="R" yChannelSelector="G" />
+                    <feDisplacementMap in="SourceGraphic" in2="noise" scale={chromaticAberration} xChannelSelector="R" yChannelSelector="G" />
                 </filter>
 
                 {/* 2. Ambient Neonglow Filter */}
                 <filter id="ambient-neon" x="-50%" y="-50%" width="200%" height="200%">
-                    <feGaussianBlur stdDeviation="var(--blur-radius)" result="blur" />
+                    <feGaussianBlur stdDeviation={blurRadius} result="blur" />
                     <feMerge>
                         <feMergeNode in="blur" />
                         <feMergeNode in="SourceGraphic" />
