@@ -32,16 +32,7 @@ export function useStorefront() {
 
     const content = (Array.isArray(contentResponse) ? contentResponse[0]?.content : contentResponse?.content) || null;
 
-    // Optional: Fetch stats only if not in preview (cached separately)
-    const { data: statsResponse } = useQuery({
-        queryKey: ['performance-hub'],
-        queryFn: async () => {
-            const { data } = await client.get('/cms/performance-hub');
-            return data;
-        },
-        enabled: !isPreview && !!content,
-        staleTime: 5 * 60 * 1000, 
-    });
+    // Optional: Fetch stats removed to fix load-time waterfalls on storefront.
 
     // Handle side effects whenever content changes (served from cache OR network)
     useEffect(() => {
@@ -69,7 +60,7 @@ export function useStorefront() {
 
     return {
         content,
-        stats: statsResponse?.stats || null,
+        stats: null,
         loading: isLoading, // Initial load
         isFetching, // Background revalidation
         error: queryError ? (queryError as any).message : null,

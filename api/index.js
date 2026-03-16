@@ -38,20 +38,17 @@ module.exports = async (req, res) => {
 
         // 2. Lazy Load Modules
         if (!stateService) {
-            stateService = require('../backend/services/stateService');
-            constants = require('../backend/services/stateService'); // Loads exports
+            stateService = require('../gsgbackend/services/stateService');
+            constants = require('../gsgbackend/services/stateService'); // Loads exports
         }
-        if (!app) app = require('../backend/server');
 
-        // 3. Update Gatekeeper State
-        // Use constants if destructured, or access directly
-        const INFRA = constants.INFRA || { DB: 'db' };
-        const LIFECYCLE = constants.LIFECYCLE || { READY: 'READY' };
+        if (!app) {
+            const bootstrap = require('../gsgbackend/bootstrap');
+            const { app: expressApp } = await bootstrap(); // Runs env & infra ready hooks
+            app = expressApp;
+        }
 
-        stateService.setInfraStatus(INFRA.DB, true);
-        stateService.setLifecycle(LIFECYCLE.READY);
-
-        // 5. Forward to Express
+        // 3. Forward to Express
         return app(req, res);
 
     } catch (e) {
