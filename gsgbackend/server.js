@@ -55,6 +55,7 @@ app.use(tenantContext);
 
 // ---------- Middleware ----------
 const allowedOrigins = (process.env.ALLOWED_ORIGINS || '').split(',').filter(Boolean);
+if (process.env.FRONTEND_URL) allowedOrigins.push(process.env.FRONTEND_URL);
 const corsOptions = {
   origin: allowedOrigins.length ? allowedOrigins : true,
   credentials: true,
@@ -137,17 +138,9 @@ app.use('/api/media', mediaRoutes);
 app.use('/api/health', healthRoutes);
 
 // Global error handler
-app.use((err, req, res, _next) => {
-  logger.error('Unhandled error', {
-    message: err.message,
-    stack: err.stack,
-    path: req.path,
-    method: req.method,
-  });
-  res.status(err.status || 500).json({
-    error: `Error: ${err.message}`,
-    stack: err.stack // Temporarily exposing stack for debugging
-  });
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send(err.message);
 });
 
 // --- ASYNC IIFE FOR BACKGROUND BOOTSTRAP ---
