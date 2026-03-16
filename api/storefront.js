@@ -16,6 +16,7 @@
  *   the latest CDN version on hard refresh.
  */
 
+module.exports = async (req, res) => {
     try {
         // ── Lazy-load Supabase ────────────────────────────────────────
         const { supabase } = require('../backend/shared/lib/supabaseClient');
