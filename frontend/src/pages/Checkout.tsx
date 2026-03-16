@@ -529,7 +529,7 @@ export default function Checkout() {
                         </div>
                     </div>
                     <h1 className="text-3xl text-[#C9A063] font-bold tracking-widest mt-6 animate-pulse">ORDER CONFIRMED</h1>
-                    <p className="text-gray-400 mt-2 text-sm lowercase tracking-wider opacity-70">> Initializing fulfillment sequence...</p>
+                    <p className="text-gray-400 mt-2 text-sm lowercase tracking-wider opacity-70">&gt; Initializing fulfillment sequence...</p>
                 </div>
             )}
         </div>
