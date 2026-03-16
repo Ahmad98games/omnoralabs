@@ -4,15 +4,24 @@ const dotenv = require('dotenv');
 // Load environment variables (Backend Context)
 dotenv.config();
 
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const initSupabase = () => {
+    try {
+        const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '';
+        const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY || '';
 
-if (!supabaseUrl || !supabaseKey) {
-    throw new Error('Missing Env Vars: SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY is required for Omnora Backend.');
-}
+        console.log(supabaseUrl ? "[Supabase] URL Loaded" : "[Supabase] URL MISSING");
 
-// Initialise the Supabase client for backend usage
-// Note: We use the ANON key for RLS-enforced queries
-const supabase = createClient(supabaseUrl, supabaseKey);
+        if (!supabaseUrl || !supabaseKey) {
+            console.warn('[Omnora Backend] CRITICAL: Supabase environment variables missing. App degrading gracefully.');
+            return null;
+        }
+        return createClient(supabaseUrl, supabaseKey);
+    } catch (err) {
+        console.error('[Omnora Backend] Failed to initialize Supabase client:', err);
+        return null;
+    }
+};
+
+const supabase = initSupabase();
 
 module.exports = { supabase };
