@@ -64,14 +64,14 @@ module.exports = async (req, res) => {
             app = expressApp;
         }
 
-        if (req.query && req.query._diagnostics) {
-            enableCors();
-            const routes = app._router.stack.map(r => {
-                if (r.route) return `[${r.route.stack[0].method.toUpperCase()}] ${r.route.path}`;
-                if (r.name === 'router') return `[MOUNT] ${r.regexp}`;
-                return r.name;
+        if (req.url && req.url.split('?')[0] === '/api/cms/content') {
+            enableCors(); // Enforce CORS for direct edge loads
+            req.url = req.url.replace('/api/cms', ''); // Maps to '/content' for sub-router
+            const cmsRoutes = require('../gsgbackend/routes/cmsRoutes');
+            return cmsRoutes(req, res, (err) => {
+                if (err) return res.status(500).json({ error: 'CMS_DIRECT_FAIL', message: err.message });
+                return app(req, res);
             });
-            return res.status(200).json({ routes, url: req.url, originalUrl: req.originalUrl });
         }
 
         // 3. Forward to Express
