@@ -1,0 +1,9 @@
+[SYNTAX_ERROR] gsgbackend\routes\whatsappTemplateRoutes.js
+Error: Illegal return statement
+
+[SYNTAX_ERROR] backend\check_users.js
+Error: Cannot use import statement outside a module
+
+[SYNTAX_ERROR] backend\modules\ai-forge\ai-forge.controller.js
+Error: Unexpected token ')'
+

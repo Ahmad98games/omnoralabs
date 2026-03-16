@@ -1,0 +1,111 @@
+
+
+X [ERROR] Could not resolve "react-router-dom"
+
+    frontend/src/main.tsx:3:30:
+      3 │ import { BrowserRouter } from 'react-router-dom'
+        ╵                               ~~~~~~~~~~~~~~~~~~
+
+  The "main" field here was ignored. Main fields must be configured explicitly when using the "neutral" platform.
+
+    frontend/node_modules/react-router-dom/package.json:21:2:
+      21 │   "main": "./dist/main.js",
+         ╵   ~~~~~~
+
+  You can mark the path "react-router-dom" as external to exclude it from the bundle, which will remove this error and leave the unresolved path in the bundle.
+
+X [ERROR] Could not resolve "react-router-dom"
+
+    frontend/src/App.tsx:14:61:
+      14 │ ...s, Route, useLocation, Outlet, Navigate } from 'react-router-dom';
+         ╵                                                   ~~~~~~~~~~~~~~~~~~
+
+  The "main" field here was ignored. Main fields must be configured explicitly when using the "neutral" platform.
+
+    frontend/node_modules/react-router-dom/package.json:21:2:
+      21 │   "main": "./dist/main.js",
+         ╵   ~~~~~~
+
+  You can mark the path "react-router-dom" as external to exclude it from the bundle, which will remove this error and leave the unresolved path in the bundle.
+
+X [ERROR] Could not resolve "react-router-dom"
+
+    frontend/src/components/ProtectedRoute.tsx:2:38:
+      2 │ import { Navigate, useLocation } from 'react-router-dom';
+        ╵                                       ~~~~~~~~~~~~~~~~~~
+
+  The "main" field here was ignored. Main fields must be configured explicitly when using the "neutral" platform.
+
+    frontend/node_modules/react-router-dom/package.json:21:2:
+      21 │   "main": "./dist/main.js",
+         ╵   ~~~~~~
+
+  You can mark the path "react-router-dom" as external to exclude it from the bundle, which will remove this error and leave the unresolved path in the bundle.
+
+X [ERROR] Could not resolve "react-router-dom"
+
+    frontend/src/components/Layout.tsx:1:55:
+      1 │ ...{ Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
+        ╵                                                    ~~~~~~~~~~~~~~~~~~
+
+  The "main" field here was ignored. Main fields must be configured explicitly when using the "neutral" platform.
+
+    frontend/node_modules/react-router-dom/package.json:21:2:
+      21 │   "main": "./dist/main.js",
+         ╵   ~~~~~~
+
+  You can mark the path "react-router-dom" as external to exclude it from the bundle, which will remove this error and leave the unresolved path in the bundle.
+
+X [ERROR] Could not resolve "lucide-react"
+
+    frontend/src/context/ToastContext.tsx:2:66:
+      2 │ ...Circle, AlertOctagon, Info, AlertTriangle, X } from 'lucide-react';
+        ╵                                                        ~~~~~~~~~~~~~~
+
+  The "main" field here was ignored. Main fields must be configured explicitly when using the "neutral" platform.
+
+    frontend/node_modules/lucide-react/package.json:26:2:
+      26 │   "main": "dist/cjs/lucide-react.js",
+         ╵   ~~~~~~
+
+  You can mark the path "lucide-react" as external to exclude it from the bundle, which will remove this error and leave the unresolved path in the bundle.
+
+X [ERROR] Could not resolve "lucide-react"
+
+    frontend/src/components/ProtectedRoute.tsx:4:37:
+      4 │ import { Loader2, ShieldCheck } from 'lucide-react';
+        ╵                                      ~~~~~~~~~~~~~~
+
+  The "main" field here was ignored. Main fields must be configured explicitly when using the "neutral" platform.
+
+    frontend/node_modules/lucide-react/package.json:26:2:
+      26 │   "main": "dist/cjs/lucide-react.js",
+         ╵   ~~~~~~
+
+  You can mark the path "lucide-react" as external to exclude it from the bundle, which will remove this error and leave the unresolved path in the bundle.
+
+6 of 137 errors shown (disable the message limit with --log-limit=0)
+node:child_process:964
+    throw err;
+    ^
+
+Error: Command failed: C:\Users\omnora\AppData\Local\npm-cache\_npx\beb367dfa21eb3f5\node_modules\@esbuild\win32-x64\esbuild.exe frontend/src/main.tsx --bundle --platform=neutral --loader:.tsx=tsx --loader:.ts=ts --loader:.png=dataurl --loader:.svg=text
+    at genericNodeError (node:internal/errors:985:15)
+    at wrappedFn (node:internal/errors:539:14)
+    at checkExecSyncError (node:child_process:925:11)
+    at Object.execFileSync (node:child_process:961:15)
+    at Object.<anonymous> (C:\Users\omnora\AppData\Local\npm-cache\_npx\beb367dfa21eb3f5\node_modules\esbuild\bin\esbuild:222:28)
+    at Module._compile (node:internal/modules/cjs/loader:1761:14)
+    at Object..js (node:internal/modules/cjs/loader:1893:10)
+    at Module.load (node:internal/modules/cjs/loader:1481:32)
+    at Module._load (node:internal/modules/cjs/loader:1300:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14) {
+  status: 1,
+  signal: null,
+  output: [ null, null, null ],
+  pid: 9808,
+  stdout: null,
+  stderr: null
+}
+
+Node.js v24.11.1

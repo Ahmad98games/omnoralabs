@@ -1,0 +1,11 @@
+[AWAIT_CHECK] frontend\src\components\blocks\NewsletterSignup.tsx:66 -> await new Promise(res => setTimeout(res, 1000));
+[AWAIT_CHECK] frontend\src\components\builder\AICopilotModal.tsx:40 -> await localAIEngine.init((p) => setProgress(p));
+[AWAIT_CHECK] frontend\src\components\cart\CheckoutBlock.tsx:99 -> await new Promise(res => setTimeout(res, 800));
+[AWAIT_CHECK] frontend\src\components\cms\LocalCopilotPanel.tsx:35 -> await localAIEngine.init((progress) => {
+[AWAIT_CHECK] frontend\src\components\media\LogoPicker.tsx:51 -> await new Promise(r => setTimeout(r, 400)); // Small pause for UX visibility
+[AWAIT_CHECK] frontend\src\components\media\LogoPicker.tsx:67 -> await new Promise(r => setTimeout(r, 400));
+[AWAIT_CHECK] frontend\src\components\seller\PaymentSettingsPanel.tsx:102 -> try { await apiClient.put('/payment-methods', config); setSaved(true); setTimeout(() => setSaved(false), 3000); }
+[AWAIT_CHECK] frontend\src\pages\AdminDashboard.tsx:52 -> await localAIEngine.init((progress) => {
+[AWAIT_CHECK] frontend\src\platform\core\Dispatcher.ts:55 -> await new Promise(resolve => requestAnimationFrame(async () => {
+[AWAIT_CHECK] frontend\src\platform\core\StorageClient.ts:65 -> await new Promise(r => setTimeout(r, 500));
+[AWAIT_CHECK] frontend\src\platform\core\StorageClient.ts:89 -> await new Promise(r => setTimeout(r, 200));

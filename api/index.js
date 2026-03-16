@@ -6,7 +6,7 @@ let dbConnect;
 let stateService;
 let constants;
 
-module.exports = async (req, res) => {
+module.exports = (req, res) => {
     // Helper to allow CORS for diagnostic messages
     const enableCors = () => {
         res.setHeader('Access-Control-Allow-Origin', '*');
@@ -32,13 +32,16 @@ module.exports = async (req, res) => {
         enableCors();
         try {
             const bootstrap = require('../gsgbackend/bootstrap');
-            const { app: expressApp } = await bootstrap();
-            const routes = expressApp._router.stack.map(r => {
-                if (r.route) return `[${r.route.stack[0].method.toUpperCase()}] ${r.route.path}`;
-                if (r.name === 'router') return `[MOUNT] ${r.regexp}`;
-                return r.name;
+            return bootstrap().then(({ app: expressApp }) => {
+                const routes = expressApp._router.stack.map(r => {
+                    if (r.route) return `[${r.route.stack[0].method.toUpperCase()}] ${r.route.path}`;
+                    if (r.name === 'router') return `[MOUNT] ${r.regexp}`;
+                    return r.name;
+                });
+                return res.status(200).json({ routes, url: req.url });
+            }).catch(e => {
+                return res.status(500).json({ error: 'DIAG_FAIL', message: e.message, stack: e.stack });
             });
-            return res.status(200).json({ routes, url: req.url });
         } catch (e) {
             return res.status(500).json({ error: 'DIAG_FAIL', message: e.message, stack: e.stack });
         }
@@ -58,24 +61,24 @@ module.exports = async (req, res) => {
             constants = require('../gsgbackend/services/stateService'); // Loads exports
         }
 
-        if (!app) {
-            const bootstrap = require('../gsgbackend/bootstrap');
-            const { app: expressApp } = await bootstrap(); // Runs env & infra ready hooks
+        const bootstrap = require('../gsgbackend/bootstrap');
+        const loadApp = app ? Promise.resolve({ app }) : bootstrap();
+
+        return loadApp.then(({ app: expressApp }) => {
             app = expressApp;
-        }
 
-        if (req.url && req.url.split('?')[0] === '/api/cms/content') {
-            enableCors(); // Enforce CORS for direct edge loads
-            req.url = req.url.replace('/api/cms', ''); // Maps to '/content' for sub-router
-            const cmsRoutes = require('../gsgbackend/routes/cmsRoutes');
-            return cmsRoutes(req, res, (err) => {
-                if (err) return res.status(500).json({ error: 'CMS_DIRECT_FAIL', message: err.message });
-                return app(req, res);
-            });
-        }
+            if (req.url && req.url.split('?')[0] === '/api/cms/content') {
+                enableCors();
+                req.url = req.url.replace('/api/cms', '');
+                const cmsRoutes = require('../gsgbackend/routes/cmsRoutes');
+                return cmsRoutes(req, res, (err) => {
+                    if (err) return res.status(500).json({ error: 'CMS_DIRECT_FAIL', message: err.message });
+                    return app(req, res);
+                });
+            }
 
-        // 3. Forward to Express
-        return app(req, res);
+            return app(req, res);
+        });
 
     } catch (e) {
         console.error('Server Initialization Crash:', e);

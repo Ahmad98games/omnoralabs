@@ -72,66 +72,55 @@ const Login: React.FC = () => {
     };
 
 
+const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setLoadingState(true);
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    try {
+        if (isSignUp) {
+            // 1. Register Flow
+            await register(formData.name, formData.email, formData.password, selectedRole);
+            
+            // Imperial Logic: Direct redirect based on selection
+            if (selectedRole === 'seller') {
+                navigate('/seller/dashboard?tab=builder');
+            } else {
+                navigate('/profile');
+            }
+        } else {
+            // 2. Login Flow
+            await login(formData.email, formData.password);
 
-        e.preventDefault();
+            // Imperial Logic: Immediate Role Verification for Vercel
+            // We fetch directly from client to bypass local state delay
+            const response = await client.get('/auth/me');
+            const currentUser = response.data?.user;
 
-        setError('');
-
-        setError('');
-        setLoadingState(true);
-        try {
-            if (isSignUp) {
-                // Register flow
-                await register(formData.name, formData.email, formData.password, selectedRole);
-                // After registration, AuthContext will set user
-                if (selectedRole === 'seller') {
+            if (currentUser) {
+                const role = currentUser.role;
+                if (role === 'admin' || role === 'super-admin') {
+                    navigate('/admin/dashboard');
+                } else if (role === 'seller') {
                     navigate('/seller/dashboard?tab=builder');
                 } else {
                     navigate('/profile');
                 }
             } else {
-                // Login flow
-                await login(formData.email, formData.password);
-                // Check role from response or decoded token?
-                // AuthContext.login sets user state, but we might rely on fetching user profile or just assume role from context on next render?
-                // Better: Ask AuthContext to return the user or check it immediately if updated?
-                // Actually, since await login() resolves after setting user, we can check a trusted source.
-                // However, state updates in React are async.
-                // Safe bet: Fetch user directly or trust the flow.
-                // BUT: To be 100% sure without waiting for state update (which might not happen in this tick),
-                // let's rely on the fact that our local login API returns { user: {...} }.
-                // We can modify AuthContext.login to return the user object.
-                // OR: We can use a small delay or check localStorage (decoded).
-                // Simplest fix for now:
-                const token = localStorage.getItem('token');
-                if (token) {
-                    // Quick role check via API or decoding would be best, but for now let's use a "reload" strategy or assume user is set?
-                    // No, login() awaits. Let's assume AuthContext.user is NOT updated in this scope yet.
-                    // The previous useEffect handled this but caused loops.
-                    // Let's modify AuthContext to return user on login.
-                    // Since I can't modify AuthContext right this second in this tool call, I'll rely on a manual check.
-                    const { data } = await client.get('/auth/me');
-                    if (data?.user?.role === 'admin' || data?.user?.role === 'super-admin') {
-                        navigate('/admin/dashboard');
-                    } else if (data?.user?.role === 'seller') {
-                        navigate('/seller/dashboard?tab=builder');
-                    } else {
-                        navigate('/profile');
-                    }
-                }
+                // Fallback for safety
+                navigate('/profile');
             }
-        } catch (err: any) {
-            // Improved error handling
-            let message = 'Authentication failed';
-            if (err.message) message = err.message;
-            if (typeof err === 'string') message = err;
-            setError(message);
-        } finally {
-            setLoadingState(false);
         }
-    };
+    } catch (err: any) {
+        console.error("Auth Error:", err);
+        let message = 'Access Denied. Please verify credentials.';
+        if (err.response?.data?.message) message = err.response.data.message;
+        else if (err.message) message = err.message;
+        setError(message);
+    } finally {
+        setLoadingState(false);
+    }
+};
 
     const handleGoogleSignIn = async () => {
 

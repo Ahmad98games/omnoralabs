@@ -1,0 +1,1151 @@
+[AWAIT] gsgbackend\bootstrap.js:31 -> await dbService.connect(config.mongo.uri);
+[AWAIT] gsgbackend\bootstrap.js:97 -> await Promise.all([
+[AWAIT] gsgbackend\controllers\adminController.js:13 -> const [emailStats, whatsappStats] = await Promise.all([
+[AWAIT] gsgbackend\controllers\adminController.js:45 -> const jobs = await getDLQJobs(queue, parseInt(start), parseInt(end));
+[AWAIT] gsgbackend\controllers\adminController.js:73 -> const newJob = await retryDLQJob(queue, jobId);
+[AWAIT] gsgbackend\controllers\adminController.js:76 -> await AdminActionLog.create({
+[AWAIT] gsgbackend\controllers\adminController.js:124 -> const job = await dlq.getJob(jobId);
+[AWAIT] gsgbackend\controllers\adminController.js:129 -> await job.remove();
+[AWAIT] gsgbackend\controllers\adminController.js:132 -> await AdminActionLog.create({
+[AWAIT] gsgbackend\controllers\adminController.js:166 -> const logs = await AdminActionLog.find()
+[AWAIT] gsgbackend\controllers\adminController.js:171 -> const total = await AdminActionLog.countDocuments();
+[AWAIT] gsgbackend\controllers\adminController.js:206 -> const messages = await MessageLog.find(query)
+[AWAIT] gsgbackend\controllers\adminController.js:211 -> const total = await MessageLog.countDocuments(query);
+[AWAIT] gsgbackend\controllers\analyticsController.js:37 -> const { error } = await supabase
+[AWAIT] gsgbackend\controllers\analyticsController.js:88 -> const { data: events, error } = await query;
+[AWAIT] gsgbackend\controllers\authController.js:26 -> const { data: userExists } = await supabase
+[AWAIT] gsgbackend\controllers\authController.js:37 -> const salt = await bcrypt.genSalt(10);
+[AWAIT] gsgbackend\controllers\authController.js:38 -> const password_hash = await bcrypt.hash(password, salt);
+[AWAIT] gsgbackend\controllers\authController.js:46 -> const { data: user, error: registerError } = await supabase
+[AWAIT] gsgbackend\controllers\authController.js:63 -> await supabase
+[AWAIT] gsgbackend\controllers\authController.js:115 -> const { data: user, error: loginError } = await supabase
+[AWAIT] gsgbackend\controllers\authController.js:126 -> const isMatch = await bcrypt.compare(password, user.password_hash);
+[AWAIT] gsgbackend\controllers\authController.js:201 -> const { data: user } = await supabase.from('merchants').select('*').eq('id', decoded.id).single();
+[AWAIT] gsgbackend\controllers\authController.js:215 -> const { data: user, error } = await supabase
+[AWAIT] gsgbackend\controllers\authController.js:237 -> const salt = await bcrypt.genSalt(10);
+[AWAIT] gsgbackend\controllers\authController.js:238 -> const password_hash = await bcrypt.hash(password, salt);
+[AWAIT] gsgbackend\controllers\authController.js:240 -> const { error } = await supabase
+[AWAIT] gsgbackend\controllers\cartController.js:24 -> const result = await CartService.calculateCartTotal(
+[AWAIT] gsgbackend\controllers\cartController.js:55 -> const result = await CartService.validateCoupon(couponCode);
+[AWAIT] gsgbackend\controllers\cartController.js:214 -> const calculation = await CartService.calculateCartTotal(
+[AWAIT] gsgbackend\controllers\contactController.js:17 -> await newContact.save();
+[AWAIT] gsgbackend\controllers\contactController.js:38 -> await transporter.sendMail(mailOptions);
+[AWAIT] gsgbackend\controllers\contactController.js:57 -> const contacts = await Contact.find().sort({ createdAt: -1 });
+[AWAIT] gsgbackend\controllers\contactController.js:72 -> const contact = await Contact.findById(id);
+[AWAIT] gsgbackend\controllers\contactController.js:76 -> await contact.save();
+[AWAIT] gsgbackend\controllers\domainController.js:27 -> const response = await axios.post(
+[AWAIT] gsgbackend\controllers\domainController.js:36 -> const statusRes = await axios.get(
+[AWAIT] gsgbackend\controllers\inventoryController.js:33 -> const stock = await InventoryService.getAvailableStock(mongoProductId);
+[AWAIT] gsgbackend\controllers\inventoryController.js:71 -> const available = await InventoryService.getAvailableStock(mongoProductId);
+[AWAIT] gsgbackend\controllers\inventoryController.js:104 -> const result = await InventoryService.reserveStock(
+[AWAIT] gsgbackend\controllers\inventoryController.js:137 -> const result = await InventoryService.releaseStock(
+[AWAIT] gsgbackend\controllers\inventoryController.js:170 -> const result = await InventoryService.deductStock(
+[AWAIT] gsgbackend\controllers\inventoryController.js:203 -> const result = await InventoryService.addStock(
+[AWAIT] gsgbackend\controllers\inventoryController.js:227 -> const products = await InventoryService.getLowStockProducts(parseInt(limit, 10));
+[AWAIT] gsgbackend\controllers\inventoryController.js:249 -> const summary = await InventoryService.getInventorySummary();
+[AWAIT] gsgbackend\controllers\inventoryController.js:276 -> const inventories = await InventoryService.getAllInventory(skip, parseInt(limit, 10));
+[AWAIT] gsgbackend\controllers\inventoryController.js:277 -> const total = await InventoryService.getTotalInventoryCount();
+[AWAIT] gsgbackend\controllers\inventoryController.js:315 -> const result = await InventoryService.initializeInventory(
+[AWAIT] gsgbackend\controllers\inventoryController.js:358 -> result = await InventoryService.setInventory(mongoProductId, update.quantity);
+[AWAIT] gsgbackend\controllers\inventoryController.js:360 -> result = await InventoryService.addStock(mongoProductId, update.quantity);
+[AWAIT] gsgbackend\controllers\inventoryController.js:362 -> result = await InventoryService.deductStock(mongoProductId, update.quantity);
+[AWAIT] gsgbackend\controllers\inventoryController.js:389 -> const alerts = await InventoryService.getStockAlerts(type, parseInt(limit, 10));
+[AWAIT] gsgbackend\controllers\mediaController.js:31 -> await asset.save();
+[AWAIT] gsgbackend\controllers\mediaController.js:63 -> const assets = await ImageAsset.find(query)
+[AWAIT] gsgbackend\controllers\mediaController.js:68 -> const total = await ImageAsset.countDocuments(query);
+[AWAIT] gsgbackend\controllers\newsletterController.js:17 -> const existingSubscription = await Newsletter.findOne({ email });
+[AWAIT] gsgbackend\controllers\newsletterController.js:24 -> await existingSubscription.save();
+[AWAIT] gsgbackend\controllers\newsletterController.js:35 -> await newSubscription.save();
+[AWAIT] gsgbackend\controllers\newsletterController.js:56 -> await transporter.sendMail(mailOptions);
+[AWAIT] gsgbackend\controllers\newsletterController.js:77 -> const subscription = await Newsletter.findOne({ email });
+[AWAIT] gsgbackend\controllers\newsletterController.js:81 -> await subscription.save();
+[AWAIT] gsgbackend\controllers\newsletterController.js:92 -> const subscribers = await Newsletter.find().sort({ createdAt: -1 });
+[AWAIT] gsgbackend\controllers\orderController.js:47 -> await supabase.from('interaction_logs').insert([{
+[AWAIT] gsgbackend\controllers\orderController.js:122 -> const stockCheck = await checkStock(normalizedItems);
+[AWAIT] gsgbackend\controllers\orderController.js:135 -> const { data: order, error: orderError } = await supabase
+[AWAIT] gsgbackend\controllers\orderController.js:169 -> const { error: itemsError } = await supabase
+[AWAIT] gsgbackend\controllers\orderController.js:202 -> const { data: orders, error } = await supabase
+[AWAIT] gsgbackend\controllers\orderController.js:227 -> const { data: order, error } = await supabase
+[AWAIT] gsgbackend\controllers\orderController.js:259 -> const { data: order, error } = await supabase
+[AWAIT] gsgbackend\controllers\orderController.js:280 -> const { error: updateError } = await supabase
+[AWAIT] gsgbackend\controllers\orderController.js:292 -> await releaseStock(order.items);
+[AWAIT] gsgbackend\controllers\orderController.js:304 -> await queueWhatsApp(phone, 'order_cancelled', [
+[AWAIT] gsgbackend\controllers\orderController.js:320 -> await sendOrderEmail(order, 'OrderCancelled');
+[AWAIT] gsgbackend\controllers\orderController.js:344 -> const { data: order, error } = await supabase
+[AWAIT] gsgbackend\controllers\orderController.js:354 -> const { error: updateError } = await supabase
+[AWAIT] gsgbackend\controllers\orderController.js:365 -> await recordAdminAction(
+[AWAIT] gsgbackend\controllers\orderController.js:381 -> await queueWhatsApp(phone, 'order_shipped', [
+[AWAIT] gsgbackend\controllers\orderController.js:392 -> await queueWhatsApp(phone, 'order_delivered', [
+[AWAIT] gsgbackend\controllers\orderController.js:410 -> await sendOrderEmail(order, 'OrderShipped');
+[AWAIT] gsgbackend\controllers\orderController.js:412 -> await sendOrderEmail(order, 'OrderDelivered');
+[AWAIT] gsgbackend\controllers\orderController.js:436 -> const { data: orders, error } = await supabase
+[AWAIT] gsgbackend\controllers\orderController.js:460 -> const { data: order, error } = await supabase
+[AWAIT] gsgbackend\controllers\orderController.js:479 -> const { error: updateError } = await supabase
+[AWAIT] gsgbackend\controllers\orderController.js:497 -> await queueEmail('approval_request', {
+[AWAIT] gsgbackend\controllers\orderController.js:537 -> const { data: order, error } = await supabase
+[AWAIT] gsgbackend\controllers\orderController.js:560 -> await decrementStock(order.items);
+[AWAIT] gsgbackend\controllers\orderController.js:567 -> await recordAdminAction(
+[AWAIT] gsgbackend\controllers\orderController.js:580 -> await queueEmail('order_confirmation', {
+[AWAIT] gsgbackend\controllers\orderController.js:586 -> await queueEmail('payment_approved', {
+[AWAIT] gsgbackend\controllers\orderController.js:601 -> await queueWhatsApp(
+[AWAIT] gsgbackend\controllers\orderController.js:622 -> await sendOrderEmail(order, 'PaymentApproved');
+[AWAIT] gsgbackend\controllers\orderController.js:653 -> const { data: order } = await supabase.from('orders').select('*').eq('id', req.params.id).single();
+[AWAIT] gsgbackend\controllers\orderController.js:664 -> const { error: updateError } = await supabase
+[AWAIT] gsgbackend\controllers\orderController.js:679 -> await releaseStock(order.items);
+[AWAIT] gsgbackend\controllers\orderController.js:686 -> await recordAdminAction(
+[AWAIT] gsgbackend\controllers\orderController.js:711 -> const { data: order, error } = await supabase
+[AWAIT] gsgbackend\controllers\paymentController.js:13 -> const paymentIntent = await stripe.paymentIntents.create({
+[AWAIT] gsgbackend\controllers\paymentController.js:30 -> const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+[AWAIT] gsgbackend\controllers\phase1Controller.js:13 -> let checkout = await OneClickCheckout.findOne({ userId });
+[AWAIT] gsgbackend\controllers\phase1Controller.js:19 -> await checkout.save();
+[AWAIT] gsgbackend\controllers\phase1Controller.js:21 -> checkout = await OneClickCheckout.create({
+[AWAIT] gsgbackend\controllers\phase1Controller.js:46 -> const checkout = await OneClickCheckout.findOne({ userId });
+[AWAIT] gsgbackend\controllers\phase1Controller.js:72 -> const checkout = await OneClickCheckout.findOneAndUpdate(
+[AWAIT] gsgbackend\controllers\phase1Controller.js:98 -> const checkout = await OneClickCheckout.findOneAndUpdate(
+[AWAIT] gsgbackend\controllers\phase1Controller.js:124 -> const checkout = await OneClickCheckout.findOne({ userId });
+[AWAIT] gsgbackend\controllers\phase1Controller.js:147 -> await checkout.save();
+[AWAIT] gsgbackend\controllers\phase1Controller.js:168 -> await OneClickCheckout.updateOne(
+[AWAIT] gsgbackend\controllers\phase1Controller.js:174 -> const checkout = await OneClickCheckout.findOneAndUpdate(
+[AWAIT] gsgbackend\controllers\phase1Controller.js:211 -> const result = await AbandonedCartService.trackAbandonedCart(
+[AWAIT] gsgbackend\controllers\phase1Controller.js:232 -> const result = await AbandonedCartService.recoverCart(recoveryToken);
+[AWAIT] gsgbackend\controllers\phase1Controller.js:251 -> const result = await AbandonedCartService.getAbandonedCartsForAdmin({
+[AWAIT] gsgbackend\controllers\phase1Controller.js:271 -> result = await AbandonedCartService.sendFirstRecoveryEmail(cartId);
+[AWAIT] gsgbackend\controllers\phase1Controller.js:273 -> result = await AbandonedCartService.sendSecondRecoveryEmail(cartId);
+[AWAIT] gsgbackend\controllers\phase1Controller.js:275 -> result = await AbandonedCartService.sendFinalRecoveryEmail(cartId);
+[AWAIT] gsgbackend\controllers\phase1Controller.js:291 -> const result = await AbandonedCartService.sendBulkRecoveryEmails(
+[AWAIT] gsgbackend\controllers\phase1Controller.js:314 -> const result = await BundleService.createBundle(bundleData, req.user.id);
+[AWAIT] gsgbackend\controllers\phase1Controller.js:330 -> const result = await BundleService.getBundleRecommendations(productId, limit);
+[AWAIT] gsgbackend\controllers\phase1Controller.js:345 -> const result = await BundleService.getTopPerformingBundles(limit);
+[AWAIT] gsgbackend\controllers\phase1Controller.js:358 -> const result = await BundleService.autoGenerateBundles();
+[AWAIT] gsgbackend\controllers\phase1Controller.js:373 -> const result = await BundleService.trackBundleView(bundleId);
+[AWAIT] gsgbackend\controllers\phase1Controller.js:394 -> const result = await ProductVariantService.getVariantsForProduct(productId);
+[AWAIT] gsgbackend\controllers\phase1Controller.js:410 -> const result = await ProductVariantService.updateVariantStock(variantId, quantityChange);
+[AWAIT] gsgbackend\controllers\phase1Controller.js:429 -> const result = await FlashSaleService.getActiveFlashSales();
+[AWAIT] gsgbackend\controllers\phase1Controller.js:444 -> const result = await FlashSaleService.trackFlashSaleImpression(flashSaleId);
+[AWAIT] gsgbackend\controllers\phase1Controller.js:465 -> const result = await OrderTrackingService.getOrderTimeline(orderId);
+[AWAIT] gsgbackend\controllers\phase1Controller.js:481 -> const result = await OrderTrackingService.updateOrderStatus(
+[AWAIT] gsgbackend\controllers\phase1Controller.js:509 -> const alert = await BackInStockAlert.create({
+[AWAIT] gsgbackend\controllers\phase1Controller.js:533 -> const alerts = await BackInStockAlert.find({
+[AWAIT] gsgbackend\controllers\phase1Controller.js:555 -> await BackInStockAlert.findByIdAndUpdate(
+[AWAIT] gsgbackend\controllers\phase2Controller.js:42 -> const segment = await CustomerSegmentationService.recalculateSegment(userId);
+[AWAIT] gsgbackend\controllers\phase2Controller.js:61 -> const segment = await CustomerSegment.findOne({ userId });
+[AWAIT] gsgbackend\controllers\phase2Controller.js:77 -> const segments = await CustomerSegment.aggregate([
+[AWAIT] gsgbackend\controllers\phase2Controller.js:108 -> const loyaltyAccount = await LoyaltyAccount.findOne({ userId });
+[AWAIT] gsgbackend\controllers\phase2Controller.js:122 -> await transaction.save();
+[AWAIT] gsgbackend\controllers\phase2Controller.js:141 -> await loyaltyAccount.save();
+[AWAIT] gsgbackend\controllers\phase2Controller.js:160 -> const loyaltyAccount = await LoyaltyAccount.findOne({ userId });
+[AWAIT] gsgbackend\controllers\phase2Controller.js:179 -> await transaction.save();
+[AWAIT] gsgbackend\controllers\phase2Controller.js:188 -> await loyaltyAccount.save();
+[AWAIT] gsgbackend\controllers\phase2Controller.js:207 -> const loyaltyAccount = await LoyaltyAccount.findOne({ userId });
+[AWAIT] gsgbackend\controllers\phase2Controller.js:223 -> const transactions = await PointsTransaction
+[AWAIT] gsgbackend\controllers\phase2Controller.js:229 -> const total = await PointsTransaction.countDocuments({ userId });
+[AWAIT] gsgbackend\controllers\phase2Controller.js:258 -> await code.save();
+[AWAIT] gsgbackend\controllers\phase2Controller.js:274 -> const referralCode = await ReferralCode.findOne({ code, expiresAt: { $gt: new Date() } });
+[AWAIT] gsgbackend\controllers\phase2Controller.js:285 -> await transaction.save();
+[AWAIT] gsgbackend\controllers\phase2Controller.js:288 -> await referralCode.save();
+[AWAIT] gsgbackend\controllers\phase2Controller.js:308 -> const earnings = await ReferralTransaction.aggregate([
+[AWAIT] gsgbackend\controllers\phase2Controller.js:334 -> const codes = await ReferralCode.find({ userId }).sort({ createdAt: -1 });
+[AWAIT] gsgbackend\controllers\phase2Controller.js:349 -> const warranties = await Warranty.find({ isActive: true });
+[AWAIT] gsgbackend\controllers\phase2Controller.js:361 -> const warranty = await Warranty.findById(warrantyId);
+[AWAIT] gsgbackend\controllers\phase2Controller.js:374 -> await warrantyPurchase.save();
+[AWAIT] gsgbackend\controllers\phase2Controller.js:390 -> const warranty = await WarrantyPurchase.findById(warrantyPurchaseId);
+[AWAIT] gsgbackend\controllers\phase2Controller.js:402 -> await warranty.save();
+[AWAIT] gsgbackend\controllers\phase2Controller.js:418 -> const claims = await WarrantyPurchase.find({ userId }).populate('warrantyId');
+[AWAIT] gsgbackend\controllers\phase2Controller.js:442 -> await fraudFlag.save();
+[AWAIT] gsgbackend\controllers\phase2Controller.js:458 -> const queue = await FraudFlag
+[AWAIT] gsgbackend\controllers\phase2Controller.js:464 -> const total = await FraudFlag.countDocuments({ status: 'under_review' });
+[AWAIT] gsgbackend\controllers\phase2Controller.js:480 -> const fraudFlag = await FraudFlag.findByIdAndUpdate(
+[AWAIT] gsgbackend\controllers\phase2Controller.js:500 -> const fraudFlag = await FraudFlag.findByIdAndUpdate(
+[AWAIT] gsgbackend\controllers\phase2Controller.js:525 -> const shippingRate = await ShippingRate.findOne({ city });
+[AWAIT] gsgbackend\controllers\phase2Controller.js:554 -> const rates = await ShippingRate.find();
+[AWAIT] gsgbackend\controllers\phase2Controller.js:567 -> const rate = await ShippingRate.findByIdAndUpdate(
+[AWAIT] gsgbackend\controllers\phase2Controller.js:603 -> await address.save();
+[AWAIT] gsgbackend\controllers\phase2Controller.js:619 -> const addresses = await CustomerAddress.find({ userId }).sort({ isDefault: -1 });
+[AWAIT] gsgbackend\controllers\phase2Controller.js:631 -> await CustomerAddress.updateMany({ userId }, { isDefault: false });
+[AWAIT] gsgbackend\controllers\phase2Controller.js:632 -> const address = await CustomerAddress.findByIdAndUpdate(
+[AWAIT] gsgbackend\controllers\phase2Controller.js:653 -> const address = await CustomerAddress.findByIdAndUpdate(
+[AWAIT] gsgbackend\controllers\phase2Controller.js:673 -> await CustomerAddress.findByIdAndDelete(addressId);
+[AWAIT] gsgbackend\controllers\phase2Controller.js:705 -> await guestOrder.save();
+[AWAIT] gsgbackend\controllers\phase2Controller.js:724 -> const guestOrder = await GuestOrder.findOne({ guestToken });
+[AWAIT] gsgbackend\controllers\phase2Controller.js:739 -> const guestOrder = await GuestOrder.findOneAndUpdate(
+[AWAIT] gsgbackend\controllers\phase2Controller.js:773 -> await aiDescription.save();
+[AWAIT] gsgbackend\controllers\phase2Controller.js:789 -> const aiDescription = await AIProductDescription.findById(aiDescriptionId);
+[AWAIT] gsgbackend\controllers\phase2Controller.js:797 -> await aiDescription.save();
+[AWAIT] gsgbackend\controllers\phase2Controller.js:813 -> const descriptions = await AIProductDescription.find({ productId });
+[AWAIT] gsgbackend\controllers\phase2Controller.js:825 -> const aiDescription = await AIProductDescription.findById(aiDescriptionId);
+[AWAIT] gsgbackend\controllers\phase2Controller.js:831 -> await aiDescription.save();
+[AWAIT] gsgbackend\controllers\phase3Controller.js:58 -> await view.save();
+[AWAIT] gsgbackend\controllers\phase3Controller.js:74 -> const views = await RecentlyViewed
+[AWAIT] gsgbackend\controllers\phase3Controller.js:88 -> const analytics = await RecentlyViewed.aggregate([
+[AWAIT] gsgbackend\controllers\phase3Controller.js:131 -> await auditLog.save();
+[AWAIT] gsgbackend\controllers\phase3Controller.js:151 -> const logs = await AuditLog
+[AWAIT] gsgbackend\controllers\phase3Controller.js:157 -> const total = await AuditLog.countDocuments(query);
+[AWAIT] gsgbackend\controllers\phase3Controller.js:174 -> const logs = await AuditLog
+[AWAIT] gsgbackend\controllers\phase3Controller.js:202 -> await exportJob.save();
+[AWAIT] gsgbackend\controllers\phase3Controller.js:221 -> const exportJob = await Export.findById(exportId);
+[AWAIT] gsgbackend\controllers\phase3Controller.js:236 -> const exportJob = await Export.findById(exportId);
+[AWAIT] gsgbackend\controllers\phase3Controller.js:265 -> await backup.save();
+[AWAIT] gsgbackend\controllers\phase3Controller.js:279 -> const backups = await Backup.find().sort({ createdAt: -1 }).limit(20);
+[AWAIT] gsgbackend\controllers\phase3Controller.js:291 -> const backup = await Backup.findById(backupId);
+[AWAIT] gsgbackend\controllers\phase3Controller.js:297 -> await backup.save();
+[AWAIT] gsgbackend\controllers\phase3Controller.js:313 -> const backup = await Backup.findByIdAndUpdate(
+[AWAIT] gsgbackend\controllers\phase3Controller.js:348 -> await page.save();
+[AWAIT] gsgbackend\controllers\phase3Controller.js:365 -> const page = await CMSPage.findByIdAndUpdate(pageId, updateData, { new: true });
+[AWAIT] gsgbackend\controllers\phase3Controller.js:381 -> const page = await CMSPage.findByIdAndUpdate(
+[AWAIT] gsgbackend\controllers\phase3Controller.js:399 -> const pages = await CMSPage.find({ status: 'published' });
+[AWAIT] gsgbackend\controllers\phase3Controller.js:411 -> const page = await CMSPage.findOne({ slug, status: 'published' });
+[AWAIT] gsgbackend\controllers\phase3Controller.js:442 -> await post.save();
+[AWAIT] gsgbackend\controllers\phase3Controller.js:458 -> const post = await BlogPost.findByIdAndUpdate(
+[AWAIT] gsgbackend\controllers\phase3Controller.js:481 -> const posts = await BlogPost
+[AWAIT] gsgbackend\controllers\phase3Controller.js:487 -> const total = await BlogPost.countDocuments(query);
+[AWAIT] gsgbackend\controllers\phase3Controller.js:503 -> const post = await BlogPost.findByIdAndUpdate(
+[AWAIT] gsgbackend\controllers\phase3Controller.js:524 -> const forecast = await InventoryForecast.find({ productId }).sort({ date: 1 });
+[AWAIT] gsgbackend\controllers\phase3Controller.js:544 -> await forecast.save();
+[AWAIT] gsgbackend\controllers\phase3Controller.js:558 -> const recommendations = await InventoryForecast.aggregate([
+[AWAIT] gsgbackend\controllers\phase3Controller.js:583 -> const settings = await TaxSetting.find(query);
+[AWAIT] gsgbackend\controllers\phase3Controller.js:596 -> const setting = await TaxSetting.findByIdAndUpdate(
+[AWAIT] gsgbackend\controllers\phase3Controller.js:616 -> const taxSetting = await TaxSetting.findOne({
+[AWAIT] gsgbackend\controllers\phase3Controller.js:659 -> await comparison.save();
+[AWAIT] gsgbackend\controllers\phase3Controller.js:675 -> const comparison = await Comparison.findOne({ shareToken }).populate('productIds');
+[AWAIT] gsgbackend\controllers\phase3Controller.js:681 -> await comparison.save();
+[AWAIT] gsgbackend\controllers\phase3Controller.js:706 -> await chatMessage.save();
+[AWAIT] gsgbackend\controllers\phase3Controller.js:722 -> const messages = await ChatMessage.find({ conversationId }).sort({ createdAt: 1 });
+[AWAIT] gsgbackend\controllers\phase3Controller.js:758 -> await imageAsset.save();
+[AWAIT] gsgbackend\controllers\phase3Controller.js:774 -> const image = await ImageAsset.findById(imageId);
+[AWAIT] gsgbackend\controllers\phase3Controller.js:781 -> await image.save();
+[AWAIT] gsgbackend\controllers\phase3Controller.js:812 -> await healthMetric.save();
+[AWAIT] gsgbackend\controllers\phase3Controller.js:827 -> const history = await HealthMetric
+[AWAIT] gsgbackend\controllers\phase3Controller.js:856 -> await orderEdit.save();
+[AWAIT] gsgbackend\controllers\phase3Controller.js:873 -> const orderEdit = await OrderEdit.findByIdAndUpdate(
+[AWAIT] gsgbackend\controllers\phase3Controller.js:905 -> await translation.save();
+[AWAIT] gsgbackend\controllers\phase3Controller.js:925 -> const translations = await Translation.find(query);
+[AWAIT] gsgbackend\controllers\phase3Controller.js:940 -> const currencies = await Currency.find({ isActive: true });
+[AWAIT] gsgbackend\controllers\phase3Controller.js:953 -> const currency = await Currency.findByIdAndUpdate(
+[AWAIT] gsgbackend\controllers\phase3Controller.js:973 -> const from = await Currency.findOne({ code: fromCurrency });
+[AWAIT] gsgbackend\controllers\phase3Controller.js:974 -> const to = await Currency.findOne({ code: toCurrency });
+[AWAIT] gsgbackend\controllers\productController.js:64 -> const { data: products, count: total, error } = await supabaseQuery
+[AWAIT] gsgbackend\controllers\productController.js:95 -> const { data: product, error } = await supabase
+[AWAIT] gsgbackend\controllers\productController.js:136 -> const { data: products, count: total, error } = await supabase
+[AWAIT] gsgbackend\controllers\productController.js:164 -> const { data: newArrivals, error } = await supabase
+[AWAIT] gsgbackend\controllers\productController.js:182 -> const { data: featuredProducts, error } = await supabase
+[AWAIT] gsgbackend\controllers\productController.js:204 -> const { data: results, error } = await supabase
+[AWAIT] gsgbackend\controllers\productController.js:231 -> const { data: product, error } = await supabase
+[AWAIT] gsgbackend\controllers\productController.js:279 -> const { data: product, error } = await supabase
+[AWAIT] gsgbackend\controllers\productController.js:316 -> const { error } = await supabase
+[AWAIT] gsgbackend\controllers\recommendationController.js:25 -> const result = await RecommendationService.getSimilarProducts(
+[AWAIT] gsgbackend\controllers\recommendationController.js:56 -> const result = await RecommendationService.getFrequentlyBoughtTogether(
+[AWAIT] gsgbackend\controllers\recommendationController.js:79 -> const result = await RecommendationService.getTrendingProducts(
+[AWAIT] gsgbackend\controllers\recommendationController.js:111 -> const result = await RecommendationService.getPersonalizedRecommendations(
+[AWAIT] gsgbackend\controllers\recommendationController.js:134 -> const result = await RecommendationService.getSeasonalRecommendations(
+[AWAIT] gsgbackend\controllers\recommendationController.js:164 -> const result = await RecommendationService.trackRecentView(
+[AWAIT] gsgbackend\controllers\recommendationController.js:203 -> await RecommendationService.trackPurchase(
+[AWAIT] gsgbackend\controllers\recommendationController.js:229 -> const stats = await RecommendationService.getRecommendationStats();
+[AWAIT] gsgbackend\controllers\reviewController.js:35 -> const existing = await ReviewService.getUserReview(productId, userId);
+[AWAIT] gsgbackend\controllers\reviewController.js:46 -> const purchase = await Order.findOne({
+[AWAIT] gsgbackend\controllers\reviewController.js:68 -> const result = await ReviewService.createReview(reviewData);
+[AWAIT] gsgbackend\controllers\reviewController.js:111 -> const result = await ReviewService.getProductReviews(productId, filters);
+[AWAIT] gsgbackend\controllers\reviewController.js:138 -> const stats = await ReviewService.getReviewStats(productId);
+[AWAIT] gsgbackend\controllers\reviewController.js:162 -> const reviews = await ReviewService.getTopReviews(
+[AWAIT] gsgbackend\controllers\reviewController.js:196 -> const result = await ReviewService.markHelpful(reviewId, userId);
+[AWAIT] gsgbackend\controllers\reviewController.js:230 -> const result = await ReviewService.editReview(reviewId, userId, {
+[AWAIT] gsgbackend\controllers\reviewController.js:268 -> const result = await ReviewService.deleteReview(reviewId, userId, isAdmin);
+[AWAIT] gsgbackend\controllers\reviewController.js:300 -> const result = await ReviewService.moderateReview(reviewId, status, notes);
+[AWAIT] gsgbackend\controllers\reviewController.js:326 -> const reviews = await Review.find({ status: 'pending' })
+[AWAIT] gsgbackend\controllers\reviewController.js:331 -> const total = await Review.countDocuments({ status: 'pending' });
+[AWAIT] gsgbackend\controllers\reviewController.js:362 -> const reviews = await Review.find({ userId, status: 'approved' })
+[AWAIT] gsgbackend\controllers\reviewController.js:368 -> const total = await Review.countDocuments({ userId, status: 'approved' });
+[AWAIT] gsgbackend\controllers\searchController.js:50 -> const result = await SearchService.search(
+[AWAIT] gsgbackend\controllers\searchController.js:93 -> const result = await SearchService.getSuggestions(q.trim(), parseInt(limit));
+[AWAIT] gsgbackend\controllers\searchController.js:114 -> const options = await SearchService.getFilterOptions();
+[AWAIT] gsgbackend\controllers\searchController.js:137 -> const popular = await SearchService.getPopularSearches(parseInt(limit));
+[AWAIT] gsgbackend\controllers\searchController.js:160 -> const analytics = await SearchService.getSearchAnalytics(parseInt(days));
+[AWAIT] gsgbackend\controllers\searchController.js:249 -> const response = await axios.post('https://api.openai.com/v1/chat/completions', {
+[AWAIT] gsgbackend\controllers\userController.js:29 -> await supabase.from('merchants').update({
+[AWAIT] gsgbackend\controllers\userController.js:51 -> const { data: existingUser } = await supabase.from('merchants').select('id').eq('email', email).maybeSingle();
+[AWAIT] gsgbackend\controllers\userController.js:56 -> const salt = await bcrypt.genSalt(10);
+[AWAIT] gsgbackend\controllers\userController.js:57 -> const passwordHash = await bcrypt.hash(password, salt);
+[AWAIT] gsgbackend\controllers\userController.js:59 -> const { data: user, error } = await supabase
+[AWAIT] gsgbackend\controllers\userController.js:72 -> const tokens = await issueTokens(user);
+[AWAIT] gsgbackend\controllers\userController.js:89 -> const { data: user, error } = await supabase
+[AWAIT] gsgbackend\controllers\userController.js:99 -> const isMatch = await bcrypt.compare(password, user.password_hash);
+[AWAIT] gsgbackend\controllers\userController.js:104 -> const tokens = await issueTokens(user);
+[AWAIT] gsgbackend\controllers\userController.js:122 -> const { data: user, error } = await supabase
+[AWAIT] gsgbackend\controllers\userController.js:137 -> const tokens = await issueTokens(user);
+[AWAIT] gsgbackend\controllers\userController.js:154 -> await supabase.from('merchants').update({
+[AWAIT] gsgbackend\controllers\userController.js:177 -> const { data: user, error: fetchError } = await supabase
+[AWAIT] gsgbackend\controllers\userController.js:199 -> const salt = await bcrypt.genSalt(10);
+[AWAIT] gsgbackend\controllers\userController.js:200 -> updateData.password_hash = await bcrypt.hash(password, salt);
+[AWAIT] gsgbackend\controllers\userController.js:203 -> const { data: updatedUser, error: updateError } = await supabase
+[AWAIT] gsgbackend\controllers\userController.js:225 -> const { data: users, error } = await supabase
+[AWAIT] gsgbackend\controllers\userController.js:244 -> const { error } = await supabase
+[AWAIT] gsgbackend\controllers\userController.js:261 -> const { data: user, error: fetchError } = await supabase
+[AWAIT] gsgbackend\controllers\userController.js:272 -> const { data: updatedUser, error: updateError } = await supabase
+[AWAIT] gsgbackend\controllers\webhookController.js:20 -> const session = await mongoose.startSession();
+[AWAIT] gsgbackend\controllers\webhookController.js:24 -> const product = await Product.findOneAndUpdate(
+[AWAIT] gsgbackend\controllers\webhookController.js:35 -> await session.commitTransaction();
+[AWAIT] gsgbackend\controllers\webhookController.js:37 -> await session.abortTransaction();
+[AWAIT] gsgbackend\controllers\webhookController.js:100 -> const event = await verifyStripeEvent(req);
+[AWAIT] gsgbackend\controllers\webhookController.js:111 -> const order = await Order.findById(orderId);
+[AWAIT] gsgbackend\controllers\webhookController.js:114 -> await atomicDecrementInventory(order.items);
+[AWAIT] gsgbackend\controllers\webhookController.js:124 -> await order.save();
+[AWAIT] gsgbackend\controllers\wishlistController.js:50 -> const result = await WishlistService.addToWishlist(userId, productData);
+[AWAIT] gsgbackend\controllers\wishlistController.js:89 -> const result = await WishlistService.removeFromWishlist(userId, mongoProductId);
+[AWAIT] gsgbackend\controllers\wishlistController.js:121 -> const result = await WishlistService.getWishlist(userId, includeStats === 'true');
+[AWAIT] gsgbackend\controllers\wishlistController.js:156 -> const inWishlist = await WishlistService.isInWishlist(userId, mongoProductId);
+[AWAIT] gsgbackend\controllers\wishlistController.js:203 -> const result = await WishlistService.updatePriority(userId, mongoProductId, priority);
+[AWAIT] gsgbackend\controllers\wishlistController.js:234 -> const result = await WishlistService.generateShareLink(userId);
+[AWAIT] gsgbackend\controllers\wishlistController.js:265 -> const result = await WishlistService.getSharedWishlist(shareToken);
+[AWAIT] gsgbackend\controllers\wishlistController.js:305 -> const result = await WishlistService.enableStockNotifications(
+[AWAIT] gsgbackend\controllers\wishlistController.js:340 -> const result = await WishlistService.clearWishlist(userId);
+[AWAIT] gsgbackend\controllers\wishlistController.js:368 -> const result = await WishlistService.getWishlistsWithOutOfStockItems(mongoProductId);
+[AWAIT] gsgbackend\controllers\wishlistController.js:397 -> const result = await WishlistService.markNotificationSent(wishlistId, mongoProductId);
+[AWAIT] gsgbackend\jobs\cleanupInitiatedOrders.js:35 -> const initiatedOrders = await Order.find({
+[AWAIT] gsgbackend\jobs\cleanupInitiatedOrders.js:59 -> await order.save();
+[AWAIT] gsgbackend\jobs\cleanupInitiatedOrders.js:63 -> await releaseStock(order.items);
+[AWAIT] gsgbackend\middleware\auth.js:27 -> const { data: user, error } = await supabase
+[AWAIT] gsgbackend\middleware\auth.js:52 -> const user = await attachUser(decoded);
+[AWAIT] gsgbackend\middleware\auth.js:75 -> const user = await attachUser(decoded);
+[AWAIT] gsgbackend\middleware\tenantContext.js:36 -> const { data: merchant, error } = await supabase
+[AWAIT] gsgbackend\routes\aiContentRoutes.js:18 -> const result = await aiContentService.generateContent(userId, { type, niche, tone, language, length, storeName, extraContext, forceRegenerate });
+[AWAIT] gsgbackend\routes\aiContentRoutes.js:37 -> const result = await aiContentService.getResult(req.user.id, req.params.type);
+[AWAIT] gsgbackend\routes\aiContentRoutes.js:47 -> await aiContentService.clearCache(req.user.id, req.params.type);
+[AWAIT] gsgbackend\routes\cmsRoutes.js:18 -> let { data: pageData, error } = await supabase
+[AWAIT] gsgbackend\routes\cmsRoutes.js:30 -> const { data: configData, error: configError } = await supabase
+[AWAIT] gsgbackend\routes\cmsRoutes.js:60 -> const { data: rootPage } = await supabase
+[AWAIT] gsgbackend\routes\cmsRoutes.js:74 -> const { data: inserted, error: insertError } = await supabase
+[AWAIT] gsgbackend\routes\cmsRoutes.js:154 -> let { data: pageData, error } = await supabase
+[AWAIT] gsgbackend\routes\cmsRoutes.js:174 -> const { data: rootPage } = await supabase
+[AWAIT] gsgbackend\routes\cmsRoutes.js:188 -> const { data: inserted, error: insertError } = await supabase
+[AWAIT] gsgbackend\routes\cmsRoutes.js:222 -> const { data: finalUpdate, error: updateError } = await supabase
+[AWAIT] gsgbackend\routes\cmsRoutes.js:250 -> const { data: pageData, error } = await supabase
+[AWAIT] gsgbackend\routes\cmsRoutes.js:276 -> const { error: updateError } = await supabase
+[AWAIT] gsgbackend\routes\cmsRoutes.js:300 -> const { data: content, error } = await supabase
+[AWAIT] gsgbackend\routes\cmsRoutes.js:313 -> const { error: updateError } = await supabase
+[AWAIT] gsgbackend\routes\onboardingRoutes.js:28 -> await SiteContent.findOneAndUpdate(
+[AWAIT] gsgbackend\routes\onboardingRoutes.js:57 -> await PaymentMethod.findOneAndUpdate(
+[AWAIT] gsgbackend\routes\onboardingRoutes.js:76 -> const result = await onboardingService.launchStore(sellerId, { niche, storeName });
+[AWAIT] gsgbackend\routes\orderRoutes.js:44 -> const { fileTypeFromBuffer } = await import('file-type');
+[AWAIT] gsgbackend\routes\orderRoutes.js:47 -> const type = await fileTypeFromBuffer(req.file.buffer);
+[AWAIT] gsgbackend\routes\paymentMethodRoutes.js:15 -> const { data: merchant, error } = await supabase
+[AWAIT] gsgbackend\routes\paymentMethodRoutes.js:45 -> const { data: merchant, error: fetchError } = await supabase
+[AWAIT] gsgbackend\routes\paymentMethodRoutes.js:58 -> const { data: updated, error: updateError } = await supabase
+[AWAIT] gsgbackend\routes\paymentMethodRoutes.js:81 -> const { data: orders, error, count } = await supabase
+[AWAIT] gsgbackend\routes\paymentMethodRoutes.js:106 -> const { data: order, error: fetchError } = await supabase
+[AWAIT] gsgbackend\routes\paymentMethodRoutes.js:125 -> const { error: updateError } = await supabase
+[AWAIT] gsgbackend\routes\performanceHubRoutes.js:14 -> const { data: logs, error: logsError } = await supabase
+[AWAIT] gsgbackend\routes\performanceHubRoutes.js:32 -> const { data: pageData } = await supabase
+[AWAIT] gsgbackend\routes\performanceHubRoutes.js:43 -> const summary = await generateCommandSummary(stats);
+[AWAIT] gsgbackend\routes\performanceHubRoutes.js:61 -> const summary = await generateCommandSummary(req.body.stats || {});
+[AWAIT] gsgbackend\routes\performanceHubRoutes.js:82 -> const { data: pageData, error: fetchError } = await supabase
+[AWAIT] gsgbackend\routes\performanceHubRoutes.js:103 -> const { error: updateError } = await supabase
+[AWAIT] gsgbackend\routes\sellerAnalyticsRoutes.js:10 -> const data = await analyticsService.getOverview(req.user.id);
+[AWAIT] gsgbackend\routes\sellerAnalyticsRoutes.js:22 -> const data = await analyticsService.getRevenueChart(req.user.id, days);
+[AWAIT] gsgbackend\routes\sellerAnalyticsRoutes.js:34 -> const data = await analyticsService.getTopProducts(req.user.id, limit);
+[AWAIT] gsgbackend\routes\sellerAnalyticsRoutes.js:45 -> const data = await analyticsService.getCustomerInsights(req.user.id);
+[AWAIT] gsgbackend\routes\sellerRoutes.js:19 -> const { data: products, error } = await supabase
+[AWAIT] gsgbackend\routes\sellerRoutes.js:39 -> const { data: product, error } = await supabase
+[AWAIT] gsgbackend\routes\sellerRoutes.js:62 -> const { data: product, error } = await supabase
+[AWAIT] gsgbackend\routes\sellerRoutes.js:86 -> const { error } = await supabase
+[AWAIT] gsgbackend\routes\whatsappTemplateRoutes.js:27 -> const { data: existingTemplates, error: fetchError } = await supabase
+[AWAIT] gsgbackend\routes\whatsappTemplateRoutes.js:45 -> const { error: insertError } = await supabase
+[AWAIT] gsgbackend\routes\whatsappTemplateRoutes.js:52 -> const { data: finalTemplates, error: finalError } = await supabase
+[AWAIT] gsgbackend\routes\whatsappTemplateRoutes.js:75 -> const { data: updated, error } = await supabase
+[AWAIT] gsgbackend\routes\whatsappTemplateRoutes.js:102 -> await waAutomation.processOptOut(phone, sellerId);
+[AWAIT] gsgbackend\scripts\createAdmin.js:24 -> await mongoose.connect(process.env.MONGODB_URI);
+[AWAIT] gsgbackend\scripts\createAdmin.js:31 -> const existingAdmin = await User.findOne({ email: ADMIN_CREDENTIALS.email });
+[AWAIT] gsgbackend\scripts\createAdmin.js:41 -> await existingAdmin.save();
+[AWAIT] gsgbackend\scripts\createAdmin.js:52 -> const admin = await User.create(ADMIN_CREDENTIALS);
+[AWAIT] gsgbackend\scripts\seed-products-remote.js:35 -> await mongoose.connect(MONGO_URI);
+[AWAIT] gsgbackend\scripts\seed-products-remote.js:45 -> await Product.deleteMany({}); // Optional: clear before seed to avoid dupes
+[AWAIT] gsgbackend\scripts\seed-products-remote.js:50 -> await Product.insertMany(productsToInsert);
+[AWAIT] gsgbackend\scripts\seed-remote.js:26 -> await mongoose.connect(MONGO_URI);
+[AWAIT] gsgbackend\scripts\seed-remote.js:33 -> const exists = await User.findOne({ email });
+[AWAIT] gsgbackend\scripts\seed-remote.js:36 -> const salt = await bcrypt.genSalt(10);
+[AWAIT] gsgbackend\scripts\seed-remote.js:37 -> exists.password = await bcrypt.hash(password, salt);
+[AWAIT] gsgbackend\scripts\seed-remote.js:39 -> await exists.save();
+[AWAIT] gsgbackend\scripts\seed-remote.js:43 -> const salt = await bcrypt.genSalt(10);
+[AWAIT] gsgbackend\scripts\seed-remote.js:44 -> const hashedPassword = await bcrypt.hash(password, salt);
+[AWAIT] gsgbackend\scripts\seed-remote.js:46 -> await User.create({
+[AWAIT] gsgbackend\scripts\seedProducts.js:115 -> await mongoose.connect(primaryUri);
+[AWAIT] gsgbackend\scripts\seedProducts.js:125 -> await mongoose.connect(localUri);
+[AWAIT] gsgbackend\scripts\seedProducts.js:134 -> const mongod = await MongoMemoryServer.create();
+[AWAIT] gsgbackend\scripts\seedProducts.js:136 -> await mongoose.connect(memUri);
+[AWAIT] gsgbackend\scripts\seedProducts.js:147 -> await connectDB();
+[AWAIT] gsgbackend\scripts\seedProducts.js:150 -> await Product.deleteMany({});
+[AWAIT] gsgbackend\scripts\seedProducts.js:154 -> const insertedProducts = await Product.insertMany(products);
+[AWAIT] gsgbackend\scripts\set-admin.js:17 -> let user = await User.findOne({ email: email.toLowerCase() });
+[AWAIT] gsgbackend\scripts\set-admin.js:26 -> user = await User.create({
+[AWAIT] gsgbackend\scripts\set-admin.js:44 -> const isMatch = await user.matchPassword(password);
+[AWAIT] gsgbackend\scripts\set-admin.js:46 -> const salt = await bcrypt.genSalt(10);
+[AWAIT] gsgbackend\scripts\set-admin.js:47 -> user.password = await bcrypt.hash(password, salt);
+[AWAIT] gsgbackend\scripts\set-admin.js:54 -> await user.save();
+[AWAIT] gsgbackend\scripts\test-approval-system.js:98 -> const response = await axios.get(`${BASE_URL}/api/orders/${TEST_ORDER_ID}/approve?token=invalid_token`, {
+[AWAIT] gsgbackend\scripts\test-approval-system.js:108 -> const response = await axios.get(`${BASE_URL}/api/orders/${TEST_ORDER_ID}/approve`, {
+[AWAIT] gsgbackend\scripts\verify-system.js:51 -> await mongoose.connect(process.env.MONGODB_URI);
+[AWAIT] gsgbackend\scripts\verify-system.js:59 -> const orderIndexes = await Order.collection.getIndexes();
+[AWAIT] gsgbackend\scripts\verify-system.js:75 -> const actionLogCount = await AdminActionLog.countDocuments();
+[AWAIT] gsgbackend\scripts\verify-system.js:78 -> const latest = await AdminActionLog.findOne().sort({ timestamp: -1 });
+[AWAIT] gsgbackend\scripts\verify-system.js:83 -> const messageLogCount = await MessageLog.countDocuments();
+[AWAIT] gsgbackend\scripts\verify-system.js:86 -> await mongoose.disconnect();
+[AWAIT] gsgbackend\services\aiContentService.js:61 -> const { data, error } = await supabase
+[AWAIT] gsgbackend\services\aiContentService.js:79 -> const quota = await aiQuota.checkAndConsume(sellerId);
+[AWAIT] gsgbackend\services\aiContentService.js:90 -> const cached = await getCached(sellerId, type, contextHash);
+[AWAIT] gsgbackend\services\aiContentService.js:101 -> const { data: record, error } = await supabase
+[AWAIT] gsgbackend\services\aiContentService.js:119 -> const queued = await queueService.safeAdd('ai-content', 'generate', {
+[AWAIT] gsgbackend\services\aiContentService.js:140 -> await supabase
+[AWAIT] gsgbackend\services\aiContentService.js:228 -> const response = await axios.post('https://api.openai.com/v1/chat/completions', {
+[AWAIT] gsgbackend\services\aiQuotaService.js:11 -> *   const ok = await aiQuotaService.checkAndConsume(sellerId);
+[AWAIT] gsgbackend\services\analyticsService.js:36 -> const [allOrdersRes, orders30Res, orders7Res] = await Promise.all([
+[AWAIT] gsgbackend\services\analyticsService.js:80 -> const { data: orders, error } = await supabase
+[AWAIT] gsgbackend\services\analyticsService.js:114 -> const { data: orders, error } = await supabase
+[AWAIT] gsgbackend\services\analyticsService.js:142 -> const { data: orders, error } = await supabase
+[AWAIT] gsgbackend\services\cartService.js:42 -> const stock = await InventoryService.getAvailableStock(productObjectId);
+[AWAIT] gsgbackend\services\cartService.js:64 -> const coupon = await this._validateCoupon(couponCode, subtotal);
+[AWAIT] gsgbackend\services\cartService.js:244 -> const result = await this._validateCoupon(couponCode, 0);
+[AWAIT] gsgbackend\services\emailService.js:45 -> await sgMail.send(msg);
+[AWAIT] gsgbackend\services\emailService.js:128 -> await sendEmail(email, `Order Confirmation - ${order.orderNumber}`, html);
+[AWAIT] gsgbackend\services\emailService.js:172 -> await sendEmail(ADMIN_EMAIL, `Payment Approval Needed - Order ${order.orderNumber}`, html);
+[AWAIT] gsgbackend\services\emailService.js:200 -> await sendEmail(email, `Payment Approved - Order ${order.orderNumber}`, html);
+[AWAIT] gsgbackend\services\emailService.js:213 -> await sendEmail(ADMIN_EMAIL, `Action Required: New Order ${order.orderNumber}`, html);
+[AWAIT] gsgbackend\services\mailblusterService.js:25 -> const response = await axios.post(MAILBLUSTER_API_URL, payload, {
+[AWAIT] gsgbackend\services\mailblusterService.js:74 -> await createLead(email, firstName, lastName, fields, tags);
+[AWAIT] gsgbackend\services\memoryDbService.js:21 -> mongoServer = await MongoMemoryServer.create({
+[AWAIT] gsgbackend\services\memoryDbService.js:45 -> await mongoServer.stop();
+[AWAIT] gsgbackend\services\onboardingService.js:29 -> const existing = await PaymentMethod.findOne({ sellerId });
+[AWAIT] gsgbackend\services\onboardingService.js:41 -> const existing = await SiteContent.findOne({ sellerId, pageId: 'home' });
+[AWAIT] gsgbackend\services\onboardingService.js:45 -> if (existing.save) await existing.save();
+[AWAIT] gsgbackend\services\onboardingService.js:46 -> else await SiteContent.findOneAndUpdate(
+[AWAIT] gsgbackend\services\onboardingService.js:51 -> await SiteContent.create({
+[AWAIT] gsgbackend\services\onboardingService.js:101 -> await Promise.all(demos.map(p => Product.create(p)));
+[AWAIT] gsgbackend\services\onboardingService.js:111 -> const [payment, template, products] = await Promise.all([
+[AWAIT] gsgbackend\services\paymentService.js:22 -> await Order.findByIdAndUpdate(orderId, {
+[AWAIT] gsgbackend\services\paymentService.js:58 -> const order = await Order.findById(orderId);
+[AWAIT] gsgbackend\services\paymentService.js:100 -> const response = await axios.post(
+[AWAIT] gsgbackend\services\paymentService.js:125 -> await Order.findByIdAndUpdate(orderId, {
+[AWAIT] gsgbackend\services\paymentService.js:168 -> const order = await Order.findById(orderId);
+[AWAIT] gsgbackend\services\paymentService.js:196 -> const response = await axios.post(
+[AWAIT] gsgbackend\services\paymentService.js:213 -> await Order.findByIdAndUpdate(orderId, {
+[AWAIT] gsgbackend\services\paymentService.js:250 -> await Order.findByIdAndUpdate(orderId, {
+[AWAIT] gsgbackend\services\paymentService.js:279 -> await Order.findByIdAndUpdate(orderId, {
+[AWAIT] gsgbackend\services\paymentService.js:308 -> await Order.findByIdAndUpdate(orderId, {
+[AWAIT] gsgbackend\services\paymentService.js:332 -> await Order.findByIdAndUpdate(orderId, {
+[AWAIT] gsgbackend\services\queueService.js:78 -> await dlq.add('dead-letter', {
+[AWAIT] gsgbackend\services\queueService.js:104 -> const waitingCount = await queue.getWaitingCount().catch(() => 0);
+[AWAIT] gsgbackend\services\queueService.js:112 -> const job = await queue.add(type, {
+[AWAIT] gsgbackend\services\queueService.js:150 -> const [waiting, active, completed, failed] = await Promise.all([
+[AWAIT] gsgbackend\services\queueService.js:163 -> await Promise.all(Object.values(_queues).map(q => q.close().catch(() => { })));
+[AWAIT] gsgbackend\services\queueService.js:165 -> await connection.quit().catch(() => { });
+[AWAIT] gsgbackend\services\queueService.js:177 -> await Promise.all(names.map(async name => {
+[AWAIT] gsgbackend\services\queueService.js:180 -> const [waiting, active, failed] = await Promise.all([
+[AWAIT] gsgbackend\services\recommendationService.js:20 -> await view.save();
+[AWAIT] gsgbackend\services\recommendationService.js:23 -> const views = await RecentlyViewed.find({ userId })
+[AWAIT] gsgbackend\services\recommendationService.js:28 -> await RecentlyViewed.deleteMany({
+[AWAIT] gsgbackend\services\recommendationService.js:82 -> const bought = await BoughtTogether.find({
+[AWAIT] gsgbackend\services\recommendationService.js:107 -> const viewed = await RecentlyViewed.find({ userId })
+[AWAIT] gsgbackend\services\recommendationService.js:130 -> const trending = await RecentlyViewed.aggregate([
+[AWAIT] gsgbackend\services\recommendationService.js:174 -> await BoughtTogether.findOneAndUpdate(
+[AWAIT] gsgbackend\services\recommendationService.js:195 -> const recentlyViewed = await RecentlyViewed.find({ userId })
+[AWAIT] gsgbackend\services\recommendationService.js:209 -> const similar = await this.getSimilarProducts(view.productId, products, 3);
+[AWAIT] gsgbackend\services\recommendationService.js:215 -> const fbt = await this.getFrequentlyBoughtTogether(view.productId, 2);
+[AWAIT] gsgbackend\services\searchService.js:194 -> await search.save();
+[AWAIT] gsgbackend\services\searchService.js:207 -> await this.SearchHistory.updateOne(
+[AWAIT] gsgbackend\services\searchService.js:226 -> const popular = await this.SearchHistory.aggregate([
+[AWAIT] gsgbackend\services\shipping\leopardsProvider.js:37 -> return await retryWithBackoff(() =>
+[AWAIT] gsgbackend\services\shipping\traxProvider.js:20 -> const res = await axios.post(`${BASE_URL}/orders`, {
+[AWAIT] gsgbackend\services\shipping\traxProvider.js:39 -> const res = await axios.get(`${BASE_URL}/orders/${trackingNumber}`, { headers: { 'Authorization': `Bearer ${API_KEY}` } });
+[AWAIT] gsgbackend\services\shipping\traxProvider.js:49 -> await axios.delete(`${BASE_URL}/orders/${trackingNumber}`, { headers: { 'Authorization': `Bearer ${API_KEY}` } });
+[AWAIT] gsgbackend\services\shippingService.js:36 -> const response = await p.createShipment({ recipientName, address, city, phone, weight, cod });
+[AWAIT] gsgbackend\services\shippingService.js:38 -> const shipment = await Shipment.create({
+[AWAIT] gsgbackend\services\shippingService.js:64 -> const info = await p.trackShipment(trackingNumber);
+[AWAIT] gsgbackend\services\shippingService.js:81 -> const shipment = await Shipment.findById(shipmentId);
+[AWAIT] gsgbackend\services\shippingService.js:85 -> await p.cancelShipment(shipment.trackingNumber);
+[AWAIT] gsgbackend\services\shippingService.js:87 -> await Shipment.findByIdAndUpdate(shipmentId, {
+[AWAIT] gsgbackend\services\shippingService.js:99 -> const inTransit = await Shipment.find({ status: { $in: ['booked', 'in_transit', 'out_for_delivery'] } });
+[AWAIT] gsgbackend\services\shippingService.js:104 -> const info = await trackShipment(s.trackingNumber, s.provider);
+[AWAIT] gsgbackend\services\shippingService.js:106 -> await Shipment.findByIdAndUpdate(s._id, {
+[AWAIT] gsgbackend\services\waRateGuard.js:32 -> const count = await redis.incr(key);
+[AWAIT] gsgbackend\services\waRateGuard.js:33 -> if (count === 1) await redis.expire(key, windowSec);
+[AWAIT] gsgbackend\services\waRateGuard.js:70 -> [dailyCount, phoneCount, spikeCount] = await Promise.all([
+[AWAIT] gsgbackend\services\whatsappAutomationService.js:16 -> const { data: optedOut, error: optError } = await supabase
+[AWAIT] gsgbackend\services\whatsappAutomationService.js:30 -> const { data: template, error: tempError } = await supabase
+[AWAIT] gsgbackend\services\whatsappAutomationService.js:52 -> const { data: template, error } = await supabase
+[AWAIT] gsgbackend\services\whatsappAutomationService.js:88 -> const guard = await waRateGuard.check(sellerId, phone);
+[AWAIT] gsgbackend\services\whatsappAutomationService.js:95 -> const safe = await canSend(phone, sellerId, eventName);
+[AWAIT] gsgbackend\services\whatsappAutomationService.js:98 -> const message = await renderTemplate(sellerId, eventName, vars);
+[AWAIT] gsgbackend\services\whatsappAutomationService.js:102 -> const result = await queueService.queueWhatsApp(phone, eventName, { message }, {
+[AWAIT] gsgbackend\services\whatsappAutomationService.js:173 -> const { error } = await supabase
+[AWAIT] gsgbackend\services\whatsappService.js:18 -> await axios.get('https://api.callmebot.com/whatsapp.php', {
+[AWAIT] gsgbackend\test-boundaries.js:37 -> const res1 = await axios.get(`${baseUrl}/api/test/read`, { headers: V1_HEADER });
+[AWAIT] gsgbackend\test-boundaries.js:41 -> const res2 = await axios.post(`${baseUrl}/api/test/mutate`, {}, { headers: V1_HEADER });
+[AWAIT] gsgbackend\test-boundaries.js:50 -> const res3 = await axios.get(`${baseUrl}/api/test/read`, { headers: V1_HEADER });
+[AWAIT] gsgbackend\test-boundaries.js:55 -> await axios.post(`${baseUrl}/api/test/mutate`, {}, { headers: V1_HEADER });
+[AWAIT] gsgbackend\test-boundaries.js:69 -> await axios.get(`${baseUrl}/api/test/read`); // No version header
+[AWAIT] gsgbackend\test-boundaries.js:82 -> const res6 = await axios.get(`${baseUrl}/api/test/read`, { headers: V1_HEADER });
+[AWAIT] gsgbackend\test-boundaries.js:87 -> await axios.post(`${baseUrl}/api/test/mutate`, {}, { headers: V1_HEADER });
+[AWAIT] gsgbackend\tests\integration\bootstrap.test.js:15 -> const result = await bootstrap();
+[AWAIT] gsgbackend\tests\integration\bootstrap.test.js:22 -> await dbService.disconnect();
+[AWAIT] gsgbackend\tests\integration\bootstrap.test.js:24 -> await mongoose.connection.db.dropDatabase();
+[AWAIT] gsgbackend\tests\integration\bootstrap.test.js:30 -> const res = await request(app).get('/api/live');
+[AWAIT] gsgbackend\tests\integration\bootstrap.test.js:36 -> const res = await request(app).get('/api/ready');
+[AWAIT] gsgbackend\tests\integration\bootstrap.test.js:63 -> const res = await request(app)
+[AWAIT] gsgbackend\tests\integration\payment-security.test.js:24 -> await mongoose.connect(mongoUri);
+[AWAIT] gsgbackend\tests\integration\payment-security.test.js:34 -> await mongoose.connection.dropDatabase();
+[AWAIT] gsgbackend\tests\integration\payment-security.test.js:35 -> await mongoose.connection.close();
+[AWAIT] gsgbackend\tests\integration\payment-security.test.js:44 -> const order = await Order.create({
+[AWAIT] gsgbackend\tests\integration\payment-security.test.js:54 -> const res = await request(app)
+[AWAIT] gsgbackend\tests\integration\payment-security.test.js:64 -> const order = await Order.create({
+[AWAIT] gsgbackend\tests\integration\payment-security.test.js:74 -> const res = await request(app)
+[AWAIT] gsgbackend\tests\integration\payment-security.test.js:84 -> const order = await Order.create({
+[AWAIT] gsgbackend\tests\integration\payment-security.test.js:95 -> const firstRes = await request(app)
+[AWAIT] gsgbackend\tests\integration\payment-security.test.js:102 -> const secondRes = await request(app)
+[AWAIT] gsgbackend\tests\integration\payment-security.test.js:109 -> const updatedOrder = await Order.findById(order._id);
+[AWAIT] gsgbackend\tests\integration\payment-security.test.js:117 -> const order = await Order.create({
+[AWAIT] gsgbackend\tests\integration\payment-security.test.js:135 -> const firstRes = await request(app)
+[AWAIT] gsgbackend\tests\integration\payment-security.test.js:143 -> const secondRes = await request(app)
+[AWAIT] gsgbackend\tests\integration\payment-security.test.js:157 -> const order = await Order.create({
+[AWAIT] gsgbackend\tests\integration\payment-security.test.js:171 -> const res = await request(app)
+[AWAIT] gsgbackend\tests\integration\payment-security.test.js:183 -> const order = await Order.create({
+[AWAIT] gsgbackend\tests\integration\payment-security.test.js:198 -> const res = await request(app)
+[AWAIT] gsgbackend\tests\integration\payment-security.test.js:216 -> const order = await Order.create({
+[AWAIT] gsgbackend\tests\integration\payment-security.test.js:233 -> await request(app)
+[AWAIT] gsgbackend\tests\integration\payment-security.test.js:240 -> const res = await request(app)
+[AWAIT] gsgbackend\tests\integration\payment-security.test.js:254 -> const order = await Order.create({
+[AWAIT] gsgbackend\tests\integration\payment-security.test.js:263 -> const res = await request(app)
+[AWAIT] gsgbackend\tests\integration\payment-security.test.js:277 -> const order = await Order.create({
+[AWAIT] gsgbackend\tests\integration\payment-security.test.js:288 -> await request(app)
+[AWAIT] gsgbackend\tests\test_approval_flow.js:15 -> await mongoose.connect(uri);
+[AWAIT] gsgbackend\tests\test_approval_flow.js:19 -> await Order.deleteMany({ 'guestCustomer.email': { $in: ['test@example.com', 'test2@example.com'] } });
+[AWAIT] gsgbackend\tests\test_approval_flow.js:36 -> await createOrder(req, res);
+[AWAIT] gsgbackend\tests\test_approval_flow.js:46 -> const order = await Order.findById(orderId);
+[AWAIT] gsgbackend\tests\test_approval_flow.js:67 -> await approveOrder(req, res);
+[AWAIT] gsgbackend\tests\test_approval_flow.js:71 -> const updatedOrder = await Order.findById(orderId);
+[AWAIT] gsgbackend\tests\test_approval_flow.js:96 -> await createOrder(req, res);
+[AWAIT] gsgbackend\tests\test_approval_flow.js:99 -> const order2 = await Order.findById(orderId2);
+[AWAIT] gsgbackend\tests\test_approval_flow.js:110 -> await rejectOrder(req, res);
+[AWAIT] gsgbackend\tests\test_approval_flow.js:114 -> const rejectedOrder = await Order.findById(orderId2);
+[AWAIT] gsgbackend\tests\test_approval_flow.js:126 -> await mongoose.connection.close();
+[AWAIT] gsgbackend\test_subscription.js:11 -> const response = await axios.post(url, { email });
+[AWAIT] gsgbackend\utils\inventoryService.js:23 -> const { data: product, error } = await supabase
+[AWAIT] gsgbackend\utils\inventoryService.js:43 -> await supabase
+[AWAIT] gsgbackend\utils\inventoryService.js:64 -> const { data: product } = await supabase
+[AWAIT] gsgbackend\utils\inventoryService.js:75 -> await supabase
+[AWAIT] gsgbackend\utils\inventoryService.js:93 -> const { data: product } = await supabase
+[AWAIT] gsgbackend\utils\inventoryService.js:102 -> await supabase
+[AWAIT] gsgbackend\utils\inventoryService.js:122 -> const { data: product } = await supabase
+[AWAIT] gsgbackend\utils\LocalDB.js:83 -> await this.hooks.pre['save'].call(newDoc, () => { });
+[AWAIT] gsgbackend\utils\LocalDB.js:254 -> await self.hooks.pre['save'].call(this, () => { });
+[AWAIT] gsgbackend\utils\retryWithBackoff.js:6 -> *   const result = await retryWithBackoff(() => leopardsApi.createShipment(...), {
+[AWAIT] gsgbackend\utils\retryWithBackoff.js:49 -> return await fn();
+[AWAIT] gsgbackend\utils\retryWithBackoff.js:63 -> await sleep(delay);
+[AWAIT] gsgbackend\utils\whatsappService.js:55 -> const res = await axios.post(url, payload, {
+[AWAIT] gsgbackend\utils\whatsappService.js:94 -> const res = await axios.post(url, payload, {
+[AWAIT] gsgbackend\utils\whatsappService.js:114 -> return await sendTextMessage(phone, message);
+[AWAIT] gsgbackend\utils\whatsappService.js:119 -> return await sendTextMessage(phone, message);
+[AWAIT] gsgbackend\utils\whatsappService.js:124 -> return await sendTextMessage(phone, message);
+[AWAIT] gsgbackend\utils\whatsappService.js:138 -> const result = await sendTemplateMessage(phone, "order_approved", "en_US", components);
+[AWAIT] gsgbackend\utils\whatsappService.js:143 -> return await sendTextMessage(phone, message);
+[AWAIT] gsgbackend\utils\whatsappService.js:151 -> return await sendTextMessage(phone, message);
+[AWAIT] gsgbackend\utils\whatsappService.js:156 -> return await sendTextMessage(phone, message);
+[AWAIT] gsgbackend\verify-mongodb.js:25 -> await mongoose.connect(mongoUri, {
+[AWAIT] gsgbackend\verify-mongodb.js:40 -> const collections = await mongoose.connection.db.listCollections().toArray();
+[AWAIT] gsgbackend\verify-mongodb.js:50 -> await mongoose.connection.close();
+[AWAIT] gsgbackend\verify-order-fix.js:15 -> await new Promise(resolve => setTimeout(resolve, 8000));
+[AWAIT] gsgbackend\verify-order-fix.js:19 -> const response = await axios.post('http://127.0.0.1:5000/api/orders', {
+[AWAIT] gsgbackend\verify-serverless.js:61 -> await apiHandler(req, res);
+[AWAIT] gsgbackend\workers\notificationWorker.js:26 -> await emailService.sendOrderConfirmation(data.order);
+[AWAIT] gsgbackend\workers\notificationWorker.js:29 -> await emailService.sendOrderApproved(data.order);
+[AWAIT] gsgbackend\workers\notificationWorker.js:32 -> await emailService.sendAdminNewOrderNotification(data.order, data.approveLink, data.rejectLink);
+[AWAIT] gsgbackend\workers\notificationWorker.js:35 -> await emailService.sendApprovalRequest(data.order, data.receiptPath, data.approvalLink);
+[AWAIT] gsgbackend\workers\notificationWorker.js:63 -> await emailDLQ.add('failed-email', {
+[AWAIT] gsgbackend\workers\notificationWorker.js:99 -> const response = await whatsappService.sendTemplateMessage(phone, templateName, "en_US", params);
+[AWAIT] gsgbackend\workers\notificationWorker.js:108 -> await MessageLog.create({
+[AWAIT] gsgbackend\workers\notificationWorker.js:137 -> await whatsappDLQ.add('failed-whatsapp', {
+[AWAIT] gsgbackend\workers\notificationWorker.js:189 -> await Promise.all([
+[AWAIT] backend\bootstrap.js:33 -> await dbService.connectPostgres(config.databaseUrl);
+[AWAIT] backend\bootstrap.js:90 -> await Promise.all([
+[AWAIT] backend\check_products.js:15 -> await bootstrap();
+[AWAIT] backend\check_products.js:23 -> const count = await Product.countDocuments(filters);
+[AWAIT] backend\check_products.js:26 -> const results = await Product.find(filters).limit(10);
+[AWAIT] backend\check_users.js:8 -> const { data, error } = await supabase.from('users').select('*');
+[AWAIT] backend\controllers\adminController.js:13 -> const [emailStats, whatsappStats] = await Promise.all([
+[AWAIT] backend\controllers\adminController.js:45 -> const jobs = await getDLQJobs(queue, parseInt(start), parseInt(end));
+[AWAIT] backend\controllers\adminController.js:73 -> const newJob = await retryDLQJob(queue, jobId);
+[AWAIT] backend\controllers\adminController.js:76 -> await AdminActionLog.create({
+[AWAIT] backend\controllers\adminController.js:124 -> const job = await dlq.getJob(jobId);
+[AWAIT] backend\controllers\adminController.js:129 -> await job.remove();
+[AWAIT] backend\controllers\adminController.js:132 -> await AdminActionLog.create({
+[AWAIT] backend\controllers\adminController.js:166 -> const logs = await AdminActionLog.find()
+[AWAIT] backend\controllers\adminController.js:171 -> const total = await AdminActionLog.countDocuments();
+[AWAIT] backend\controllers\adminController.js:206 -> const messages = await MessageLog.find(query)
+[AWAIT] backend\controllers\adminController.js:211 -> const total = await MessageLog.countDocuments(query);
+[AWAIT] backend\controllers\analyticsController.js:41 -> const { error } = await supabase
+[AWAIT] backend\controllers\analyticsController.js:84 -> const { data: events, error } = await query;
+[AWAIT] backend\controllers\authController.js:26 -> const userExists = await User.findOne({ email });
+[AWAIT] backend\controllers\authController.js:37 -> const user = await User.create({
+[AWAIT] backend\controllers\authController.js:48 -> await SiteContent.create({
+[AWAIT] backend\controllers\authController.js:127 -> const user = await User.findOne({ email }).select('+password');
+[AWAIT] backend\controllers\authController.js:133 -> const isMatch = await user.matchPassword(password);
+[AWAIT] backend\controllers\authController.js:143 -> const hasStore = await SiteContent.findOne({ seller: user._id });
+[AWAIT] backend\controllers\authController.js:146 -> await SiteContent.create({
+[AWAIT] backend\controllers\authController.js:232 -> const user = await User.findById(decoded.id);
+[AWAIT] backend\controllers\authController.js:246 -> const user = await User.findOne({ email });
+[AWAIT] backend\controllers\authController.js:262 -> const user = await User.findById(decoded.id);
+[AWAIT] backend\controllers\authController.js:266 -> await user.save();
+[AWAIT] backend\controllers\cartController.js:24 -> const result = await CartService.calculateCartTotal(
+[AWAIT] backend\controllers\cartController.js:55 -> const result = await CartService.validateCoupon(couponCode);
+[AWAIT] backend\controllers\cartController.js:214 -> const calculation = await CartService.calculateCartTotal(
+[AWAIT] backend\controllers\contactController.js:17 -> await newContact.save();
+[AWAIT] backend\controllers\contactController.js:38 -> await transporter.sendMail(mailOptions);
+[AWAIT] backend\controllers\contactController.js:57 -> const contacts = await Contact.find().sort({ createdAt: -1 });
+[AWAIT] backend\controllers\contactController.js:72 -> const contact = await Contact.findById(id);
+[AWAIT] backend\controllers\contactController.js:76 -> await contact.save();
+[AWAIT] backend\controllers\domainController.js:27 -> const response = await axios.post(
+[AWAIT] backend\controllers\domainController.js:36 -> const statusRes = await axios.get(
+[AWAIT] backend\controllers\domainController.js:88 -> const response = await axios.get(
+[AWAIT] backend\controllers\inventoryController.js:33 -> const stock = await InventoryService.getAvailableStock(mongoProductId);
+[AWAIT] backend\controllers\inventoryController.js:71 -> const available = await InventoryService.getAvailableStock(mongoProductId);
+[AWAIT] backend\controllers\inventoryController.js:104 -> const result = await InventoryService.reserveStock(
+[AWAIT] backend\controllers\inventoryController.js:137 -> const result = await InventoryService.releaseStock(
+[AWAIT] backend\controllers\inventoryController.js:170 -> const result = await InventoryService.deductStock(
+[AWAIT] backend\controllers\inventoryController.js:203 -> const result = await InventoryService.addStock(
+[AWAIT] backend\controllers\inventoryController.js:227 -> const products = await InventoryService.getLowStockProducts(parseInt(limit, 10));
+[AWAIT] backend\controllers\inventoryController.js:249 -> const summary = await InventoryService.getInventorySummary();
+[AWAIT] backend\controllers\inventoryController.js:276 -> const inventories = await InventoryService.getAllInventory(skip, parseInt(limit, 10));
+[AWAIT] backend\controllers\inventoryController.js:277 -> const total = await InventoryService.getTotalInventoryCount();
+[AWAIT] backend\controllers\inventoryController.js:315 -> const result = await InventoryService.initializeInventory(
+[AWAIT] backend\controllers\inventoryController.js:358 -> result = await InventoryService.setInventory(mongoProductId, update.quantity);
+[AWAIT] backend\controllers\inventoryController.js:360 -> result = await InventoryService.addStock(mongoProductId, update.quantity);
+[AWAIT] backend\controllers\inventoryController.js:362 -> result = await InventoryService.deductStock(mongoProductId, update.quantity);
+[AWAIT] backend\controllers\inventoryController.js:389 -> const alerts = await InventoryService.getStockAlerts(type, parseInt(limit, 10));
+[AWAIT] backend\controllers\mediaController.js:31 -> await asset.save();
+[AWAIT] backend\controllers\mediaController.js:63 -> const assets = await ImageAsset.find(query)
+[AWAIT] backend\controllers\mediaController.js:68 -> const total = await ImageAsset.countDocuments(query);
+[AWAIT] backend\controllers\newsletterController.js:17 -> const existingSubscription = await Newsletter.findOne({ email });
+[AWAIT] backend\controllers\newsletterController.js:24 -> await existingSubscription.save();
+[AWAIT] backend\controllers\newsletterController.js:35 -> await newSubscription.save();
+[AWAIT] backend\controllers\newsletterController.js:56 -> await transporter.sendMail(mailOptions);
+[AWAIT] backend\controllers\newsletterController.js:77 -> const subscription = await Newsletter.findOne({ email });
+[AWAIT] backend\controllers\newsletterController.js:81 -> await subscription.save();
+[AWAIT] backend\controllers\newsletterController.js:92 -> const subscribers = await Newsletter.find().sort({ createdAt: -1 });
+[AWAIT] backend\controllers\orderController.js:43 -> await AdminActionLog.create({
+[AWAIT] backend\controllers\orderController.js:121 -> const stockCheck = await checkStock(normalizedItems);
+[AWAIT] backend\controllers\orderController.js:169 -> const order = await Order.create(orderData);
+[AWAIT] backend\controllers\orderController.js:180 -> await order.save();
+[AWAIT] backend\controllers\orderController.js:207 -> const orders = await Order.find({ user: req.user.id })
+[AWAIT] backend\controllers\orderController.js:228 -> const order = await Order.findById(req.params.id);
+[AWAIT] backend\controllers\orderController.js:256 -> const order = await Order.findById(req.params.id);
+[AWAIT] backend\controllers\orderController.js:276 -> await order.save();
+[AWAIT] backend\controllers\orderController.js:280 -> await releaseStock(order.items);
+[AWAIT] backend\controllers\orderController.js:292 -> await queueWhatsApp(phone, 'order_cancelled', [
+[AWAIT] backend\controllers\orderController.js:308 -> await sendOrderEmail(order, 'OrderCancelled');
+[AWAIT] backend\controllers\orderController.js:332 -> const order = await Order.findById(req.params.id);
+[AWAIT] backend\controllers\orderController.js:354 -> await order.save();
+[AWAIT] backend\controllers\orderController.js:357 -> await recordAdminAction(
+[AWAIT] backend\controllers\orderController.js:373 -> await queueWhatsApp(phone, 'order_shipped', [
+[AWAIT] backend\controllers\orderController.js:384 -> await queueWhatsApp(phone, 'order_delivered', [
+[AWAIT] backend\controllers\orderController.js:402 -> await sendOrderEmail(order, 'OrderShipped');
+[AWAIT] backend\controllers\orderController.js:404 -> await sendOrderEmail(order, 'OrderDelivered');
+[AWAIT] backend\controllers\orderController.js:428 -> const orders = await Order.find()
+[AWAIT] backend\controllers\orderController.js:449 -> const order = await Order.findById(req.params.id);
+[AWAIT] backend\controllers\orderController.js:472 -> await order.save();
+[AWAIT] backend\controllers\orderController.js:477 -> await queueEmail('approval_request', {
+[AWAIT] backend\controllers\orderController.js:518 -> const order = await Order.findOneAndUpdate(
+[AWAIT] backend\controllers\orderController.js:544 -> const existingOrder = await Order.findById(req.params.id);
+[AWAIT] backend\controllers\orderController.js:556 -> await decrementStock(order.items);
+[AWAIT] backend\controllers\orderController.js:563 -> await recordAdminAction(
+[AWAIT] backend\controllers\orderController.js:576 -> await queueEmail('order_confirmation', {
+[AWAIT] backend\controllers\orderController.js:582 -> await queueEmail('payment_approved', {
+[AWAIT] backend\controllers\orderController.js:597 -> await queueWhatsApp(
+[AWAIT] backend\controllers\orderController.js:618 -> await sendOrderEmail(order, 'PaymentApproved');
+[AWAIT] backend\controllers\orderController.js:649 -> const order = await Order.findById(req.params.id);
+[AWAIT] backend\controllers\orderController.js:660 -> await Order.updateOne(
+[AWAIT] backend\controllers\orderController.js:676 -> await releaseStock(order.items);
+[AWAIT] backend\controllers\orderController.js:683 -> await recordAdminAction(
+[AWAIT] backend\controllers\orderController.js:708 -> const order = await Order.findById(req.params.id);
+[AWAIT] backend\controllers\paymentController.js:23 -> const dbProducts = await Product.find({ _id: { $in: productIds } });
+[AWAIT] backend\controllers\paymentController.js:55 -> const session = await stripe.checkout.sessions.create({
+[AWAIT] backend\controllers\paymentController.js:80 -> const paymentIntent = await stripe.paymentIntents.create({
+[AWAIT] backend\controllers\paymentController.js:97 -> const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+[AWAIT] backend\controllers\phase1Controller.js:13 -> let checkout = await OneClickCheckout.findOne({ userId });
+[AWAIT] backend\controllers\phase1Controller.js:19 -> await checkout.save();
+[AWAIT] backend\controllers\phase1Controller.js:21 -> checkout = await OneClickCheckout.create({
+[AWAIT] backend\controllers\phase1Controller.js:46 -> const checkout = await OneClickCheckout.findOne({ userId });
+[AWAIT] backend\controllers\phase1Controller.js:72 -> const checkout = await OneClickCheckout.findOneAndUpdate(
+[AWAIT] backend\controllers\phase1Controller.js:98 -> const checkout = await OneClickCheckout.findOneAndUpdate(
+[AWAIT] backend\controllers\phase1Controller.js:124 -> const checkout = await OneClickCheckout.findOne({ userId });
+[AWAIT] backend\controllers\phase1Controller.js:147 -> await checkout.save();
+[AWAIT] backend\controllers\phase1Controller.js:168 -> await OneClickCheckout.updateOne(
+[AWAIT] backend\controllers\phase1Controller.js:174 -> const checkout = await OneClickCheckout.findOneAndUpdate(
+[AWAIT] backend\controllers\phase1Controller.js:211 -> const result = await AbandonedCartService.trackAbandonedCart(
+[AWAIT] backend\controllers\phase1Controller.js:232 -> const result = await AbandonedCartService.recoverCart(recoveryToken);
+[AWAIT] backend\controllers\phase1Controller.js:251 -> const result = await AbandonedCartService.getAbandonedCartsForAdmin({
+[AWAIT] backend\controllers\phase1Controller.js:271 -> result = await AbandonedCartService.sendFirstRecoveryEmail(cartId);
+[AWAIT] backend\controllers\phase1Controller.js:273 -> result = await AbandonedCartService.sendSecondRecoveryEmail(cartId);
+[AWAIT] backend\controllers\phase1Controller.js:275 -> result = await AbandonedCartService.sendFinalRecoveryEmail(cartId);
+[AWAIT] backend\controllers\phase1Controller.js:291 -> const result = await AbandonedCartService.sendBulkRecoveryEmails(
+[AWAIT] backend\controllers\phase1Controller.js:314 -> const result = await BundleService.createBundle(bundleData, req.user.id);
+[AWAIT] backend\controllers\phase1Controller.js:330 -> const result = await BundleService.getBundleRecommendations(productId, limit);
+[AWAIT] backend\controllers\phase1Controller.js:345 -> const result = await BundleService.getTopPerformingBundles(limit);
+[AWAIT] backend\controllers\phase1Controller.js:358 -> const result = await BundleService.autoGenerateBundles();
+[AWAIT] backend\controllers\phase1Controller.js:373 -> const result = await BundleService.trackBundleView(bundleId);
+[AWAIT] backend\controllers\phase1Controller.js:394 -> const result = await ProductVariantService.getVariantsForProduct(productId);
+[AWAIT] backend\controllers\phase1Controller.js:410 -> const result = await ProductVariantService.updateVariantStock(variantId, quantityChange);
+[AWAIT] backend\controllers\phase1Controller.js:429 -> const result = await FlashSaleService.getActiveFlashSales();
+[AWAIT] backend\controllers\phase1Controller.js:444 -> const result = await FlashSaleService.trackFlashSaleImpression(flashSaleId);
+[AWAIT] backend\controllers\phase1Controller.js:465 -> const result = await OrderTrackingService.getOrderTimeline(orderId);
+[AWAIT] backend\controllers\phase1Controller.js:481 -> const result = await OrderTrackingService.updateOrderStatus(
+[AWAIT] backend\controllers\phase1Controller.js:509 -> const alert = await BackInStockAlert.create({
+[AWAIT] backend\controllers\phase1Controller.js:533 -> const alerts = await BackInStockAlert.find({
+[AWAIT] backend\controllers\phase1Controller.js:555 -> await BackInStockAlert.findByIdAndUpdate(
+[AWAIT] backend\controllers\phase2Controller.js:42 -> const segment = await CustomerSegmentationService.recalculateSegment(userId);
+[AWAIT] backend\controllers\phase2Controller.js:61 -> const segment = await CustomerSegment.findOne({ userId });
+[AWAIT] backend\controllers\phase2Controller.js:77 -> const segments = await CustomerSegment.aggregate([
+[AWAIT] backend\controllers\phase2Controller.js:108 -> const loyaltyAccount = await LoyaltyAccount.findOne({ userId });
+[AWAIT] backend\controllers\phase2Controller.js:122 -> await transaction.save();
+[AWAIT] backend\controllers\phase2Controller.js:141 -> await loyaltyAccount.save();
+[AWAIT] backend\controllers\phase2Controller.js:160 -> const loyaltyAccount = await LoyaltyAccount.findOne({ userId });
+[AWAIT] backend\controllers\phase2Controller.js:179 -> await transaction.save();
+[AWAIT] backend\controllers\phase2Controller.js:188 -> await loyaltyAccount.save();
+[AWAIT] backend\controllers\phase2Controller.js:207 -> const loyaltyAccount = await LoyaltyAccount.findOne({ userId });
+[AWAIT] backend\controllers\phase2Controller.js:223 -> const transactions = await PointsTransaction
+[AWAIT] backend\controllers\phase2Controller.js:229 -> const total = await PointsTransaction.countDocuments({ userId });
+[AWAIT] backend\controllers\phase2Controller.js:258 -> await code.save();
+[AWAIT] backend\controllers\phase2Controller.js:274 -> const referralCode = await ReferralCode.findOne({ code, expiresAt: { $gt: new Date() } });
+[AWAIT] backend\controllers\phase2Controller.js:285 -> await transaction.save();
+[AWAIT] backend\controllers\phase2Controller.js:288 -> await referralCode.save();
+[AWAIT] backend\controllers\phase2Controller.js:308 -> const earnings = await ReferralTransaction.aggregate([
+[AWAIT] backend\controllers\phase2Controller.js:334 -> const codes = await ReferralCode.find({ userId }).sort({ createdAt: -1 });
+[AWAIT] backend\controllers\phase2Controller.js:349 -> const warranties = await Warranty.find({ isActive: true });
+[AWAIT] backend\controllers\phase2Controller.js:361 -> const warranty = await Warranty.findById(warrantyId);
+[AWAIT] backend\controllers\phase2Controller.js:374 -> await warrantyPurchase.save();
+[AWAIT] backend\controllers\phase2Controller.js:390 -> const warranty = await WarrantyPurchase.findById(warrantyPurchaseId);
+[AWAIT] backend\controllers\phase2Controller.js:402 -> await warranty.save();
+[AWAIT] backend\controllers\phase2Controller.js:418 -> const claims = await WarrantyPurchase.find({ userId }).populate('warrantyId');
+[AWAIT] backend\controllers\phase2Controller.js:442 -> await fraudFlag.save();
+[AWAIT] backend\controllers\phase2Controller.js:458 -> const queue = await FraudFlag
+[AWAIT] backend\controllers\phase2Controller.js:464 -> const total = await FraudFlag.countDocuments({ status: 'under_review' });
+[AWAIT] backend\controllers\phase2Controller.js:480 -> const fraudFlag = await FraudFlag.findByIdAndUpdate(
+[AWAIT] backend\controllers\phase2Controller.js:500 -> const fraudFlag = await FraudFlag.findByIdAndUpdate(
+[AWAIT] backend\controllers\phase2Controller.js:525 -> const shippingRate = await ShippingRate.findOne({ city });
+[AWAIT] backend\controllers\phase2Controller.js:554 -> const rates = await ShippingRate.find();
+[AWAIT] backend\controllers\phase2Controller.js:567 -> const rate = await ShippingRate.findByIdAndUpdate(
+[AWAIT] backend\controllers\phase2Controller.js:603 -> await address.save();
+[AWAIT] backend\controllers\phase2Controller.js:619 -> const addresses = await CustomerAddress.find({ userId }).sort({ isDefault: -1 });
+[AWAIT] backend\controllers\phase2Controller.js:631 -> await CustomerAddress.updateMany({ userId }, { isDefault: false });
+[AWAIT] backend\controllers\phase2Controller.js:632 -> const address = await CustomerAddress.findByIdAndUpdate(
+[AWAIT] backend\controllers\phase2Controller.js:653 -> const address = await CustomerAddress.findByIdAndUpdate(
+[AWAIT] backend\controllers\phase2Controller.js:673 -> await CustomerAddress.findByIdAndDelete(addressId);
+[AWAIT] backend\controllers\phase2Controller.js:705 -> await guestOrder.save();
+[AWAIT] backend\controllers\phase2Controller.js:724 -> const guestOrder = await GuestOrder.findOne({ guestToken });
+[AWAIT] backend\controllers\phase2Controller.js:739 -> const guestOrder = await GuestOrder.findOneAndUpdate(
+[AWAIT] backend\controllers\phase2Controller.js:773 -> await aiDescription.save();
+[AWAIT] backend\controllers\phase2Controller.js:789 -> const aiDescription = await AIProductDescription.findById(aiDescriptionId);
+[AWAIT] backend\controllers\phase2Controller.js:797 -> await aiDescription.save();
+[AWAIT] backend\controllers\phase2Controller.js:813 -> const descriptions = await AIProductDescription.find({ productId });
+[AWAIT] backend\controllers\phase2Controller.js:825 -> const aiDescription = await AIProductDescription.findById(aiDescriptionId);
+[AWAIT] backend\controllers\phase2Controller.js:831 -> await aiDescription.save();
+[AWAIT] backend\controllers\phase3Controller.js:58 -> await view.save();
+[AWAIT] backend\controllers\phase3Controller.js:74 -> const views = await RecentlyViewed
+[AWAIT] backend\controllers\phase3Controller.js:88 -> const analytics = await RecentlyViewed.aggregate([
+[AWAIT] backend\controllers\phase3Controller.js:131 -> await auditLog.save();
+[AWAIT] backend\controllers\phase3Controller.js:151 -> const logs = await AuditLog
+[AWAIT] backend\controllers\phase3Controller.js:157 -> const total = await AuditLog.countDocuments(query);
+[AWAIT] backend\controllers\phase3Controller.js:174 -> const logs = await AuditLog
+[AWAIT] backend\controllers\phase3Controller.js:202 -> await exportJob.save();
+[AWAIT] backend\controllers\phase3Controller.js:221 -> const exportJob = await Export.findById(exportId);
+[AWAIT] backend\controllers\phase3Controller.js:236 -> const exportJob = await Export.findById(exportId);
+[AWAIT] backend\controllers\phase3Controller.js:265 -> await backup.save();
+[AWAIT] backend\controllers\phase3Controller.js:279 -> const backups = await Backup.find().sort({ createdAt: -1 }).limit(20);
+[AWAIT] backend\controllers\phase3Controller.js:291 -> const backup = await Backup.findById(backupId);
+[AWAIT] backend\controllers\phase3Controller.js:297 -> await backup.save();
+[AWAIT] backend\controllers\phase3Controller.js:313 -> const backup = await Backup.findByIdAndUpdate(
+[AWAIT] backend\controllers\phase3Controller.js:348 -> await page.save();
+[AWAIT] backend\controllers\phase3Controller.js:365 -> const page = await CMSPage.findByIdAndUpdate(pageId, updateData, { new: true });
+[AWAIT] backend\controllers\phase3Controller.js:381 -> const page = await CMSPage.findByIdAndUpdate(
+[AWAIT] backend\controllers\phase3Controller.js:399 -> const pages = await CMSPage.find({ status: 'published' });
+[AWAIT] backend\controllers\phase3Controller.js:411 -> const page = await CMSPage.findOne({ slug, status: 'published' });
+[AWAIT] backend\controllers\phase3Controller.js:442 -> await post.save();
+[AWAIT] backend\controllers\phase3Controller.js:458 -> const post = await BlogPost.findByIdAndUpdate(
+[AWAIT] backend\controllers\phase3Controller.js:481 -> const posts = await BlogPost
+[AWAIT] backend\controllers\phase3Controller.js:487 -> const total = await BlogPost.countDocuments(query);
+[AWAIT] backend\controllers\phase3Controller.js:503 -> const post = await BlogPost.findByIdAndUpdate(
+[AWAIT] backend\controllers\phase3Controller.js:524 -> const forecast = await InventoryForecast.find({ productId }).sort({ date: 1 });
+[AWAIT] backend\controllers\phase3Controller.js:544 -> await forecast.save();
+[AWAIT] backend\controllers\phase3Controller.js:558 -> const recommendations = await InventoryForecast.aggregate([
+[AWAIT] backend\controllers\phase3Controller.js:583 -> const settings = await TaxSetting.find(query);
+[AWAIT] backend\controllers\phase3Controller.js:596 -> const setting = await TaxSetting.findByIdAndUpdate(
+[AWAIT] backend\controllers\phase3Controller.js:616 -> const taxSetting = await TaxSetting.findOne({
+[AWAIT] backend\controllers\phase3Controller.js:659 -> await comparison.save();
+[AWAIT] backend\controllers\phase3Controller.js:675 -> const comparison = await Comparison.findOne({ shareToken }).populate('productIds');
+[AWAIT] backend\controllers\phase3Controller.js:681 -> await comparison.save();
+[AWAIT] backend\controllers\phase3Controller.js:706 -> await chatMessage.save();
+[AWAIT] backend\controllers\phase3Controller.js:722 -> const messages = await ChatMessage.find({ conversationId }).sort({ createdAt: 1 });
+[AWAIT] backend\controllers\phase3Controller.js:758 -> await imageAsset.save();
+[AWAIT] backend\controllers\phase3Controller.js:774 -> const image = await ImageAsset.findById(imageId);
+[AWAIT] backend\controllers\phase3Controller.js:781 -> await image.save();
+[AWAIT] backend\controllers\phase3Controller.js:812 -> await healthMetric.save();
+[AWAIT] backend\controllers\phase3Controller.js:827 -> const history = await HealthMetric
+[AWAIT] backend\controllers\phase3Controller.js:856 -> await orderEdit.save();
+[AWAIT] backend\controllers\phase3Controller.js:873 -> const orderEdit = await OrderEdit.findByIdAndUpdate(
+[AWAIT] backend\controllers\phase3Controller.js:905 -> await translation.save();
+[AWAIT] backend\controllers\phase3Controller.js:925 -> const translations = await Translation.find(query);
+[AWAIT] backend\controllers\phase3Controller.js:940 -> const currencies = await Currency.find({ isActive: true });
+[AWAIT] backend\controllers\phase3Controller.js:953 -> const currency = await Currency.findByIdAndUpdate(
+[AWAIT] backend\controllers\phase3Controller.js:973 -> const from = await Currency.findOne({ code: fromCurrency });
+[AWAIT] backend\controllers\phase3Controller.js:974 -> const to = await Currency.findOne({ code: toCurrency });
+[AWAIT] backend\controllers\productController.js:60 -> const count = await Product.countDocuments({ tenant_id: 'default_tenant' });
+[AWAIT] backend\controllers\productController.js:65 -> await Product.create({
+[AWAIT] backend\controllers\productController.js:72 -> let productsSelection = await Product.find(filters).sort(sort).skip(skip).limit(limit);
+[AWAIT] backend\controllers\productController.js:73 -> let total = await Product.countDocuments(filters);
+[AWAIT] backend\controllers\productController.js:80 -> productsSelection = await Product.find(fallbackFilters).sort(sort).skip(skip).limit(limit);
+[AWAIT] backend\controllers\productController.js:81 -> total = await Product.countDocuments(fallbackFilters);
+[AWAIT] backend\controllers\productController.js:109 -> let product = await Product.findOne({ _id: id, tenant_id: req.tenantId || 'default_tenant' });
+[AWAIT] backend\controllers\productController.js:112 -> product = await Product.findOne({ _id: id, tenant_id: 'default_tenant' });
+[AWAIT] backend\controllers\productController.js:148 -> let products = await Product.find({ category, tenant_id: req.tenantId || 'default_tenant' }).sort({ createdAt: -1 }).skip(skip).limit(limit);
+[AWAIT] backend\controllers\productController.js:149 -> let total = await Product.countDocuments({ category, tenant_id: req.tenantId || 'default_tenant' });
+[AWAIT] backend\controllers\productController.js:152 -> const fallbackTotal = await Product.countDocuments({ tenant_id: req.tenantId });
+[AWAIT] backend\controllers\productController.js:155 -> products = await Product.find({ category, tenant_id: 'default_tenant' }).sort({ createdAt: -1 }).skip(skip).limit(limit);
+[AWAIT] backend\controllers\productController.js:156 -> total = await Product.countDocuments({ category, tenant_id: 'default_tenant' });
+[AWAIT] backend\controllers\productController.js:179 -> let newArrivals = await Product.find({ isNew: true, tenant_id: req.tenantId || 'default_tenant' })
+[AWAIT] backend\controllers\productController.js:184 -> const fallbackTotal = await Product.countDocuments({ tenant_id: req.tenantId });
+[AWAIT] backend\controllers\productController.js:186 -> newArrivals = await Product.find({ isNew: true, tenant_id: 'default_tenant' }).sort({ createdAt: -1 }).limit(limit);
+[AWAIT] backend\controllers\productController.js:200 -> let featuredProducts = await Product.find({ isFeatured: true, tenant_id: req.tenantId || 'default_tenant' })
+[AWAIT] backend\controllers\productController.js:204 -> const fallbackTotal = await Product.countDocuments({ tenant_id: req.tenantId });
+[AWAIT] backend\controllers\productController.js:206 -> featuredProducts = await Product.find({ isFeatured: true, tenant_id: 'default_tenant' }).limit(limit);
+[AWAIT] backend\controllers\productController.js:224 -> let results = await Product.find({
+[AWAIT] backend\controllers\productController.js:234 -> const fallbackTotal = await Product.countDocuments({ tenant_id: req.tenantId });
+[AWAIT] backend\controllers\productController.js:236 -> results = await Product.find({
+[AWAIT] backend\controllers\productController.js:281 -> const product = await Product.create(payload);
+[AWAIT] backend\controllers\productController.js:305 -> let product = await Product.findOne(query);
+[AWAIT] backend\controllers\productController.js:341 -> await product.save();
+[AWAIT] backend\controllers\productController.js:365 -> const product = await Product.findOneAndDelete(query);
+[AWAIT] backend\controllers\recommendationController.js:25 -> const result = await RecommendationService.getSimilarProducts(
+[AWAIT] backend\controllers\recommendationController.js:56 -> const result = await RecommendationService.getFrequentlyBoughtTogether(
+[AWAIT] backend\controllers\recommendationController.js:79 -> const result = await RecommendationService.getTrendingProducts(
+[AWAIT] backend\controllers\recommendationController.js:111 -> const result = await RecommendationService.getPersonalizedRecommendations(
+[AWAIT] backend\controllers\recommendationController.js:134 -> const result = await RecommendationService.getSeasonalRecommendations(
+[AWAIT] backend\controllers\recommendationController.js:164 -> const result = await RecommendationService.trackRecentView(
+[AWAIT] backend\controllers\recommendationController.js:203 -> await RecommendationService.trackPurchase(
+[AWAIT] backend\controllers\recommendationController.js:229 -> const stats = await RecommendationService.getRecommendationStats();
+[AWAIT] backend\controllers\reviewController.js:35 -> const existing = await ReviewService.getUserReview(productId, userId);
+[AWAIT] backend\controllers\reviewController.js:46 -> const purchase = await Order.findOne({
+[AWAIT] backend\controllers\reviewController.js:68 -> const result = await ReviewService.createReview(reviewData);
+[AWAIT] backend\controllers\reviewController.js:111 -> const result = await ReviewService.getProductReviews(productId, filters);
+[AWAIT] backend\controllers\reviewController.js:138 -> const stats = await ReviewService.getReviewStats(productId);
+[AWAIT] backend\controllers\reviewController.js:162 -> const reviews = await ReviewService.getTopReviews(
+[AWAIT] backend\controllers\reviewController.js:196 -> const result = await ReviewService.markHelpful(reviewId, userId);
+[AWAIT] backend\controllers\reviewController.js:230 -> const result = await ReviewService.editReview(reviewId, userId, {
+[AWAIT] backend\controllers\reviewController.js:268 -> const result = await ReviewService.deleteReview(reviewId, userId, isAdmin);
+[AWAIT] backend\controllers\reviewController.js:300 -> const result = await ReviewService.moderateReview(reviewId, status, notes);
+[AWAIT] backend\controllers\reviewController.js:326 -> const reviews = await Review.find({ status: 'pending' })
+[AWAIT] backend\controllers\reviewController.js:331 -> const total = await Review.countDocuments({ status: 'pending' });
+[AWAIT] backend\controllers\reviewController.js:362 -> const reviews = await Review.find({ userId, status: 'approved' })
+[AWAIT] backend\controllers\reviewController.js:368 -> const total = await Review.countDocuments({ userId, status: 'approved' });
+[AWAIT] backend\controllers\searchController.js:50 -> const result = await SearchService.search(
+[AWAIT] backend\controllers\searchController.js:93 -> const result = await SearchService.getSuggestions(q.trim(), parseInt(limit));
+[AWAIT] backend\controllers\searchController.js:114 -> const options = await SearchService.getFilterOptions();
+[AWAIT] backend\controllers\searchController.js:137 -> const popular = await SearchService.getPopularSearches(parseInt(limit));
+[AWAIT] backend\controllers\searchController.js:160 -> const analytics = await SearchService.getSearchAnalytics(parseInt(days));
+[AWAIT] backend\controllers\userController.js:25 -> await user.setRefreshToken(refreshToken);
+[AWAIT] backend\controllers\userController.js:26 -> await user.save({ validateBeforeSave: false });
+[AWAIT] backend\controllers\userController.js:43 -> const existingUser = await User.findOne({ email });
+[AWAIT] backend\controllers\userController.js:57 -> await user.save();
+[AWAIT] backend\controllers\userController.js:58 -> const tokens = await issueTokens(user);
+[AWAIT] backend\controllers\userController.js:75 -> const user = await User.findOne({ email }).select('+password +refreshToken');
+[AWAIT] backend\controllers\userController.js:89 -> const isMatch = await user.matchPassword(password);
+[AWAIT] backend\controllers\userController.js:95 -> const tokens = await issueTokens(user);
+[AWAIT] backend\controllers\userController.js:113 -> const user = await User.findById(decoded.id).select('+refreshToken');
+[AWAIT] backend\controllers\userController.js:119 -> const isValid = await user.verifyRefreshToken(refreshToken);
+[AWAIT] backend\controllers\userController.js:124 -> const tokens = await issueTokens(user);
+[AWAIT] backend\controllers\userController.js:141 -> const user = await User.findById(req.user._id).select('+refreshToken');
+[AWAIT] backend\controllers\userController.js:144 -> await user.save({ validateBeforeSave: false });
+[AWAIT] backend\controllers\userController.js:162 -> const user = await User.findById(req.user._id).select('+password');
+[AWAIT] backend\controllers\userController.js:174 -> await user.save();
+[AWAIT] backend\controllers\userController.js:188 -> const users = await User.find().select('-password -__v');
+[AWAIT] backend\controllers\userController.js:201 -> const user = await User.findByIdAndDelete(req.params.id);
+[AWAIT] backend\controllers\userController.js:215 -> const user = await User.findById(req.params.id);
+[AWAIT] backend\controllers\userController.js:223 -> await user.save({ validateBeforeSave: false });
+[AWAIT] backend\controllers\webhookController.js:20 -> const session = await mongoose.startSession();
+[AWAIT] backend\controllers\webhookController.js:24 -> const product = await Product.findOneAndUpdate(
+[AWAIT] backend\controllers\webhookController.js:35 -> await session.commitTransaction();
+[AWAIT] backend\controllers\webhookController.js:37 -> await session.abortTransaction();
+[AWAIT] backend\controllers\webhookController.js:100 -> const event = await verifyStripeEvent(req);
+[AWAIT] backend\controllers\webhookController.js:113 -> const order = await Order.findById(orderId);
+[AWAIT] backend\controllers\webhookController.js:115 -> await atomicDecrementInventory(order.items);
+[AWAIT] backend\controllers\webhookController.js:119 -> await order.save();
+[AWAIT] backend\controllers\webhookController.js:131 -> await atomicDecrementInventory(items.map(i => ({ product: i.id, quantity: i.q })));
+[AWAIT] backend\controllers\webhookController.js:157 -> await newOrder.save();
+[AWAIT] backend\controllers\wishlistController.js:50 -> const result = await WishlistService.addToWishlist(userId, productData);
+[AWAIT] backend\controllers\wishlistController.js:89 -> const result = await WishlistService.removeFromWishlist(userId, mongoProductId);
+[AWAIT] backend\controllers\wishlistController.js:121 -> const result = await WishlistService.getWishlist(userId, includeStats === 'true');
+[AWAIT] backend\controllers\wishlistController.js:156 -> const inWishlist = await WishlistService.isInWishlist(userId, mongoProductId);
+[AWAIT] backend\controllers\wishlistController.js:203 -> const result = await WishlistService.updatePriority(userId, mongoProductId, priority);
+[AWAIT] backend\controllers\wishlistController.js:234 -> const result = await WishlistService.generateShareLink(userId);
+[AWAIT] backend\controllers\wishlistController.js:265 -> const result = await WishlistService.getSharedWishlist(shareToken);
+[AWAIT] backend\controllers\wishlistController.js:305 -> const result = await WishlistService.enableStockNotifications(
+[AWAIT] backend\controllers\wishlistController.js:340 -> const result = await WishlistService.clearWishlist(userId);
+[AWAIT] backend\controllers\wishlistController.js:368 -> const result = await WishlistService.getWishlistsWithOutOfStockItems(mongoProductId);
+[AWAIT] backend\controllers\wishlistController.js:397 -> const result = await WishlistService.markNotificationSent(wishlistId, mongoProductId);
+[AWAIT] backend\jobs\cleanupInitiatedOrders.js:35 -> const initiatedOrders = await Order.find({
+[AWAIT] backend\jobs\cleanupInitiatedOrders.js:59 -> await order.save();
+[AWAIT] backend\jobs\cleanupInitiatedOrders.js:63 -> await releaseStock(order.items);
+[AWAIT] backend\list_merchants.js:15 -> const { data, error } = await supabase
+[AWAIT] backend\middleware\auth.js:27 -> const { data: user, error } = await supabase
+[AWAIT] backend\middleware\auth.js:52 -> const user = await attachUser(decoded);
+[AWAIT] backend\middleware\auth.js:75 -> const user = await attachUser(decoded);
+[AWAIT] backend\modules\ai-forge\ai-forge.controller.js:18 -> const ast = await aiForgeService.generateStoreAST(merchantId, prompt);
+[AWAIT] backend\modules\ai-forge\ai-forge.controller.js:31 -> const result = await aiForgeService.generateCopy(merchantId, req.body);
+[AWAIT] backend\modules\ai-forge\ai-forge.controller.js:44 -> const usage = await aiForgeService.checkQuota(merchantId);
+[AWAIT] backend\modules\ai-forge\ai-forge.service.js:41 -> const quota = await this.checkQuota(merchantId);
+[AWAIT] backend\modules\ai-forge\ai-forge.service.js:50 -> const { data: cached } = await supabase
+[AWAIT] backend\modules\ai-forge\ai-forge.service.js:70 -> const { data: quota, error } = await supabase
+[AWAIT] backend\modules\ai-forge\ai-forge.service.js:80 -> await supabase.from('ai_quotas').insert({ merchant_id: merchantId });
+[AWAIT] backend\modules\analytics\analytics.controller.js:14 -> const stats = await analyticsService.getStoreStats(merchantId, req.query.days || 30);
+[AWAIT] backend\modules\analytics\analytics.controller.js:27 -> await analyticsService.trackEvent(merchantId, req.body);
+[AWAIT] backend\modules\analytics\analytics.service.js:15 -> const { data, error } = await supabase
+[AWAIT] backend\modules\analytics\analytics.service.js:29 -> const { error } = await supabase
+[AWAIT] backend\modules\checkout\checkout.controller.js:16 -> const result = await checkoutService.createSession(merchantId, req.body);
+[AWAIT] backend\modules\checkout\checkout.controller.js:41 -> await checkoutService.handleWebhook(event);
+[AWAIT] backend\modules\checkout\checkout.service.js:18 -> const { data: products } = await supabase
+[AWAIT] backend\modules\checkout\checkout.service.js:39 -> const session = await stripe.checkout.sessions.create({
+[AWAIT] backend\modules\checkout\checkout.service.js:68 -> const { data: order, error: orderErr } = await supabase
+[AWAIT] backend\modules\checkout\checkout.service.js:85 -> const { error: invErr } = await supabase.rpc('decrement_inventory_batch', {
+[AWAIT] backend\modules\tenant\tenant.controller.js:15 -> const ast = await tenantService.getPageAST(merchantId, slug, !isPreview);
+[AWAIT] backend\modules\tenant\tenant.controller.js:28 -> const result = await tenantService.savePageAST(merchantId, slug, manifest, publish);
+[AWAIT] backend\modules\tenant\tenant.controller.js:39 -> const products = await tenantService.getProducts(merchantId, req.query);
+[AWAIT] backend\modules\tenant\tenant.service.js:14 -> const { data: page, error } = await supabase
+[AWAIT] backend\modules\tenant\tenant.service.js:27 -> const { data, error } = await supabase
+[AWAIT] backend\modules\tenant\tenant.service.js:53 -> const { data, error } = await query;
+[AWAIT] backend\modules\tenant\tenant.service.js:59 -> const { data, error } = await supabase
+[AWAIT] backend\routes\jobRoutes.js:19 -> const status = await jobService.getJobStatus(req.params.id);
+[AWAIT] backend\routes\paymentMethodRoutes.js:16 -> let config = await PaymentMethod.findOne({ sellerId });
+[AWAIT] backend\routes\paymentMethodRoutes.js:18 -> config = await PaymentMethod.create({ sellerId });
+[AWAIT] backend\routes\paymentMethodRoutes.js:34 -> const updated = await PaymentMethod.findOneAndUpdate(
+[AWAIT] backend\routes\paymentMethodRoutes.js:55 -> const orders = await Order.find({
+[AWAIT] backend\routes\paymentMethodRoutes.js:80 -> const order = await Order.findById(req.params.orderId);
+[AWAIT] backend\routes\paymentMethodRoutes.js:95 -> await Order.findByIdAndUpdate(req.params.orderId, {
+[AWAIT] backend\routes\performanceHubRoutes.js:14 -> const events = await Event.find({ tenant_id: targetTenant }).sort({ createdAt: -1 }).limit(1000);
+[AWAIT] backend\routes\performanceHubRoutes.js:25 -> const content = await SiteContent.findOne({ tenant_id: targetTenant });
+[AWAIT] backend\routes\performanceHubRoutes.js:52 -> const content = await SiteContent.findOne({ tenant_id: targetTenant, seller: req.user._id });
+[AWAIT] backend\routes\performanceHubRoutes.js:64 -> await content.save();
+[AWAIT] backend\routes\sellerAnalyticsRoutes.js:10 -> const data = await analyticsService.getOverview(req.user.id);
+[AWAIT] backend\routes\sellerAnalyticsRoutes.js:22 -> const data = await analyticsService.getRevenueChart(req.user.id, days);
+[AWAIT] backend\routes\sellerAnalyticsRoutes.js:34 -> const data = await analyticsService.getTopProducts(req.user.id, limit);
+[AWAIT] backend\routes\sellerAnalyticsRoutes.js:45 -> const data = await analyticsService.getCustomerInsights(req.user.id);
+[AWAIT] backend\routes\sellerRoutes.js:13 -> const products = await Product.find({ seller: req.user._id });
+[AWAIT] backend\routes\sellerRoutes.js:31 -> const product = await Product.create(productData);
+[AWAIT] backend\routes\sellerRoutes.js:45 -> const product = await Product.findOneAndUpdate(
+[AWAIT] backend\routes\sellerRoutes.js:67 -> const product = await Product.findOneAndDelete({ _id: req.params.id, seller: req.user._id });
+[AWAIT] backend\routes\whatsappTemplateRoutes.js:18 -> await Promise.all(events.map(eventName =>
+[AWAIT] backend\routes\whatsappTemplateRoutes.js:26 -> const templates = await Template.find({ sellerId });
+[AWAIT] backend\routes\whatsappTemplateRoutes.js:45 -> const updated = await Template.findOneAndUpdate(
+[AWAIT] backend\routes\whatsappTemplateRoutes.js:64 -> await waAutomation.processOptOut(phone, sellerId);
+[AWAIT] backend\scripts\createAdmin.js:24 -> await mongoose.connect(process.env.MONGODB_URI);
+[AWAIT] backend\scripts\createAdmin.js:31 -> const existingAdmin = await User.findOne({ email: ADMIN_CREDENTIALS.email });
+[AWAIT] backend\scripts\createAdmin.js:41 -> await existingAdmin.save();
+[AWAIT] backend\scripts\createAdmin.js:52 -> const admin = await User.create(ADMIN_CREDENTIALS);
+[AWAIT] backend\scripts\seed-products-remote.js:35 -> await mongoose.connect(MONGO_URI);
+[AWAIT] backend\scripts\seed-products-remote.js:45 -> await Product.deleteMany({}); // Optional: clear before seed to avoid dupes
+[AWAIT] backend\scripts\seed-products-remote.js:50 -> await Product.insertMany(productsToInsert);
+[AWAIT] backend\scripts\seed-remote.js:26 -> await mongoose.connect(MONGO_URI);
+[AWAIT] backend\scripts\seed-remote.js:33 -> const exists = await User.findOne({ email });
+[AWAIT] backend\scripts\seed-remote.js:36 -> const salt = await bcrypt.genSalt(10);
+[AWAIT] backend\scripts\seed-remote.js:37 -> exists.password = await bcrypt.hash(password, salt);
+[AWAIT] backend\scripts\seed-remote.js:39 -> await exists.save();
+[AWAIT] backend\scripts\seed-remote.js:43 -> const salt = await bcrypt.genSalt(10);
+[AWAIT] backend\scripts\seed-remote.js:44 -> const hashedPassword = await bcrypt.hash(password, salt);
+[AWAIT] backend\scripts\seed-remote.js:46 -> await User.create({
+[AWAIT] backend\scripts\seedProducts.js:115 -> await mongoose.connect(primaryUri);
+[AWAIT] backend\scripts\seedProducts.js:125 -> await mongoose.connect(localUri);
+[AWAIT] backend\scripts\seedProducts.js:134 -> const mongod = await MongoMemoryServer.create();
+[AWAIT] backend\scripts\seedProducts.js:136 -> await mongoose.connect(memUri);
+[AWAIT] backend\scripts\seedProducts.js:147 -> await connectDB();
+[AWAIT] backend\scripts\seedProducts.js:150 -> await Product.deleteMany({});
+[AWAIT] backend\scripts\seedProducts.js:154 -> const insertedProducts = await Product.insertMany(products);
+[AWAIT] backend\scripts\set-admin.js:17 -> let user = await User.findOne({ email: email.toLowerCase() });
+[AWAIT] backend\scripts\set-admin.js:26 -> user = await User.create({
+[AWAIT] backend\scripts\set-admin.js:44 -> const isMatch = await user.matchPassword(password);
+[AWAIT] backend\scripts\set-admin.js:46 -> const salt = await bcrypt.genSalt(10);
+[AWAIT] backend\scripts\set-admin.js:47 -> user.password = await bcrypt.hash(password, salt);
+[AWAIT] backend\scripts\set-admin.js:54 -> await user.save();
+[AWAIT] backend\scripts\test-approval-system.js:98 -> const response = await axios.get(`${BASE_URL}/api/orders/${TEST_ORDER_ID}/approve?token=invalid_token`, {
+[AWAIT] backend\scripts\test-approval-system.js:108 -> const response = await axios.get(`${BASE_URL}/api/orders/${TEST_ORDER_ID}/approve`, {
+[AWAIT] backend\scripts\verify-system.js:51 -> await mongoose.connect(process.env.MONGODB_URI);
+[AWAIT] backend\scripts\verify-system.js:59 -> const orderIndexes = await Order.collection.getIndexes();
+[AWAIT] backend\scripts\verify-system.js:75 -> const actionLogCount = await AdminActionLog.countDocuments();
+[AWAIT] backend\scripts\verify-system.js:78 -> const latest = await AdminActionLog.findOne().sort({ timestamp: -1 });
+[AWAIT] backend\scripts\verify-system.js:83 -> const messageLogCount = await MessageLog.countDocuments();
+[AWAIT] backend\scripts\verify-system.js:86 -> await mongoose.disconnect();
+[AWAIT] backend\services\analyticsService.js:38 -> const [allOrders, orders30, orders7] = await Promise.all([
+[AWAIT] backend\services\analyticsService.js:82 -> const orders = await Order.find(baseQuery);
+[AWAIT] backend\services\analyticsService.js:110 -> const orders = await Order.find({
+[AWAIT] backend\services\analyticsService.js:136 -> const orders = await Order.find(getSellerQuery(sellerId));
+[AWAIT] backend\services\cartService.js:42 -> const coupon = await this._validateCoupon(couponCode, subtotal);
+[AWAIT] backend\services\cartService.js:222 -> const result = await this._validateCoupon(couponCode, 0);
+[AWAIT] backend\services\emailService.js:45 -> await sgMail.send(msg);
+[AWAIT] backend\services\emailService.js:128 -> await sendEmail(email, `Order Confirmation - ${order.orderNumber}`, html);
+[AWAIT] backend\services\emailService.js:172 -> await sendEmail(ADMIN_EMAIL, `Payment Approval Needed - Order ${order.orderNumber}`, html);
+[AWAIT] backend\services\emailService.js:200 -> await sendEmail(email, `Payment Approved - Order ${order.orderNumber}`, html);
+[AWAIT] backend\services\emailService.js:213 -> await sendEmail(ADMIN_EMAIL, `Action Required: New Order ${order.orderNumber}`, html);
+[AWAIT] backend\services\jobService.js:19 -> const result = await queueService.safeAdd('background-tasks', type, data, options);
+[AWAIT] backend\services\jobService.js:44 -> const job = await queue.getJob(jobId);
+[AWAIT] backend\services\jobService.js:47 -> const state = await job.getState();
+[AWAIT] backend\services\mailblusterService.js:25 -> const response = await axios.post(MAILBLUSTER_API_URL, payload, {
+[AWAIT] backend\services\mailblusterService.js:74 -> await createLead(email, firstName, lastName, fields, tags);
+[AWAIT] backend\services\memoryDbService.js:21 -> mongoServer = await MongoMemoryServer.create({
+[AWAIT] backend\services\memoryDbService.js:45 -> await mongoServer.stop();
+[AWAIT] backend\services\queueService.js:80 -> await dlq.add('dead-letter', {
+[AWAIT] backend\services\queueService.js:106 -> const waitingCount = await queue.getWaitingCount().catch(() => 0);
+[AWAIT] backend\services\queueService.js:114 -> const job = await queue.add(type, {
+[AWAIT] backend\services\queueService.js:152 -> const [waiting, active, completed, failed] = await Promise.all([
+[AWAIT] backend\services\queueService.js:165 -> await Promise.all(Object.values(_queues).map(q => q.close().catch(() => { })));
+[AWAIT] backend\services\queueService.js:167 -> await connection.quit().catch(() => { });
+[AWAIT] backend\services\queueService.js:179 -> await Promise.all(names.map(async name => {
+[AWAIT] backend\services\queueService.js:182 -> const [waiting, active, failed] = await Promise.all([
+[AWAIT] backend\services\recommendationService.js:20 -> await view.save();
+[AWAIT] backend\services\recommendationService.js:23 -> const views = await RecentlyViewed.find({ userId })
+[AWAIT] backend\services\recommendationService.js:28 -> await RecentlyViewed.deleteMany({
+[AWAIT] backend\services\recommendationService.js:82 -> const bought = await BoughtTogether.find({
+[AWAIT] backend\services\recommendationService.js:107 -> const viewed = await RecentlyViewed.find({ userId })
+[AWAIT] backend\services\recommendationService.js:130 -> const trending = await RecentlyViewed.aggregate([
+[AWAIT] backend\services\recommendationService.js:174 -> await BoughtTogether.findOneAndUpdate(
+[AWAIT] backend\services\recommendationService.js:195 -> const recentlyViewed = await RecentlyViewed.find({ userId })
+[AWAIT] backend\services\recommendationService.js:209 -> const similar = await this.getSimilarProducts(view.productId, products, 3);
+[AWAIT] backend\services\recommendationService.js:215 -> const fbt = await this.getFrequentlyBoughtTogether(view.productId, 2);
+[AWAIT] backend\services\shipping\leopardsProvider.js:37 -> return await retryWithBackoff(() =>
+[AWAIT] backend\services\shipping\traxProvider.js:20 -> const res = await axios.post(`${BASE_URL}/orders`, {
+[AWAIT] backend\services\shipping\traxProvider.js:39 -> const res = await axios.get(`${BASE_URL}/orders/${trackingNumber}`, { headers: { 'Authorization': `Bearer ${API_KEY}` } });
+[AWAIT] backend\services\shipping\traxProvider.js:49 -> await axios.delete(`${BASE_URL}/orders/${trackingNumber}`, { headers: { 'Authorization': `Bearer ${API_KEY}` } });
+[AWAIT] backend\services\shippingService.js:36 -> const response = await p.createShipment({ recipientName, address, city, phone, weight, cod });
+[AWAIT] backend\services\shippingService.js:38 -> const shipment = await Shipment.create({
+[AWAIT] backend\services\shippingService.js:64 -> const info = await p.trackShipment(trackingNumber);
+[AWAIT] backend\services\shippingService.js:81 -> const shipment = await Shipment.findById(shipmentId);
+[AWAIT] backend\services\shippingService.js:85 -> await p.cancelShipment(shipment.trackingNumber);
+[AWAIT] backend\services\shippingService.js:87 -> await Shipment.findByIdAndUpdate(shipmentId, {
+[AWAIT] backend\services\shippingService.js:99 -> const inTransit = await Shipment.find({ status: { $in: ['booked', 'in_transit', 'out_for_delivery'] } });
+[AWAIT] backend\services\shippingService.js:104 -> const info = await trackShipment(s.trackingNumber, s.provider);
+[AWAIT] backend\services\shippingService.js:106 -> await Shipment.findByIdAndUpdate(s._id, {
+[AWAIT] backend\services\waRateGuard.js:32 -> const count = await redis.incr(key);
+[AWAIT] backend\services\waRateGuard.js:33 -> if (count === 1) await redis.expire(key, windowSec);
+[AWAIT] backend\services\waRateGuard.js:70 -> [dailyCount, phoneCount, spikeCount] = await Promise.all([
+[AWAIT] backend\services\whatsappAutomationService.js:21 -> const optedOut = await WaOptOut.findOne({ phone, sellerId, reinstated: false });
+[AWAIT] backend\services\whatsappAutomationService.js:28 -> const template = await WhatsAppTemplate.findOne({ sellerId, eventName });
+[AWAIT] backend\services\whatsappAutomationService.js:45 -> let template = await WhatsAppTemplate.findOne({ sellerId, eventName, isActive: true });
+[AWAIT] backend\services\whatsappAutomationService.js:68 -> const guard = await waRateGuard.check(sellerId, phone);
+[AWAIT] backend\services\whatsappAutomationService.js:75 -> const safe = await canSend(phone, sellerId, eventName);
+[AWAIT] backend\services\whatsappAutomationService.js:78 -> const message = await renderTemplate(sellerId, eventName, vars);
+[AWAIT] backend\services\whatsappAutomationService.js:82 -> const result = await queueService.queueWhatsApp(phone, eventName, { message }, {
+[AWAIT] backend\services\whatsappAutomationService.js:154 -> const existing = await WaOptOut.findOne({ phone, sellerId });
+[AWAIT] backend\services\whatsappAutomationService.js:156 -> await WaOptOut.create({ phone, sellerId });
+[AWAIT] backend\services\whatsappService.js:18 -> await axios.get('https://api.callmebot.com/whatsapp.php', {
+[AWAIT] backend\shared\lib\dbService.js:33 -> const client = await pgPool.connect();
+[AWAIT] backend\shared\lib\dbService.js:42 -> await new Promise(res => setTimeout(res, delay));
+[AWAIT] backend\shared\lib\dbService.js:54 -> await pgPool.end();
+[AWAIT] backend\shared\middleware\authGuard.js:23 -> const { data: { user }, error } = await supabase.auth.getUser(token);
+[AWAIT] backend\shared\middleware\tenantContext.js:35 -> const { data: merchant, error } = await supabase
+[AWAIT] backend\test-boundaries.js:37 -> const res1 = await axios.get(`${baseUrl}/api/test/read`, { headers: V1_HEADER });
+[AWAIT] backend\test-boundaries.js:41 -> const res2 = await axios.post(`${baseUrl}/api/test/mutate`, {}, { headers: V1_HEADER });
+[AWAIT] backend\test-boundaries.js:50 -> const res3 = await axios.get(`${baseUrl}/api/test/read`, { headers: V1_HEADER });
+[AWAIT] backend\test-boundaries.js:55 -> await axios.post(`${baseUrl}/api/test/mutate`, {}, { headers: V1_HEADER });
+[AWAIT] backend\test-boundaries.js:69 -> await axios.get(`${baseUrl}/api/test/read`); // No version header
+[AWAIT] backend\test-boundaries.js:82 -> const res6 = await axios.get(`${baseUrl}/api/test/read`, { headers: V1_HEADER });
+[AWAIT] backend\test-boundaries.js:87 -> await axios.post(`${baseUrl}/api/test/mutate`, {}, { headers: V1_HEADER });
+[AWAIT] backend\tests\integration\bootstrap.test.js:15 -> const result = await bootstrap();
+[AWAIT] backend\tests\integration\bootstrap.test.js:22 -> await dbService.disconnect();
+[AWAIT] backend\tests\integration\bootstrap.test.js:24 -> await mongoose.connection.db.dropDatabase();
+[AWAIT] backend\tests\integration\bootstrap.test.js:30 -> const res = await request(app).get('/api/live');
+[AWAIT] backend\tests\integration\bootstrap.test.js:36 -> const res = await request(app).get('/api/ready');
+[AWAIT] backend\tests\integration\bootstrap.test.js:63 -> const res = await request(app)
+[AWAIT] backend\tests\integration\payment-security.test.js:24 -> await mongoose.connect(mongoUri);
+[AWAIT] backend\tests\integration\payment-security.test.js:34 -> await mongoose.connection.dropDatabase();
+[AWAIT] backend\tests\integration\payment-security.test.js:35 -> await mongoose.connection.close();
+[AWAIT] backend\tests\integration\payment-security.test.js:44 -> const order = await Order.create({
+[AWAIT] backend\tests\integration\payment-security.test.js:54 -> const res = await request(app)
+[AWAIT] backend\tests\integration\payment-security.test.js:64 -> const order = await Order.create({
+[AWAIT] backend\tests\integration\payment-security.test.js:74 -> const res = await request(app)
+[AWAIT] backend\tests\integration\payment-security.test.js:84 -> const order = await Order.create({
+[AWAIT] backend\tests\integration\payment-security.test.js:95 -> const firstRes = await request(app)
+[AWAIT] backend\tests\integration\payment-security.test.js:102 -> const secondRes = await request(app)
+[AWAIT] backend\tests\integration\payment-security.test.js:109 -> const updatedOrder = await Order.findById(order._id);
+[AWAIT] backend\tests\integration\payment-security.test.js:117 -> const order = await Order.create({
+[AWAIT] backend\tests\integration\payment-security.test.js:135 -> const firstRes = await request(app)
+[AWAIT] backend\tests\integration\payment-security.test.js:143 -> const secondRes = await request(app)
+[AWAIT] backend\tests\integration\payment-security.test.js:157 -> const order = await Order.create({
+[AWAIT] backend\tests\integration\payment-security.test.js:171 -> const res = await request(app)
+[AWAIT] backend\tests\integration\payment-security.test.js:183 -> const order = await Order.create({
+[AWAIT] backend\tests\integration\payment-security.test.js:198 -> const res = await request(app)
+[AWAIT] backend\tests\integration\payment-security.test.js:216 -> const order = await Order.create({
+[AWAIT] backend\tests\integration\payment-security.test.js:233 -> await request(app)
+[AWAIT] backend\tests\integration\payment-security.test.js:240 -> const res = await request(app)
+[AWAIT] backend\tests\integration\payment-security.test.js:254 -> const order = await Order.create({
+[AWAIT] backend\tests\integration\payment-security.test.js:263 -> const res = await request(app)
+[AWAIT] backend\tests\integration\payment-security.test.js:277 -> const order = await Order.create({
+[AWAIT] backend\tests\integration\payment-security.test.js:288 -> await request(app)
+[AWAIT] backend\tests\test_approval_flow.js:15 -> await mongoose.connect(uri);
+[AWAIT] backend\tests\test_approval_flow.js:19 -> await Order.deleteMany({ 'guestCustomer.email': { $in: ['test@example.com', 'test2@example.com'] } });
+[AWAIT] backend\tests\test_approval_flow.js:36 -> await createOrder(req, res);
+[AWAIT] backend\tests\test_approval_flow.js:46 -> const order = await Order.findById(orderId);
+[AWAIT] backend\tests\test_approval_flow.js:67 -> await approveOrder(req, res);
+[AWAIT] backend\tests\test_approval_flow.js:71 -> const updatedOrder = await Order.findById(orderId);
+[AWAIT] backend\tests\test_approval_flow.js:96 -> await createOrder(req, res);
+[AWAIT] backend\tests\test_approval_flow.js:99 -> const order2 = await Order.findById(orderId2);
+[AWAIT] backend\tests\test_approval_flow.js:110 -> await rejectOrder(req, res);
+[AWAIT] backend\tests\test_approval_flow.js:114 -> const rejectedOrder = await Order.findById(orderId2);
+[AWAIT] backend\tests\test_approval_flow.js:126 -> await mongoose.connection.close();
+[AWAIT] backend\test_db.js:4 -> await mongoose.connect('mongodb://127.0.0.1:27017/omnora_db');
+[AWAIT] backend\test_db.js:9 -> const defProducts = await Product.countDocuments({ tenant_id: 'default_tenant' });
+[AWAIT] backend\test_db.js:10 -> const aggregateProducts = await Product.aggregate([
+[AWAIT] backend\test_db.js:18 -> const siteContents = await SiteContent.aggregate([
+[AWAIT] backend\test_login_controller_final.js:24 -> await authController.login(req, res);
+[AWAIT] backend\test_login_debug.js:19 -> const { data, error } = await supabase
+[AWAIT] backend\test_subscription.js:11 -> const response = await axios.post(url, { email });
+[AWAIT] backend\utils\inventoryService.js:22 -> const product = await Product.findById(item.product);
+[AWAIT] backend\utils\inventoryService.js:38 -> await Product.updateOne(
+[AWAIT] backend\utils\inventoryService.js:58 -> const product = await Product.findById(item.product);
+[AWAIT] backend\utils\inventoryService.js:66 -> await Product.updateOne(
+[AWAIT] backend\utils\inventoryService.js:91 -> const product = await Product.findById(item.product);
+[AWAIT] backend\utils\inventoryService.js:99 -> await Product.updateOne(
+[AWAIT] backend\utils\inventoryService.js:123 -> const product = await Product.findById(item.product);
+[AWAIT] backend\utils\LocalDB.js:83 -> await this.hooks.pre['save'].call(newDoc, () => { });
+[AWAIT] backend\utils\LocalDB.js:254 -> await self.hooks.pre['save'].call(this, () => { });
+[AWAIT] backend\utils\retryWithBackoff.js:6 -> *   const result = await retryWithBackoff(() => leopardsApi.createShipment(...), {
+[AWAIT] backend\utils\retryWithBackoff.js:49 -> return await fn();
+[AWAIT] backend\utils\retryWithBackoff.js:63 -> await sleep(delay);
+[AWAIT] backend\utils\whatsappService.js:55 -> const res = await axios.post(url, payload, {
+[AWAIT] backend\utils\whatsappService.js:94 -> const res = await axios.post(url, payload, {
+[AWAIT] backend\utils\whatsappService.js:114 -> return await sendTextMessage(phone, message);
+[AWAIT] backend\utils\whatsappService.js:119 -> return await sendTextMessage(phone, message);
+[AWAIT] backend\utils\whatsappService.js:124 -> return await sendTextMessage(phone, message);
+[AWAIT] backend\utils\whatsappService.js:138 -> const result = await sendTemplateMessage(phone, "order_approved", "en_US", components);
+[AWAIT] backend\utils\whatsappService.js:143 -> return await sendTextMessage(phone, message);
+[AWAIT] backend\utils\whatsappService.js:151 -> return await sendTextMessage(phone, message);
+[AWAIT] backend\utils\whatsappService.js:156 -> return await sendTextMessage(phone, message);
+[AWAIT] backend\verify-mongodb.js:25 -> await mongoose.connect(mongoUri, {
+[AWAIT] backend\verify-mongodb.js:40 -> const collections = await mongoose.connection.db.listCollections().toArray();
+[AWAIT] backend\verify-mongodb.js:50 -> await mongoose.connection.close();
+[AWAIT] backend\verify-order-fix.js:15 -> await new Promise(resolve => setTimeout(resolve, 8000));
+[AWAIT] backend\verify-order-fix.js:19 -> const response = await axios.post('http://127.0.0.1:5000/api/orders', {
+[AWAIT] backend\verify-serverless.js:61 -> await apiHandler(req, res);
+[AWAIT] backend\workers\notificationWorker.js:26 -> await emailService.sendOrderConfirmation(data.order);
+[AWAIT] backend\workers\notificationWorker.js:29 -> await emailService.sendOrderApproved(data.order);
+[AWAIT] backend\workers\notificationWorker.js:32 -> await emailService.sendAdminNewOrderNotification(data.order, data.approveLink, data.rejectLink);
+[AWAIT] backend\workers\notificationWorker.js:35 -> await emailService.sendApprovalRequest(data.order, data.receiptPath, data.approvalLink);
+[AWAIT] backend\workers\notificationWorker.js:63 -> await emailDLQ.add('failed-email', {
+[AWAIT] backend\workers\notificationWorker.js:99 -> const response = await whatsappService.sendTemplateMessage(phone, templateName, "en_US", params);
+[AWAIT] backend\workers\notificationWorker.js:108 -> await MessageLog.create({
+[AWAIT] backend\workers\notificationWorker.js:137 -> await whatsappDLQ.add('failed-whatsapp', {
+[AWAIT] backend\workers\notificationWorker.js:189 -> await Promise.all([
+[AWAIT] backend\workers\taskWorker.js:24 -> const result = await onboardingService.launchStore(sellerId, { niche, storeName });
+[AWAIT] backend\workers\taskWorker.js:32 -> const content = await SiteContent.findOne(query);
+[AWAIT] backend\workers\taskWorker.js:43 -> await content.save();
+[AWAIT] backend\workers\taskWorker.js:51 -> const content = await SiteContent.findOne(query);
+[AWAIT] backend\workers\taskWorker.js:66 -> await content.save();
+[AWAIT] backend\workers\taskWorker.js:74 -> const ast = await aiStoreBuilderService.generateStore(sellerId, prompt);
+[AWAIT] backend\workers\taskWorker.js:77 -> const content = await SiteContent.findOne({ tenant_id: tenantId });
+[AWAIT] backend\workers\taskWorker.js:89 -> await content.save();
+[AWAIT] backend\workers\taskWorker.js:101 -> await sendToDLQ('background', job, error);
+[AWAIT] api\index.js:35 -> const { app: expressApp } = await bootstrap();
+[AWAIT] api\index.js:63 -> const { app: expressApp } = await bootstrap(); // Runs env & infra ready hooks
+[AWAIT] api\storefront.js:33 -> const { data: content, error } = await supabase
+[AWAIT] api\storefront.js:83 -> const { data: products, count: total, error } = await query;
+[AWAIT] api\storefront.js:106 -> const { data: product, error } = await supabase

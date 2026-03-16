@@ -16,7 +16,7 @@
  *   the latest CDN version on hard refresh.
  */
 
-module.exports = async (req, res) => {
+module.exports = (req, res) => {
     try {
         // ── Lazy-load Supabase ────────────────────────────────────────
         const { supabase } = require('../backend/shared/lib/supabaseClient');
@@ -30,32 +30,27 @@ module.exports = async (req, res) => {
         // │  GET /api/storefront/content?tenant=xxx                    │
         // └─────────────────────────────────────────────────────────────┘
         if (pathname.endsWith('/content') || pathname.endsWith('/content/')) {
-            const { data: content, error } = await supabase
+            return supabase
                 .from('store_configs')
                 .select('*')
                 .eq('merchant_id', tenantId)
-                .single();
+                .single()
+                .then(({ data: content, error }) => {
+                    if (error && error.code !== 'PGRST116') throw error;
+                    if (!content) return res.status(404).json({ success: false, error: 'Storefront not found' });
 
-            if (error && error.code !== 'PGRST116') { // PGRST116 is "no rows found"
-                 throw error;
-            }
+                    res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
+                    res.setHeader('CDN-Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
+                    res.setHeader('Vercel-CDN-Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
 
-            if (!content) {
-                return res.status(404).json({ success: false, error: 'Storefront not found' });
-            }
-
-            // ── ISR Cache Headers ─────────────────────────────────────
-            res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
-            res.setHeader('CDN-Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
-            res.setHeader('Vercel-CDN-Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
-
-            return res.status(200).json({
-                success: true,
-                content: content.node_tree || {},
-                tenant_id: content.merchant_id,
-                tenant_slug: content.tenant_slug || tenantId,
-                _cache: { strategy: 'isr', maxAge: 60, swr: 300 },
-            });
+                    return res.status(200).json({
+                        success: true,
+                        content: content.node_tree || {},
+                        tenant_id: content.merchant_id,
+                        tenant_slug: content.tenant_slug || tenantId,
+                        _cache: { strategy: 'isr', maxAge: 60, swr: 300 },
+                    });
+                }).catch(err => { throw err; });
         }
 
         // ┌─────────────────────────────────────────────────────────────┐
@@ -80,20 +75,20 @@ module.exports = async (req, res) => {
             if (category) query = query.eq('category_slug', category);
             if (search) query = query.ilike('title', `%${search}%`);
 
-            const { data: products, count: total, error } = await query;
-            if (error) throw error;
+            return query.then(({ data: products, count: total, error }) => {
+                if (error) throw error;
 
-            // ── ISR Cache Headers ─────────────────────────────────────
-            res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
-            res.setHeader('CDN-Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
-            res.setHeader('Vercel-CDN-Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
+                res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
+                res.setHeader('CDN-Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
+                res.setHeader('Vercel-CDN-Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
 
-            return res.status(200).json({
-                success: true,
-                products: products || [],
-                pagination: { page, limit, total, pages: Math.ceil((total || 0) / limit) },
-                _cache: { strategy: 'isr', maxAge: 60, swr: 300 },
-            });
+                return res.status(200).json({
+                    success: true,
+                    products: products || [],
+                    pagination: { page, limit, total, pages: Math.ceil((total || 0) / limit) },
+                    _cache: { strategy: 'isr', maxAge: 60, swr: 300 },
+                });
+            }).catch(err => { throw err; });
         }
 
         // ┌─────────────────────────────────────────────────────────────┐
@@ -103,27 +98,27 @@ module.exports = async (req, res) => {
         const productMatch = pathname.match(/\/product\/([^/]+)/);
         if (productMatch) {
             const handle = productMatch[1];
-            const { data: product, error } = await supabase
+            return supabase
                 .from('products')
                 .select('*, product_variants(*), product_images(*)')
                 .eq('merchant_id', tenantId)
                 .or(`handle.eq.${handle},slug.eq.${handle},id.eq.${handle}`)
-                .single();
+                .single()
+                .then(({ data: product, error }) => {
+                    if (error || !product) {
+                        return res.status(404).json({ success: false, error: 'Product not found' });
+                    }
 
-            if (error || !product) {
-                return res.status(404).json({ success: false, error: 'Product not found' });
-            }
+                    res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
+                    res.setHeader('CDN-Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
+                    res.setHeader('Vercel-CDN-Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
 
-            // ── ISR Cache Headers ─────────────────────────────────────
-            res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
-            res.setHeader('CDN-Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
-            res.setHeader('Vercel-CDN-Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
-
-            return res.status(200).json({
-                success: true,
-                product,
-                _cache: { strategy: 'isr', maxAge: 60, swr: 300 },
-            });
+                    return res.status(200).json({
+                        success: true,
+                        product,
+                        _cache: { strategy: 'isr', maxAge: 60, swr: 300 },
+                    });
+                }).catch(err => { throw err; });
         }
 
         // Fallback
