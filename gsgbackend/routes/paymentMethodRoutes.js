@@ -1,6 +1,7 @@
+const express = require('express');
+const router = express.Router();
 // 🛑 Mongoose Removed. Using Supabase Backend Client
-const { supabase } = require('../../backend/shared/lib/supabaseClient'); 
-const { protect: authenticate } = require('../middleware/auth');
+const { supabase } = require('../../backend/shared/lib/supabaseClient'); const { protect: authenticate } = require('../middleware/auth');
 const logger = require('../services/logger');
 const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
