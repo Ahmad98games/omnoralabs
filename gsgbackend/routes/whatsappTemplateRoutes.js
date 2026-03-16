@@ -15,8 +15,9 @@ const DEFAULT_TEMPLATES = {
     welcome_message: "Welcome to our store, {{name}}! We're glad to have you."
 };
 
-// â”€â”€ GET /api/whatsapp-templates â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-// Returns all 5 event templates for the seller; creates defaults if missing
+// ─── GET /api/whatsapp-templates ─────────────────────────────────────────────
+router.get('/', authenticate, async (req, res) => {
+    try {
         const merchant_id = req.user.id || req.user._id;
         if (!uuidRegex.test(merchant_id)) {
             return res.json([]); // Return empty list for non-merchants
