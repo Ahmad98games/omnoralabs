@@ -28,6 +28,22 @@ module.exports = async (req, res) => {
         });
     }
 
+    if (req.query && req.query.diag) {
+        enableCors();
+        try {
+            const bootstrap = require('../gsgbackend/bootstrap');
+            const { app: expressApp } = await bootstrap();
+            const routes = expressApp._router.stack.map(r => {
+                if (r.route) return `[${r.route.stack[0].method.toUpperCase()}] ${r.route.path}`;
+                if (r.name === 'router') return `[MOUNT] ${r.regexp}`;
+                return r.name;
+            });
+            return res.status(200).json({ routes, url: req.url });
+        } catch (e) {
+            return res.status(500).json({ error: 'DIAG_FAIL', message: e.message, stack: e.stack });
+        }
+    }
+
     try {
         // 1. HARDCODED FALLBACKS (The "Nuclear Option")
         // If Vercel Env Vars fail, we use these directly to ensure startup.
