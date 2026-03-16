@@ -25,7 +25,7 @@ async function bootstrap() {
 
     // 2. Database Connection
     // 2. Database Connection
-    if (config.mongo.uri) {
+    if (config.mongo && config.mongo.uri) {
         logger.info('SYSTEM: Connecting to MongoDB...');
         try {
             await dbService.connect(config.mongo.uri);
