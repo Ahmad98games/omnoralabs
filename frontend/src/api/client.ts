@@ -2,7 +2,7 @@ import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios'
 import axiosRetry from 'axios-retry';
 
 const client = axios.create({
-  baseURL: '/api',
+  baseURL: import.meta.env.VITE_API_URL || '/api',
   timeout: 15000, // Increased to 15s to handle Vercel cold starts/ISR revalidation
   headers: {
     'Content-Type': 'application/json',
@@ -80,7 +80,7 @@ client.interceptors.response.use(
       responseError.code = `API_${error.response.status}`;
       return Promise.reject(responseError)
     } else if (error.request) {
-      const networkError = new Error('Unable to reach the server. Please check your internet connection or try again later.') as any;
+      const networkError = new Error('Atelier Server Offline. Unable to reach the backend gateway.') as any;
       networkError.code = error.code || 'ERR_NETWORK';
       networkError.request = error.request;
       return Promise.reject(networkError)
