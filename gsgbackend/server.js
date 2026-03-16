@@ -121,9 +121,9 @@ app.use('/api/newsletter', newsletterRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/domains', domainRoutes);
 app.post('/api/track', require('./controllers/analyticsController').track); // Direct alias for frontend
-app.use('/api/phase1', phase1Routes);
-app.use('/api/phase2', phase2Routes);
-app.use('/api/phase3', phase3Routes);
+// app.use('/api/phase1', phase1Routes); // Legacy Mongoose Routes - Disabling to prevent crashes on missing models
+// app.use('/api/phase2', phase2Routes);
+// app.use('/api/phase3', phase3Routes);
 app.use('/api/cms', cmsRoutes);
 app.use('/api/cms/performance-hub', require('./routes/performanceHubRoutes'));
 app.use('/api/seller', require('./routes/sellerRoutes'));
