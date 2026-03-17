@@ -91,7 +91,6 @@ app.post('/api/auth/register', async (req, res) => {
       const { data: user, error } = await supabase.from('users').insert([{
           email,
           password_hash,
-          name: name || 'User',
           role: role || 'customer'
       }]).select().single();
 
@@ -103,7 +102,7 @@ app.post('/api/auth/register', async (req, res) => {
           { expiresIn: '7d' }
       );
       
-      res.status(201).json({ success: true, token, user: { id: user.id, name: user.name, email: user.email, role: user.role } });
+      res.status(201).json({ success: true, token, user: { id: user.id, email: user.email, role: user.role } });
   } catch (error) {
       console.error('Registration error:', error);
       res.status(500).json({ error: error.message });
@@ -129,7 +128,7 @@ app.post('/api/auth/login', async (req, res) => {
           { expiresIn: '7d' }
       );
       
-      res.json({ success: true, token, user: { id: user.id, name: user.name, email: user.email, role: user.role } });
+      res.json({ success: true, token, user: { id: user.id, email: user.email, role: user.role } });
   } catch (error) {
       console.error('Login error:', error);
       res.status(500).json({ error: error.message });

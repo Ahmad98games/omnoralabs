@@ -48,7 +48,6 @@ exports.register = async (req, res) => {
             .insert([{
                 email,
                 password_hash,
-                name: name || `${firstName} ${lastName}`,
                 store_slug: name.toLowerCase().replace(/[^a-z0-9]/g, '') || `store-${Date.now()}`,
                 subscription: req.body.role === 'seller' ? 'pro' : 'free'
             }])
@@ -92,7 +91,6 @@ exports.register = async (req, res) => {
             token,
             user: {
                 id: user.id,
-                name: user.name,
                 email: user.email,
                 role: user.role
             }
@@ -133,7 +131,6 @@ exports.login = async (req, res) => {
             token,
             user: {
                 id: user.id,
-                name: user.name || `${user.firstName} ${user.lastName}`.trim(),
                 email: user.email,
                 role: user.role
             }
