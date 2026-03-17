@@ -198,7 +198,7 @@ const AddPageModal = ({ onClose, onAdd }: { onClose: () => void; onAdd: (name: s
 // ─── Main dashboard ───────────────────────────────────────────────────────────
 
 export default function SellerDashboard() {
-    const { user, handleLogoutCleanup, isInitialized, loading } = useAuth();
+    const { user, handleLogoutCleanup, isInitialized, loading: authLoading } = useAuth();
     const { showToast } = useToast();
     const [searchParams, setSearchParams] = useSearchParams();
     const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'overview');
