@@ -6,7 +6,6 @@ const path = require('path');
 const fs = require('fs');
 const helmet = require('helmet');
 const morgan = require('morgan');
-// [Mongoose Removed] const mongoose = require('mongoose');
 const compression = require('compression');
 const cookieParser = require('cookie-parser');
 const hpp = require('hpp');
@@ -15,6 +14,12 @@ const { apiLimiter } = require('./middleware/rateLimiter');
 const { validateEnv } = require('./config/env');
 const logger = require('./services/logger');
 const { gatekeeper, CAPABILITIES } = require('./middleware/gatekeeper');
+
+// --- Bridge JWT Auth Requirements ---
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const { supabase } = require('./config/supabaseClient');
+// ------------------------------------
 
 // Load Validated Config
 const config = validateEnv();
@@ -35,22 +40,6 @@ if (process.env.SENTRY_DSN) {
   app.use(Sentry.Handlers.requestHandler());
 }
 
-// Database connection and seeding are handled by bootstrap.js
-
-// [Mongoose Removed] require('./models/OneClickCheckout');
-// [Mongoose Removed] require('./models/AbandonedCart');
-// [Mongoose Removed] require('./models/Bundle');
-// [Mongoose Removed] require('./models/Phase1Models');
-// [Mongoose Removed] require('./models/Phase2Models');
-// [Mongoose Removed] require('./models/Phase3Models');
-// [Mongoose Removed] require('./models/SiteContent');
-// [Mongoose Removed] require('./models/Product');
-// [Mongoose Removed] require('./models/PaymentMethod');
-// [Mongoose Removed] require('./models/WaOptOut');
-// [Mongoose Removed] require('./models/WhatsAppTemplate');
-// [Mongoose Removed] require('./models/AiContent');
-// [Mongoose Removed] require('./models/Shipment');
-
 const { tenantContext } = require('./middleware/tenantContext');
 app.use(tenantContext);
 
@@ -64,7 +53,6 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 // Increased limit for Serverless uploads (Vercel max 4.5MB)
-// Capture raw body for Stripe webhooks
 app.use(express.json({
   limit: '4mb',
   verify: (req, res, buf) => {
@@ -77,23 +65,78 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(hpp());
 app.use(compression());
-app.use(
-  helmet({
-    crossOriginResourcePolicy: { policy: 'cross-origin' },
-  })
-);
-app.use(
-  helmet.hsts({
-    maxAge: 31536000,
-    includeSubDomains: true,
-    preload: true,
-  })
-);
+app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
+app.use(helmet.hsts({ maxAge: 31536000, includeSubDomains: true, preload: true }));
 
-const morganStream = {
-  write: (message) => logger.info(message.trim()),
-};
+const morganStream = { write: (message) => logger.info(message.trim()) };
 app.use(morgan('combined', { stream: morganStream }));
+
+// =========================================================================
+// BRIDGE JWT AUTH ROUTES (/auth/login & /auth/register) DIRECTLY IN SERVER
+// =========================================================================
+app.post('/api/auth/register', async (req, res) => {
+  try {
+      const { name, email, password, role } = req.body;
+      if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
+
+      // Check if user exists
+      const { data: userExists } = await supabase.from('users').select('id').eq('email', email).maybeSingle();
+      if (userExists) return res.status(400).json({ error: 'User already exists' });
+
+      // Hash password
+      const salt = await bcrypt.genSalt(10);
+      const password_hash = await bcrypt.hash(password, salt);
+
+      // Create new user securely bypassing trigger hooks with Service Role Key
+      const { data: user, error } = await supabase.from('users').insert([{
+          email,
+          password_hash,
+          display_name: name || 'User',
+          role: role || 'customer',
+          metadata: { role: role || 'customer' }
+      }]).select().single();
+
+      if (error) throw error;
+
+      const token = jwt.sign(
+          { id: user.id, role: user.role || 'customer' }, 
+          config.jwt?.secret || process.env.JWT_SECRET || 'secret', 
+          { expiresIn: '7d' }
+      );
+      
+      res.status(201).json({ success: true, token, user: { id: user.id, name: user.display_name, email: user.email, role: user.role } });
+  } catch (error) {
+      console.error('Registration error:', error);
+      res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/auth/login', async (req, res) => {
+  try {
+      const { email, password } = req.body;
+      if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
+
+      // Fetch user using service role
+      const { data: user, error } = await supabase.from('users').select('*').eq('email', email).maybeSingle();
+      if (!user || error) return res.status(401).json({ error: 'Invalid credentials' });
+
+      // Verify bcrypt hash
+      const isMatch = await bcrypt.compare(password, user.password_hash);
+      if (!isMatch) return res.status(401).json({ error: 'Invalid credentials' });
+
+      const token = jwt.sign(
+          { id: user.id, role: user.role || user.metadata?.role }, 
+          config.jwt?.secret || process.env.JWT_SECRET || 'secret', 
+          { expiresIn: '7d' }
+      );
+      
+      res.json({ success: true, token, user: { id: user.id, name: user.display_name, email: user.email, role: user.role || user.metadata?.role } });
+  } catch (error) {
+      console.error('Login error:', error);
+      res.status(500).json({ error: error.message });
+  }
+});
+// =========================================================================
 
 // ---------- Routes ----------
 const authRoutes = require('./routes/authRoutes');
@@ -104,15 +147,12 @@ const userRoutes = require('./routes/userRoutes');
 const contactRoutes = require('./routes/contactRoutes');
 const newsletterRoutes = require('./routes/newsletterRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
-// const phase1Routes = require('./routes/phase1Routes'); // Legacy Mongoose Routes
-// const phase2Routes = require('./routes/phase2Routes');
-// const phase3Routes = require('./routes/phase3Routes');
 const cmsRoutes = require('./routes/cmsRoutes');
 const healthRoutes = require('./routes/healthRoutes');
 const domainRoutes = require('./routes/domainRoutes');
 const mediaRoutes = require('./routes/mediaRoutes');
 
-app.use('/api/auth', authRoutes);
+app.use('/api/auth', authRoutes); // Fallback for other auth actions like /auth/me or /auth/logout
 app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/users', userRoutes);
@@ -123,10 +163,7 @@ app.use('/api/contact', contactRoutes);
 app.use('/api/newsletter', newsletterRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/domains', domainRoutes);
-app.post('/api/track', require('./controllers/analyticsController').track); // Direct alias for frontend
-// app.use('/api/phase1', phase1Routes); // Legacy Mongoose Routes - Disabling to prevent crashes on missing models
-// app.use('/api/phase2', phase2Routes);
-// app.use('/api/phase3', phase3Routes);
+app.post('/api/track', require('./controllers/analyticsController').track);
 app.use('/api/cms', cmsRoutes);
 app.use('/api/cms/performance-hub', require('./routes/performanceHubRoutes'));
 app.use('/api/seller', require('./routes/sellerRoutes'));
@@ -154,47 +191,18 @@ app.use((err, req, res, next) => {
   }
 })();
 
-/*
-// Only start server if running directly
-if (require.main === module) {
-  const bootstrap = require('./bootstrap');
-  bootstrap().then(({ config }) => {
-    const PORT = config.port;
-    app.listen(PORT, '127.0.0.1', () => {
-      logger.info(`Server running on http://127.0.0.1:${PORT}`);
-      logger.info(`Mode: ${config.env}`);
-    }).on('error', (err) => {
-      if (err.code === 'EADDRINUSE') {
-        logger.error(`Port ${PORT} is already in use!`);
-        process.exit(1);
-      } else {
-        logger.error('Server error', { error: err.message });
-      }
-    });
-  }).catch(err => {
-    console.error('❌ FATAL: Bootstrap failed:', err);
-    process.exit(1);
-  });
-}
-*/
-
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // ─── ERROR HANDLER ───────────────────────────────────────────────────────────
 process.on('unhandledRejection', (reason, promise) => {
   logger.error('Unhandled Rejection at:', { promise, reason: reason?.message || reason });
-  // Flush logs if possible, then exit to allow restart
-  setTimeout(() => {
-    process.exit(1);
-  }, 1000);
+  setTimeout(() => { process.exit(1); }, 1000);
 });
 
 process.on('uncaughtException', (error) => {
   logger.error('Uncaught Exception:', { error: error.message, stack: error.stack });
-  // Flush logs if possible, then exit
-  setTimeout(() => {
-    process.exit(1);
-  }, 1000);
+  setTimeout(() => { process.exit(1); }, 1000);
 });
 
+// Fully export the Express standard app! Vercel Node Runtime expects exactly this.
 module.exports = app;
