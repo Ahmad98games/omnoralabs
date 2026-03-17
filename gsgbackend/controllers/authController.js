@@ -48,7 +48,7 @@ exports.register = async (req, res) => {
             .insert([{
                 email,
                 password_hash,
-                display_name: name || `${firstName} ${lastName}`,
+                name: name || `${firstName} ${lastName}`,
                 store_slug: name.toLowerCase().replace(/[^a-z0-9]/g, '') || `store-${Date.now()}`,
                 subscription: req.body.role === 'seller' ? 'pro' : 'free',
                 metadata: { firstName, lastName, role: req.body.role || 'customer' }
@@ -95,7 +95,7 @@ exports.register = async (req, res) => {
                 id: user.id,
                 firstName: user.metadata?.firstName,
                 lastName: user.metadata?.lastName,
-                name: user.display_name,
+                name: user.name,
                 email: user.email,
                 role: user.metadata?.role
             }
@@ -138,7 +138,7 @@ exports.login = async (req, res) => {
                 id: user.id,
                 firstName: user.metadata?.firstName || user.firstName,
                 lastName: user.metadata?.lastName || user.lastName,
-                name: user.display_name || `${user.firstName} ${user.lastName}`.trim(),
+                name: user.name || `${user.firstName} ${user.lastName}`.trim(),
                 email: user.email,
                 role: user.metadata?.role || user.role
             }
