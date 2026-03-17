@@ -9,7 +9,7 @@ interface State {
     error?: Error;
 }
 
-import { trackEvent } from '../api/client';
+// import { trackEvent } from '../api/client';
 
 class GlobalErrorBoundary extends Component<Props, State> {
     public state: State = {
@@ -23,7 +23,8 @@ class GlobalErrorBoundary extends Component<Props, State> {
     public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
         console.error('Uncaught error:', error, errorInfo);
 
-        // 🚀 Telemetry: Report the exact component crash to backend
+        // 🚀 Telemetry Disabled for now
+        /*
         trackEvent({
             type: 'react_crash',
             path: window.location.pathname,
@@ -33,6 +34,7 @@ class GlobalErrorBoundary extends Component<Props, State> {
                 componentStack: errorInfo.componentStack
             }
         });
+        */
     }
 
 
