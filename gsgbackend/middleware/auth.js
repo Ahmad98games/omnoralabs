@@ -39,6 +39,10 @@ const attachUser = async (decoded) => {
 };
 
 const protect = async (req, res, next) => {
+  if (!process.env.SUPABASE_ANON_KEY) {
+    logger.error('Backend Config Error: Missing Supabase Key');
+    return res.status(500).json({ error: 'Backend Config Error: Missing Supabase Key' });
+  }
   try {
     const token = extractToken(req);
     if (!token) {

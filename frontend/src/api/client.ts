@@ -66,12 +66,13 @@ client.interceptors.response.use(
     // Global Auth Error Handling
     if (error.response?.status === 401 && window.location.pathname !== '/login') {
       localStorage.removeItem('token');
+      console.error(`[Omnora API] Unauthorized (401) Response:`, error.response?.data);
       window.location.href = '/login';
       return Promise.reject(error);
     }
 
     if (error.response?.status === 403) {
-      console.warn(`[Omnora API] Forbidden (403): Access restricted for ${error.config?.url}`);
+      console.error(`[Omnora API] Forbidden (403) Response:`, error.response?.data);
       return Promise.reject(error);
     }
 
