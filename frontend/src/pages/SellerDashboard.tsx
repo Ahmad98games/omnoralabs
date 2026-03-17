@@ -46,6 +46,7 @@ import { BuilderToolbar } from '../components/cms/BuilderToolbar';
 import { useStorefront } from '../hooks/useStorefront';
 import { useToast } from '../context/ToastContext';
 import { useBuilder } from '../context/BuilderContext';
+import { db } from '../lib/supabaseClient';
 import { TourOverlay } from '../components/cms/help/TourOverlay';
 import { BuilderHelpPage } from './builder/BuilderHelpPage';
 import AdminBillingManager from '../components/admin/AdminBillingManager';
@@ -221,12 +222,15 @@ export default function SellerDashboard() {
 
     const fetchContent = async () => {
         try {
-            const [statsRes, cmsRes] = await Promise.all([
-                client.get('/cms/performance-hub'),
-                client.get('/cms/content'),
-            ]);
+            // Stats remains Axios (as not specifically excluded in instructions)
+            const statsRes = await client.get('/cms/performance-hub');
             if (statsRes.data.success) setStats(statsRes.data.stats);
-            if (cmsRes.data.success) setLocalContent(cmsRes.data.content);
+
+            // ⚡ Bypassing Axios for content DB queries
+            if (user?.id) {
+                const content = await db.getMerchantContent(user.id);
+                if (content) setLocalContent(content);
+            }
         } catch (err) {
             console.error('Failed to fetch dashboard content:', err);
         } finally {
@@ -258,14 +262,36 @@ export default function SellerDashboard() {
         }
     };
 
-    const addPage = (name: string) => {
+    const addPage = async (name: string) => {
         try {
             if (!name.trim()) return;
             const slug = name.toLowerCase().replace(/[^a-z0-9]/g, '-');
-            setLocalContent((p: any) => ({
-                ...p,
-                pages: { ...p.pages, [slug]: { title: name, layout: [{ type: 'hero', data: { headline: name } }] } }
-            }));
+            
+            // 🛡️ Safe spread logic check if null to prevent white screens
+            setLocalContent((p: any) => {
+                const base = p || { pages: {} };
+                return {
+                    ...base,
+                    pages: {
+                        ...(base.pages || {}),
+                        [slug]: { title: name, layout: [{ type: 'hero', data: { headline: name } }] }
+                    }
+                };
+            });
+
+            // 🛡️ SDK direct Sync
+            if (user?.id) {
+                const base = localContent || { pages: {} };
+                const updatedContent = {
+                    ...base,
+                    pages: {
+                        ...(base.pages || {}),
+                        [slug]: { title: name, layout: [{ type: 'hero', data: { headline: name } }] }
+                    }
+                };
+                await db.createPage(user.id, name, updatedContent);
+            }
+
             setAddPageOpen(false);
             showToast('Page created successfully', 'success');
         } catch (err) {
