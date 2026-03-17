@@ -27,14 +27,6 @@ client.interceptors.request.use(
     const tenantId = localStorage.getItem('tenantId');
 
     // 1. Auth Guard: Block requests without token unless public
-    const EXEMPT_PATHS = ['/auth/login', '/auth/register', '/auth/verify'];
-    const isExempt = EXEMPT_PATHS.some(path => config.url?.includes(path));
-
-    if (!token && !isExempt) {
-      console.warn(`[Omnora API] Request blocked: Missing Token for ${config.url}`);
-      return Promise.reject(new Error('AUTH_TOKEN_REQUIRED'));
-    }
-
     if (token && token !== 'undefined' && token !== 'null') {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -59,7 +51,7 @@ client.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     if (error.response?.status === 401 && window.location.pathname !== '/login') {
-      localStorage.clear();
+      // 🛡️ Gentle Redirect: Let AuthContext handle re-hydration or session resets 
       window.location.href = '/login';
       return Promise.reject(error);
     }
