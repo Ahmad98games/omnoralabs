@@ -61,7 +61,7 @@ client.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     // Global Auth Error Handling
-    if (error.response?.status === 401) {
+    if (error.response?.status === 401 && window.location.pathname !== '/login') {
       localStorage.removeItem('token');
       window.location.href = '/login';
       return Promise.reject(error);
