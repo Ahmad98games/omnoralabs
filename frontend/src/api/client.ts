@@ -33,7 +33,7 @@ client.interceptors.request.use(
     const token = localStorage.getItem('token');
     const tenantId = localStorage.getItem('tenantId');
 
-    if (token) {
+    if (token && token !== 'undefined' && token !== 'null') {
       config.headers.Authorization = `Bearer ${token}`;
     }
     

@@ -90,13 +90,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         client.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
         try {
-            // Add timeout to prevent hanging on mobile
+            // Add timeout to prevent hanging
             const { data } = await client.get('/auth/me', { timeout: 3000 });
             if (data.success && data.user) {
                 setUser(data.user);
                 setStatus('authenticated');
             } else {
                 setStatus('unauthenticated');
+                if (window.location.pathname !== '/login' && !window.location.pathname.startsWith('/store')) {
+                    window.location.href = '/login';
+                }
             }
             setLoading(false);
             setIsInitialized(true);
@@ -105,6 +108,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setStatus('unauthenticated');
             setLoading(false);
             setIsInitialized(true);
+            if (window.location.pathname !== '/login' && !window.location.pathname.startsWith('/store')) {
+                window.location.href = '/login';
+            }
         }
     }, []);
 

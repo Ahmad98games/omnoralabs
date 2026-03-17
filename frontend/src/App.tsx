@@ -1,7 +1,7 @@
 import React, { Suspense } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { HelmetProvider } from 'react-helmet-async';
-import ErrorBoundary from './components/ErrorBoundary';
+import GlobalErrorBoundary from './components/GlobalErrorBoundary';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
 import { HostnameInterceptor } from './components/HostnameInterceptor';
@@ -51,9 +51,9 @@ const queryClient = new QueryClient({
 
 export default function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <HelmetProvider>
-        <ErrorBoundary>
+    <GlobalErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <HelmetProvider>
           <RenderPipelineProvider>
             <ThemeProvider>
               <AuthProvider>
@@ -87,10 +87,10 @@ export default function App() {
                 </ToastProvider>
               </HostnameInterceptor>
             </AuthProvider>
-          </ThemeProvider>
+            </ThemeProvider>
           </RenderPipelineProvider>
-        </ErrorBoundary>
-      </HelmetProvider>
-    </QueryClientProvider>
+        </HelmetProvider>
+      </QueryClientProvider>
+    </GlobalErrorBoundary>
   );
 }

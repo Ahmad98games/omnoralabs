@@ -43,7 +43,8 @@ import { BuilderProvider } from '../context/BuilderContext';
 import { LiveCanvas } from '../components/cms/LiveCanvas';
 import { ElementLibrary } from '../components/cms/ElementLibrary';
 import { BuilderToolbar } from '../components/cms/BuilderToolbar';
-import { useBuilder } from '../context/BuilderContext';
+import { useStorefront } from '../hooks/useStorefront';
+import { useToast } from '../context/ToastContext';
 import { TourOverlay } from '../components/cms/help/TourOverlay';
 import { BuilderHelpPage } from './builder/BuilderHelpPage';
 import AdminBillingManager from '../components/admin/AdminBillingManager';
@@ -197,7 +198,8 @@ const AddPageModal = ({ onClose, onAdd }: { onClose: () => void; onAdd: (name: s
 // ─── Main dashboard ───────────────────────────────────────────────────────────
 
 export default function SellerDashboard() {
-    const { user, isInitialized } = useAuth();
+    const { user, handleLogoutCleanup, isInitialized, loading } = useAuth();
+    const { showToast } = useToast();
     const [searchParams, setSearchParams] = useSearchParams();
     const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'overview');
     const [mobileSidebarOpen, setMob] = useState(false);
@@ -261,13 +263,19 @@ export default function SellerDashboard() {
     };
 
     const addPage = (name: string) => {
-        if (!name.trim()) return;
-        const slug = name.toLowerCase().replace(/[^a-z0-9]/g, '-');
-        setLocalContent((p: any) => ({
-            ...p,
-            pages: { ...p.pages, [slug]: { title: name, layout: [{ type: 'hero', data: { headline: name } }] } }
-        }));
-        setAddPageOpen(false);
+        try {
+            if (!name.trim()) return;
+            const slug = name.toLowerCase().replace(/[^a-z0-9]/g, '-');
+            setLocalContent((p: any) => ({
+                ...p,
+                pages: { ...p.pages, [slug]: { title: name, layout: [{ type: 'hero', data: { headline: name } }] } }
+            }));
+            setAddPageOpen(false);
+            showToast('Page created successfully', 'success');
+        } catch (err) {
+            console.error('[Page Creation Failed]', err);
+            showToast('Failed to create page. Data structure invariant broken.', 'error');
+        }
     };
 
     if (!isInitialized) {
