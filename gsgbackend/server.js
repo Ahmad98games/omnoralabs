@@ -141,7 +141,7 @@ app.use('/api/health', healthRoutes);
 // Global error handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).json({ error: err.message });
+  res.status(500).json({ error: err.message, stack: err.stack });
 });
 
 // --- ASYNC IIFE FOR BACKGROUND BOOTSTRAP ---
