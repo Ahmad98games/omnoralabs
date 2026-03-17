@@ -11,10 +11,7 @@ class AIController {
       const apiKey = process.env.GROQ_API_KEY;
 
       if (!apiKey) {
-        return res.status(500).json({
-          success: false,
-          error: 'GROQ_API_KEY is not configured in environment variables'
-        });
+        return res.status(500).json({ error: "Backend Missing GROQ_API_KEY" });
       }
 
       const response = await axios.post('https://api.groq.com/openai/v1/chat/completions', {

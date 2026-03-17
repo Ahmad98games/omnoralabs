@@ -32,14 +32,10 @@ client.interceptors.request.use(
     // 1. Auth Token
     const token = localStorage.getItem('token');
     if (token) {
-      if (config.headers.set) {
-         config.headers.set('Authorization', `Bearer ${token}`);
-      } else {
-         config.headers['Authorization'] = `Bearer ${token}`;
-      }
+      config.headers.Authorization = `Bearer ${token}`;
       console.log(`Outbound Request with Token: ${token.substring(0, 5)}`);
     } else {
-      console.log(`[Omnora Auth] Token attached: False (${config.url})`);
+      console.error(`DEBUG: No token found in localStorage for request to ${config.url}`);
     }
 
     // 2. Multi-Tenant Gateway Scoping
