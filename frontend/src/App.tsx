@@ -30,6 +30,13 @@ import { BuilderHelpPage } from './pages/builder/BuilderHelpPage';
 import SellerDashboard from './pages/SellerDashboard';
 import { ROUTES } from './routes';
 
+import client from './api/client';
+
+const token = localStorage.getItem('token');
+if (token) {
+  client.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+}
+
 // Hardened Cache Configuration
 const queryClient = new QueryClient({
   defaultOptions: {

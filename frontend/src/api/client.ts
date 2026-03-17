@@ -37,7 +37,7 @@ client.interceptors.request.use(
       } else {
          config.headers['Authorization'] = `Bearer ${token}`;
       }
-      console.log(`[Omnora Auth] Token attached: True (${config.url})`);
+      console.log(`Outbound Request with Token: ${token.substring(0, 5)}`);
     } else {
       console.log(`[Omnora Auth] Token attached: False (${config.url})`);
     }
@@ -67,6 +67,7 @@ client.interceptors.response.use(
     // Global Auth Error Handling
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
+      window.location.href = '/login';
       return Promise.reject(error);
     }
 
