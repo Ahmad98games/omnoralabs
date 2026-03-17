@@ -19,6 +19,7 @@ export interface User {
 
 interface AuthContextType {
     user: User | null;
+    status: 'initializing' | 'authenticated' | 'unauthenticated';
     loading: boolean;
     isInitialized: boolean;
     login: (email: string, password: string) => Promise<User>;
@@ -50,6 +51,7 @@ const setAuthHeader = (token: string | null) => {
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
+    const [status, setStatus] = useState<'initializing' | 'authenticated' | 'unauthenticated'>('initializing');
     const [loading, setLoading] = useState(true);
     const [isInitialized, setIsInitialized] = useState(false);
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
@@ -79,6 +81,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (!token) {
             setLoading(false);
             setIsInitialized(true);
+            setStatus('unauthenticated');
             return;
         }
 
@@ -91,15 +94,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const { data } = await client.get('/auth/me', { timeout: 3000 });
             if (data.success && data.user) {
                 setUser(data.user);
+                setStatus('authenticated');
             } else {
-                throw new Error('Invalid session');
+                setStatus('unauthenticated');
             }
             setLoading(false);
             setIsInitialized(true);
         } catch (error) {
-            console.error('Session validation failed:', error);
-            setAuthError(true);
-            handleLogoutCleanup();
+            console.warn('Session re-hydration failure:', error);
+            setStatus('unauthenticated');
             setLoading(false);
             setIsInitialized(true);
         }
@@ -185,6 +188,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const value = {
         user,
+        status,
         loading,
         isInitialized,
         login,
@@ -201,33 +205,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setAuthModalOpen
     };
 
-    if (!isInitialized) {
-        return (
-            <AuthContext.Provider value={value}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#050505' }}>
-                    <div className="champagne-spinner" style={{ width: '40px', height: '40px', border: '3px solid rgba(241,213,146,0.1)', borderTop: '3px solid #F1D592', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
-                    <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
-                </div>
-            </AuthContext.Provider>
-        );
-    }
-
-    if (!user && authError && window.location.pathname !== '/login') {
-        return (
-            <AuthContext.Provider value={value}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#050505', flexDirection: 'column' }}>
-                    <div style={{ fontSize: '48px', color: '#F1D592', fontFamily: 'serif', marginBottom: '20px' }}>O</div>
-                    <h2 style={{ color: '#fff', fontSize: '16px', letterSpacing: '0.05em', marginBottom: '30px', fontWeight: 'normal' }}>Sovereign Intercept: Connection Fragmented</h2>
-                    <button onClick={() => window.location.href = '/login'} style={{ padding: '12px 24px', background: 'linear-gradient(135deg, #F1D592 0%, #D4AF37 100%)', color: '#050505', border: 'none', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold', letterSpacing: '0.1em', cursor: 'pointer', textTransform: 'uppercase', transition: 'transform 0.2s', boxShadow: '0 4px 15px rgba(241,213,146,0.2)' }} onMouseOver={e => e.currentTarget.style.transform = 'scale(1.05)'} onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}>
-                        Re-establish Connection
-                    </button>
-                </div>
-            </AuthContext.Provider>
-        );
-    }
-
     return (
         <AuthContext.Provider value={value}>
+            {status === 'initializing' && (
+                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, height: '3px', background: 'linear-gradient(to right, #F1D592, #D4AF37)', zIndex: 9999, animation: 'imperial-pulse 1.5s infinite ease-in-out' }}>
+                    <style>{`@keyframes imperial-pulse { 0% { opacity: 0.6; width: 0%; } 50% { opacity: 1; width: 50%; } 100% { opacity: 0.6; width: 100%; } }`}</style>
+                    <span style={{ position: 'absolute', top: '8px', right: '16px', color: '#F1D592', fontSize: '10px', letterSpacing: '0.1em', fontFamily: 'serif' }}>Re-establishing Imperial Link...</span>
+                </div>
+            )}
             {children}
         </AuthContext.Provider>
     );

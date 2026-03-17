@@ -31,11 +31,14 @@ client.interceptors.request.use(
   (config) => {
     // 1. Auth Token
     const token = localStorage.getItem('token');
+    const tenantId = localStorage.getItem('tenantId');
+
     if (token) {
-      config.headers.Authorization = `Bearer ${localStorage.getItem('token')}`;
-      console.log(`Outbound Request with Token: ${token.substring(0, 5)}`);
-    } else {
-      console.error(`DEBUG: No token found in localStorage for request to ${config.url}`);
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    
+    if (tenantId) {
+      config.headers['x-tenant-id'] = tenantId;
     }
 
     // 2. Multi-Tenant Gateway Scoping
@@ -64,6 +67,11 @@ client.interceptors.response.use(
     if (error.response?.status === 401 && window.location.pathname !== '/login') {
       localStorage.removeItem('token');
       window.location.href = '/login';
+      return Promise.reject(error);
+    }
+
+    if (error.response?.status === 403) {
+      console.warn(`[Omnora API] Forbidden (403): Access restricted for ${error.config?.url}`);
       return Promise.reject(error);
     }
 
