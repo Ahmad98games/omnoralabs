@@ -9,7 +9,7 @@ import {
 import './AdminDashboard.css'; // Preserving the CSS import just in case, though styles are inline
 
 export default function AdminDashboard() {
-    const { user } = useAuth();
+    const { user, authReady } = useAuth();
     // Assuming user.id serves as the merchantId in this architecture based on previous context
     const merchantId = user?.id || ''; 
 
@@ -38,10 +38,10 @@ export default function AdminDashboard() {
             }
         };
 
-        if (merchantId) {
+        if (merchantId && authReady) {
             fetchData();
         }
-    }, [merchantId]);
+    }, [merchantId, authReady]);
 
     const handleGenerateInsights = async () => {
         if (!stats) return;
@@ -66,6 +66,14 @@ export default function AdminDashboard() {
             setInsightStatus('error');
         }
     };
+
+    if (!authReady) {
+        return (
+            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', background: '#0a0a0f', minHeight: '100vh', color: '#F1D592', fontFamily: 'serif' }}>
+                <div style={{ fontSize: '18px', letterSpacing: '0.1em' }}>Imperial Loading...</div>
+            </div>
+        );
+    }
 
     if (isLoading) {
         return (
