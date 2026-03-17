@@ -46,7 +46,7 @@ import { BuilderToolbar } from '../components/cms/BuilderToolbar';
 import { useStorefront } from '../hooks/useStorefront';
 import { useToast } from '../context/ToastContext';
 import { useBuilder } from '../context/BuilderContext';
-import { db } from '../lib/supabaseClient';
+import cmsApi from '../api/cmsApi';
 import { TourOverlay } from '../components/cms/help/TourOverlay';
 import { BuilderHelpPage } from './builder/BuilderHelpPage';
 import AdminBillingManager from '../components/admin/AdminBillingManager';
@@ -222,27 +222,15 @@ export default function SellerDashboard() {
 
     const fetchContent = async () => {
         try {
-            // Stats remains Axios (as not specifically excluded in instructions)
-            const statsRes = await client.get('/cms/performance-hub');
-            if (statsRes.data.success) setStats(statsRes.data.stats);
+            // 🛰️ Backend Bridge: Stats + CMS data together via Axios proxying
+            const [statsRes, cmsRes] = await Promise.all([
+                client.get('/cms/performance-hub'),
+                cmsApi.get('/cms/dashboard')
+            ]);
 
-            // ⚡ Bypassing Axios for content DB queries
-            if (user?.id) {
-                const content = await db.getMerchantContent(user.id);
-                if (content) {
-                    setLocalContent(content);
-                } else {
-                    // 🛡️ Null Guard: Initialize defaults to prevent White Screen
-                    setLocalContent({ 
-                        pages: { 
-                            home: { 
-                                title: 'Home', 
-                                layout: [{ type: 'hero', data: { headline: 'Welcome to your Workspace' } }] 
-                            } 
-                        } 
-                    });
-                }
-            }
+            if (statsRes.data.success) setStats(statsRes.data.stats);
+            if (cmsRes.data.success) setLocalContent(cmsRes.data.content);
+
         } catch (err) {
             console.error('Failed to fetch dashboard content:', err);
         } finally {
@@ -291,19 +279,7 @@ export default function SellerDashboard() {
                 };
             });
 
-            // 🛡️ SDK direct Sync
-            if (user?.id) {
-                const base = localContent || { pages: {} };
-                const updatedContent = {
-                    ...base,
-                    pages: {
-                        ...(base.pages || {}),
-                        [slug]: { title: name, layout: [{ type: 'hero', data: { headline: name } }] }
-                    }
-                };
-                await db.createPage(user.id, name, updatedContent);
-            }
-
+            // 🛡️ Direct SDK calls removed for Backend Bridge compliance
             setAddPageOpen(false);
             showToast('Page created successfully', 'success');
         } catch (err) {

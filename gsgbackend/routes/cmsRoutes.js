@@ -5,6 +5,49 @@ const { supabase } = require('../../backend/shared/lib/supabaseClient');
 const { requireAuth, seller } = require('../../backend/middleware/authMiddleware');
 const { sanitizeManifest } = require('../../backend/services/manifestService');
 const { validateManifest } = require('../../backend/services/preflightService');
+const { supabaseAdmin } = require('../config/supabaseAdmin'); // 🛡️ Admin Bridge
+
+// @desc    Get dashboard metrics & pages (Backend Bridge)
+// @route   GET /api/cms/dashboard
+router.get('/dashboard', requireAuth, async (req, res) => {
+    try {
+        const merchantId = req.user.id || req.user._id;
+
+        if (!merchantId) {
+            return res.status(401).json({ success: false, error: 'User Not Identified' });
+        }
+
+        // Fetch using Admin Client bypassing RLS
+        let { data, error } = await supabaseAdmin
+            .from('pages')
+            .select('*')
+            .eq('merchant_id', merchantId);
+
+        if (error) {
+            console.error('[CMS Bridge Error]:', error);
+            return res.status(500).json({ success: false, error: 'BRIDGE_CONNECTION_FAILED', details: error.message });
+        }
+
+        // 🛡️ Fallback Default if empty layout
+        if (!data || data.length === 0) {
+            const defaultContent = {
+                pages: {
+                    home: {
+                        title: "Home",
+                        layout: [{ type: 'hero', data: { headline: 'Welcome to your Workspace' } }]
+                    }
+                }
+            };
+            return res.json({ success: true, content: defaultContent });
+        }
+
+        return res.json({ success: true, content: data[0].content });
+
+    } catch (err) {
+        console.error('[CMS Bridge Crash]:', err);
+        return res.status(500).json({ success: false, error: 'BRIDGE_CONNECTION_FAILED' });
+    }
+});
 
 // @desc    Get site content (Autonomous & Isolated)
 // @route   GET /api/cms/content
