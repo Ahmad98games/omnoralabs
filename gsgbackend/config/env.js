@@ -40,9 +40,9 @@ const config = {
     },
 
     jwt: {
-        secret: process.env.JWT_SECRET || 'default_secret_for_development',
+        secret: process.env.JWT_SECRET || 'gsiWgCJDeUF4ifOIC74IbrCTyHtJuCCgEyswqaJbFyTUR11bI/EVjCrJdyv4Nnx2IlgT2saupDAToIP4G6odCw==',
         expiresIn: process.env.JWT_EXPIRES_IN || '7d',
-        refreshSecret: process.env.JWT_REFRESH_SECRET || 'default_refresh_secret',
+        refreshSecret: process.env.JWT_REFRESH_SECRET || 'gsiWgCJDeUF4ifOIC74IbrCTyHtJuCCgEyswqaJbFyTUR11bI/EVjCrJdyv4Nnx2IlgT2saupDAToIP4G6odCw==-refresh',
         refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '30d',
         approvalSecret: process.env.APPROVAL_TOKEN_SECRET || 'approval_secret'
     },
