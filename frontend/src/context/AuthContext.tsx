@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import client from '../api/client';
-import { isAxiosError } from 'axios';
+import axios, { isAxiosError } from 'axios';
 
 // Define the User Shape clearly
 export interface User {
@@ -40,8 +40,10 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const setAuthHeader = (token: string | null) => {
     if (token) {
         client.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     } else {
         delete client.defaults.headers.common['Authorization'];
+        delete axios.defaults.headers.common['Authorization'];
     }
 };
 

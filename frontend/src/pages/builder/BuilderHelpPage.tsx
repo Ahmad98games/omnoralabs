@@ -17,8 +17,8 @@ const DEFAULT_GUIDES = [
     { icon: 'Zap', title: "Saving & Publishing", description: "Ready to go live? Learn how to stage your changes and publish to your domain.", steps: ["Builder auto-saves your progress", "Preview across Mobile, Tablet, Desktop", "Click Publish to deploy changes", "Review SEO and Social meta tags"] }
 ];
 
-const ACCENT = '#6366F1';
-const DARK = '#0F172A';
+const ACCENT = '#F1D592';
+const DARK = '#050505';
 
 const SectionCard = ({ icon: Icon, title, description, steps }: any) => {
     const [isHovered, setIsHovered] = useState(false);
@@ -29,11 +29,11 @@ const SectionCard = ({ icon: Icon, title, description, steps }: any) => {
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
             style={{
-                background: '#FFFFFF',
+                background: '#0a0a0a',
                 borderRadius: 20,
                 padding: 24,
-                border: `1px solid ${isHovered ? 'rgba(99, 102, 241, 0.2)' : '#E2E8F0'}`,
-                boxShadow: isHovered ? '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)' : 'none',
+                border: `1px solid ${isHovered ? 'rgba(241, 213, 146, 0.4)' : '#1A1A1A'}`,
+                boxShadow: isHovered ? '0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.2)' : 'none',
                 transition: 'all 0.3s ease'
             }}
         >
@@ -41,7 +41,7 @@ const SectionCard = ({ icon: Icon, title, description, steps }: any) => {
                 width: 48,
                 height: 48,
                 borderRadius: 14,
-                background: isHovered ? ACCENT : 'rgba(99, 102, 241, 0.05)',
+                background: isHovered ? ACCENT : '#1A1A1A',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -50,8 +50,8 @@ const SectionCard = ({ icon: Icon, title, description, steps }: any) => {
             }}>
                 <Icon size={24} color={isHovered ? '#FFFFFF' : ACCENT} />
             </div>
-            <h3 style={{ fontSize: 18, fontWeight: 800, color: DARK, marginBottom: 12 }}>{title}</h3>
-            <p style={{ fontSize: 14, color: '#64748b', lineHeight: 1.6, marginBottom: 20 }}>{description}</p>
+            <h3 style={{ fontSize: 18, fontWeight: 800, color: '#FFFFFF', marginBottom: 12 }}>{title}</h3>
+            <p style={{ fontSize: 14, color: '#A1A1AA', lineHeight: 1.6, marginBottom: 20 }}>{description}</p>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 {steps.map((step: string, i: number) => (
@@ -60,8 +60,8 @@ const SectionCard = ({ icon: Icon, title, description, steps }: any) => {
                             width: 18,
                             height: 18,
                             borderRadius: '50%',
-                            background: 'rgba(16, 185, 129, 0.1)',
-                            color: '#10B981',
+                            background: 'rgba(241, 213, 146, 0.1)',
+                            color: ACCENT,
                             fontSize: 10,
                             fontWeight: 800,
                             display: 'flex',
@@ -72,7 +72,7 @@ const SectionCard = ({ icon: Icon, title, description, steps }: any) => {
                         }}>
                             {i + 1}
                         </div>
-                        <span style={{ fontSize: 13, color: '#334155', fontWeight: 500 }}>{step}</span>
+                        <span style={{ fontSize: 13, color: '#D4D4D8', fontWeight: 500 }}>{step}</span>
                     </div>
                 ))}
             </div>
@@ -99,7 +99,7 @@ export const BuilderHelpPage: React.FC = () => {
     return (
         <div style={{
             minHeight: '100vh',
-            background: '#F8FAFC',
+            background: DARK,
             fontFamily: "'Inter', system-ui, sans-serif",
             padding: '40px 20px'
         }}>
@@ -112,13 +112,13 @@ export const BuilderHelpPage: React.FC = () => {
                             display: 'flex',
                             alignItems: 'center',
                             gap: 8,
-                            background: '#FFFFFF',
-                            border: '1px solid #E2E8F0',
+                            background: '#0a0a0a',
+                            border: '1px solid #1A1A1A',
                             borderRadius: 12,
                             padding: '10px 16px',
                             fontSize: 13,
                             fontWeight: 700,
-                            color: '#64748b',
+                            color: '#A1A1AA',
                             cursor: 'pointer',
                             transition: 'all 0.2s'
                         }}
@@ -127,13 +127,13 @@ export const BuilderHelpPage: React.FC = () => {
                     </button>
                     <div style={{ display: 'flex', gap: 12 }}>
                         <button style={{
-                            background: '#FFFFFF',
-                            border: '1px solid #E2E8F0',
+                            background: '#0a0a0a',
+                            border: '1px solid #1A1A1A',
                             borderRadius: 12,
                             padding: '10px 20px',
                             fontSize: 13,
                             fontWeight: 700,
-                            color: DARK,
+                            color: '#F9F9F9',
                             cursor: 'pointer'
                         }}>
                             Documentation
@@ -152,7 +152,7 @@ export const BuilderHelpPage: React.FC = () => {
                             display: 'inline-flex',
                             alignItems: 'center',
                             gap: 8,
-                            background: 'rgba(99, 102, 241, 0.08)',
+                            background: 'rgba(241, 213, 146, 0.1)',
                             padding: '8px 16px',
                             borderRadius: 100,
                             color: ACCENT,
@@ -167,7 +167,7 @@ export const BuilderHelpPage: React.FC = () => {
                         <h1 style={{
                             fontSize: 48,
                             fontWeight: 900,
-                            color: DARK,
+                            color: '#FFFFFF',
                             marginBottom: 20,
                             letterSpacing: '-0.02em'
                         }}>
@@ -175,7 +175,7 @@ export const BuilderHelpPage: React.FC = () => {
                         </h1>
                         <p style={{
                             fontSize: 18,
-                            color: '#64748b',
+                            color: '#A1A1AA',
                             maxWidth: 600,
                             margin: '0 auto 40px',
                             lineHeight: 1.6
@@ -193,7 +193,7 @@ export const BuilderHelpPage: React.FC = () => {
                                 }}
                                 style={{
                                     background: ACCENT,
-                                    color: '#FFFFFF',
+                                    color: DARK,
                                     border: 'none',
                                     borderRadius: 14,
                                     padding: '16px 32px',
@@ -203,7 +203,7 @@ export const BuilderHelpPage: React.FC = () => {
                                     display: 'flex',
                                     alignItems: 'center',
                                     gap: 10,
-                                    boxShadow: '0 10px 20px -5px rgba(99, 102, 241, 0.4)'
+                                    boxShadow: '0 10px 20px -5px rgba(241, 213, 146, 0.2)'
                                 }}
                             >
                                 <PlayCircle size={20} /> Start Interactive Tour
@@ -232,23 +232,23 @@ export const BuilderHelpPage: React.FC = () => {
 
                 {/* Common Mistakes */}
                 <div style={{
-                    background: '#FFFFFF',
+                    background: '#0a0a0a',
                     borderRadius: 24,
                     padding: 40,
-                    border: '1px solid #E2E8F0',
+                    border: '1px solid #1A1A1A',
                     marginBottom: 80
                 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 32 }}>
                         <AlertTriangle color="#F59E0B" size={24} />
-                        <h2 style={{ fontSize: 24, fontWeight: 800, color: DARK }}>Common Mistakes</h2>
+                        <h2 style={{ fontSize: 24, fontWeight: 800, color: '#FFFFFF' }}>Common Mistakes</h2>
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: 40 }}>
                         <div style={{ display: 'flex', gap: 16 }}>
                             <div style={{ flexShrink: 0, marginTop: 4 }}><X color="#EF4444" size={18} /></div>
                             <div>
-                                <h4 style={{ fontSize: 15, fontWeight: 700, color: DARK, marginBottom: 6 }}>Low Resolution Assets</h4>
-                                <p style={{ fontSize: 13, color: '#64748b', lineHeight: 1.5 }}>
+                                <h4 style={{ fontSize: 15, fontWeight: 700, color: '#FFFFFF', marginBottom: 6 }}>Low Resolution Assets</h4>
+                                <p style={{ fontSize: 13, color: '#A1A1AA', lineHeight: 1.5 }}>
                                     Using images smaller than 256px will result in blurry displays on high-density screens. Always aim for 512px or larger.
                                 </p>
                             </div>
@@ -256,8 +256,8 @@ export const BuilderHelpPage: React.FC = () => {
                         <div style={{ display: 'flex', gap: 16 }}>
                             <div style={{ flexShrink: 0, marginTop: 4 }}><X color="#EF4444" size={18} /></div>
                             <div>
-                                <h4 style={{ fontSize: 15, fontWeight: 700, color: DARK, marginBottom: 6 }}>Overcrowded Viewports</h4>
-                                <p style={{ fontSize: 13, color: '#64748b', lineHeight: 1.5 }}>
+                                <h4 style={{ fontSize: 15, fontWeight: 700, color: '#FFFFFF', marginBottom: 6 }}>Overcrowded Viewports</h4>
+                                <p style={{ fontSize: 13, color: '#A1A1AA', lineHeight: 1.5 }}>
                                     Don't forget to check mobile view. If a section looks too busy, use the "Hide on Mobile" toggle to keep it clean.
                                 </p>
                             </div>
@@ -265,8 +265,8 @@ export const BuilderHelpPage: React.FC = () => {
                         <div style={{ display: 'flex', gap: 16 }}>
                             <div style={{ flexShrink: 0, marginTop: 4 }}><X color="#EF4444" size={18} /></div>
                             <div>
-                                <h4 style={{ fontSize: 15, fontWeight: 700, color: DARK, marginBottom: 6 }}>Extreme Aspect Ratios</h4>
-                                <p style={{ fontSize: 13, color: '#64748b', lineHeight: 1.5 }}>
+                                <h4 style={{ fontSize: 15, fontWeight: 700, color: '#FFFFFF', marginBottom: 6 }}>Extreme Aspect Ratios</h4>
+                                <p style={{ fontSize: 13, color: '#A1A1AA', lineHeight: 1.5 }}>
                                     Very wide or very tall logos can become illegible in standard headers. Try to use a balanced container.
                                 </p>
                             </div>
@@ -274,8 +274,8 @@ export const BuilderHelpPage: React.FC = () => {
                         <div style={{ display: 'flex', gap: 16 }}>
                             <div style={{ flexShrink: 0, marginTop: 4 }}><X color="#EF4444" size={18} /></div>
                             <div>
-                                <h4 style={{ fontSize: 15, fontWeight: 700, color: DARK, marginBottom: 6 }}>Unsaved Drafts</h4>
-                                <p style={{ fontSize: 13, color: '#64748b', lineHeight: 1.5 }}>
+                                <h4 style={{ fontSize: 15, fontWeight: 700, color: '#FFFFFF', marginBottom: 6 }}>Unsaved Drafts</h4>
+                                <p style={{ fontSize: 13, color: '#A1A1AA', lineHeight: 1.5 }}>
                                     While the builder auto-saves locally, you must click 'Publish' to make those changes visible to your customers.
                                 </p>
                             </div>
@@ -287,19 +287,19 @@ export const BuilderHelpPage: React.FC = () => {
                 <div style={{
                     textAlign: 'center',
                     padding: '60px 0',
-                    borderTop: '1px solid #E2E8F0'
+                    borderTop: '1px solid #1A1A1A'
                 }}>
                     <BookOpen size={32} color={ACCENT} style={{ marginBottom: 16 }} />
-                    <h2 style={{ fontSize: 24, fontWeight: 800, color: DARK, marginBottom: 16 }}>Still need help?</h2>
-                    <p style={{ color: '#64748b', marginBottom: 32 }}>Our support team is available 24/7 to help you build the perfect store.</p>
+                    <h2 style={{ fontSize: 24, fontWeight: 800, color: '#FFFFFF', marginBottom: 16 }}>Still need help?</h2>
+                    <p style={{ color: '#A1A1AA', marginBottom: 32 }}>Our support team is available 24/7 to help you build the perfect store.</p>
                     <button style={{
-                        background: '#FFFFFF',
-                        border: '1px solid #E2E8F0',
+                        background: '#0a0a0a',
+                        border: '1px solid #1A1A1A',
                         borderRadius: 12,
                         padding: '12px 24px',
                         fontSize: 14,
                         fontWeight: 700,
-                        color: DARK,
+                        color: '#F9F9F9',
                         cursor: 'pointer'
                     }}>
                         Contact Support
