@@ -13,7 +13,7 @@ export const OmnoraProductGrid: React.FC<{ nodeId: string }> = ({ nodeId }) => {
     const { nodes, viewport, mode } = useOmnora();
     const node = nodes[nodeId];
 
-    const tenantId = (window as any).__OMNORA_TENANT_ID__ || 'default_tenant';
+    const tenantId = (window as any).__OMNORA_TENANT_ID__;
 
     const { data: products = [], isLoading } = useQuery({
         queryKey: ['products', tenantId],

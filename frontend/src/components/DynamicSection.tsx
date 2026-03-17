@@ -130,11 +130,11 @@ const AtomicButton: React.FC<BlockProps> = ({ nodeId }) => (
 );
 
 const FeaturedProduct: React.FC<BlockProps> = ({ nodeId, data = {} }) => {
-    const tenantId = (window as any).__OMNORA_TENANT_ID__ || 'default_tenant';
+    const tenantId = (window as any).__OMNORA_TENANT_ID__;
     const { data: products = [] } = useQuery({
         queryKey: ['products', tenantId],
-        queryFn: () => databaseClient.getProductsByMerchant(tenantId),
-        enabled: !!data.productId,
+        queryFn: () => databaseClient.getProductsByMerchant(tenantId!),
+        enabled: !!tenantId && !!data.productId,
     });
 
     const product = React.useMemo(() => {
