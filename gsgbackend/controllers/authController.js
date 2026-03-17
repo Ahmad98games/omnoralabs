@@ -49,7 +49,7 @@ exports.register = async (req, res) => {
                 email,
                 password_hash,
                 display_name: name || `${firstName} ${lastName}`,
-                store_slug: name.toLowerCase().replace(/[^a-z0-0]/g, '') || `store-${Date.now()}`,
+                store_slug: name.toLowerCase().replace(/[^a-z0-9]/g, '') || `store-${Date.now()}`,
                 subscription: req.body.role === 'seller' ? 'pro' : 'free',
                 metadata: { firstName, lastName, role: req.body.role || 'customer' }
             }])
