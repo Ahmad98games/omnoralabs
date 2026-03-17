@@ -229,7 +229,19 @@ export default function SellerDashboard() {
             // ⚡ Bypassing Axios for content DB queries
             if (user?.id) {
                 const content = await db.getMerchantContent(user.id);
-                if (content) setLocalContent(content);
+                if (content) {
+                    setLocalContent(content);
+                } else {
+                    // 🛡️ Null Guard: Initialize defaults to prevent White Screen
+                    setLocalContent({ 
+                        pages: { 
+                            home: { 
+                                title: 'Home', 
+                                layout: [{ type: 'hero', data: { headline: 'Welcome to your Workspace' } }] 
+                            } 
+                        } 
+                    });
+                }
             }
         } catch (err) {
             console.error('Failed to fetch dashboard content:', err);

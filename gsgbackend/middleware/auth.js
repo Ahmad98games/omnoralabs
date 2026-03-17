@@ -7,6 +7,10 @@ const { validateEnv } = require('../config/env');
 const config = validateEnv();
 const JWT_SECRET = config.jwt.secret;
 
+if (!JWT_SECRET || JWT_SECRET === 'default_secret_for_development') {
+    throw new Error('BACKEND_MISSING_JWT_SECRET');
+}
+
 const extractToken = (req) => {
   const authHeader = req.headers.authorization || req.headers.Authorization;
   if (authHeader && authHeader.startsWith('Bearer ')) {
@@ -63,8 +67,12 @@ const protect = async (req, res, next) => {
     req.user = user;
     return next();
   } catch (error) {
-    logger.warn('AUTH_FAIL: JWT verification failed', { error: error.message });
-    return res.status(401).json({ error: 'Not authorized. Invalid or expired token.' });
+    logger.error('AUTH_FAIL: JWT verification failed', { 
+      name: error.name, 
+      message: error.message, 
+      stack: error.stack 
+    });
+    return res.status(401).json({ error: `Not authorized. Invalid token: ${error.name}` });
   }
 };
 
