@@ -1,28 +1,46 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Vite mein process.env nahi chalta, import.meta.env chalta hai!
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://cuywxaeancehgibiibne.supabase.co';
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'sb_publishable_fSTvAeJdvOl4WkUIPVz65Q_xTTScsF-';
 
-console.log(`[Omnora Supabase] Init Key Prefix: ${supabaseKey.substring(0, 5)}...`);
+if (!supabaseUrl || !supabaseKey) {
+    console.warn('[Omnora Supabase] Absolute Initialization failure: missing URL or Key');
+}
 
-export const getSupabaseClient = () => {
-    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://cuywxaeancehgibiibne.supabase.co';
-    const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'sb_publishable_fSTvAeJdv014WkUIPVz65Q_xTTScsF-';
-
-    if (!supabaseUrl || !supabaseKey || supabaseKey === 'undefined') {
-        console.warn('[Omnora Supabase] Client disabled - VITE variables missing');
-        return null;
+export const supabase = createClient(supabaseUrl, supabaseKey, {
+    auth: {
+        persistSession: true,
+        autoRefreshToken: true,
     }
+});
 
-    try {
-        const client = createClient(supabaseUrl, supabaseKey);
-        console.log("Supabase Connection: ACTIVE");
-        return client;
-    } catch (err) {
-        console.warn('[Omnora Supabase] Initialization failure:', err);
-        return null;
-    }
+/**
+ * 🛡️ Defensive full-object error logger for Ahmad
+ */
+export const handleSupabaseError = (error: any, context: string) => {
+    console.error(`[Supabase Error] -> @\${context}:`, JSON.stringify(error, null, 2));
+    throw error;
 };
 
-export const supabase = getSupabaseClient();
+/**
+ * ⚡ Sample Fetcher Example: Bypassing Axios completely via SDK
+ */
+export const fetchProducts = async (tenantId: string) => {
+    try {
+        // Auto-Session Verification if required
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        const { data, error } = await supabase
+            .from('products')
+            .select('*')
+            .eq('merchant_id', tenantId);
+
+        if (error) {
+            handleSupabaseError(error, 'fetchProducts');
+        }
+
+        return data;
+    } catch (err) {
+        throw err;
+    }
+};
