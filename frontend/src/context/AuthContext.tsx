@@ -20,7 +20,7 @@ export interface User {
 interface AuthContextType {
     user: User | null;
     loading: boolean;
-    authReady: boolean;
+    isInitialized: boolean;
     login: (email: string, password: string) => Promise<User>;
     loginWithGoogle: () => Promise<void>;
     register: (name: string, email: string, password: string, role?: string) => Promise<User>;
@@ -51,7 +51,7 @@ const setAuthHeader = (token: string | null) => {
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
-    const [authReady, setAuthReady] = useState(false);
+    const [isInitialized, setIsInitialized] = useState(false);
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
     const [authModalMode, setAuthModalMode] = useState<'login' | 'signup'>('login');
 
@@ -78,12 +78,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         if (!token) {
             setLoading(false);
-            setAuthReady(true);
+            setIsInitialized(true);
             return;
         }
 
-        // Critical: Sync header before making the request
-        setAuthHeader(token);
+        // Global Headers set IMMEDIATELY before fetch
+        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        client.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
         try {
             // Add timeout to prevent hanging on mobile
@@ -94,13 +95,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 throw new Error('Invalid session');
             }
             setLoading(false);
-            setAuthReady(true);
+            setIsInitialized(true);
         } catch (error) {
             console.error('Session validation failed:', error);
             setAuthError(true);
             handleLogoutCleanup();
             setLoading(false);
-            setAuthReady(true);
+            setIsInitialized(true);
         }
     }, []);
 
@@ -185,7 +186,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const value = {
         user,
         loading,
-        authReady,
+        isInitialized,
         login,
         loginWithGoogle,
         register,

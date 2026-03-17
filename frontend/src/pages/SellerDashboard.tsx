@@ -197,7 +197,7 @@ const AddPageModal = ({ onClose, onAdd }: { onClose: () => void; onAdd: (name: s
 // ─── Main dashboard ───────────────────────────────────────────────────────────
 
 export default function SellerDashboard() {
-    const { user, authReady } = useAuth();
+    const { user, isInitialized } = useAuth();
     const [searchParams, setSearchParams] = useSearchParams();
     const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'overview');
     const [mobileSidebarOpen, setMob] = useState(false);
@@ -237,10 +237,10 @@ export default function SellerDashboard() {
     };
 
     useEffect(() => {
-        if (authReady) {
+        if (isInitialized) {
             fetchContent();
         }
-    }, [authReady]);
+    }, [isInitialized]);
 
     const save = async () => {
         setSaveStatus('saving');
@@ -270,7 +270,7 @@ export default function SellerDashboard() {
         setAddPageOpen(false);
     };
 
-    if (!authReady) {
+    if (!isInitialized) {
         return (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#050505', color: '#F1D592', fontFamily: 'serif', fontSize: '18px', letterSpacing: '0.05em' }}>
                 Imperial Loading...
