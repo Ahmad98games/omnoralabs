@@ -275,14 +275,14 @@ export default function SellerDashboard() {
         );
     }
 
-    const storeName = localContent?.configuration?.name || user?.name || 'My Store';
+    const storeName = user?.full_name || 'Imperial Store';
     const isBuilder = activeTab === 'builder';
 
     return (
         <div className="seller-dashboard">
 
             {/* ── Sidebar ── */}
-            <aside className={`seller-sidebar ${mobileSidebarOpen ? 'mobile-open' : ''}`}>
+            <aside className={`seller-sidebar w-[220px] bg-[#050505] backdrop-blur-xl border-r border-[#1A1A1A] custom-scrollbar overflow-y-auto ${mobileSidebarOpen ? 'mobile-open' : ''}`}>
                 {/* Brand */}
                 <div className="sidebar-brand">
                     <div className="brand-wrapper">
@@ -325,21 +325,22 @@ export default function SellerDashboard() {
             <div className="dashboard-main">
 
                 {/* Top header */}
-                <header className="top-header">
+                <header className="top-header bg-[#050505]/80 backdrop-blur-xl border-b border-[#1A1A1A]">
                     <div className="header-left">
                         {/* Mobile hamburger */}
                         <button onClick={() => setMob(o => !o)} className="menu-trigger">
                             ☰
                         </button>
-                        <h1>
-                            {NAV.find(n => n.id === activeTab)?.label ?? 'Dashboard'}
+                        <h1 className="text-xl text-[#F9F9F9] tracking-tight">
+                            <span className="font-sans font-medium opacity-80">Greetings, </span>
+                            <span className="font-serif font-light text-[#F1D592]">{storeName}</span>
                         </h1>
                     </div>
                     <div className="header-right">
                         {saveStatus === 'saving' && <span className="save-status">Saving…</span>}
                         {saveStatus === 'saved' && <span className="save-status success"><CheckCircle2 size={14} /> Saved</span>}
                         {saveStatus === 'error' && <span className="save-status error">Save failed</span>}
-                        <button onClick={save} className="save-btn">
+                        <button onClick={save} className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#F1D592] to-[#D4AF37] text-black font-bold text-sm transition-transform duration-300 hover:scale-105 shadow-[0_10px_30px_rgba(241,213,146,0.15)] hover:shadow-[0_15px_40px_rgba(241,213,146,0.25)]">
                             <Save size={15} /> Save changes
                         </button>
                     </div>
@@ -398,7 +399,7 @@ export default function SellerDashboard() {
 
                     {/* ── Builder (full-screen) ── */}
                     {activeTab === 'builder' && (
-                        <BuilderProvider initialData={localContent?.pages?.home} isPreview={false} tenantId={user?.id}>
+                        <BuilderProvider initialData={localContent?.pages?.home} isPreview={false} tenantId={user?.id} userName={user?.full_name || 'Your'}>
                             <AutoSaveManager />
                             <GlobalKeyboardShortcuts />
                             <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import client from '../api/client';
 import { isAxiosError } from 'axios';
 
@@ -56,40 +56,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setIsAuthModalOpen(open);
     };
 
-    // 1. INITIAL SESSION CHECK
-    useEffect(() => {
-        const initAuth = async () => {
-            const token = localStorage.getItem('token');
-
-            if (!token) {
-                setLoading(false);
-                return;
-            }
-
-            // Critical: Sync header before making the request
-            setAuthHeader(token);
-
-            try {
-                // Add timeout to prevent hanging on mobile
-                const { data } = await client.get('/auth/me', { timeout: 3000 });
-                if (data.success && data.user) {
-                    setUser(data.user);
-                } else {
-                    throw new Error('Invalid session');
-                }
-            } catch (error) {
-                console.error('Session validation failed:', error);
-                // On mobile, if network fails, we might still want to keep the token 
-                // but default to 'not verified' state or just log out safety.
-                // For admin stability, it is safer to LOGOUT if we can't verify identity.
-                handleLogoutCleanup();
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        initAuth();
-    }, []);
+    const [authError, setAuthError] = useState(false);
 
     // Helper function to clean up local state
     const handleLogoutCleanup = () => {
@@ -97,6 +64,44 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setAuthHeader(null); // Clear axios header
         setUser(null);
     };
+
+    // 1. INITIAL SESSION CHECK
+    const initAuth = useCallback(async () => {
+        setAuthError(false);
+        setLoading(true);
+        const token = localStorage.getItem('token');
+
+        if (!token) {
+            setLoading(false);
+            return;
+        }
+
+        // Critical: Sync header before making the request
+        setAuthHeader(token);
+
+        try {
+            // Add timeout to prevent hanging on mobile
+            const { data } = await client.get('/auth/me', { timeout: 3000 });
+            if (data.success && data.user) {
+                setUser(data.user);
+            } else {
+                throw new Error('Invalid session');
+            }
+            setLoading(false);
+        } catch (error) {
+            console.error('Session validation failed:', error);
+            // On mobile, if network fails, we might still want to keep the token 
+            // but default to 'not verified' state or just log out safety.
+            // For admin stability, it is safer to LOGOUT if we can't verify identity.
+            setAuthError(true);
+            handleLogoutCleanup();
+            setLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        initAuth();
+    }, [initAuth]);
 
     // 2. LOGIN
     const login = async (email: string, password: string) => {
@@ -187,7 +192,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setAuthModalOpen
     };
 
-    return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+    if (loading || authError) {
+        return (
+            <AuthContext.Provider value={value}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#050505', flexDirection: 'column' }}>
+                    {loading ? (
+                        <>
+                            <div style={{ fontSize: '48px', color: '#F1D592', fontFamily: 'serif', animation: 'glow 2s ease-in-out infinite' }}>O</div>
+                            <style>{`@keyframes glow { 0%, 100% { text-shadow: 0 0 10px rgba(241,213,146,0.3), 0 0 20px rgba(241,213,146,0.2); opacity: 0.8; } 50% { text-shadow: 0 0 20px rgba(241,213,146,0.6), 0 0 40px rgba(241,213,146,0.4); opacity: 1; } }`}</style>
+                        </>
+                    ) : (
+                        <>
+                            <div style={{ fontSize: '48px', color: '#F1D592', fontFamily: 'serif', marginBottom: '20px' }}>O</div>
+                            <h2 style={{ color: '#fff', fontSize: '16px', letterSpacing: '0.05em', marginBottom: '30px', fontWeight: 'normal' }}>Sovereign Intercept: Connection Fragmented</h2>
+                            <button onClick={initAuth} style={{ padding: '12px 24px', background: 'linear-gradient(135deg, #F1D592 0%, #D4AF37 100%)', color: '#050505', border: 'none', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold', letterSpacing: '0.1em', cursor: 'pointer', textTransform: 'uppercase', transition: 'transform 0.2s', boxShadow: '0 4px 15px rgba(241,213,146,0.2)' }} onMouseOver={e => e.currentTarget.style.transform = 'scale(1.05)'} onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}>
+                                Re-establish Connection
+                            </button>
+                        </>
+                    )}
+                </div>
+            </AuthContext.Provider>
+        );
+    }
+
+    return (
+        <AuthContext.Provider value={value}>
+            {children}
+        </AuthContext.Provider>
+    );
 };
 
 export const useAuth = () => {

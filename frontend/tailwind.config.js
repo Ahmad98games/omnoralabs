@@ -11,6 +11,9 @@ export default {
                 'blush-pink': '#FADADD',
                 'muted-gold': '#C5A059',
                 'warm-white': '#F9F9F9',
+                'obsidian': '#050505',
+                'champagne': '#F1D592',
+                'charcoal': '#1A1A1A',
             },
             fontFamily: {
                 sans: ['Inter', 'sans-serif'],
