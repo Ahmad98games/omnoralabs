@@ -50,6 +50,7 @@ const setAuthHeader = (token: string | null) => {
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
+    const [isLoaded, setIsLoaded] = useState(false);
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
     const [authModalMode, setAuthModalMode] = useState<'login' | 'signup'>('login');
 
@@ -63,6 +64,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Helper function to clean up local state
     const handleLogoutCleanup = () => {
         localStorage.removeItem('token');
+        localStorage.removeItem('role');
         setAuthHeader(null); // Clear axios header
         setUser(null);
     };
@@ -90,14 +92,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 throw new Error('Invalid session');
             }
             setLoading(false);
+            setIsLoaded(true);
         } catch (error) {
             console.error('Session validation failed:', error);
-            // On mobile, if network fails, we might still want to keep the token 
-            // but default to 'not verified' state or just log out safety.
-            // For admin stability, it is safer to LOGOUT if we can't verify identity.
             setAuthError(true);
             handleLogoutCleanup();
             setLoading(false);
+            setIsLoaded(true);
         }
     }, []);
 
@@ -112,6 +113,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
             if (data.success && data.token) {
                 localStorage.setItem('token', data.token);
+                localStorage.setItem('role', data.user?.role || 'customer');
                 setAuthHeader(data.token); // Sync Immediately
                 setUser(data.user);
                 return data.user;
@@ -133,6 +135,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
             if (data.success && data.token) {
                 localStorage.setItem('token', data.token);
+                localStorage.setItem('role', data.user?.role || 'customer');
                 setAuthHeader(data.token); // Sync Immediately
                 setUser(data.user);
                 return data.user;
@@ -194,7 +197,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setAuthModalOpen
     };
 
-    if (loading || authError) {
+    if (!isLoaded || authError) {
         return (
             <AuthContext.Provider value={value}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#050505', flexDirection: 'column' }}>

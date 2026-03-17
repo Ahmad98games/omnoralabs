@@ -32,7 +32,7 @@ client.interceptors.request.use(
     // 1. Auth Token
     const token = localStorage.getItem('token');
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+      config.headers.Authorization = `Bearer ${localStorage.getItem('token')}`;
       console.log(`Outbound Request with Token: ${token.substring(0, 5)}`);
     } else {
       console.error(`DEBUG: No token found in localStorage for request to ${config.url}`);
