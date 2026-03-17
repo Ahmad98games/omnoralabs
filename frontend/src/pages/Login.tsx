@@ -114,8 +114,11 @@ const handleSubmit = async (e: React.FormEvent) => {
     } catch (err: any) {
         console.error("Auth Error:", err);
         let message = 'Access Denied. Please verify credentials.';
-        if (err.response?.data?.message) message = err.response.data.message;
-        else if (err.message) message = err.message;
+        if (err.response?.data?.message) {
+            message = typeof err.response.data.message === 'object' ? JSON.stringify(err.response.data.message) : err.response.data.message;
+        } else if (err.message) {
+            message = typeof err.message === 'object' ? JSON.stringify(err.message) : err.message;
+        }
         setError(message);
     } finally {
         setLoadingState(false);

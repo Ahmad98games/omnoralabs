@@ -132,9 +132,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             } else {
                 throw new Error(data.message || 'Login failed');
             }
-        } catch (error) {
+        } catch (error: any) {
             if (isAxiosError(error)) {
-                throw new Error(error.response?.data?.error || 'Server connection failed');
+                const errorData = error.response?.data;
+                const errorMsg = errorData?.error || errorData?.message || 'Server connection failed';
+                
+                throw new Error(typeof errorMsg === 'object' ? JSON.stringify(errorMsg) : errorMsg);
             }
             throw error;
         }
