@@ -21,12 +21,13 @@ const generateToken = (id, role) => {
 exports.register = async (req, res) => {
     try {
         const { name, email, password } = req.body;
+        const userEmail = (email || '').trim().toLowerCase();
 
         // Check if user exists
         const { data: userExists } = await supabase
             .from('users')
             .select('id')
-            .eq('email', email)
+            .eq('email', userEmail)
             .maybeSingle();
 
         if (userExists) {
@@ -49,8 +50,10 @@ exports.register = async (req, res) => {
         const { data: user, error: registerError } = await supabase
             .from('users')
             .insert([{
-                email,
+                email: userEmail,
                 password_hash,
+                name: (firstName + ' ' + lastName).trim(),
+                role: req.body.role || 'customer',
                 store_slug: storeSlug,
                 subscription: req.body.role === 'seller' ? 'pro' : 'free'
             }])
@@ -108,12 +111,13 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
     try {
         const { email, password } = req.body;
+        const userEmail = (email || '').trim().toLowerCase();
 
         // Check for user
         const { data: user, error: loginError } = await supabase
             .from('users')
             .select('*')
-            .eq('email', email)
+            .eq('email', userEmail)
             .maybeSingle();
 
         if (!user || loginError) {
