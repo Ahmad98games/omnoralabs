@@ -13,7 +13,7 @@ if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
 }
 
 if (!supabaseUrl || !supabaseKey) {
-    throw new Error('Missing Env Vars: SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY is required for Omnora Backend.');
+    console.error('CRITICAL: Missing Env Vars: SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY is required for Omnora Backend.');
 }
 
 const supabase = createClient(supabaseUrl, supabaseKey);

@@ -40,11 +40,11 @@ const config = {
     },
 
     jwt: {
-        secret: process.env.JWT_SECRET,
+        secret: process.env.JWT_SECRET || 'default_secret_for_development',
         expiresIn: process.env.JWT_EXPIRES_IN || '7d',
-        refreshSecret: process.env.JWT_REFRESH_SECRET,
+        refreshSecret: process.env.JWT_REFRESH_SECRET || 'default_refresh_secret',
         refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '30d',
-        approvalSecret: process.env.APPROVAL_TOKEN_SECRET
+        approvalSecret: process.env.APPROVAL_TOKEN_SECRET || 'approval_secret'
     },
 
     limits: {
