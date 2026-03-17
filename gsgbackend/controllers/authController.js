@@ -50,8 +50,7 @@ exports.register = async (req, res) => {
                 password_hash,
                 name: name || `${firstName} ${lastName}`,
                 store_slug: name.toLowerCase().replace(/[^a-z0-9]/g, '') || `store-${Date.now()}`,
-                subscription: req.body.role === 'seller' ? 'pro' : 'free',
-                metadata: { firstName, lastName, role: req.body.role || 'customer' }
+                subscription: req.body.role === 'seller' ? 'pro' : 'free'
             }])
             .select()
             .single();
@@ -59,7 +58,7 @@ exports.register = async (req, res) => {
         if (registerError) throw registerError;
 
         // --- Demo Hydration for Sellers ---
-        if (user.metadata?.role === 'seller') {
+        if (req.body.role === 'seller') {
             await supabase
                 .from('store_pages')
                 .insert([{
@@ -86,18 +85,16 @@ exports.register = async (req, res) => {
         }
 
         // Generate token
-        const token = generateToken(user.id, user.metadata?.role || 'customer');
+        const token = generateToken(user.id, user.role || 'customer');
 
         res.status(201).json({
             success: true,
             token,
             user: {
                 id: user.id,
-                firstName: user.metadata?.firstName,
-                lastName: user.metadata?.lastName,
                 name: user.name,
                 email: user.email,
-                role: user.metadata?.role
+                role: user.role
             }
         });
     } catch (error) {
@@ -129,18 +126,16 @@ exports.login = async (req, res) => {
         }
 
         // Generate token
-        const token = generateToken(user.id, user.metadata?.role || user.role);
+        const token = generateToken(user.id, user.role);
 
         res.json({
             success: true,
             token,
             user: {
                 id: user.id,
-                firstName: user.metadata?.firstName || user.firstName,
-                lastName: user.metadata?.lastName || user.lastName,
                 name: user.name || `${user.firstName} ${user.lastName}`.trim(),
                 email: user.email,
-                role: user.metadata?.role || user.role
+                role: user.role
             }
         });
     } catch (error) {

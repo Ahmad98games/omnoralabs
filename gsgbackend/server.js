@@ -92,8 +92,7 @@ app.post('/api/auth/register', async (req, res) => {
           email,
           password_hash,
           name: name || 'User',
-          role: role || 'customer',
-          metadata: { role: role || 'customer' }
+          role: role || 'customer'
       }]).select().single();
 
       if (error) throw error;
@@ -125,12 +124,12 @@ app.post('/api/auth/login', async (req, res) => {
       if (!isMatch) return res.status(401).json({ error: 'Invalid credentials' });
 
       const token = jwt.sign(
-          { id: user.id, role: user.role || user.metadata?.role }, 
+          { id: user.id, role: user.role }, 
           config.jwt?.secret || process.env.JWT_SECRET || 'secret', 
           { expiresIn: '7d' }
       );
       
-      res.json({ success: true, token, user: { id: user.id, name: user.name, email: user.email, role: user.role || user.metadata?.role } });
+      res.json({ success: true, token, user: { id: user.id, name: user.name, email: user.email, role: user.role } });
   } catch (error) {
       console.error('Login error:', error);
       res.status(500).json({ error: error.message });
