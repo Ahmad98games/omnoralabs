@@ -2,7 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import App from './App'
-import { trackEvent } from './api/client'
+// import { trackEvent } from './api/client'
 import './index.css'
 
 // 🚀 OMNORA PLATFORM BOOTSTRAP: Explicit Initialization (v4)
@@ -23,10 +23,11 @@ function ensureSessionId() {
 }
 
 const sessionId = ensureSessionId()
-trackEvent({ type: 'app_start', path: location.pathname, sessionId, referrer: document.referrer, screen: { width: screen.width, height: screen.height } })
+// trackEvent({ type: 'app_start', path: location.pathname, sessionId, referrer: document.referrer, screen: { width: screen.width, height: screen.height } })
 
 // 🛡️ Global Diagnostics
 window.onerror = (message, source, lineno, colno, error) => {
+  /*
   trackEvent({
     type: 'runtime_error',
     path: location.pathname,
@@ -39,6 +40,7 @@ window.onerror = (message, source, lineno, colno, error) => {
       stack: error?.stack
     }
   });
+  */
 };
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
