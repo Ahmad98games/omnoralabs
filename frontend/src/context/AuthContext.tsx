@@ -211,14 +211,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setAuthModalOpen
     };
 
+    if (!isInitialized) {
+        return (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#050505', color: '#F1D592', fontFamily: 'serif', fontSize: '18px', letterSpacing: '0.05em' }}>
+                Imperial Loading...
+            </div>
+        );
+    }
+
     return (
         <AuthContext.Provider value={value}>
-            {status === 'initializing' && (
-                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, height: '3px', background: 'linear-gradient(to right, #F1D592, #D4AF37)', zIndex: 9999, animation: 'imperial-pulse 1.5s infinite ease-in-out' }}>
-                    <style>{`@keyframes imperial-pulse { 0% { opacity: 0.6; width: 0%; } 50% { opacity: 1; width: 50%; } 100% { opacity: 0.6; width: 100%; } }`}</style>
-                    <span style={{ position: 'absolute', top: '8px', right: '16px', color: '#F1D592', fontSize: '10px', letterSpacing: '0.1em', fontFamily: 'serif' }}>Re-establishing Imperial Link...</span>
-                </div>
-            )}
             {children}
         </AuthContext.Provider>
     );

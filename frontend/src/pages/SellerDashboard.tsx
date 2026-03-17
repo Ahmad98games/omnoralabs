@@ -45,6 +45,7 @@ import { ElementLibrary } from '../components/cms/ElementLibrary';
 import { BuilderToolbar } from '../components/cms/BuilderToolbar';
 import { useStorefront } from '../hooks/useStorefront';
 import { useToast } from '../context/ToastContext';
+import { useBuilder } from '../context/BuilderContext';
 import { TourOverlay } from '../components/cms/help/TourOverlay';
 import { BuilderHelpPage } from './builder/BuilderHelpPage';
 import AdminBillingManager from '../components/admin/AdminBillingManager';

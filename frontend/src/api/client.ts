@@ -33,11 +33,23 @@ client.interceptors.request.use(
     const token = localStorage.getItem('token');
     const tenantId = localStorage.getItem('tenantId');
 
+    // 🛡️ defensive Guard: Block outwards requests without token unless exempt
+    const EXEMPT_PATHS = ['/auth/login', '/auth/register', '/auth/verify'];
+    const isExempt = EXEMPT_PATHS.some(path => config.url?.includes(path));
+
+    if (!token && !isExempt) {
+      console.warn(`[Omnora API] request blocked: Missing Auth Token for ${config.url}`);
+      return Promise.reject(new Error('Auth Token Required'));
+    }
+
     if (token && token !== 'undefined' && token !== 'null') {
       config.headers.Authorization = `Bearer ${token}`;
     }
     
-    if (tenantId) {
+    // 🛡️ UUID validation for Multi-Tenant Header syntax errors
+    const isValidUUID = (id: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+    
+    if (tenantId && isValidUUID(tenantId)) {
       config.headers['x-tenant-id'] = tenantId;
     }
 

@@ -7,7 +7,7 @@ const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 console.log(`[Omnora Supabase] Init Key Prefix: ${supabaseKey.substring(0, 5)}...`);
 
 export const getSupabaseClient = () => {
-    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://cuywxaeancehgibiibne.supabase.co';
     const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
     if (!supabaseUrl || !supabaseKey || supabaseKey === 'undefined') {
