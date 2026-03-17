@@ -158,42 +158,37 @@ const PageCard = ({ slug, onEdit, onDelete }: { slug: string; onEdit: () => void
 );
 
 // ─── Add Page Modal ───────────────────────────────────────────────────────────
+// Replace your addPage function with this:
+const addPage = async (name: string) => {
+    if (!name.trim()) return;
+    
+    // 🛡️ CRITICAL: If localContent is null, initialize it instead of spreading null
+    const currentContent = localContent || { pages: {} };
+    const slug = name.toLowerCase().replace(/[^a-z0-9]/g, '-');
 
-const AddPageModal = ({ onClose, onAdd }: { onClose: () => void; onAdd: (name: string) => void }) => {
-    const [name, setName] = useState('');
-    return (
-        <div className="modal-overlay">
-            <div className="modal-content">
-                // Inside AddPageModal component, replace the header with this:
-                <div className="modal-header">
-                    <h3>Create new page</h3>
-                    <button
-                        onClick={onClose}
-                        className="modal-close"
-                        aria-label="Close modal"
-                        title="Close"
-                    >
-                        <X size={20} aria-hidden="true" />
-                    </button>
-                </div>
-                <div className="form-field">
-                    <label htmlFor="newPageName">Page name</label>
-                    <input
-                        id="newPageName"
-                        value={name} onChange={e => setName(e.target.value)}
-                        placeholder="e.g. About Us"
-                        className="form-input"
-                        onKeyDown={e => e.key === 'Enter' && onAdd(name)}
-                        autoFocus
-                    />
-                </div>
-                <div className="modal-actions">
-                    <button onClick={onClose} className="btn-cancel">Cancel</button>
-                    <button onClick={() => onAdd(name)} className="btn-confirm">Create page</button>
-                </div>
-            </div>
-        </div>
-    );
+    try {
+        const newPageData = { 
+            title: name, 
+            layout: [{ type: 'hero', data: { headline: name } }] 
+        };
+
+        // 1. Update UI immediately for "Snappy" feel
+        setLocalContent({
+            ...currentContent,
+            pages: { ...currentContent.pages, [slug]: newPageData }
+        });
+
+        // 2. Sync with Backend
+        await client.post('/cms/pages', { slug, pageData: newPageData });
+        
+        setAddPageOpen(false);
+        showToast('Page forged successfully', 'success');
+    } catch (err) {
+        console.error('[Omnora OS] Forge Failed:', err);
+        showToast('Forge failed. Database rejected the link.', 'error');
+        // Rollback UI state if needed
+        fetchContent(); 
+    }
 };
 
 // ─── Main dashboard ───────────────────────────────────────────────────────────
