@@ -197,24 +197,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setAuthModalOpen
     };
 
-    if (!isLoaded || authError) {
+    if (loading) {
+        return (
+            <AuthContext.Provider value={value}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#050505' }}>
+                    <div className="champagne-spinner" style={{ width: '40px', height: '40px', border: '3px solid rgba(241,213,146,0.1)', borderTop: '3px solid #F1D592', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+                    <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+                </div>
+            </AuthContext.Provider>
+        );
+    }
+
+    if (!user && authError && window.location.pathname !== '/login') {
         return (
             <AuthContext.Provider value={value}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#050505', flexDirection: 'column' }}>
-                    {loading ? (
-                        <>
-                            <div style={{ fontSize: '48px', color: '#F1D592', fontFamily: 'serif', animation: 'glow 2s ease-in-out infinite' }}>O</div>
-                            <style>{`@keyframes glow { 0%, 100% { text-shadow: 0 0 10px rgba(241,213,146,0.3), 0 0 20px rgba(241,213,146,0.2); opacity: 0.8; } 50% { text-shadow: 0 0 20px rgba(241,213,146,0.6), 0 0 40px rgba(241,213,146,0.4); opacity: 1; } }`}</style>
-                        </>
-                    ) : (
-                        <>
-                            <div style={{ fontSize: '48px', color: '#F1D592', fontFamily: 'serif', marginBottom: '20px' }}>O</div>
-                            <h2 style={{ color: '#fff', fontSize: '16px', letterSpacing: '0.05em', marginBottom: '30px', fontWeight: 'normal' }}>Sovereign Intercept: Connection Fragmented</h2>
-                            <button onClick={initAuth} style={{ padding: '12px 24px', background: 'linear-gradient(135deg, #F1D592 0%, #D4AF37 100%)', color: '#050505', border: 'none', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold', letterSpacing: '0.1em', cursor: 'pointer', textTransform: 'uppercase', transition: 'transform 0.2s', boxShadow: '0 4px 15px rgba(241,213,146,0.2)' }} onMouseOver={e => e.currentTarget.style.transform = 'scale(1.05)'} onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}>
-                                Re-establish Connection
-                            </button>
-                        </>
-                    )}
+                    <div style={{ fontSize: '48px', color: '#F1D592', fontFamily: 'serif', marginBottom: '20px' }}>O</div>
+                    <h2 style={{ color: '#fff', fontSize: '16px', letterSpacing: '0.05em', marginBottom: '30px', fontWeight: 'normal' }}>Sovereign Intercept: Connection Fragmented</h2>
+                    <button onClick={() => window.location.href = '/login'} style={{ padding: '12px 24px', background: 'linear-gradient(135deg, #F1D592 0%, #D4AF37 100%)', color: '#050505', border: 'none', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold', letterSpacing: '0.1em', cursor: 'pointer', textTransform: 'uppercase', transition: 'transform 0.2s', boxShadow: '0 4px 15px rgba(241,213,146,0.2)' }} onMouseOver={e => e.currentTarget.style.transform = 'scale(1.05)'} onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}>
+                        Re-establish Connection
+                    </button>
                 </div>
             </AuthContext.Provider>
         );
