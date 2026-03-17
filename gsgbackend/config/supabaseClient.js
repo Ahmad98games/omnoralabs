@@ -16,6 +16,11 @@ if (!supabaseUrl || !supabaseKey) {
     console.error('CRITICAL: Missing Env Vars: SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY is required for Omnora Backend.');
 }
 
-const supabase = createClient(supabaseUrl, supabaseKey);
+// Use dummy values to prevent synchronous crashes on Vercel boot if env vars are misconfigured.
+// The queries will fail gracefully later, instead of crashing the entire Serverless Function container.
+const supabase = createClient(
+    supabaseUrl || 'https://dummy.supabase.co', 
+    supabaseKey || 'dummy_key'
+);
 
 module.exports = { supabase };
