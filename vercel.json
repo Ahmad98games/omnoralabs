@@ -4,6 +4,22 @@
     "installCommand": "npm install && cd backend && npm install && cd ../gsgbackend && npm install",
     "rewrites": [
         {
+            "source": "/manifest.webmanifest",
+            "destination": "/manifest.webmanifest"
+        },
+        {
+            "source": "/registerSW.js",
+            "destination": "/registerSW.js"
+        },
+        {
+            "source": "/sw.js",
+            "destination": "/sw.js"
+        },
+        {
+            "source": "/assets/(.*)",
+            "destination": "/assets/$1"
+        },
+        {
             "source": "/api/storefront/(.*)",
             "destination": "/api/storefront.js"
         },

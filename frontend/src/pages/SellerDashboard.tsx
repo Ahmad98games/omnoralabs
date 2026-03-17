@@ -50,6 +50,7 @@ import AdminBillingManager from '../components/admin/AdminBillingManager';
 import AdminPaymentSettings from '../components/admin/AdminPaymentSettings';
 const DomainSettings = React.lazy(() => import('../components/seller/DomainSettings').then(m => ({ default: m.DomainSettings })));
 import { StoreGenerator } from '../components/seller/StoreGenerator';
+import { InstallButton } from '../components/seller/InstallButton';
 
 // ─── Auto-save manager (lives inside BuilderProvider) ─────────────────────────
 const AutoSaveManager: React.FC = () => {
@@ -336,10 +337,11 @@ export default function SellerDashboard() {
                             <span className="font-serif font-light text-[#F1D592]">{storeName}</span>
                         </h1>
                     </div>
-                    <div className="header-right">
-                        {saveStatus === 'saving' && <span className="save-status">Saving…</span>}
-                        {saveStatus === 'saved' && <span className="save-status success"><CheckCircle2 size={14} /> Saved</span>}
-                        {saveStatus === 'error' && <span className="save-status error">Save failed</span>}
+                    <div className="header-right flex items-center">
+                        {saveStatus === 'saving' && <span className="save-status mr-4">Saving…</span>}
+                        {saveStatus === 'saved' && <span className="save-status success mr-4"><CheckCircle2 size={14} /> Saved</span>}
+                        {saveStatus === 'error' && <span className="save-status error mr-4">Save failed</span>}
+                        <InstallButton />
                         <button onClick={save} className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#F1D592] to-[#D4AF37] text-black font-bold text-sm transition-transform duration-300 hover:scale-105 shadow-[0_10px_30px_rgba(241,213,146,0.15)] hover:shadow-[0_15px_40px_rgba(241,213,146,0.25)]">
                             <Save size={15} /> Save changes
                         </button>
