@@ -8,7 +8,7 @@ console.log(`[Omnora Supabase] Init Key Prefix: ${supabaseKey.substring(0, 5)}..
 
 export const getSupabaseClient = () => {
     const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://cuywxaeancehgibiibne.supabase.co';
-    const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+    const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'sb_publishable_fSTvAeJdv014WkUIPVz65Q_xTTScsF-';
 
     if (!supabaseUrl || !supabaseKey || supabaseKey === 'undefined') {
         console.warn('[Omnora Supabase] Client disabled - VITE variables missing');
@@ -16,7 +16,9 @@ export const getSupabaseClient = () => {
     }
 
     try {
-        return createClient(supabaseUrl, supabaseKey);
+        const client = createClient(supabaseUrl, supabaseKey);
+        console.log("Supabase Connection: ACTIVE");
+        return client;
     } catch (err) {
         console.warn('[Omnora Supabase] Initialization failure:', err);
         return null;
