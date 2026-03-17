@@ -157,9 +157,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             } else {
                 throw new Error(data.message || 'Registration failed');
             }
-        } catch (error) {
+        } catch (error: any) {
             if (isAxiosError(error)) {
-                throw new Error(error.response?.data?.error || 'Registration failed');
+                const errorData = error.response?.data;
+                const errorMsg = errorData?.error || errorData?.message || 'Registration failed';
+                
+                throw new Error(typeof errorMsg === 'object' ? JSON.stringify(errorMsg) : errorMsg);
             }
             throw error;
         }
@@ -187,9 +190,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const resetPassword = async (email: string) => {
         try {
             await client.post('/auth/forgot-password', { email });
-        } catch (error) {
+        } catch (error: any) {
             if (isAxiosError(error)) {
-                throw new Error(error.response?.data?.error || 'Failed to send reset email');
+                const errorData = error.response?.data;
+                const errorMsg = errorData?.error || errorData?.message || 'Failed to send reset email';
+                
+                throw new Error(typeof errorMsg === 'object' ? JSON.stringify(errorMsg) : errorMsg);
             }
             throw error;
         }
