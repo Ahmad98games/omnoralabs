@@ -8,164 +8,226 @@ import { useQuery } from '@tanstack/react-query';
 import { databaseClient } from '../platform/core/DatabaseClient';
 import { StorefrontProvider } from '../context/StorefrontContext';
 
-const HeroSection: React.FC<BlockProps> = ({ data = {}, nodeId }) => (
-    <section className="dynamic-hero" style={{ minHeight: '80vh', display: 'flex', alignItems: 'center', background: 'var(--db-bg)' }}>
-        <div className="container">
-            <motion.h1
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
-                style={{ color: 'var(--p-color, #C5A059)' }}
-            >
-                <EditableText nodeId={nodeId} path="props.headline" tag="span" />
-            </motion.h1>
-            <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.3, duration: 0.8 }}
-                className="eyebrow"
-                style={{ color: 'var(--s-color, rgba(255,255,255,0.6))' }}
-            >
-                <EditableText nodeId={nodeId} path="props.subheadline" tag="span" />
-            </motion.p>
-        </div>
-    </section>
-);
-
-const TextContent: React.FC<BlockProps> = ({ data = {}, nodeId }) => (
-    <section className="dynamic-text py-20" style={{ background: 'var(--db-bg)' }}>
-        <div className="container max-w-3xl">
-            <h2 className="mb-8" style={{ color: 'var(--p-color, #C5A059)' }}>
-                <EditableText nodeId={nodeId} path="props.title" tag="span" />
-            </h2>
-            <div className="prose prose-invert" style={{ color: 'rgba(255,255,255,0.8)' }}>
-                <EditableText nodeId={nodeId} path="props.body" tag="div" />
+const HeroSection: React.FC<any> = ({ nodeId, ...props }) => {
+    if (!props) return null;
+    return (
+        <section 
+            className="dynamic-hero" 
+            style={{ 
+                minHeight: props?.height || '80vh', 
+                display: 'flex', 
+                alignItems: 'center', 
+                background: props?.bgImage ? `url(${props?.bgImage}) center/cover` : (props?.bgColor || 'var(--db-bg)'),
+                color: props?.textColor || '#fff',
+                position: 'relative'
+            }}
+        >
+            {props?.overlayOpacity && (
+                <div 
+                    className="absolute inset-0 bg-black" 
+                    style={{ opacity: (props?.overlayOpacity ?? 0) / 100 }} 
+                />
+            )}
+            <div className="container relative z-10">
+                <motion.h1
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
+                    style={{ color: props?.headlineColor || 'var(--p-color, #C5A059)' }}
+                >
+                    <EditableText nodeId={nodeId} path="props.headline" tag="span" />
+                </motion.h1>
+                <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.3, duration: 0.8 }}
+                    className="eyebrow mt-4"
+                    style={{ color: props?.subheadlineColor || 'var(--s-color, rgba(255,255,255,0.6))' }}
+                >
+                    <EditableText nodeId={nodeId} path="props.subheadline" tag="span" />
+                </motion.p>
             </div>
-        </div>
-    </section>
-);
+        </section>
+    );
+};
 
-const TrustSection: React.FC<BlockProps> = ({ data, nodeId }) => (
-    <section className="dynamic-trust py-12" style={{ background: 'var(--db-bg)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-        <div className="container">
-            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '40px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', opacity: 0.8 }}>
-                    <div style={{ width: '32px', height: '32px', background: 'rgba(197, 160, 89, 0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent-primary)' }}>✓</div>
-                    <EditableText nodeId={nodeId} path="props.badge1Label" tag="span" />
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', opacity: 0.8 }}>
-                    <div style={{ width: '32px', height: '32px', background: 'rgba(197, 160, 89, 0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent-primary)' }}>✓</div>
-                    <EditableText nodeId={nodeId} path="props.badge2Label" tag="span" />
-                </div>
-            </div>
-        </div>
-    </section>
-);
-
-const PromoBanner: React.FC<BlockProps> = ({ nodeId }) => (
-    <section className="promo-banner py-6" style={{ background: 'var(--accent-primary, #C5A059)', color: '#000', textAlign: 'center' }}>
-        <div className="container">
-            <span style={{ fontWeight: 900, fontSize: '0.9rem', letterSpacing: '0.1em' }}>
-                <EditableText nodeId={nodeId} path="props.message" tag="span" />
-            </span>
-        </div>
-    </section>
-);
-
-const ReviewsSection: React.FC<BlockProps> = ({ nodeId }) => (
-    <section className="reviews-section py-20" style={{ background: 'var(--db-bg)' }}>
-        <div className="container">
-            <h2 className="text-center mb-12">
-                <EditableText nodeId={nodeId} path="props.title" tag="span" />
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {[1, 2, 3].map(i => (
-                    <div key={i} className="review-card p-8 border border-white/5 bg-white/[0.02]" style={{ borderRadius: '8px' }}>
-                        <div className="stars mb-4" style={{ color: 'var(--accent-primary)' }}>★★★★★</div>
-                        <p className="mb-4" style={{ fontStyle: 'italic', opacity: 0.8 }}>
-                            <EditableText nodeId={nodeId} path={`props.review${i}`} tag="span" />
-                        </p>
-                        <span style={{ fontWeight: 900, fontSize: '0.7rem', opacity: 0.5 }}>
-                            — <EditableText nodeId={nodeId} path={`props.author${i}`} tag="span" />
-                        </span>
-                    </div>
-                ))}
-            </div>
-        </div>
-    </section>
-);
-
-const ProductGrid: React.FC<BlockProps> = ({ data = {}, nodeId }) => (
-    <section className="dynamic-products py-20" style={{ background: 'var(--db-bg)' }}>
-        <div className="container">
-            <div className="section-header mb-12">
-                <span className="eyebrow" style={{ color: 'var(--accent-primary, #C5A059)' }}>
-                    <EditableText nodeId={nodeId} path="props.eyebrow" tag="span" />
-                </span>
-                <h2 style={{ color: '#fff' }}>
+const TextContent: React.FC<any> = ({ nodeId, ...props }) => {
+    if (!props) return null;
+    return (
+        <section className="dynamic-text py-20" style={{ background: props?.bgColor || 'var(--db-bg)', textAlign: props?.alignment || 'left' }}>
+            <div className="container max-w-3xl">
+                <h2 className="mb-8" style={{ color: props?.headlineColor || 'var(--p-color, #C5A059)' }}>
                     <EditableText nodeId={nodeId} path="props.title" tag="span" />
                 </h2>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-                <div className="product-placeholder p-12 border border-white/5 bg-white/[0.02] text-center" style={{ borderRadius: '8px' }}>
-                    <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.8rem' }}>
-                        Products matching "{data?.category || 'all'}" will materialize here.
-                    </p>
+                <div className="prose prose-invert" style={{ color: props?.textColor || 'rgba(255,255,255,0.8)' }}>
+                    <EditableText nodeId={nodeId} path="props.body" tag="div" />
                 </div>
             </div>
+        </section>
+    );
+};
+
+const TrustSection: React.FC<any> = ({ nodeId, ...props }) => {
+    if (!props) return null;
+    return (
+        <section className="dynamic-trust py-12" style={{ background: props?.bgColor || 'var(--db-bg)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+            <div className="container">
+                <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: props?.alignment || 'center', gap: `${props?.gap || 40}px` }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', opacity: 0.8 }}>
+                        <div style={{ width: '32px', height: '32px', background: 'rgba(197, 160, 89, 0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: props?.iconColor || 'var(--accent-primary)' }}>✓</div>
+                        <EditableText nodeId={nodeId} path="props.badge1Label" tag="span" />
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', opacity: 0.8 }}>
+                        <div style={{ width: '32px', height: '32px', background: 'rgba(197, 160, 89, 0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: props?.iconColor || 'var(--accent-primary)' }}>✓</div>
+                        <EditableText nodeId={nodeId} path="props.badge2Label" tag="span" />
+                    </div>
+                </div>
+            </div>
+        </section>
+    );
+};
+
+const PromoBanner: React.FC<any> = ({ nodeId, ...props }) => {
+    if (!props) return null;
+    return (
+        <section className="promo-banner py-6" style={{ background: props?.bgColor || 'var(--accent-primary, #C5A059)', color: props?.textColor || '#000', textAlign: props?.alignment || 'center' }}>
+            <div className="container">
+                <span style={{ fontWeight: 900, fontSize: '0.9rem', letterSpacing: '0.1em' }}>
+                    <EditableText nodeId={nodeId} path="props.message" tag="span" />
+                </span>
+            </div>
+        </section>
+    );
+};
+
+const ReviewsSection: React.FC<any> = ({ nodeId, ...props }) => {
+    if (!props) return null;
+    return (
+        <section className="reviews-section py-20" style={{ background: props?.bgColor || 'var(--db-bg)' }}>
+            <div className="container">
+                <h2 className="text-center mb-12" style={{ color: props?.headlineColor || '#fff' }}>
+                    <EditableText nodeId={nodeId} path="props.title" tag="span" />
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    {[1, 2, 3].map(i => (
+                        <div key={i} className="review-card p-8 border border-white/5 bg-white/[0.02]" style={{ borderRadius: `${props?.borderRadius || 8}px` }}>
+                            <div className="stars mb-4" style={{ color: props?.starColor || 'var(--accent-primary)' }}>★★★★★</div>
+                            <p className="mb-4" style={{ fontStyle: 'italic', opacity: 0.8, color: props?.textColor || '' }}>
+                                <EditableText nodeId={nodeId} path={`props.review${i}`} tag="span" />
+                            </p>
+                            <span style={{ fontWeight: 900, fontSize: '0.7rem', opacity: 0.5 }}>
+                                — <EditableText nodeId={nodeId} path={`props.author${i}`} tag="span" />
+                            </span>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </section>
+    );
+};
+
+const ProductGrid: React.FC<any> = ({ nodeId, ...props }) => {
+    if (!props) return null;
+    const desktopCols = props?.desktopColumns || 4;
+    const gap = props?.gridGap !== undefined ? `${props?.gridGap}px` : '2rem';
+
+    return (
+        <section className="dynamic-products py-20" style={{ background: 'var(--db-bg)' }}>
+            <div className="container">
+                <div className="section-header mb-12">
+                    <span className="eyebrow" style={{ color: 'var(--accent-primary, #C5A059)' }}>
+                        <EditableText nodeId={nodeId} path="props.eyebrow" tag="span" />
+                    </span>
+                    <h2 style={{ color: '#fff' }}>
+                        <EditableText nodeId={nodeId} path="props.title" tag="span" />
+                    </h2>
+                </div>
+                <div 
+                    className="grid" 
+                    style={{ 
+                        gridTemplateColumns: `repeat(${desktopCols}, minmax(0, 1fr))`,
+                        gap 
+                    }}
+                >
+                    <div className="product-placeholder p-12 border border-white/5 bg-white/[0.02] text-center" style={{ borderRadius: '8px', gridColumn: '1 / -1' }}>
+                        <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.8rem' }}>
+                            Products matching "{props?.category || 'all'}" will materialize here.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    );
+};
+
+const Spacer: React.FC<any> = ({ ...props }) => {
+    if (!props) return null;
+    return (
+        <div style={{ height: props?.height || '40px', background: 'transparent' }} />
+    );
+};
+
+const AtomicButton: React.FC<any> = ({ nodeId, ...props }) => {
+    if (!props) return null;
+    return (
+        <div className="py-8 text-center" style={{ background: props?.bgColor || 'var(--db-bg)' }}>
+            <button 
+                className="btn-primary" 
+                style={{ 
+                    padding: '12px 32px', 
+                    borderRadius: `${props?.borderRadius || 4}px`, 
+                    background: props?.buttonColor || 'var(--accent-primary)', 
+                    color: props?.textColor || '#000', 
+                    border: 'none', 
+                    fontWeight: 900, 
+                    fontSize: '0.8rem', 
+                    cursor: 'pointer' 
+                }}
+            >
+                <EditableText nodeId={nodeId} path="props.label" tag="span" />
+            </button>
         </div>
-    </section>
-);
+    );
+};
 
-const Spacer: React.FC<BlockProps> = ({ data = {} }) => (
-    <div style={{ height: data?.height || '40px', background: 'transparent' }} />
-);
-
-const AtomicButton: React.FC<BlockProps> = ({ nodeId }) => (
-    <div className="py-8 text-center" style={{ background: 'var(--db-bg)' }}>
-        <button className="btn-primary" style={{ padding: '12px 32px', borderRadius: '4px', background: 'var(--accent-primary)', color: '#000', border: 'none', fontWeight: 900, fontSize: '0.8rem', cursor: 'pointer' }}>
-            <EditableText nodeId={nodeId} path="props.label" tag="span" />
-        </button>
-    </div>
-);
-
-const FeaturedProduct: React.FC<BlockProps> = ({ nodeId, data = {} }) => {
+const FeaturedProduct: React.FC<any> = ({ nodeId, ...props }) => {
+    if (!props) return null;
     const tenantId = (window as any).__OMNORA_TENANT_ID__;
     const { data: products = [] } = useQuery({
         queryKey: ['products', tenantId],
         queryFn: () => databaseClient.getProductsByMerchant(tenantId!),
-        enabled: !!tenantId && !!data.productId,
+        enabled: !!tenantId && !!props?.productId,
     });
 
     const product = React.useMemo(() => {
-        if (!data.productId) return null;
-        return products.find(p => p.id === data.productId);
-    }, [products, data.productId]);
+        if (!props?.productId) return null;
+        return products.find(p => p.id === props?.productId);
+    }, [products, props?.productId]);
 
     const content = (
-        <section className="featured-product py-20" style={{ background: 'var(--db-bg)' }}>
+        <section className="featured-product py-20" style={{ background: props?.bgColor || 'var(--db-bg)' }}>
             <div className="container">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-                    <div className="product-image-scaffold aspect-square bg-white/[0.02] border border-white/5 overflow-hidden" style={{ borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div className="product-image-scaffold aspect-square bg-white/[0.02] border border-white/5 overflow-hidden" style={{ borderRadius: `${props?.borderRadius || 8}px`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         {product ? (
-                            <img src={product.featured_image} alt={product.title} className="w-full h-full object-cover" />
+                            <img src={product?.featured_image} alt={product?.title} className="w-full h-full object-cover" />
                         ) : (
                             <span style={{ fontSize: '0.7rem', opacity: 0.3 }}>PRODUCT IMAGE</span>
                         )}
                     </div>
                     <div className="product-info">
                         <span className="eyebrow" style={{ color: 'var(--accent-primary)' }}>
-                            {product ? (product.type || 'FEATURED PIECE') : 'FEATURED PIECE'}
+                            {product ? (product?.type || 'FEATURED PIECE') : 'FEATURED PIECE'}
                         </span>
                         <h2 className="mb-4">
-                            {product ? product.title : <EditableText nodeId={nodeId} path="props.title" tag="span" />}
+                            {product ? product?.title : <EditableText nodeId={nodeId} path="props.title" tag="span" />}
                         </h2>
                         <p className="mb-8 opacity-70">
-                            {product ? product.description : <EditableText nodeId={nodeId} path="props.description" tag="span" />}
+                            {product ? product?.description : <EditableText nodeId={nodeId} path="props.description" tag="span" />}
                         </p>
                         <div className="flex items-center gap-6">
                             <span className="text-xl font-bold text-white">
-                                {product ? `$${product.price.toLocaleString()}` : ''}
+                                {product ? `$${product?.price?.toLocaleString()}` : ''}
                             </span>
                             <button className="btn-primary" style={{ padding: '16px 40px', background: '#fff', color: '#000', border: 'none', fontWeight: 900, borderRadius: '4px' }}>
                                 PURCHASE NOW

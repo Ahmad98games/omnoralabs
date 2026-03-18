@@ -1,6 +1,6 @@
 -- ╔══════════════════════════════════════════════════════════════════════════════╗
--- ║  OMNORA OS — High-Fidelity Analytics Aggregator (RPC)                      ║
--- ║  Performance-Optimized PostgreSQL Logic for Cinematic Dashboards           ║
+-- ║  OMNORA OS — High-Fidelity Analytics Aggregator (RPC)                      ║-------
+-- ║  Performance-Optimized PostgreSQL Logic for Cinematic Dashboards           ║-------
 -- ╚══════════════════════════════════════════════════════════════════════════════╝
 
 CREATE OR REPLACE FUNCTION get_high_fidelity_stats(p_merchant_id UUID)

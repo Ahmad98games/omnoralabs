@@ -1,7 +1,7 @@
 import { 
   Type, LayoutGrid, Sparkles, Image, Video, Calendar, 
   Smartphone, Monitor, Grid, SortAsc, Star, CheckSquare, 
-  Heart, Plus, Compass, Settings
+  Heart, Plus, Compass, Settings, Shield // 🛡️ For Trust Badges
 } from 'lucide-react';
 
 export interface PropField {
@@ -67,6 +67,8 @@ export const PROP_CONFIGS: Record<string, ComponentPropConfig> = {
         title: "Grid Layout",
         icon: LayoutGrid,
         fields: [
+          { name: 'dataSource', type: 'select', label: 'Data Source', options: [{ value: 'dynamic', label: 'Dynamic (Live)' }, { value: 'manual', label: 'Manual' }] },
+          { name: 'cardStyle', type: 'select', label: 'Card Style', options: [{ value: 'boxed', label: 'Boxed' }, { value: 'flat', label: 'Flat' }] },
           { name: 'desktopColumns', type: 'slider', label: 'Desktop Columns', min: 2, max: 6, step: 1 },
           { name: 'mobileColumns', type: 'slider', label: 'Mobile Columns', min: 1, max: 2, step: 1 },
           { name: 'gridGap', type: 'slider', label: 'Grid Gap (px)', min: 0, max: 100, step: 4 }
@@ -102,6 +104,7 @@ export const PROP_CONFIGS: Record<string, ComponentPropConfig> = {
         fields: [
           { name: 'phoneNumber', type: 'text', label: 'WhatsApp Number', placeholder: '+1...' },
           { name: 'welcomeMessage', type: 'text', label: 'Welcome Message' },
+          { name: 'avatarImage', type: 'image', label: 'Avatar Image' }, // 🛡️ Added Avatar image type
           { name: 'position', type: 'select', label: 'PositionAnchor', options: [{ value: 'bottom-right', label: 'Bottom Right' }, { value: 'bottom-left', label: 'Bottom Left' }] }
         ]
       }
@@ -117,6 +120,20 @@ export const PROP_CONFIGS: Record<string, ComponentPropConfig> = {
         fields: [
           { name: 'allowMultiple', type: 'toggle', label: 'Allow Multiple Open' },
           { name: 'iconType', type: 'select', label: 'Icon Type', options: [{ value: 'plus-minus', label: '+ / -' }, { value: 'arrow', label: 'Arrow' }] }
+        ]
+      }
+    ]
+  },
+
+  // ─── TRUST & AUTHORITY ──────────────────────────────────────────────────────
+  'trust-badges': {
+    sections: [
+      {
+        title: "Badges Configuration",
+        icon: Shield,
+        fields: [
+          { name: 'iconLibrary', type: 'select', label: 'Icon Library', options: [{ value: 'lucide', label: 'Lucide Icons' }, { value: 'feather', label: 'Feather Icons' }] },
+          { name: 'layout', type: 'select', label: 'Layout style', options: [{ value: 'grid', label: 'Grid' }, { value: 'list', label: 'Vertical List' }] }
         ]
       }
     ]

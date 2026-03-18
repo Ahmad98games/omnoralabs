@@ -435,14 +435,25 @@ export class SupabaseDatabaseClient implements IDatabaseClient {
     }
 
     async createProduct(merchantId: string, product: Omit<Product, 'id'>): Promise<Product> {
-        // 1. Insert Base Product
+        // 1. Generate & Verify Handle (Slug Safety)
+        const baseHandle = product.handle || product.title.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+        const { data: existing } = await this.sb
+            .from('products')
+            .select('id')
+            .eq('handle', baseHandle);
+
+        const handle = (existing && existing.length > 0) 
+            ? `${baseHandle}-${Math.random().toString(36).substring(2, 5)}` 
+            : baseHandle;
+
+        // 2. Insert Base Product
         const { data: productData, error: productErr } = await this.sb
             .from('products')
             .insert({
                 merchant_id: merchantId,
                 title: product.title,
                 description: product.description || '',
-                handle: product.handle,
+                handle,
                 base_price: product.price,
                 compare_at_price: product.compareAtPrice || null,
                 featured_image: product.featured_image,
@@ -647,6 +658,7 @@ export class SupabaseDatabaseClient implements IDatabaseClient {
             slug: row.slug,
             status: row.status,
             nodeIds: row.node_tree?.nodeIds || [],
+            content: row.content, // 🛡️ Map content accurate
             createdAt: row.created_at,
             updatedAt: row.updated_at,
         }));
@@ -661,6 +673,7 @@ export class SupabaseDatabaseClient implements IDatabaseClient {
                 slug: page.slug,
                 status: page.status,
                 node_tree: { nodeIds: page.nodeIds || [] },
+                content: page.content || { pages: { home: { layout: [] } } }, // 🛡️ Add stability skeleton
             })
             .select()
             .single();
@@ -674,6 +687,7 @@ export class SupabaseDatabaseClient implements IDatabaseClient {
             slug: data.slug,
             status: data.status,
             nodeIds: data.node_tree?.nodeIds || [],
+            content: data.content, // 🛡️ Map content accurate
             createdAt: data.created_at,
             updatedAt: data.updated_at,
         };
@@ -685,6 +699,7 @@ export class SupabaseDatabaseClient implements IDatabaseClient {
         if (updates.slug !== undefined) mapped.slug = updates.slug;
         if (updates.status !== undefined) mapped.status = updates.status;
         if (updates.nodeIds !== undefined) mapped.node_tree = { nodeIds: updates.nodeIds };
+        if (updates.content !== undefined) mapped.content = updates.content; // 🛡️ Map content accurate
 
         const { data, error } = await this.sb
             .from('pages')
@@ -702,6 +717,7 @@ export class SupabaseDatabaseClient implements IDatabaseClient {
             slug: data.slug,
             status: data.status,
             nodeIds: data.node_tree?.nodeIds || [],
+            content: data.content, // 🛡️ Map content accurate
             createdAt: data.created_at,
             updatedAt: data.updated_at,
         };

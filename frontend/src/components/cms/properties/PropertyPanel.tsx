@@ -3,25 +3,76 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNodeSelector } from '../../../hooks/useNodeSelector';
 import { dispatcher } from '../../../platform/core/Dispatcher';
 import { PROP_CONFIGS } from './propConfigurations';
-import { RefreshCw, Monitor, Smartphone } from 'lucide-react';
+import { RefreshCw, Monitor, Smartphone, Upload, Trash2, Loader2 } from 'lucide-react'; // 🛡️ Added Icons
+import { supabase } from '../../../lib/supabaseClient'; // 🛡️ For Storage updates
+import { useBuilder } from '../../../context/BuilderContext';
 
 interface PropertyPanelProps {
   nodeId: string;
 }
 
 export const PropertyPanel: React.FC<PropertyPanelProps> = ({ nodeId }) => {
+  const { merchantId = '' } = useBuilder(); // 🛡️ Retrieve merchant contexts node list Sequential!
   const node = useNodeSelector(nodeId, n => ({
     type: n.type,
     props: n.props || {},
   }));
 
   const [activeViewport, setActiveViewport] = useState<'desktop' | 'mobile'>('desktop');
+  const [uploading, setUploading] = useState(false); // 🛡️ Upload tracking node
+  const [uploadProgress, setUploadProgress] = useState(0); // 🛡️ Upload Progress tracking
   const debounceRef = useRef<any>(null);
 
   const config = useMemo(() => {
     if (!node) return null;
     return PROP_CONFIGS[node.type] || null;
   }, [node]);
+
+  // 🛡️ Upload Local Image Handler
+  const uploadImage = async (file: File, property: string, isResponsive: boolean) => {
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      alert('Only JPEG, PNG, and WEBP formats are supported.');
+      return;
+    }
+
+    setUploading(true);
+    setUploadProgress(10); // Start
+    
+    // Simulate Smooth progress nodes Sequential list!
+    const progressInterval = setInterval(() => {
+      setUploadProgress(prev => (prev < 90 ? prev + 8 : prev));
+    }, 200);
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `assets/${merchantId}/${Date.now()}-${file.name}`;
+      
+      const { data, error } = await supabase.storage
+        .from('store-assets')
+        .upload(fileName, file, { cacheControl: '3600', upsert: true });
+
+      if (error) throw error;
+      clearInterval(progressInterval);
+      setUploadProgress(100);
+
+      const { data: urlData } = supabase.storage
+        .from('store-assets')
+        .getPublicUrl(fileName);
+
+      if (urlData?.publicUrl) {
+        handlePropChange(property, urlData.publicUrl, isResponsive);
+      }
+    } catch (err) {
+      console.error('[PropertyPanel] Upload failed:', err);
+      clearInterval(progressInterval);
+    } finally {
+      setTimeout(() => {
+        setUploading(false);
+        setUploadProgress(0);
+      }, 500);
+    }
+  };
 
   const handlePropChange = useCallback((property: string, value: any, isResponsive = false) => {
     if (!node) return;
@@ -224,13 +275,56 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({ nodeId }) => {
                       )}
 
                       {(field.type === 'image' || field.type === 'video') && (
-                        <input 
-                          type="text"
-                          className="w-full bg-[#18181b] border border-white/5 rounded px-3 py-1.5 text-xs text-white focus:outline-none"
-                          value={currentVal || ''}
-                          placeholder={`Paste ${field.type} URL...`}
-                          onChange={(e) => onChangeHandler(e.target.value)}
-                        />
+                        <div className="flex flex-col gap-2">
+                          {currentVal && field.type === 'image' && (
+                            <img src={currentVal} alt={field.label} className="w-full h-32 object-cover rounded bg-[#18181b] border border-white/5" />
+                          )}
+                          <div className="flex items-center gap-2">
+                            {field.type === 'image' ? (
+                              <>
+                                <input 
+                                  type="file"
+                                  accept="image/jpeg,image/png,image/webp"
+                                  className="hidden"
+                                  id={`upload-${field.name}`}
+                                  disabled={uploading}
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) uploadImage(file, field.name, field.responsive ?? false);
+                                  }}
+                                />
+                                <label 
+                                  htmlFor={`upload-${field.name}`}
+                                  className="flex-1 flex items-center justify-center gap-2 bg-[#18181b] border border-white/5 hover:border-[#D4AF37]/40 rounded px-3 py-1.5 text-xs text-white/80 cursor-pointer transition-colors"
+                                >
+                                  {uploading ? <Loader2 size={12} className="animate-spin text-[#D4AF37]" /> : <Upload size={12} />}
+                                  {uploading ? 'Uploading...' : 'Local Upload'}
+                                </label>
+                              </>
+                            ) : (
+                              <input 
+                                type="text"
+                                className="w-full bg-[#18181b] border border-white/5 rounded px-3 py-1.5 text-xs text-white focus:outline-none"
+                                value={currentVal || ''}
+                                placeholder={`Paste ${field.type} URL...`}
+                                onChange={(e) => onChangeHandler(e.target.value)}
+                              />
+                            )}
+                            {currentVal && (
+                              <button 
+                                onClick={() => handlePropChange(field.name, '', field.responsive ?? false)}
+                                className="p-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded border border-red-500/20"
+                              >
+                                <Trash2 size={12} />
+                              </button>
+                            )}
+                          </div>
+                          {uploading && field.type === 'image' && (
+                            <div className="w-full bg-white/5 h-1 rounded-full overflow-hidden mt-1">
+                              <div className="bg-[#D4AF37] h-full transition-all duration-300" style={{ width: `${uploadProgress}%` }} />
+                            </div>
+                          )}
+                        </div>
                       )}
                     </motion.div>
                   );

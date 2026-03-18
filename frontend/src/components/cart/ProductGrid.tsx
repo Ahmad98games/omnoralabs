@@ -81,8 +81,9 @@ export interface ProductGridProps {
     cardStyle?: CardStyle;
     imageAspect?: ImageAspect;
     selectionMode?: 'category' | 'specific';
-    categorySlug?: string;
+    source?: 'recent' | 'featured' | string; // 🛡️ Dynamic Source: 'recent', 'featured', 'category:[ID]'
     productIds?: string[];
+    categorySlug?: string;
     children?: React.ReactNode;
 }
 
@@ -115,8 +116,9 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
     cardStyle = 'minimal',
     imageAspect = 'portrait',
     selectionMode = 'category',
-    categorySlug = '',
+    source = '', // 🛡️ Dynamic Source
     productIds = [],
+    categorySlug = '',
 }) => {
     const { state } = useStorefront();
     const collection = state.collection;
@@ -152,9 +154,24 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
 
     // Phase 47: Dynamic CMS filtering — category or specific products
     const productsToRender = useMemo(() => {
-        const source = liveProducts.length > 0 ? liveProducts : (collection?.fullProducts ?? []);
-        
-        let filtered = source;
+        const sourceItems = liveProducts.length > 0 ? liveProducts : (collection?.fullProducts ?? []);
+        let filtered = sourceItems;
+
+        // 🛡️ Dynamic Source Overrides Sequential!
+        const activeSource = source || selectionMode;
+        if (activeSource === 'recent') {
+            filtered = [...filtered].sort((a, b) => b.id.localeCompare(a.id)); // Fallback ID sort Sequential!
+        } else if (activeSource === 'featured') {
+            filtered = filtered.filter(p => p.tags?.some(t => t.toLowerCase() === 'featured'));
+        } else if (typeof activeSource === 'string' && activeSource.startsWith('category:')) {
+            const catId = activeSource.split(':')[1]?.toLowerCase();
+            if (catId) {
+                filtered = filtered.filter(p => 
+                    p.type?.toLowerCase() === catId || 
+                    p.tags?.some(t => t.toLowerCase() === catId)
+                );
+            }
+        }
 
         // 1. AI Vibe Search Filter
         if (vibeTags.length > 0) {
@@ -172,11 +189,12 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
             );
         }
 
-        if (selectionMode === 'specific' && productIds.length > 0) {
+        // Legacy selection modes fallback Sequential
+        if (activeSource === 'specific' && productIds.length > 0) {
             filtered = productIds
-                .map(id => source.find(p => p.id === id))
+                .map(id => sourceItems.find(p => p.id === id))
                 .filter(Boolean) as Product[];
-        } else if (selectionMode === 'category' && categorySlug) {
+        } else if (activeSource === 'category' && categorySlug) {
              const slug = categorySlug.toLowerCase();
              filtered = filtered.filter(p =>
                  p.tags?.some(t => t.toLowerCase() === slug) ||
@@ -186,7 +204,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
 
         const sorted = sortProducts(filtered, sortKey);
         return sorted.slice(0, safeLimit);
-    }, [liveProducts, collection, sortKey, safeLimit, selectionMode, categorySlug, productIds, vibeTags, selectedCategory]);
+    }, [liveProducts, collection, sortKey, safeLimit, selectionMode, source, categorySlug, productIds, vibeTags, selectedCategory]);
 
     const handleVibeSearch = async (e: React.FormEvent) => {
         e.preventDefault();

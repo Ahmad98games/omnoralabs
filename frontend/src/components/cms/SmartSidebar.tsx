@@ -212,12 +212,15 @@ const GenericSchemaEditor: React.FC<{ nodeId: string; schema: any }> = ({ nodeId
         </div>
     );
 };
+import { NavigatorPanel } from './NavigatorPanel'; // 🛡️ Load Layers Tree
+
 export const SmartSidebar: React.FC = () => {
     const {
         selectedNodeId, viewport, setViewport, mode, setMode
     } = useBuilder();
 
     const [activeTab, setActiveTab] = useState<'settings' | 'design'>('settings');
+    const [emptyTab, setEmptyTab] = useState<'settings' | 'layers'>('layers'); // 🛡️ Default to layers tree
 
     // Only re-renders when selection changes
     const selectedNode = useNodeSelector(selectedNodeId || '', (n) => ({ id: n.id, type: n.type }));
@@ -250,8 +253,25 @@ export const SmartSidebar: React.FC = () => {
 
             <div style={{ flex: 1, overflowY: 'auto' }}>
                 {!selectedNode ? (
-                    <div style={{ padding: '1rem' }}>
-                        <PageSettingsPanel />
+                    <div className="flex flex-col h-full">
+                        {/* 🛡️ Empty State Switcher Sequential! */}
+                        <div className="flex border-b border-white/5">
+                            <button 
+                                onClick={() => setEmptyTab('layers')}
+                                className={`flex-1 p-3 text-[10px] font-bold uppercase tracking-wider
+                                    ${emptyTab === 'layers' ? 'text-[#D4AF37] border-b-2 border-[#D4AF37]' : 'text-white/40'}
+                                `}
+                            >Layers</button>
+                            <button 
+                                onClick={() => setEmptyTab('settings')}
+                                className={`flex-1 p-3 text-[10px] font-bold uppercase tracking-wider
+                                    ${emptyTab === 'settings' ? 'text-[#D4AF37] border-b-2 border-[#D4AF37]' : 'text-white/40'}
+                                `}
+                            >Page Settings</button>
+                        </div>
+                        <div className="flex-1 overflow-y-auto">
+                            {emptyTab === 'layers' ? <NavigatorPanel /> : <div style={{ padding: '1rem' }}><PageSettingsPanel /></div>}
+                        </div>
                     </div>
                 ) : (
                     <>

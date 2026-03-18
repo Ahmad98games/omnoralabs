@@ -5,14 +5,26 @@ import { DynamicSection } from '../DynamicSection';
 import { CanvasOverlay } from './CanvasOverlay';
 import { BuilderHealthOverlay } from './BuilderHealthOverlay';
 import { getPreset } from './DevicePresetPanel';
+import { useGlobalThemeStore, toCSSVariables } from '../../stores/useGlobalThemeStore'; // 🛡️ Load Global Tokens
+
+// ─── One-time keyframe injection ──────────────────────────────────────────────
+(function injectLiveCanvasKf() {
+    if (typeof document === 'undefined' || document.getElementById('omnora-lc-kf')) return;
+    const s = document.createElement('style');
+    s.id = 'omnora-lc-kf';
+    s.textContent = `@keyframes spin { to { transform: rotate(360deg); } }`;
+    document.head.appendChild(s);
+})();
+
+const LoadingSpinner = () => (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', width: '100%', background: '#030304', color: '#fff' }}>
+        <div style={{ width: 32, height: 32, border: '3px solid #1a1a1a', borderTopColor: '#D4AF37', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+    </div>
+);
 
 // ─── Shadow Host ──────────────────────────────────────────────────────────────
 /**
  * ShadowHost — Omnora OS v5.1 Device Simulation Architecture
- *
- * Extends v5.0 singleton Shadow DOM with:
- *  - safe-area CSS variable injection (--omnora-safe-*)
- *  - GPU acceleration hints for smooth scaling
  */
 const ShadowHost: React.FC<{
     children: React.ReactNode;
@@ -23,6 +35,7 @@ const ShadowHost: React.FC<{
     safeBottom?: number;
 }> = ({ children, designSystem, theme, mode, safeTop = 0, safeBottom = 0 }) => {
     const hostRef = useRef<HTMLDivElement>(null);
+    const globalTheme = useGlobalThemeStore(); // 🛡️ Dynamic Theme Hookup Sequential!
     const shadowRootRef = useRef<ShadowRoot | null>(null);
     const styleElRef = useRef<HTMLStyleElement | null>(null);
     const [isReady, setIsReady] = useState(false);
@@ -61,24 +74,10 @@ const ShadowHost: React.FC<{
         const t = designSystem?.typography ?? {};
         const s = designSystem?.spacing ?? {};
 
-        // Font family map
-        const fontPairMap: Record<string, { heading: string; body: string }> = {
-            luxury: { heading: "'Playfair Display', Georgia, serif", body: "'Inter', system-ui, sans-serif" },
-            minimal: { heading: "'DM Sans', system-ui, sans-serif", body: "'DM Sans', system-ui, sans-serif" },
-            editorial: { heading: "'Space Mono', monospace", body: "Georgia, 'Times New Roman', serif" },
-            clean: { heading: "'Inter', system-ui, sans-serif", body: "'Inter', system-ui, sans-serif" },
-            poppins: { heading: "'Poppins', system-ui, sans-serif", body: "'Poppins', system-ui, sans-serif" },
-        };
-        const pair = fontPairMap[t.pair ?? 'luxury'] ?? fontPairMap.luxury;
-
-        // Shadow system
-        const shadowMap: Record<string, string> = {
-            none: 'none',
-            soft: '0 2px 8px rgba(0,0,0,0.15)',
-            medium: '0 8px 24px rgba(0,0,0,0.3)',
-            heavy: '0 20px 60px rgba(0,0,0,0.6)',
-        };
-        const shadowVal = shadowMap[s.shadowStyle ?? 'soft'] ?? shadowMap.soft;
+        const globalVars = toCSSVariables(globalTheme);
+        const varsCSS = Object.entries(globalVars)
+            .map(([k, v]) => `  ${k}: ${v};`)
+            .join('\n');
 
         return `
 :host {
@@ -88,71 +87,47 @@ const ShadowHost: React.FC<{
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
+  /* ── Global Themes ────────────────────────── */
+${varsCSS}
+
   /* ── Safe areas ─────────────────────────────── */
   --omnora-safe-top: ${safeTop}px;
   --omnora-safe-bottom: ${safeBottom}px;
   --omnora-safe-left: 0px;
   --omnora-safe-right: 0px;
 
-  /* ── Backgrounds ───────────────────────────── */
-  --bg-primary:      ${theme?.backgroundColor ?? c.primary ?? '#030304'};
-  --bg-surface:      ${theme?.cardColor ?? c.surface ?? '#0a0a0b'};
+  /* ── Legacy Fallbacks / Overrides ───────────── */
+  --bg-primary:      var(--omnora-color-bg);
+  --bg-surface:      var(--omnora-color-surface);
   --bg-overlay:      ${c.overlay ?? 'rgba(0,0,0,0.7)'};
 
-  /* ── Brand / Accent ────────────────────────── */
-  --accent-primary:   ${theme?.primaryColor ?? c.accentPrimary ?? '#C5A059'};
-  --accent-secondary: ${theme?.primaryColor ?? c.accentSecondary ?? '#8B5E2A'};
+  --accent-primary:   var(--omnora-color-primary);
+  --accent-secondary: var(--omnora-color-secondary);
 
-  /* ── Text ──────────────────────────────────── */
-  --text-primary: ${theme?.textColor ?? c.textPrimary ?? '#ffffff'};
-  --text-muted:   ${theme?.textColor ?? c.textMuted ?? 'rgba(255,255,255,0.5)'};
+  --text-primary: var(--omnora-color-text);
+  --text-muted:   var(--omnora-color-text-muted);
 
-  /* ── UI ────────────────────────────────────── */
-  --border-color: ${c.border ?? 'rgba(255,255,255,0.08)'};
-  --btn-bg:       ${theme?.primaryColor ?? c.buttonBg ?? c.accentPrimary ?? '#C5A059'};
-  --btn-text:     ${theme?.backgroundColor ?? c.buttonText ?? '#000000'};
+  --border-color: var(--omnora-color-border);
+  --btn-bg:       var(--omnora-color-primary);
+  --btn-text:     #fff;
 
-  /* ── Feedback ──────────────────────────────── */
-  --color-success: ${c.success ?? '#4ade80'};
-  --color-error:   ${c.error ?? '#ef4444'};
-  --color-warning: ${c.warning ?? '#fbbf24'};
-
-  /* ── Typography Scale ──────────────────────── */
-  --font-heading:      ${pair.heading};
-  --font-body:         ${pair.body};
-  --font-size-base:    ${t.baseFontSize ?? '16px'};
-  --font-size-h1:      ${t.h1 ?? '56px'};
-  --font-size-h2:      ${t.h2 ?? '40px'};
-  --font-size-h3:      ${t.h3 ?? '28px'};
-  --line-height:       ${t.lineHeight ?? '1.6'};
-  --letter-spacing:    ${t.letterSpacing ? t.letterSpacing + 'px' : '0px'};
-
-  /* ── Spacing & Layout ──────────────────────── */
-  --section-padding:    ${s.sectionPadding ?? '80'}px;
-  --container-width:    ${s.containerMaxWidth ?? '1200'}px;
-  --card-gap:           ${s.cardGap ?? '24'}px;
-  --radius-button:      ${theme?.borderRadius ?? s.buttonRadius ?? '4px'};
-  --radius-card:        ${theme?.borderRadius ?? s.cardRadius ?? '8px'};
-  --radius-image:       ${s.imageRadius ?? '4'}px;
-  --shadow:             ${shadowVal};
+  --font-heading:      var(--omnora-font-heading);
+  --font-body:         var(--omnora-font-body);
+  --font-size-base:    var(--omnora-font-base-size);
 
   /* ── Canvas defaults ───────────────────────── */
   background: var(--bg-primary);
   color: var(--text-primary);
   font-family: var(--font-body);
   font-size: var(--font-size-base);
-  line-height: var(--line-height);
 }
 *, *::before, *::after { box-sizing: border-box; }
 img { max-width: 100%; height: auto; }
-h1, h2, h3, h4, h5, h6 { font-family: var(--font-heading); letter-spacing: var(--letter-spacing); }
-h1 { font-size: var(--font-size-h1); }
-h2 { font-size: var(--font-size-h2); }
-h3 { font-size: var(--font-size-h3); }
+h1, h2, h3, h4, h5, h6 { font-family: var(--font-heading); }
 ${mode === 'edit' ? 'a, button { pointer-events: none !important; }' : ''}
 .omnora-editable-text { pointer-events: auto !important; }
 `;
-    }, [designSystem, theme, mode, safeTop, safeBottom]);
+    }, [designSystem, theme, mode, safeTop, safeBottom, globalTheme]);
 
     useEffect(() => {
         if (styleElRef.current) styleElRef.current.textContent = shadowStyles;
@@ -346,7 +321,47 @@ const FoldMarker: React.FC<{ h: number }> = ({ h }) => (
     </div>
 );
 
-// ─── Main LiveCanvas ──────────────────────────────────────────────────────────
+class CanvasErrorBoundary extends React.Component<
+    { children: React.ReactNode },
+    { hasError: boolean; error: Error | null }
+> {
+    constructor(props: { children: React.ReactNode }) {
+        super(props);
+        this.state = { hasError: false, error: null };
+    }
+
+    static getDerivedStateFromError(error: Error) {
+        return { hasError: true, error };
+    }
+
+    componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+        console.error('[Omnora Canvas Crash]', error, errorInfo);
+    }
+
+    render() {
+        if (this.state.hasError) {
+            return (
+                <div style={{
+                    padding: '40px',
+                    textAlign: 'center',
+                    background: '#1a0505',
+                    color: '#ff6b6b',
+                    borderRadius: '12px',
+                    border: '1px solid #ff4444',
+                    margin: '20px',
+                    fontFamily: 'monospace'
+                }}>
+                    <h3 style={{ margin: '0 0 10px 0' }}>⚠️ Render Cascade Failure</h3>
+                    <p style={{ fontSize: '12px', opacity: 0.8 }}>
+                        {this.state.error?.message || 'Unknown runtime error'}
+                    </p>
+                </div>
+            );
+        }
+        return this.props.children;
+    }
+}
+
 // ─── Render Engine ────────────────────────────────────────────────────────────
 /**
  * RenderTree: Enforces OS.IDENTITY by keeping the same component instances
@@ -359,9 +374,11 @@ const RenderTree: React.FC<{ blocks: string[] }> = React.memo(({ blocks }) => {
 // ─── Main LiveCanvas ──────────────────────────────────────────────────────────
 export const LiveCanvas: React.FC = () => {
     const {
-        mode, designSystem, theme, activePageId, pageLayouts,
+        isLoading, mode, designSystem, theme, activePageId, pageLayouts, pages,
         devicePreset, orientation, zoomLevel, showDeviceFrame, showSafeAreaOverlay,
     } = useBuilder();
+
+    if (isLoading) return <LoadingSpinner />;
 
     const containerRef = useRef<HTMLDivElement>(null);
     const [containerH, setContainerH] = useState(800);
@@ -402,7 +419,7 @@ export const LiveCanvas: React.FC = () => {
     const safeTop = orientation === 'portrait' ? (preset.safeTop ?? 0) : 0;
     const safeBottom = orientation === 'portrait' ? (preset.safeBottom ?? 0) : 0;
 
-    const blocks = useMemo(() => pageLayouts[activePageId] || [], [pageLayouts, activePageId]);
+    const blocks = useMemo(() => pageLayouts?.[activePageId] || [], [pageLayouts, activePageId]);
 
     const isEdit = mode === 'edit';
     const isPhone = preset.category === 'phone';
@@ -436,14 +453,21 @@ export const LiveCanvas: React.FC = () => {
                 zIndex: 1,
             }}
         >
-            <ShadowHost designSystem={designSystem} theme={theme} mode={mode} safeTop={safeTop} safeBottom={safeBottom}>
-                <RenderTree blocks={blocks} />
-            </ShadowHost>
+            <CanvasErrorBoundary>
+                <ShadowHost designSystem={designSystem} theme={theme} mode={mode} safeTop={safeTop} safeBottom={safeBottom}>
+                    <RenderTree blocks={blocks} />
+                </ShadowHost>
+            </CanvasErrorBoundary>
             {isEdit && <CanvasOverlay />}
             {showSafeAreaOverlay && isEdit && <SafeAreaOverlay safeTop={safeTop} safeBottom={safeBottom} w={typeof canvasDisplayW === 'number' ? canvasDisplayW : 1200} h={canvasDisplayH} />}
             {(isPhone || isTablet) && isEdit && <FoldMarker h={canvasDisplayH} />}
         </div>
     );
+
+    const activePage = pages?.byId?.[activePageId] || null;
+    if (!activePage || !activePage.content) {
+        return <LoadingSpinner />;
+    }
 
     return (
         <div

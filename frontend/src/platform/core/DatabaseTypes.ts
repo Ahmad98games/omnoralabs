@@ -79,6 +79,7 @@ export interface CustomPage {
     };
     type?: 'system' | 'template' | 'custom';
     isLocked?: boolean;
+    content?: any;
 }
 
 export interface NavLink {

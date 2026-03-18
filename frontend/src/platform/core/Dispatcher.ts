@@ -95,8 +95,12 @@ class Dispatcher {
         // Increment revision at the root level of the node
         const nextRevision = (node.revision || 0) + 1;
         
+        const cleanPath = patch.path.startsWith('activeElement.') 
+            ? patch.path.replace('activeElement.', '') 
+            : patch.path;
+            
         // Use recursive immutable setter to ensure no "Silent Mutations"
-        const newNode = this.immutableSet(node, patch.path.split('.'), patch.value);
+        const newNode = this.immutableSet(node, cleanPath.split('.'), patch.value);
         
         return { ...newNode, revision: nextRevision };
     }

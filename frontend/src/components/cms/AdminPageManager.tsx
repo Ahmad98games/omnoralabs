@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom'; // 🛡️ For Builder navigation
 import { databaseClient } from '../../platform/core/DatabaseClient';
 import type { CustomPage } from '../../platform/core/DatabaseTypes';
 
@@ -34,6 +35,7 @@ export const adminPageManagerSchema = {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export const AdminPageManager: React.FC<AdminPageManagerProps> = ({ nodeId, merchantId = '' }) => {
+    const navigate = useNavigate(); // 🛡️ Navigation hooks Sequential!
     const [pages, setPages] = useState<CustomPage[]>([]);
     const [loading, setLoading] = useState(true);
     const [modalOpen, setModalOpen] = useState(false);
@@ -71,7 +73,20 @@ export const AdminPageManager: React.FC<AdminPageManagerProps> = ({ nodeId, merc
             if (editingPage) {
                 await databaseClient.updatePage(editingPage.id, { title: form.title, slug, status: form.status });
             } else {
-                await databaseClient.createPage(merchantId, { title: form.title, slug, status: form.status, nodeIds: [] });
+                const newPage = await databaseClient.createPage(merchantId, { 
+                    title: form.title, 
+                    slug, 
+                    status: form.status, 
+                    nodeIds: [],
+                    content: { pages: { home: { layout: [] } } } // 🛡️ Initial skeleton stability!
+                });
+
+                if (newPage && newPage.id) {
+                    setModalOpen(false);
+                    // 🛡️ Navigate to builder with details triggers
+                    navigate(`/seller?tab=builder&pageId=${newPage.id}`);
+                    return;
+                }
             }
             await loadPages();
             setModalOpen(false);

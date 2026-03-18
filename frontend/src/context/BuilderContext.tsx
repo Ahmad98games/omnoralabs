@@ -86,6 +86,7 @@ export enum InteractionPriority {
 }
 
 interface UIContextType {
+    isLoading: boolean;
     pages: { byId: Record<string, PageMetadata>; allIds: string[] };
     activePageId: string;
     setActivePageId: (id: string) => void;
@@ -149,9 +150,10 @@ interface NodesContextType {
     setNodeForcedState: (id: string, state: 'hover' | 'active' | null) => void;
     addNode: (type: string, props?: any, parentId?: string | null, index?: number | null) => string;
     deleteNode: (id: string) => void;
-    duplicateNode: (id: string) => void;
+    duplicateNode: (id: string) => string;
     reorderNode: (id: string, direction: 'up' | 'down') => void;
-    moveNodeToIndex: (id: string, targetIndex: number) => void;
+    moveNodeToIndex: (id: string, index: number) => void;
+    reorderPageLayout: (newLayout: string[]) => void;
     systemHealth: any;
     undo: () => void;
     redo: () => void;
@@ -166,6 +168,7 @@ const NodesContext = createContext<NodesContextType | undefined>(undefined);
 const BuilderContext = createContext<any>(undefined);
 
 export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData: any, isPreview: boolean, tenantId?: string, userName?: string }> = ({ children, initialData, isPreview, tenantId, userName }) => {
+    const [isLoading, setIsLoading] = useState(true);
     const [isBuilderActive, setIsBuilderActive] = useState(false);
     const [mode, setMode] = useState<'edit' | 'preview'>('edit');
     const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
@@ -364,6 +367,7 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
                         setActivePageId(parsed.activePageId || 'home');
                     }
                     setDesignSystem(parsed.designSystem || {});
+                    setIsLoading(false);
                     return;
                 } catch (e) {
                     console.error('[Omnora Boot] Local storage corruption detected. Rolling back.', e);
@@ -447,6 +451,7 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
                 setActivePageId('home');
                 setDesignSystem({});
             }
+            setIsLoading(false);
         };
 
         bootstrap();
@@ -865,6 +870,11 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
         commitHistory();
     }, [activePageId, commitHistory]);
 
+    const reorderPageLayout = useCallback((newLayout: string[]) => {
+        setPageLayouts(prev => ({ ...prev, [activePageId]: newLayout }));
+        setHasUnsavedChanges(true);
+    }, [activePageId]);
+
     const publishLive = useCallback(async () => {
         setSaveStatus('saving');
         try {
@@ -1027,6 +1037,7 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
     }, [endDrag, commitHistory]);
 
     const uiValues: UIContextType = {
+        isLoading,
         pages, activePageId, setActivePageId: switchPage, addPage, deletePage, updatePageMeta,
         viewport, setViewport, devicePreset, setDevicePreset, orientation, setOrientation,
         zoomLevel, setZoomLevel, showDeviceFrame, toggleDeviceFrame, showSafeAreaOverlay, toggleSafeAreaOverlay,
@@ -1039,7 +1050,7 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
     const nodeValues: NodesContextType = {
         nodes, pageLayouts, activePageId, nodeTree, selectedNodeId, designSystem, selectNode,
         updateNode, updateDesignSystem, setNodeForcedState, addNode, deleteNode, duplicateNode,
-        reorderNode, moveNodeToIndex, undo, redo, commitHistory, saveDraft, publishLive, injectAST, systemHealth
+        reorderNode, moveNodeToIndex, reorderPageLayout, undo, redo, commitHistory, saveDraft, publishLive, injectAST, systemHealth
     };
 
     const omnoraValues = {
