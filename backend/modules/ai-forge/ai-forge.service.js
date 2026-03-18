@@ -36,18 +36,20 @@ AESTHETIC: Luxury, Cinematic, OLED Black.`;
 
             const systemPrompt = this.buildStorePrompt();
             
-            // 🛡️ Outboard Call with 60-second Timeout protection
+            // 🛡️ Outboard Call with 8-second Timeout protection (Vercel compliance)
             const response = await axios.post('https://api.groq.com/openai/v1/chat/completions', {
                 model: 'llama-3.3-70b-versatile',
                 messages: [
                     { role: 'system', content: systemPrompt },
                     { role: 'user', content: `Generate a storefront for: "${prompt}"` }
                 ],
+                max_tokens: 2000,
                 temperature: 0.7,
+                stream: false,
                 response_format: { type: "json_object" }
             }, {
                 headers: { Authorization: `Bearer ${this.groqKey}` },
-                timeout: 60000 
+                timeout: 8000 
             });
 
             const content = response.data.choices[0].message.content;

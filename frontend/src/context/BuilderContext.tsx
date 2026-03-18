@@ -505,7 +505,7 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
             if (!rawNode) return;
             const node = migrateNode(rawNode);
             tree[id] = node;
-            node.children.forEach(collect);
+            (node.children || []).forEach(collect);
         };
 
         layout.forEach(collect);

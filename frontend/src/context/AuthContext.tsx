@@ -117,15 +117,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }, []);
 
     useEffect(() => {
+        let isMounted = true;
+
         const syncSession = async () => {
             try {
                 const { data: { session } } = await supabase.auth.getSession();
-                if (session?.access_token) {
+                if (isMounted && session?.access_token) {
                     localStorage.setItem('token', session.access_token);
                     setAuthHeader(session.access_token);
                 }
             } catch (err) {
                 console.warn('[Supabase Sync Auth Failure]', err);
+            } finally {
+                if (isMounted) {
+                    // 🛡️ Trigger initAuth exactly after session is hydrated!
+                    initAuth();
+                }
             }
         };
 
@@ -140,11 +147,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             }
         });
 
-        return () => subscription.unsubscribe();
-    }, []);
-
-    useEffect(() => {
-        initAuth();
+        return () => {
+            isMounted = false;
+            subscription.unsubscribe();
+        };
     }, [initAuth]);
 
     // 2. LOGIN
@@ -249,7 +255,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setAuthModalOpen
     };
 
-    if (!isInitialized) {
+    if (loading || !isInitialized) {
         return <CinematicLoader />;
     }
 
