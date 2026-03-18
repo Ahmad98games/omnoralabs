@@ -14,6 +14,8 @@ export interface PropField {
   step?: number;
   options?: { value: string; label: string }[];
   category?: string;
+  visibleIf?: (props: any) => boolean; // 🛡️ Conditional Visibility
+  responsive?: boolean; // 🛡️ Supports split Desktop/Mobile configurations
 }
 
 export interface ComponentPropConfig {
@@ -33,9 +35,15 @@ export const PROP_CONFIGS: Record<string, ComponentPropConfig> = {
         icon: Image,
         fields: [
           { name: 'bgType', type: 'select', label: 'Type', options: [{ value: 'image', label: 'Image' }, { value: 'video', label: 'Video' }, { value: 'color', label: 'Solid Color' }] },
-          { name: 'bgImage', type: 'image', label: 'Background Image' },
-          { name: 'bgVideo', type: 'video', label: 'Video Asset' },
-          { name: 'overlayOpacity', type: 'slider', label: 'Overlay Opacity', min: 0, max: 100, step: 1 },
+          { 
+            name: 'bgImage', type: 'image', label: 'Background Image',
+            visibleIf: (p) => p.bgType === 'image' || !p.bgType 
+          },
+          { 
+            name: 'bgVideo', type: 'video', label: 'Video Asset',
+            visibleIf: (p) => p.bgType === 'video' 
+          },
+          { name: 'overlayOpacity', type: 'slider', label: 'Overlay Opacity', min: 0, max: 100, step: 1, visibleIf: (p) => p.bgType === 'image' || p.bgType === 'video' },
           { name: 'bgOverlay', type: 'color', label: 'Overlay Color' }
         ]
       },
@@ -46,7 +54,7 @@ export const PROP_CONFIGS: Record<string, ComponentPropConfig> = {
           { name: 'headline', type: 'text', label: 'Headline Text', placeholder: 'Enter headline...' },
           { name: 'subtitle', type: 'text', label: 'Subtitle Text' },
           { name: 'textAlign', type: 'select', label: 'Text Alignment', options: [{ value: 'left', label: 'Left' }, { value: 'center', label: 'Center' }, { value: 'right', label: 'Right' }] },
-          { name: 'fontSize', type: 'slider', label: 'Font Size (em)', min: 1, max: 10, step: 0.5 }
+          { name: 'fontSize', type: 'slider', label: 'Font Size (em)', min: 1, max: 10, step: 0.5, responsive: true }
         ]
       }
     ]
