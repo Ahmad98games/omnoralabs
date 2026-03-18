@@ -50,6 +50,9 @@ client.interceptors.request.use(
 client.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
+    // 🛡️ Verbose error logger: Full URL tracking for 404/500 diagnostics
+    console.error(`[Axios Failed] ${error.config?.method?.toUpperCase()} ${error.config?.baseURL || ''}${error.config?.url} | Status: ${error.response?.status || 'Network'} | Msg: ${error.message}`);
+
     if (error.response?.status === 401) {
       console.warn('[Axios Interceptor] 401 Unauthorized. Letting AuthContext manage session reset nodes.');
       // window.location.href = '/login'; // 🛡️ Disabled to prevent infinite page reloads triggers node!
