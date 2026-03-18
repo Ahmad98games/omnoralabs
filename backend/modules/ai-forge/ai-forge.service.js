@@ -19,13 +19,13 @@ class AIForgeService {
     // ─── Store Generation (AST) ──────────────────────────────────────────────
 
     /**
-     * Build the system prompt for high-fidelity AST generation.
+     * Build the system prompt for concise Blueprint generation.
      */
     buildStorePrompt() {
-        return `ROLE: Senior AI Systems Engineer & E-commerce Architect.
-TASK: Generate a complete, multi-page storefront AST for Omnora OS.
-STRICT JSON SCHEMA: { pages: { byId, allIds }, nodes: {}, pageLayouts: {}, designSystem: {} }
-AESTHETIC: Luxury, Cinematic, OLED Black.`;
+        return `ROLE: AI E-commerce Architect.
+TASK: Generate ONLY a JSON configuration for the requested store niche. Do not write items like HTML or CSS. 
+Just return keys for 'colors' (primary, background, text), 'fonts' (heading, body), 'hero_title', and 'sections_list' (array of strings e.g., ["features", "testimonials"]).
+STICK TO JSON only.`;
     }
 
     async generateStoreAST(merchantId, prompt) {
@@ -36,33 +36,57 @@ AESTHETIC: Luxury, Cinematic, OLED Black.`;
 
             const systemPrompt = this.buildStorePrompt();
             
-            // 🛡️ Outboard Call with 8-second Timeout protection (Vercel compliance)
+            // 🛡️ Outboard Call with 9-second Timeout protection (Vercel compliance)
             const response = await axios.post('https://api.groq.com/openai/v1/chat/completions', {
                 model: 'llama-3.3-70b-versatile',
                 messages: [
                     { role: 'system', content: systemPrompt },
-                    { role: 'user', content: `Generate a storefront for: "${prompt}"` }
+                    { role: 'user', content: `Generate a store blueprint for: "${prompt}"` }
                 ],
-                max_tokens: 2000,
+                max_tokens: 1000,
                 temperature: 0.7,
                 stream: false,
                 response_format: { type: "json_object" }
             }, {
                 headers: { Authorization: `Bearer ${this.groqKey}` },
-                timeout: 8000 
+                timeout: 9000 
             });
 
             const content = response.data.choices[0].message.content;
+            let blueprint = {};
 
             // 🛡️ Safe JSON Parser Fallback
             try {
-                return JSON.parse(content);
+                blueprint = JSON.parse(content);
             } catch (pErr) {
-                console.warn('[AST Parse Failed] Attempting regex extraction...');
+                console.warn('[Blueprint Parse Failed] Attempting regex extraction...');
                 const match = content.match(/\{[\s\S]*\}/);
-                if (match) return JSON.parse(match[0]);
-                throw pErr;
+                if (match) blueprint = JSON.parse(match[0]);
+                else throw pErr;
             }
+
+            // 🛡️ Translate Blueprint to Full AST for frontend Injection compatibilities
+            return {
+                pages: { 
+                    home: { 
+                        title: "Home", 
+                        layout: [
+                            { 
+                                type: 'hero', 
+                                data: { headline: blueprint.hero_title || 'Exquisite Elegance', subtitle: 'Crafted for the sovereign.' } 
+                            },
+                            ...(blueprint.sections_list || []).map((sec, idx) => ({
+                                type: sec.toLowerCase().includes('grid') ? 'product-grid' : 'feature-cards',
+                                data: { title: sec }
+                            }))
+                        ] 
+                    } 
+                },
+                designSystem: {
+                    colors: blueprint.colors || { primary: '#D4AF37', background: '#050505', text: '#FFFFFF' },
+                    fonts: blueprint.fonts || ['Outfit', 'Inter']
+                }
+            };
 
         } catch (err) {
             console.error('Groq Error:', err.message);

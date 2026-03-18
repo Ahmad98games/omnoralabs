@@ -4,6 +4,7 @@ import { Sparkles, Terminal, Database, Cpu, Layout, Layers, ShieldCheck, Rocket 
 import client from '../../api/client';
 import { useNodes } from '../../context/BuilderContext';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext'; // 🛡️ Load auth for safe hydration checks node!
 
 interface StoreGeneratorProps {
     prompt: string;
@@ -26,6 +27,8 @@ export const StoreGenerator: React.FC<StoreGeneratorProps> = ({ prompt, onComple
     const [currentStep, setCurrentStep] = useState(0);
     const [status, setStatus] = useState<'processing' | 'completed' | 'failed'>('processing');
     const [jobId, setJobId] = useState<string | null>(null);
+    const [timerText, setTimerText] = useState<string>(''); // 🛡️ Stage timer text
+    const { user } = useAuth(); // 🛡️ Hydrate session loading guards
     
     // Optional integration with BuilderContext
     let injectAST: any = null;
@@ -40,6 +43,8 @@ export const StoreGenerator: React.FC<StoreGeneratorProps> = ({ prompt, onComple
 
     // Start Generation
     useEffect(() => {
+        if (!user || status !== 'processing') return; // 🛡️ Guard against un-hydrated sessions layout!
+
         const startGeneration = async () => {
             try {
                 const response = await client.post('/api/ai/generate-store', { prompt });
@@ -58,8 +63,15 @@ export const StoreGenerator: React.FC<StoreGeneratorProps> = ({ prompt, onComple
                 setStatus('failed');
             }
         };
+
         startGeneration();
-    }, [prompt]);
+
+        const stageTimer = setTimeout(() => {
+            setTimerText("Refining details for better performance...");
+        }, 10000); // 🛡️ 10s Stage Timer
+
+        return () => clearTimeout(stageTimer);
+    }, [user, prompt, status, injectAST, onComplete]);
 
     // Poll Status
     useEffect(() => {
@@ -128,7 +140,7 @@ export const StoreGenerator: React.FC<StoreGeneratorProps> = ({ prompt, onComple
                         OMNORA <span className="text-[#D4AF37]">FORGE</span>
                     </h1>
                     <p className="text-white/40 text-sm max-w-sm mx-auto">
-                        Generating high-fidelity storefront based on: <br/>
+                        {timerText || `Generating high-fidelity storefront based on:`} <br/>
                         <span className="text-white/60 italic">"{prompt}"</span>
                     </p>
                 </motion.div>
