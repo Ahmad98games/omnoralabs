@@ -8,7 +8,7 @@ class AIController {
   static async generateCopy(req, res) {
     try {
       const { prompt } = req.body;
-      const apiKey = process.env.GROQ_API_KEY;
+      const apiKey = process.env.GROQ_API_KEY || process.env.VITE_GROQ_API_KEY;
 
       if (!apiKey) {
         return res.status(500).json({ error: "Backend Missing GROQ_API_KEY" });

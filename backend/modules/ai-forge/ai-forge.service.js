@@ -12,6 +12,7 @@ const { supabase } = require('../../shared/lib/supabaseClient');
 class AIForgeService {
     constructor() {
         this.openaiKey = process.env.OPENAI_API_KEY;
+        this.groqKey = process.env.GROQ_API_KEY || process.env.VITE_GROQ_API_KEY;
         this.openaiUrl = 'https://api.openai.com/v1/chat/completions';
     }
 
