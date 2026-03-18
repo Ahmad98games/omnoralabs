@@ -80,7 +80,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setLoading(true);
         const token = localStorage.getItem('token');
 
-        if (!token) {
+        if (!token || token === 'null' || token === 'undefined') {
             setLoading(false);
             setIsInitialized(true);
             setStatus('unauthenticated');

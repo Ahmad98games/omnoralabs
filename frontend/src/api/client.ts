@@ -50,10 +50,9 @@ client.interceptors.request.use(
 client.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
-    if (error.response?.status === 401 && window.location.pathname !== '/login') {
-      // 🛡️ Gentle Redirect: Let AuthContext handle re-hydration or session resets 
-      window.location.href = '/login';
-      return Promise.reject(error);
+    if (error.response?.status === 401) {
+      console.warn('[Axios Interceptor] 401 Unauthorized. Letting AuthContext manage session reset nodes.');
+      // window.location.href = '/login'; // 🛡️ Disabled to prevent infinite page reloads triggers node!
     }
     return Promise.reject(error);
   }

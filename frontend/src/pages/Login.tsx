@@ -274,7 +274,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 
                                     onChange={handleChange}
                                     className="form-input"
-                                    placeholder="Ahmad Mahboob" required />
+                                    placeholder="Your Name(e.g john , Ali )" required />
                             </div>)}
 
                         <div className="form-group">
