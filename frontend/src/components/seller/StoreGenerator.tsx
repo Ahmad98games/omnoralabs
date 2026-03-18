@@ -4,7 +4,8 @@ import { Sparkles, Terminal, Database, Cpu, Layout, Layers, ShieldCheck, Rocket 
 import client from '../../api/client';
 import { useNodes } from '../../context/BuilderContext';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext'; // 🛡️ Load auth for safe hydration checks node!
+import { useAuth } from '../../context/AuthContext';
+import { supabase } from '../../lib/supabaseClient'; // 🛡️ Load Supabase for Direct save triggers node!
 
 interface StoreGeneratorProps {
     prompt: string;
@@ -45,14 +46,59 @@ export const StoreGenerator: React.FC<StoreGeneratorProps> = ({ prompt, onComple
     useEffect(() => {
         if (!user || status !== 'processing') return; // 🛡️ Guard against un-hydrated sessions layout!
 
+        const saveToDatabase = async (ast: any) => {
+            try {
+                if (!user?.id) return;
+
+                console.log('[Omnora AI Pre-Save] AST:', ast);
+
+                // 🛡️ 1. DATA EXTRACTION: Strict Fallback matching
+                let layout = ast.pages?.home?.layout;
+                if (!layout || layout.length === 0) {
+                     layout = ast.layout || ast.data?.layout || ast.home?.layout || [];
+                }
+
+                const savePayload = {
+                    pages: {
+                        home: {
+                            title: "Home",
+                            layout: layout
+                        }
+                    },
+                    designSystem: ast.designSystem || {}
+                };
+
+                console.log('[Omnora AI Pre-Save] Payload:', savePayload);
+
+                const { error } = await supabase
+                     .from('pages')
+                     .upsert({ 
+                         merchant_id: user.id, 
+                         title: 'Home', 
+                         slug: 'home',
+                         content: savePayload,
+                         updated_at: new Date().toISOString()
+                     });
+
+                if (error) throw error;
+                console.log('[Supabase Save Success] Forge AST synced securely.');
+
+            } catch (err) {
+                console.error('[Supabase Save Failed] Forge AST synchronization error:', err);
+            }
+        };
+
         const startGeneration = async () => {
             try {
                 const response = await client.post('/ai/generate-store', { prompt }, { timeout: 10000 }); // 🛡️ 10s Timeout protection
                 
                 if (response.data.success && response.data.ast) {
                     // 🛡️ Direct Ingestion: Bypass Polling
-                    setTimeout(() => {
+                    setTimeout(async () => {
                         if (injectAST) injectAST(response.data.ast);
+                        
+                        await saveToDatabase(response.data.ast); // 🛡️ Save triggered
+                        
                         setStatus('completed');
                         if (onComplete) onComplete();
                     }, 14000); 
@@ -79,11 +125,14 @@ export const StoreGenerator: React.FC<StoreGeneratorProps> = ({ prompt, onComple
                     }
                 };
 
-                setTimeout(() => {
+                setTimeout(async () => {
                     if (injectAST) injectAST(fallbackAST);
+                    
+                    await saveToDatabase(fallbackAST); // 🛡️ Save Fallback
+                    
                     setStatus('completed');
                     if (onComplete) onComplete();
-                }, 5000); // 🛡️ Trigger visual rescue in 5s instead of hanging!
+                }, 5000); 
             }
         };
 
