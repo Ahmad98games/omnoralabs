@@ -29,8 +29,58 @@ AESTHETIC: Luxury, Cinematic, OLED Black.`;
     }
 
     async generateStoreAST(merchantId, prompt) {
-        // Implementation of Phase 53/60 logic using Supabase...
-        // profit.
+        try {
+            if (!this.groqKey) {
+                throw new Error('Missing GROQ_API_KEY for Forge');
+            }
+
+            const systemPrompt = this.buildStorePrompt();
+            
+            // 🛡️ Outboard Call with 60-second Timeout protection
+            const response = await axios.post('https://api.groq.com/openai/v1/chat/completions', {
+                model: 'llama-3.3-70b-versatile',
+                messages: [
+                    { role: 'system', content: systemPrompt },
+                    { role: 'user', content: `Generate a storefront for: "${prompt}"` }
+                ],
+                temperature: 0.7,
+                response_format: { type: "json_object" }
+            }, {
+                headers: { Authorization: `Bearer ${this.groqKey}` },
+                timeout: 60000 
+            });
+
+            const content = response.data.choices[0].message.content;
+
+            // 🛡️ Safe JSON Parser Fallback
+            try {
+                return JSON.parse(content);
+            } catch (pErr) {
+                console.warn('[AST Parse Failed] Attempting regex extraction...');
+                const match = content.match(/\{[\s\S]*\}/);
+                if (match) return JSON.parse(match[0]);
+                throw pErr;
+            }
+
+        } catch (err) {
+            console.error('Groq Error:', err.message);
+            
+            // 🛡️ Fallback Default Template as safe recovery
+            return {
+                pages: { 
+                    home: { 
+                        title: "The Imperial Boutique", 
+                        layout: [
+                            { type: 'hero', data: { headline: 'Exquisite Elegance', subtitle: 'Crafted for the sovereign.' } },
+                            { type: 'product-grid', data: { title: 'Featured Masterpieces' } }
+                        ] 
+                    }
+                },
+                designSystem: {
+                    colors: { primary: '#D4AF37', background: '#050505' }
+                }
+            };
+        }
     }
 
     // ─── Content Generation (NLP) ──────────────────────────────────────────────

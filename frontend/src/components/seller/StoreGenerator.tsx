@@ -43,13 +43,18 @@ export const StoreGenerator: React.FC<StoreGeneratorProps> = ({ prompt, onComple
         const startGeneration = async () => {
             try {
                 const response = await client.post('/api/ai/generate-store', { prompt });
-                if (response.data.success) {
-                    setJobId(response.data.jobId);
+                if (response.data.success && response.data.ast) {
+                    // 🛡️ Direct Ingestion: Bypass Polling
+                    setTimeout(() => {
+                        if (injectAST) injectAST(response.data.ast);
+                        setStatus('completed');
+                        if (onComplete) onComplete();
+                    }, 14000); // Wait for visual steps to finish!
                 } else {
                     setStatus('failed');
                 }
             } catch (err) {
-                console.error('[AI Store] Failed to start generation:', err);
+                console.error('[AI Store] Generation Error:', err);
                 setStatus('failed');
             }
         };
