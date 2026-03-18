@@ -12,6 +12,8 @@ import {
 import { StyleEditorPanel } from './StyleEditorPanel';
 import { PageSettingsPanel } from './PageSettingsPanel';
 import { MediaLibraryModal } from './MediaLibraryModal';
+import { PropertyPanel } from './properties/PropertyPanel'; // 🛡️ Load advanced Property Engine
+import { PROP_CONFIGS } from './properties/propConfigurations';
 
 // Property Module Imports
 import { FeatureGridv5 as FeatureGridv5Editor } from '../../platform/library/modules/FeatureGridv5';
@@ -297,6 +299,12 @@ export const SmartSidebar: React.FC = () => {
                             {activeTab === 'settings' ? (
                                 // Tab 1: Props Settings
                                 (() => {
+                                    // 🛡️ 1. Advanced Property Engine Overloads
+                                    if (PROP_CONFIGS[selectedNode.type]) {
+                                        return <PropertyPanel nodeId={selectedNode.id} />;
+                                    }
+
+                                    // 🛡️ 2. Legacy Module Editors Fallback
                                     const ModuleEditor = MODULE_MAP[selectedNode.type];
                                     if (ModuleEditor) return <ModuleEditor nodeId={selectedNode.id} />;
 
