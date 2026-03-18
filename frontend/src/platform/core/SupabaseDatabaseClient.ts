@@ -405,15 +405,33 @@ export class SupabaseDatabaseClient implements IDatabaseClient {
 
     // ── Products (Phase 15/58) ───────────────────────────────────────────────
     async getProductsByMerchant(merchantId: string): Promise<Product[]> {
-        const { data, error } = await this.sb
-            .from('products')
-            .select('*, product_variants(*), product_images(*), categories(name)')
-            .eq('merchant_id', merchantId)
-            .order('created_at', { ascending: false });
+        try {
+            const { data, error } = await this.sb
+                .from('products')
+                .select('*, product_variants(*), product_images(*), categories(name)')
+                .eq('merchant_id', merchantId)
+                .order('created_at', { ascending: false });
 
-        if (error) throw new Error(`[getProducts] ${error.message}`);
+            if (error) {
+                // 🛡️ Fallback: If categories relationship is missing in Supabase, fetch without it
+                if (error.message?.includes('relationship') || error.message?.includes('categories')) {
+                    console.warn('[getProducts] categories join failed, retrying without categories');
+                    const { data: fbData, error: fbError } = await this.sb
+                        .from('products')
+                        .select('*, product_variants(*), product_images(*)')
+                        .eq('merchant_id', merchantId)
+                        .order('created_at', { ascending: false });
+                    
+                    if (fbError) throw fbError;
+                    return (fbData || []).map((row: any) => this.mapProduct(row));
+                }
+                throw error;
+            }
 
-        return (data || []).map((row: any) => this.mapProduct(row));
+            return (data || []).map((row: any) => this.mapProduct(row));
+        } catch (err: any) {
+            throw new Error(`[getProducts] ${err.message}`);
+        }
     }
 
     async createProduct(merchantId: string, product: Omit<Product, 'id'>): Promise<Product> {

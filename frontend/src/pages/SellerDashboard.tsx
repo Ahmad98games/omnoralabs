@@ -229,7 +229,20 @@ export default function SellerDashboard() {
             ]);
 
             if (statsRes.data.success) setStats(statsRes.data.stats);
-            if (cmsRes.data.success) setLocalContent(cmsRes.data.content);
+
+            // 🛡️ Safe Null Guard fallback for Dashboard recovery
+            if (cmsRes.data.success && cmsRes.data.content) {
+                setLocalContent(cmsRes.data.content);
+            } else {
+                setLocalContent({ 
+                    pages: { 
+                        home: { 
+                            title: 'Home', 
+                            layout: [{ type: 'hero', data: { headline: 'Welcome to your Workspace' } }] 
+                        } 
+                    } 
+                });
+            }
 
         } catch (err) {
             console.error('Failed to fetch dashboard content:', err);

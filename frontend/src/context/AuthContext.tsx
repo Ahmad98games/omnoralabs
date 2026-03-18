@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import client from '../api/client';
 import axios, { isAxiosError } from 'axios';
+import { supabase } from '../lib/supabaseClient';
+import { CinematicLoader } from '../components/ui/CinematicLoader';
 
 // Define the User Shape clearly
 export interface User {
@@ -115,6 +117,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }, []);
 
     useEffect(() => {
+        const syncSession = async () => {
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (session?.access_token) {
+                    localStorage.setItem('token', session.access_token);
+                    setAuthHeader(session.access_token);
+                }
+            } catch (err) {
+                console.warn('[Supabase Sync Auth Failure]', err);
+            }
+        };
+
+        syncSession();
+
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+            if (session?.access_token) {
+                localStorage.setItem('token', session.access_token);
+                setAuthHeader(session.access_token);
+            } else if (event === 'SIGNED_OUT') {
+                handleLogoutCleanup();
+            }
+        });
+
+        return () => subscription.unsubscribe();
+    }, []);
+
+    useEffect(() => {
         initAuth();
     }, [initAuth]);
 
@@ -221,11 +250,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     if (!isInitialized) {
-        return (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#050505', color: '#F1D592', fontFamily: 'serif', fontSize: '18px', letterSpacing: '0.05em' }}>
-                Imperial Loading...
-            </div>
-        );
+        return <CinematicLoader />;
     }
 
     return (
