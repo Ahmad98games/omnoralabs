@@ -386,26 +386,27 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
                             onMouseLeave={() => setHoveredProduct(null)}
                         >
                                 {/* Image with aspect ratio control */}
-                                <OmnoraImage 
-                                    src={product.featured_image || product.images?.[0]?.src} 
-                                    alt={product.title} 
-                                    aspectRatio={activeAspect} 
-                                    width={500}
-                                    className="transition-transform duration-500 group-hover:scale-105"
-                                />
+                                <div style={{ aspectRatio: activeAspect, overflow: 'hidden', background: '#111', position: 'relative' }}>
+                                    <OmnoraImage 
+                                        src={product.featured_image || product.images?.[0]?.src} 
+                                        alt={product.title} 
+                                        aspectRatio={activeAspect} 
+                                        width={500}
+                                        className="transition-transform duration-500 group-hover:scale-105"
+                                    />
 
-                                {hoveredProduct?.id === product.id && (
-                                    <div className="absolute inset-0 bg-black/40 backdrop-blur-sm flex flex-col items-center justify-center p-4 animate-fade-in pointer-events-none md:pointer-events-auto">
-                                        <div style={{ background: '#0A0A0A', border: '1px solid rgba(201,160,99,0.3)', padding: 12, borderRadius: 2, textAlign: 'center', width: '90%', maxWidth: 200 }}>
-                                            <p style={{ fontSize: 11, color: '#C9A063', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 4 }}>Quick View</p>
-                                            <p style={{ fontSize: 12, color: '#fff', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{product.title}</p>
-                                            <button style={{ marginTop: 8, background: '#C9A063', color: '#000', border: 'none', padding: '4px 12px', fontSize: 11, fontWeight: 700, cursor: 'pointer', width: '100%', borderRadius: 1 }}>
-                                                View Details
-                                            </button>
+                                    {hoveredProduct?.id === product.id && (
+                                        <div className="absolute inset-0 bg-black/40 backdrop-blur-sm flex flex-col items-center justify-center p-4 animate-fade-in pointer-events-none md:pointer-events-auto">
+                                            <div style={{ background: '#0A0A0A', border: '1px solid rgba(201,160,99,0.3)', padding: 12, borderRadius: 2, textAlign: 'center', width: '90%', maxWidth: 200 }}>
+                                                <p style={{ fontSize: 11, color: '#C9A063', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 4 }}>Quick View</p>
+                                                <p style={{ fontSize: 12, color: '#fff', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{product.title}</p>
+                                                <button style={{ marginTop: 8, background: '#C9A063', color: '#000', border: 'none', padding: '4px 12px', fontSize: 11, fontWeight: 700, cursor: 'pointer', width: '100%', borderRadius: 1 }}>
+                                                    View Details
+                                                </button>
+                                            </div>
                                         </div>
-                                    </div>
-                                )}
-                            </div>
+                                    )}
+                                </div>
 
                             {/* Product Info */}
                             <div style={{

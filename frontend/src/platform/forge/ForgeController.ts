@@ -226,4 +226,3 @@ export const useForgeController = () => {
 
     return { forge, publish };
 };
-```
