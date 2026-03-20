@@ -117,6 +117,9 @@ export const SplitHero: React.FC<SplitHeroProps> = ({
                     objectFit: 'cover', display: 'block',
                     minHeight: 300,
                 }}
+                onError={(e) => {
+                    e.currentTarget.src = 'https://images.unsplash.com/photo-1511556532299-8f662fc26c06?w=1600&q=80';
+                }}
             />
             {/* Gradient overlay on edge */}
             <div style={{

@@ -68,6 +68,7 @@ export interface GlobalTheme {
     radii: ThemeRadii;
     shadows: ThemeShadows;
     customCSS: string;       // Global raw CSS injection for power users
+    adSensePublisherId?: string; // e.g., ca-pub-XXXX
 }
 
 export interface GlobalThemeActions {
@@ -78,6 +79,7 @@ export interface GlobalThemeActions {
     setShadows: (preset: ShadowPreset) => void;
     setShadowField: <K extends keyof ThemeShadows>(key: K, value: ThemeShadows[K]) => void;
     setCustomCSS: (css: string) => void;
+    setAdSensePublisherId: (id: string) => void;
     resetTheme: () => void;
     loadTheme: (theme: Partial<GlobalTheme>) => void;
 }
@@ -126,6 +128,7 @@ const DEFAULT_THEME: GlobalTheme = {
     radii: { preset: 'rounded', ...RADII_PRESETS.rounded },
     shadows: { preset: 'soft', ...SHADOW_PRESETS.soft, custom: '' },
     customCSS: '',
+    adSensePublisherId: '',
 };
 
 // ─── Store Implementation ───────────────────────────────────────────────────
@@ -162,6 +165,8 @@ export const useGlobalThemeStore = create<GlobalTheme & GlobalThemeActions>()(
                 })),
 
             setCustomCSS: (css) => set({ customCSS: css }),
+            
+            setAdSensePublisherId: (id) => set({ adSensePublisherId: id }),
 
             resetTheme: () => set({ ...DEFAULT_THEME }),
 
@@ -172,6 +177,7 @@ export const useGlobalThemeStore = create<GlobalTheme & GlobalThemeActions>()(
                     radii: theme.radii ? { ...state.radii, ...theme.radii } : state.radii,
                     shadows: theme.shadows ? { ...state.shadows, ...theme.shadows } : state.shadows,
                     customCSS: theme.customCSS ?? state.customCSS,
+                    adSensePublisherId: theme.adSensePublisherId ?? state.adSensePublisherId,
                 })),
         }),
         {

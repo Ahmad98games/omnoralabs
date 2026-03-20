@@ -1,5 +1,7 @@
 import React, { useRef, useCallback, useState, useMemo, useEffect } from 'react';
 import { dispatcher } from '../../platform/core/Dispatcher';
+import { useGlobalThemeStore } from '../../stores/useGlobalThemeStore';
+import { generateScopedTheme, loadGoogleFont } from '../../utils/ThemeVariableGenerator';
 
 // ─── Animation Presets (Phase 12) ─────────────────────────────────────────────
 
@@ -54,7 +56,6 @@ export interface ComponentWrapperProps {
     isBuilderMode?: boolean;
 }
 
-// ─── Internal drag state (all mutable, lives outside React render cycle) ─────/----By AHMAD
 interface DragState {
     pointerId: number;
     startX: number; startY: number;
@@ -77,7 +78,6 @@ const resolveDropPosition = (
     return y < height / 2 ? 'before' : 'after';
 };
 
-/** Parse a CSS pixel value string safely; returns 0 for non-px values (calc, %, etc.). */
 function parsePx(value: unknown): number {
     if (typeof value === 'number') return value;
     if (typeof value !== 'string') return 0;
@@ -94,12 +94,19 @@ export const ComponentWrapper: React.FC<ComponentWrapperProps> = ({
     animations, animationPreviewKey, isBuilderMode = false,
 }) => {
     const ref = useRef<HTMLDivElement>(null);
+    const globalTheme = useGlobalThemeStore();
 
-    // ── Animation State (Phase 12) ───────────────────────────────────────────
+    // ── Font Loading Optimization ─────────────────────────────────────────────
+    useEffect(() => {
+        if (globalTheme.typography.bodyFont) {
+            loadGoogleFont(globalTheme.typography.bodyFont);
+        }
+    }, [globalTheme.typography.bodyFont]);
+
+    // ── Animation State ───────────────────────────────────────────────────────
     const [animVisible, setAnimVisible] = useState(false);
     const hasAnimation = animations && animations.type && animations.type !== 'none';
 
-    // LIVE MODE: IntersectionObserver triggers animation on scroll
     useEffect(() => {
         if (!hasAnimation || isBuilderMode) return;
         const el = ref.current;
@@ -117,48 +124,30 @@ export const ComponentWrapper: React.FC<ComponentWrapperProps> = ({
         return () => obs.disconnect();
     }, [hasAnimation, isBuilderMode, animations?.once]);
 
-    // BUILDER MODE: Watch animationPreviewKey — when it changes, reset & replay
     useEffect(() => {
         if (!hasAnimation || !isBuilderMode || !animationPreviewKey) return;
-        // Reset to initial state, then after a tick, set to visible to replay
         setAnimVisible(false);
         const timer = setTimeout(() => setAnimVisible(true), 50);
         return () => clearTimeout(timer);
     }, [animationPreviewKey, hasAnimation, isBuilderMode]);
 
-    // ── Drag state ────────────────────────────────────────────────────────────
-    // FIX: single ref holds all mutable drag data. React state is only used to
-    // schedule re-renders, not as the source of truth for coordinates.
     const dragRef = useRef<DragState | null>(null);
-
-    // FIX: synchronous ref — set before the first re-render so handleDragStart
-    // can read the current value without waiting for the next paint.
     const isFreeDraggingRef = useRef(false);
-
-    // Minimal state: x/y are read from dragRef in render; this just triggers repaints.
     const [freeDragTick, setFreeDragTick] = useState(0);
     const forceRepaint = useCallback(() => setFreeDragTick(n => n + 1), []);
 
     const isDetached = style?.position === 'absolute';
-
-    // FIX: extract only the scalar values we need from style so useCallback deps
-    // are stable primitives, not the style object reference.
     const styleLeft = style?.left;
     const styleTop = style?.top;
     const styleZIndex = style?.zIndex;
 
     const handlePointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
         if (!isDraggable) return;
-
         const isModifierHeld = e.metaKey || e.ctrlKey;
         if (!isModifierHeld && !isDetached) return;
-
         e.stopPropagation();
-
         const el = ref.current;
         if (!el) return;
-
-        // Lock the pointer to this element — events arrive even if mouse leaves.
         el.setPointerCapture(e.pointerId);
 
         const rect = el.getBoundingClientRect();
@@ -167,13 +156,9 @@ export const ComponentWrapper: React.FC<ComponentWrapperProps> = ({
         const initTop = isDetached ? parsePx(styleTop) : (rect.top - parentRect.top);
 
         dragRef.current = {
-            pointerId: e.pointerId,
-            startX: e.clientX, startY: e.clientY,
-            initLeft, initTop,
-            liveX: initLeft, liveY: initTop,
+            pointerId: e.pointerId, startY: e.clientY, startX: e.clientX,
+            initLeft, initTop, liveX: initLeft, liveY: initTop,
         };
-
-        // FIX: set the ref synchronously so handleDragStart sees it immediately.
         isFreeDraggingRef.current = true;
         forceRepaint();
     }, [isDraggable, isDetached, styleLeft, styleTop, forceRepaint]);
@@ -182,62 +167,38 @@ export const ComponentWrapper: React.FC<ComponentWrapperProps> = ({
         const d = dragRef.current;
         if (!d || d.pointerId !== e.pointerId) return;
         e.stopPropagation();
-
         let newX = d.initLeft + (e.clientX - d.startX);
         let newY = d.initTop + (e.clientY - d.startY);
-
-        if (e.shiftKey) {
-            // Grid snap: round to nearest 10px.
-            newX = Math.round(newX / 10) * 10;
-            newY = Math.round(newY / 10) * 10;
-        }
-
-        // Write directly into the ref — no intermediate state update per frame.
-        d.liveX = newX;
-        d.liveY = newY;
+        if (e.shiftKey) { newX = Math.round(newX / 10) * 10; newY = Math.round(newY / 10) * 10; }
+        d.liveX = newX; d.liveY = newY;
         forceRepaint();
     }, [forceRepaint]);
 
     const commitAndCleanup = useCallback((pointerId: number) => {
         const d = dragRef.current;
         if (!d || d.pointerId !== pointerId) return;
-
         const el = ref.current;
-        if (el) {
-            try { el.releasePointerCapture(pointerId); } catch { /* already released */ }
-        }
+        if (el) { try { el.releasePointerCapture(pointerId); } catch {} }
 
-        // Commit the final position to the store.
         dispatcher.dispatch([
             { nodeId, path: 'styles.position', value: 'absolute', type: 'structural', source: 'editor' },
             { nodeId, path: 'styles.left', value: `${d.liveX}px`, type: 'visual', source: 'editor' },
             { nodeId, path: 'styles.top', value: `${d.liveY}px`, type: 'visual', source: 'editor' },
             { nodeId, path: 'styles.zIndex', value: String(styleZIndex ?? 10), type: 'visual', source: 'editor' },
         ]);
-
-        dragRef.current = null;
-        isFreeDraggingRef.current = false;
-        forceRepaint();
+        dragRef.current = null; isFreeDraggingRef.current = false; forceRepaint();
     }, [nodeId, styleZIndex, forceRepaint]);
 
     const handlePointerUp = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
-        if (!isFreeDraggingRef.current) return;
-        e.stopPropagation();
-        commitAndCleanup(e.pointerId);
+        if (!isFreeDraggingRef.current) return; e.stopPropagation(); commitAndCleanup(e.pointerId);
     }, [commitAndCleanup]);
 
-    // FIX: cancel must unconditionally clean up — don't gate on isFreeDragging state.
     const handlePointerCancel = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
         commitAndCleanup(e.pointerId);
     }, [commitAndCleanup]);
 
-    // ── HTML5 drag (flow-layout structural reordering) ─────────────────────────
     const handleDragStart = useCallback((e: React.DragEvent) => {
-        // FIX: read from ref (synchronous) not state (async) — was the race condition.
-        if (isFreeDraggingRef.current || isDetached) {
-            e.preventDefault();
-            return;
-        }
+        if (isFreeDraggingRef.current || isDetached) { e.preventDefault(); return; }
         e.dataTransfer.effectAllowed = 'move';
         e.dataTransfer.setData('text/omnora-node-id', nodeId);
         requestAnimationFrame(() => ref.current?.setAttribute('data-dragging', 'true'));
@@ -245,15 +206,12 @@ export const ComponentWrapper: React.FC<ComponentWrapperProps> = ({
     }, [nodeId, onDragStart, isDetached]);
 
     const handleDragEnd = useCallback((e: React.DragEvent) => {
-        ref.current?.removeAttribute('data-dragging');
-        onDragEnd?.(e, nodeId);
+        ref.current?.removeAttribute('data-dragging'); onDragEnd?.(e, nodeId);
     }, [nodeId, onDragEnd]);
 
     const handleDragOver = useCallback((e: React.DragEvent) => {
         if (isFreeDraggingRef.current) return;
-        e.preventDefault();
-        e.stopPropagation();
-        e.dataTransfer.dropEffect = 'move';
+        e.preventDefault(); e.stopPropagation(); e.dataTransfer.dropEffect = 'move';
         if (!ref.current) return;
         onDragOver?.(e, nodeId, resolveDropPosition(e, ref.current, acceptsChildren));
     }, [nodeId, acceptsChildren, onDragOver]);
@@ -263,14 +221,10 @@ export const ComponentWrapper: React.FC<ComponentWrapperProps> = ({
     }, [nodeId, onDragLeave]);
 
     const handleDrop = useCallback((e: React.DragEvent) => {
-        if (isFreeDraggingRef.current) return;
-        e.preventDefault();
-        e.stopPropagation();
-        if (!ref.current) return;
-        onDrop?.(e, nodeId, resolveDropPosition(e, ref.current, acceptsChildren));
+        if (isFreeDraggingRef.current) return; e.preventDefault(); e.stopPropagation();
+        if (!ref.current) return; onDrop?.(e, nodeId, resolveDropPosition(e, ref.current, acceptsChildren));
     }, [nodeId, acceptsChildren, onDrop]);
 
-    // ── Derived render values ─────────────────────────────────────────────────
     const d = dragRef.current;
     const isCurrentlyDragging = isFreeDraggingRef.current;
 
@@ -279,28 +233,38 @@ export const ComponentWrapper: React.FC<ComponentWrapperProps> = ({
         if (dropPosition === 'before') return { boxShadow: 'inset 0 3px 0 0 #7c6dfa' };
         if (dropPosition === 'after') return { boxShadow: 'inset 0 -3px 0 0 #7c6dfa' };
         return { outline: '2px solid #7c6dfa', outlineOffset: '-2px', backgroundColor: 'rgba(124,109,250,0.04)' };
-        // freeDragTick included so this memo re-runs when drag state changes.
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isDropTarget, dropPosition, isCurrentlyDragging, freeDragTick]);
 
-    // ── Compute animation CSS ─────────────────────────────────────────────
     const animStyle: React.CSSProperties = useMemo(() => {
         if (!hasAnimation || !animations) return {};
         const dur = animations.duration ?? 600;
         const del = animations.delay ?? 0;
-        const initial = ANIMATION_INITIAL_STYLES[animations.type] || {};
-        const final_ = ANIMATION_FINAL_STYLES[animations.type] || {};
-        const active = animVisible ? final_ : initial;
         return {
-            ...active,
+            ...(animVisible ? ANIMATION_FINAL_STYLES[animations.type] : ANIMATION_INITIAL_STYLES[animations.type]),
             transition: `opacity ${dur}ms ease ${del}ms, transform ${dur}ms ease ${del}ms, filter ${dur}ms ease ${del}ms`,
         };
     }, [hasAnimation, animations, animVisible]);
 
+    // ── Scoped CSS Variables & Reset ──────────────────────────────────────────
+    const scopedVars = generateScopedTheme({
+        primaryColor: globalTheme.colors.primary,
+        backgroundColor: globalTheme.colors.background,
+        textColor: globalTheme.colors.text,
+        fontFamily: globalTheme.typography.bodyFont,
+    });
+
+    const cleanSlateStyle: React.CSSProperties = {
+        all: 'unset',
+        boxSizing: 'border-box',
+        display: 'block',
+    };
+
     const dynamicStyle: React.CSSProperties = {
+        ...cleanSlateStyle, // Global Reset
         ...style,
         ...dropStyle,
         ...animStyle,
+        ...(scopedVars as any), // Scoped Theme Variables
         position: isCurrentlyDragging || isDetached ? 'absolute' : (style?.position ?? 'relative'),
         left: isCurrentlyDragging && d ? `${d.liveX}px` : style?.left,
         top: isCurrentlyDragging && d ? `${d.liveY}px` : style?.top,
@@ -308,11 +272,13 @@ export const ComponentWrapper: React.FC<ComponentWrapperProps> = ({
         opacity: isHidden ? 0.3 : isCurrentlyDragging ? 0.8 : (animStyle.opacity ?? (style?.opacity as number | undefined)),
         cursor: isCurrentlyDragging ? 'grabbing' : isDetached ? 'grab' : 'inherit',
         zIndex: isCurrentlyDragging ? 99999 : style?.zIndex,
-        // FIX: disable transitions during drag for zero-latency feel.
         transition: isCurrentlyDragging ? 'none' : (hasAnimation ? animStyle.transition : 'opacity 0.15s'),
-        // FIX: required for pointer capture to function on touch devices.
         touchAction: isDraggable ? 'none' : undefined,
         userSelect: isCurrentlyDragging ? 'none' : undefined,
+        
+        // Apply dynamic adaptive color based on theme
+        color: `var(--omnora-text)`,
+        fontFamily: `var(--omnora-font)`,
     };
 
     return (
@@ -320,19 +286,17 @@ export const ComponentWrapper: React.FC<ComponentWrapperProps> = ({
             ref={ref}
             data-node-id={nodeId}
             data-node-type={type}
+            data-omnora-component="true"
             className={className}
-            // FIX: HTML5 drag is disabled when already free-dragging or detached.
             draggable={isDraggable && !isDetached && !isCurrentlyDragging}
             style={dynamicStyle}
             onClick={onClick}
             onMouseEnter={onMouseEnter}
             onMouseLeave={onMouseLeave}
-
             onPointerDown={handlePointerDown}
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}
             onPointerCancel={handlePointerCancel}
-
             onDragStart={isDraggable ? handleDragStart : undefined}
             onDragEnd={isDraggable ? handleDragEnd : undefined}
             onDragOver={handleDragOver}

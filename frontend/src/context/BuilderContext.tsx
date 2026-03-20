@@ -460,11 +460,10 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
     const switchPage = useCallback((newId: string) => {
         const previousId = activePageIdRef.current;
         if (!pagesRef.current.byId[newId]) {
-            reportRegistryError({
-                type: 'ROUTER_ABORT',
-                context: `Target page ${newId} not found. Reverting to ${previousId}`,
-                pageId: newId
-            });
+            console.warn(`[PageSwitcher] Page ${newId} not found. Falling back to 'home'.`);
+            if (pagesRef.current.byId['home']) {
+                setActivePageId('home');
+            }
             return;
         }
 
@@ -678,7 +677,12 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
         commitHistory();
     }, [activePageId, selectedNodeId, commitHistory, mode]);
 
-    const addPage = useCallback((title: string, slug: string, type: 'system' | 'template' | 'custom' = 'custom') => {
+    const addPage = useCallback((
+        title: string, 
+        slug: string, 
+        type: 'system' | 'template' | 'custom' = 'custom',
+        templateData?: { nodes: Record<string, any>; layout: string[] }
+    ) => {
         const id = `${type}_${Date.now()}`;
         const now = new Date().toISOString();
         const newPage: PageMetadata = {
@@ -692,11 +696,20 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
             seoMeta: { title: `${title} | Omnora`, description: '' },
         };
 
+        if (templateData) {
+            nodeStore._update(() => ({
+                nodes: { ...nodeStore.getState().nodes, ...templateData.nodes }
+            }));
+            setPageLayouts(prev => ({ ...prev, [id]: templateData.layout }));
+        } else {
+            setPageLayouts(prev => ({ ...prev, [id]: [] }));
+        }
+
         setPages(prev => ({
             byId: { ...prev.byId, [id]: newPage },
             allIds: [...prev.allIds, id]
         }));
-        setPageLayouts(prev => ({ ...prev, [id]: [] }));
+
         switchPage(id);
     }, [switchPage]);
 

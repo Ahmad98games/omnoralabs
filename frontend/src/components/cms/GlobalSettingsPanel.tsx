@@ -14,7 +14,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
     Palette, Type, Square, Sun, RotateCcw,
-    ChevronDown, ChevronRight, Code2, Sparkles,
+    ChevronDown, ChevronRight, Code2, Sparkles, Megaphone,
 } from 'lucide-react';
 import {
     useGlobalThemeStore,
@@ -165,11 +165,13 @@ export const GlobalSettingsPanel: React.FC = () => {
     const radii = useGlobalThemeStore((s) => s.radii);
     const shadows = useGlobalThemeStore((s) => s.shadows);
     const customCSS = useGlobalThemeStore((s) => s.customCSS);
+    const adSensePublisherId = useGlobalThemeStore((s) => s.adSensePublisherId);
     const setColors = useGlobalThemeStore((s) => s.setColors);
     const setTypography = useGlobalThemeStore((s) => s.setTypography);
     const setRadii = useGlobalThemeStore((s) => s.setRadii);
     const setShadows = useGlobalThemeStore((s) => s.setShadows);
     const setCustomCSS = useGlobalThemeStore((s) => s.setCustomCSS);
+    const setAdSensePublisherId = useGlobalThemeStore((s) => s.setAdSensePublisherId);
     const resetTheme = useGlobalThemeStore((s) => s.resetTheme);
 
     // Load current fonts on mount
@@ -312,6 +314,23 @@ export const GlobalSettingsPanel: React.FC = () => {
                     className="w-full bg-[#050505] border border-white/10 rounded-xl px-3 py-2 text-[11px] text-emerald-400 font-mono placeholder-gray-700
                         focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/30 transition-all resize-none"
                 />
+            </Section>
+
+            {/* ── AdSense Configuration ── */}
+            <Section title="Google AdSense" icon={<Megaphone size={13} className="text-emerald-400" />} defaultOpen={false}>
+                <p className="text-[10px] text-gray-600 leading-relaxed mb-2">
+                    Enter your Google AdSense Publisher ID (e.g., ca-pub-xxxxxxxxxxxxxxxx) to enable ads.
+                </p>
+                <div className="space-y-1.5">
+                    <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-500">Publisher ID</label>
+                    <input
+                        type="text"
+                        value={adSensePublisherId || ''}
+                        onChange={(e) => setAdSensePublisherId(e.target.value)}
+                        placeholder="ca-pub-1234567890123456"
+                        className="w-full bg-[#050505] border border-white/10 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500/50 transition-all"
+                    />
+                </div>
             </Section>
         </div>
     );

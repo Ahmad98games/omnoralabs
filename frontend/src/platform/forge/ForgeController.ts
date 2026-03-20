@@ -7,35 +7,52 @@ export interface AIStoreJson {
 }
 
 const SYSTEM_PROMPT = `
-ACT AS THE "OMNORA OS" ARCHITECT AND STORE GENERATOR.
+ACT AS A WORLD-CLASS E-COMMERCE CONVERSION EXPERT AND A $10k/mo AGENCY DESIGNER.
 
-CONTEXT:
-You are an expert in the Omnora PostgreSQL Schema. Your goal is to generate a high-conversion e-commerce store by outputting a strictly formatted JSON that fits into the 'store_pages' table's 'ast_manifest' column.
+GOAL: Generate a high-converting, production-ready store manifest that drives sales.
 
-KNOWLEDGE BASE (Our Schema Rules):
-1. TABLE 'merchants': Every store must link to a 'merchant_id' (UUID).
-2. TABLE 'store_pages': Your output MUST be a valid 'ast_manifest' JSON object.
-3. TABLE 'products': Reference products using their 'handle' or 'id'.
-4. THEME_VARS: Support CSS variables like {"--primary-color": "#hex"}.
+COPYWRITING ENGINE (Magnetic Headlines):
+- ABSOLUTELY NO generic headlines (e.g., "Welcome", "Sneaker Store").
+- Use MAGNETIC, BENEFIT-DRIVEN HEADLINES. Speak to target customer desires or local identity (e.g., "Elevate Your Street Cred: Karachi's Most Exclusive Drops", "Timeless Precision: Invest in Legacy").
+- Subtitles must bridge to trust and local accessibility (e.g., "Authentic Jordan 1s & Yeezys. Shipped fast from local stock").
+
+AUTOMATIC TRUST BUILDING:
+- Every store MUST have a 'TrustBadges' element placed directly below the Hero or Grid.
+- Provide exactly 3 hyper-local benefits with matching icons (e.g., "Cash on Delivery", "24/7 Support", "100% Authenticity Guarantee", "Instant Local Shipping").
 
 AVAILABLE COMPONENT LIBRARY (Use only these):
 - HeroBanner: { title: string, subtitle: string, bgImage: string, cta: string }
 - ProductGrid: { desktopColumns: number, category: string, gridGap: number }
-- WhatsAppFloating: { phoneNumber: string, position: 'left'|'right' }
+- WhatsAppFloating: { phoneNumber: string, welcomeMessage: string, position: 'left'|'right' }
 - TrustBadges: { items: Array<{icon: string, label: string}> }
 - FAQ: { questions: Array<{q: string, a: string}> }
 
+THE WHATSAPP CONVERSION BRIDGE:
+- 'phoneNumber': Must be a valid international format (e.g., "+923001234567").
+- 'welcomeMessage': MUST BE NICHE-SPECIFIC to lower decision friction (e.g., "Yo! I saw the Retro drops on Omnora, do you have sizes in Karachi stock?").
+
+THEME INTELLIGENCE:
+- 'theme_vars' MUST support high-contrast accessibility (Contrast ratio > 4.5:1).
+- Include depth scaling variables:
+  - "--primary": Core branding color (HEX).
+  - "--accent": CTA attention-grabber color (HEX).
+  - "--surface-color": Premium background depth offset (HEX).
+  - "--text-muted": Subtext/Subtitle readability level (HEX).
+
 STRICT OUTPUT RULES:
-- Output ONLY a minified JSON object. 
-- NO conversational text. NO explanations. 
-- Ensure all color codes are in HEX format.
-- All image URLs must be high-quality placeholders if real ones aren't provided.
+- Output ONLY valid JSON. No conversational wrapper or noise.
+- All image URLs can use premium stock defaults if specifics aren't specified.
 
 EXPECTED JSON STRUCTURE:
 {
   "slug": "home",
-  "ast_manifest": [ { "type": "HeroBanner", "props": {...} }, { "type": "ProductGrid", "props": {...} } ],
-  "theme_vars": { "--accent": "#C5A059" }
+  "ast_manifest": [ { "type": "HeroBanner", "props": {...} }, { "type": "TrustBadges", "props": {...} } ],
+  "theme_vars": {
+    "--primary": "#0A0A0A",
+    "--accent": "#FF4500",
+    "--surface-color": "#1A1A1A",
+    "--text-muted": "#7B7B7B"
+  }
 }
 `;
 
@@ -91,6 +108,10 @@ export const handleForgeGeneration = async (userPrompt: string): Promise<{ aiJso
       throw new Error("Invalid output: ast_manifest is missing or not an array.");
     }
 
+    if (!aiJson.theme_vars || typeof aiJson.theme_vars !== 'object') {
+      throw new Error("Invalid output: theme_vars is missing or not an object.");
+    }
+
     // 4. DATABASE INJECTION (The Upsert)
     const { error: dbError } = await supabase
       .from('store_pages')
@@ -99,6 +120,7 @@ export const handleForgeGeneration = async (userPrompt: string): Promise<{ aiJso
         slug: aiJson.slug || 'home',
         ast_manifest: aiJson.ast_manifest,
         theme_vars: aiJson.theme_vars,
+        is_published: false,
         updated_at: new Date().toISOString(),
       }, { onConflict: 'merchant_id, slug' });
 
@@ -139,3 +161,69 @@ export const handleForgeGeneration = async (userPrompt: string): Promise<{ aiJso
     throw error;
   }
 };
+
+import { useBuilder } from '../../context/BuilderContext';
+import { toast } from 'react-hot-toast';
+
+export const useForgeController = () => {
+    const builderContext = useBuilder();
+
+    const forge = async (userPrompt: string): Promise<boolean> => {
+        try {
+            const { builderPayload } = await handleForgeGeneration(userPrompt);
+            
+            if (builderContext?.injectAST) {
+                builderContext.injectAST(builderPayload);
+                return true;
+            } else {
+                console.error("Builder context not found or injectAST missing");
+                return false;
+            }
+        } catch (err: any) {
+            console.error("[useForgeController error]", err);
+            if (err.message.includes('malformed') || err.message.includes('JSON')) {
+                toast.error("AI Logic error. Retrying with a cleaner prompt...");
+            } else {
+                toast.error(err.message || "Forge failed");
+            }
+            return false;
+        }
+    };
+
+    const publish = async (slug: string): Promise<{ success: boolean; url?: string; error?: string }> => {
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            const userId = session?.user?.id;
+            if (!userId) throw new Error("User not authenticated");
+
+            // 1. Fetch Merchant Slug
+            const { data: merchant, error: mError } = await supabase
+                .from('merchants')
+                .select('slug')
+                .eq('id', userId)
+                .single();
+
+            if (mError) throw new Error(`Merchant lookup failed: ${mError.message}`);
+            const merchant_slug = merchant?.slug || 'store';
+
+            // 2. Update status
+            const { error } = await supabase
+                .from('store_pages')
+                .update({ is_published: true })
+                .eq('slug', slug)
+                .eq('merchant_id', userId);
+
+            if (error) throw error;
+
+            const url = `${window.location.origin}/store/${merchant_slug}/${slug === 'home' ? '' : slug}`;
+            return { success: true, url };
+        } catch (err: any) {
+            console.error("Publish failed:", err);
+            toast.error(err.message || "Publish failed");
+            return { success: false, error: err.message || "Publish failed" };
+        }
+    };
+
+    return { forge, publish };
+};
+```

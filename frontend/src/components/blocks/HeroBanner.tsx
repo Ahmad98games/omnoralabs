@@ -44,6 +44,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
     showCta = true,
 }) => {
     const [ctaHov, setCtaHov] = useState(false);
+    const [imgUrl, setImgUrl] = useState(bgImageUrl);
 
     const alignMap = {
         left: 'flex-start',
@@ -72,13 +73,21 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
         >
             {/* Background Image */}
             {bgImageUrl && (
-                <div style={{
-                    position: 'absolute', inset: 0,
-                    backgroundImage: `url(${bgImageUrl})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                    transition: 'transform 8s ease-out',
-                }} />
+                <>
+                    <img 
+                        src={bgImageUrl} 
+                        onError={() => setImgUrl('https://images.unsplash.com/photo-1511556532299-8f662fc26c06?w=1600&q=80')} 
+                        style={{ display: 'none' }} 
+                        alt="bg-fallback-trigger"
+                    />
+                    <div style={{
+                        position: 'absolute', inset: 0,
+                        backgroundImage: `url(${imgUrl})`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        transition: 'transform 8s ease-out',
+                    }} />
+                </>
             )}
 
             {/* Overlay */}

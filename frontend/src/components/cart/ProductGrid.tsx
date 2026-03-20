@@ -21,6 +21,7 @@ import axios from 'axios';
 import { databaseClient } from '../../platform/core/DatabaseClient';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
+import { OmnoraImage } from '../cms/OmnoraImage';
 
 // ─── Design Tokens ────────────────────────────────────────────────────────────
 
@@ -384,21 +385,15 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
                             onMouseEnter={() => setHoveredProduct(product)}
                             onMouseLeave={() => setHoveredProduct(null)}
                         >
-                            {/* Image with aspect ratio control */}
-                            <div style={{ aspectRatio: activeAspect, overflow: 'hidden', background: '#111', position: 'relative' }}>
-                                <img
-                                    src={product.featured_image || product.images?.[0]?.src}
-                                    alt={product.title}
-                                    loading="lazy"
-                                    style={{
-                                        width: '100%', height: '100%', objectFit: 'cover',
-                                        transition: 'transform 0.4s cubic-bezier(0.16,1,0.3,1)',
-                                    }}
-                                    onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.05)')}
-                                    onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
+                                {/* Image with aspect ratio control */}
+                                <OmnoraImage 
+                                    src={product.featured_image || product.images?.[0]?.src} 
+                                    alt={product.title} 
+                                    aspectRatio={activeAspect} 
+                                    width={500}
+                                    className="transition-transform duration-500 group-hover:scale-105"
                                 />
-                                
-                                {/* Quick Look Ethereal Popover on Desktop Hover */}
+
                                 {hoveredProduct?.id === product.id && (
                                     <div className="absolute inset-0 bg-black/40 backdrop-blur-sm flex flex-col items-center justify-center p-4 animate-fade-in pointer-events-none md:pointer-events-auto">
                                         <div style={{ background: '#0A0A0A', border: '1px solid rgba(201,160,99,0.3)', padding: 12, borderRadius: 2, textAlign: 'center', width: '90%', maxWidth: 200 }}>

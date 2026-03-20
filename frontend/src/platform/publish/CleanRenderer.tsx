@@ -19,6 +19,7 @@ import React, { useMemo, useRef, useState, useEffect, createContext, useContext 
 import { getRegistryEntry } from '../core/Registry';
 import { PlatformBlock } from '../core/types';
 import { precomputeAdjacencyMap } from '../core/normalize';
+import { useGlobalThemeStore } from '../../stores/useGlobalThemeStore';
 
 // ─── Animation Presets (shared with ComponentWrapper) ─────────────────────────
 
@@ -70,6 +71,22 @@ export const CleanRenderer: React.FC<CleanRendererProps> = React.memo(({
     viewport = 'desktop',
 }) => {
     const adjacencyMap = useMemo(() => precomputeAdjacencyMap(nodes), [nodes]);
+    const adSensePublisherId = useGlobalThemeStore((s) => s.adSensePublisherId);
+
+    // Inject AdSense script safely if configured
+    useEffect(() => {
+        if (!adSensePublisherId) return;
+        
+        const scriptId = 'google-adsense-script';
+        if (document.getElementById(scriptId)) return;
+
+        const script = document.createElement('script');
+        script.id = scriptId;
+        script.async = true;
+        script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adSensePublisherId}`;
+        script.crossOrigin = 'anonymous';
+        document.head.appendChild(script);
+    }, [adSensePublisherId]);
 
     const contextValue = useMemo<CleanRenderContextType>(() => ({
         nodes,

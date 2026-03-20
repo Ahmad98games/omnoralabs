@@ -6,6 +6,7 @@ import { CanvasOverlay } from './CanvasOverlay';
 import { BuilderHealthOverlay } from './BuilderHealthOverlay';
 import { getPreset } from './DevicePresetPanel';
 import { useGlobalThemeStore, toCSSVariables } from '../../stores/useGlobalThemeStore'; // 🛡️ Load Global Tokens
+import { SafeRenderer } from './SafeRenderer'; // 🛡️ Safe Renderer
 
 // ─── One-time keyframe injection ──────────────────────────────────────────────
 (function injectLiveCanvasKf() {
@@ -378,7 +379,7 @@ export const LiveCanvas: React.FC = () => {
         devicePreset, orientation, zoomLevel, showDeviceFrame, showSafeAreaOverlay,
     } = useBuilder();
 
-    if (isLoading) return <LoadingSpinner />;
+    // if (isLoading) return <LoadingSpinner />;
 
     const containerRef = useRef<HTMLDivElement>(null);
     const [containerH, setContainerH] = useState(800);
@@ -453,11 +454,11 @@ export const LiveCanvas: React.FC = () => {
                 zIndex: 1,
             }}
         >
-            <CanvasErrorBoundary>
+            <SafeRenderer blocks={blocks} loading={isLoading}>
                 <ShadowHost designSystem={designSystem} theme={theme} mode={mode} safeTop={safeTop} safeBottom={safeBottom}>
                     <RenderTree blocks={blocks} />
                 </ShadowHost>
-            </CanvasErrorBoundary>
+            </SafeRenderer>
             {isEdit && <CanvasOverlay />}
             {showSafeAreaOverlay && isEdit && <SafeAreaOverlay safeTop={safeTop} safeBottom={safeBottom} w={typeof canvasDisplayW === 'number' ? canvasDisplayW : 1200} h={canvasDisplayH} />}
             {(isPhone || isTablet) && isEdit && <FoldMarker h={canvasDisplayH} />}
