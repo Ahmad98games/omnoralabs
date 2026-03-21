@@ -87,6 +87,14 @@ export const StorefrontApp: React.FC<StorefrontAppProps> = ({ initialPath, store
     useEffect(() => {
         let mounted = true;
 
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('force_sync') === 'true') {
+            console.warn('[StorefrontApp] Force Sync Triggered: Clearing Local Storage.');
+            try {
+                localStorage.clear();
+            } catch (e) { /* ignore safe blocks */ }
+        }
+
         const loadConfig = async () => {
             const domain = storeDomain || resolveStoreDomain();
 

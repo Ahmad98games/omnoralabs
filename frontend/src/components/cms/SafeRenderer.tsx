@@ -139,6 +139,7 @@ export const SafeRenderer: React.FC<SafeRendererProps> = ({ blocks, loading, isB
         };
     }, [blocks, isClient]);
 
+    if (!blocks) return <SkeletonLoader />;
     if (loading && !isForceRender) return <SkeletonLoader />;
     if (!isClient) return <div style={{ minHeight: '100vh', background: '#0e0e12' }} />; // Hydration Guard
     
@@ -147,17 +148,14 @@ export const SafeRenderer: React.FC<SafeRendererProps> = ({ blocks, loading, isB
         return <StoreTemporarilyPaused />;
     }
 
-    if (!hydratedBlocks || hydratedBlocks.length === 0) return <BlankPagePlaceholder />;
+    if (!hydratedBlocks) return <SkeletonLoader />;
 
-    // ATOMIC VALIDATION: The "Render-Shield"
-    if (!Array.isArray(hydratedBlocks)) {
-        console.error('[SafeRenderer] CRITICAL: hydratedBlocks is not an array.', hydratedBlocks);
-        return <StorefrontFallback />;
-    }
+    const finalBlocks = Array.isArray(hydratedBlocks) ? hydratedBlocks : [];
+    if (finalBlocks.length === 0) return <BlankPagePlaceholder />;
 
     let renderedBlocks: React.ReactNode[] = [];
     try {
-        renderedBlocks = hydratedBlocks.map((node: any, index: number) => {
+        renderedBlocks = finalBlocks.map((node: any, index: number) => {
             if (!node || !node.type) return null;
 
             const registryItem = ComponentRegistry[node.type];

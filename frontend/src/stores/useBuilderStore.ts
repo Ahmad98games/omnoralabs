@@ -29,6 +29,10 @@ export interface BuilderState {
     historyStack: Command[];
     historyIndex: number;
 
+    // Hydration stability
+    isHydrating: boolean;
+    setIsHydrating: (val: boolean) => void;
+
     // Actions
     setNodes: (nodes: Record<string, BuilderNode>) => void;
     updateNode: (id: string, path: string, value: any) => void;
@@ -66,6 +70,9 @@ export const useBuilderStore = create<BuilderState>()(persist(immer((set, get) =
     lastUpdatedRemote: null,
     historyStack: [],
     historyIndex: -1,
+    isHydrating: false,
+
+    setIsHydrating: (val) => set((state) => { state.isHydrating = val; }),
 
     setNodes: (nodes) => set((state) => {
         state.nodes = nodes;
@@ -179,13 +186,28 @@ export const useBuilderStore = create<BuilderState>()(persist(immer((set, get) =
     }
 })), {
     name: 'omnora-builder-storage',
-    onRehydrateStorage: () => (state, error) => {
-        if (error || !state || !state.nodes || Object.keys(state.nodes).length === 0) {
-            console.error('[useBuilderStore] Boot-Guard Triggered: Storage payload is null, empty, or corrupted. Wiping persist.', error);
-            localStorage.removeItem('omnora-builder-storage');
-            sessionStorage.removeItem('omnora-builder-storage');
-            // Force reFetch from Supabase by reloading
-            window.location.reload();
+    skipHydration: true, // 🛡️ Spec 4: skip automatic hydration
+    onRehydrateStorage: () => (state) => {
+        // Set isHydrating to true before rehydration starts
+        if (state) {
+            state.setIsHydrating(true);
         }
+
+        return (state, error) => {
+            if (error || !state || !state.nodes || Object.keys(state.nodes).length === 0) {
+                console.error('[useBuilderStore] Boot-Guard Triggered: Storage payload is null, empty, or corrupted. Wiping persist.', error);
+                
+                if (state) {
+                    // Reset to initial state logic
+                    state.nodes = {};
+                    state.pages = {}; // Corrected from pageLayouts to pages
+                    state.activePageId = 'home';
+                }
+            }
+            // Set isHydrating to false after rehydration finishes (or fails)
+            if (state) {
+                state.setIsHydrating(false);
+            }
+        };
     }
 }));

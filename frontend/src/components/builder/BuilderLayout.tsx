@@ -4,6 +4,7 @@ import { SmartSidebar } from '../cms/SmartSidebar';
 import { LiveCanvas } from '../cms/LiveCanvas';
 import { ElementLibrary } from '../cms/ElementLibrary';
 import { BuilderToolbar } from '../cms/BuilderToolbar';
+import { useBuilderStore } from '../../stores/useBuilderStore';
 
 export const BuilderLayout: React.FC = () => {
     const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
@@ -14,6 +15,14 @@ export const BuilderLayout: React.FC = () => {
     useEffect(() => {
         const handleResize = () => setIsMobile(window.innerWidth < 1024);
         window.addEventListener('resize', handleResize);
+        
+        // 🛡️ Spec 4: Manually trigger rehydration inside safe React loop
+        try {
+            useBuilderStore.persist.rehydrate();
+        } catch (e) {
+            console.error('[BuilderLayout] Hydration error caught:', e);
+        }
+
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
