@@ -1,3 +1,4 @@
+import React, { useState, useRef } from 'react';
 import { useBuilder } from '../../context/BuilderContext';
 import { Globe, Plus, ChevronDown, ChevronUp, RotateCcw, AlertTriangle } from 'lucide-react';
 import { AddPageModal } from './AddPageModal';
