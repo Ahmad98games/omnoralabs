@@ -3,6 +3,8 @@ import { motion } from 'framer-motion';
 import { ComponentRegistry, DEFAULT_PROPS } from './ComponentRegistry';
 import { StoreTemporarilyPaused } from './StoreTemporarilyPaused';
 import { OmnoraKernel } from '../../platform/kernel/OmnoraKernel';
+import { useBuilderStore } from '../../stores/useBuilderStore';
+import { StorefrontFallback } from './StorefrontFallback';
 
 class ErrorBoundary extends React.Component<
     { children: React.ReactNode; fallback?: React.ReactNode },
@@ -87,6 +89,20 @@ interface SafeRendererProps {
 export const SafeRenderer: React.FC<SafeRendererProps> = ({ blocks, loading, isBuilder = false, fbPixelId, ttPixelId, walletDaysRemaining }) => {
     const [isClient, setIsClient] = useState(false);
     const [hydratedBlocks, setHydratedBlocks] = useState<any[]>([]);
+    const [isForceRender, setIsForceRender] = useState(false);
+
+    // Timeout: If loading freezes over 5000ms natively force render what we have.
+    useEffect(() => {
+        if (!loading) {
+            setIsForceRender(false);
+            return;
+        }
+        const timer = setTimeout(() => {
+            console.warn('[SafeRenderer] Infinite load threshold hit (>5s). Aborting and native rendering.');
+            setIsForceRender(true);
+        }, 5000);
+        return () => clearTimeout(timer);
+    }, [loading]);
 
     useEffect(() => {
         setIsClient(true);
@@ -123,7 +139,7 @@ export const SafeRenderer: React.FC<SafeRendererProps> = ({ blocks, loading, isB
         };
     }, [blocks, isClient]);
 
-    if (loading) return <SkeletonLoader />;
+    if (loading && !isForceRender) return <SkeletonLoader />;
     if (!isClient) return <div style={{ minHeight: '100vh', background: '#0e0e12' }} />; // Hydration Guard
     
     // Enforcement Middleware
@@ -133,28 +149,55 @@ export const SafeRenderer: React.FC<SafeRendererProps> = ({ blocks, loading, isB
 
     if (!hydratedBlocks || hydratedBlocks.length === 0) return <BlankPagePlaceholder />;
 
+    // ATOMIC VALIDATION: The "Render-Shield"
+    if (!Array.isArray(hydratedBlocks)) {
+        console.error('[SafeRenderer] CRITICAL: hydratedBlocks is not an array.', hydratedBlocks);
+        return <StorefrontFallback />;
+    }
+
+    let renderedBlocks: React.ReactNode[] = [];
+    try {
+        renderedBlocks = hydratedBlocks.map((node: any, index: number) => {
+            if (!node || !node.type) return null;
+
+            const registryItem = ComponentRegistry[node.type];
+            if (!registryItem) return null;
+
+            // Support both React.lazy Exotic components or inline FC components
+            const Component = registryItem as React.FC<any>; 
+            // Kernel has already safely sanitized node.props against DEFAULT_PROPS schema
+            const finalProps = { ...(DEFAULT_PROPS[node.type]?.defaultProps || {}), ...(node.props || {}) };
+
+            return (
+                <ErrorBoundary key={node.id || index} fallback={
+                    <div style={{ padding: 24, border: '1px solid #7f1d1d', background: '#450a0a', color: '#fca5a5', borderRadius: 8, margin: '12px', textAlign: 'center' }}>
+                        <h3 style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '8px' }}>⚠️ Block Crashed ({node.type})</h3>
+                        <p style={{ fontSize: '11px', opacity: 0.8, marginBottom: '16px' }}>This component encountered a fatal runtime error and was halted.</p>
+                        {isBuilder && (
+                            <button 
+                                onClick={() => useBuilderStore.getState().deleteNode(node.id)}
+                                style={{ padding: '6px 12px', background: '#7f1d1d', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' }}
+                            >
+                                [ 🗑️ Delete Corrupted Block ]
+                            </button>
+                        )}
+                    </div>
+                }>
+                    <Suspense fallback={<div style={{ padding: '40px', textAlign: 'center', opacity: 0.5 }}>Loading {node.type}...</div>}>
+                        <Component {...finalProps} />
+                    </Suspense>
+                </ErrorBoundary>
+            );
+        });
+    } catch (err) {
+        console.error('[SafeRenderer] FATAL MAP CRASH:', err);
+        return <StorefrontFallback />;
+    }
+
     return (
-        <ErrorBoundary>
+        <ErrorBoundary fallback={<StorefrontFallback />}>
             <div style={{ position: 'relative', width: '100%' }}>
-                {hydratedBlocks.map((node: any, index: number) => {
-                    if (!node || !node.type) return null;
-
-                    const registryItem = ComponentRegistry[node.type];
-                    if (!registryItem) return null;
-
-                    // Support both React.lazy Exotic components or inline FC components
-                    const Component = registryItem as React.FC<any>; 
-                    // Kernel has already safely sanitized node.props against DEFAULT_PROPS schema
-                    const finalProps = { ...(DEFAULT_PROPS[node.type]?.defaultProps || {}), ...(node.props || {}) };
-
-                    return (
-                        <ErrorBoundary key={node.id || index} fallback={<div style={{ padding: 12, border: '1px dashed #ef4444', color: '#ef4444', fontSize: '11px' }}>Failed mapping: {node.type}</div>}>
-                            <Suspense fallback={<div style={{ padding: '40px', textAlign: 'center', opacity: 0.5 }}>Loading {node.type}...</div>}>
-                                <Component {...finalProps} />
-                            </Suspense>
-                        </ErrorBoundary>
-                    );
-                })}
+                {renderedBlocks}
             </div>
         </ErrorBoundary>
     );

@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
+import { persist } from 'zustand/middleware';
 import { produceWithPatches, applyPatches, enablePatches, Patch } from 'immer';
 import type { BuilderNode, PageMetadata } from '../context/BuilderContext';
 import { SyncManager } from './SyncManager';
@@ -55,7 +56,7 @@ const saveHistoryToSession = (stack: Command[], index: number) => {
     } catch (e) { /* ignore quota exceed */ }
 };
 
-export const useBuilderStore = create<BuilderState>()(immer((set, get) => ({
+export const useBuilderStore = create<BuilderState>()(persist(immer((set, get) => ({
     nodes: {},
     pages: {},
     activePageId: '',
@@ -176,4 +177,15 @@ export const useBuilderStore = create<BuilderState>()(immer((set, get) => ({
             }
         } catch (e) { /* ignore restore failures */ }
     }
-})));
+})), {
+    name: 'omnora-builder-storage',
+    onRehydrateStorage: () => (state, error) => {
+        if (error || !state || !state.nodes || Object.keys(state.nodes).length === 0) {
+            console.error('[useBuilderStore] Boot-Guard Triggered: Storage payload is null, empty, or corrupted. Wiping persist.', error);
+            localStorage.removeItem('omnora-builder-storage');
+            sessionStorage.removeItem('omnora-builder-storage');
+            // Force reFetch from Supabase by reloading
+            window.location.reload();
+        }
+    }
+}));

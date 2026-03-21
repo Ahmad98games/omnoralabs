@@ -2,7 +2,9 @@ import React, { useState, useMemo } from 'react';
 import { useBuilder } from '../../context/BuilderContext';
 import { slugify, validateSlug } from '../../utils/slugify';
 import { cloneNodeTree } from '../../utils/nodeCloner';
+import { cloneNodeTree } from '../../utils/nodeCloner';
 import { toast } from 'react-hot-toast';
+import { NewPageInitializer } from '../../platform/kernel/NewPageInitializer';
 
 interface AddPageModalProps {
     isOpen: boolean;
@@ -31,6 +33,9 @@ export const AddPageModal: React.FC<AddPageModalProps> = ({ isOpen, onClose }) =
 
     const generateTemplateData = (type: TemplateType) => {
         const now = Date.now();
+        if (type === 'blank') {
+            return NewPageInitializer.generateBlankAST();
+        }
         if (type === 'product_detail') {
             const hId = `node_herobanner_${now}_1`;
             const gId = `node_productgrid_${now}_2`;
@@ -69,6 +74,13 @@ export const AddPageModal: React.FC<AddPageModalProps> = ({ isOpen, onClose }) =
         }
 
         const templateData = generateTemplateData(template);
+
+        // SCHEMA VALIDATION: Block any attempt to save a page with a null or empty block array.
+        if (!templateData || !templateData.nodes || Object.keys(templateData.nodes).length === 0) {
+            console.error('[AddPageModal] BLOCKED: Attempted to save layout with null AST nodes.');
+            return toast.error("System Error: Template contains null AST array. Action blocked.");
+        }
+
         addPage(title, slug, 'custom', templateData);
         toast.success(`Page "${title}" created successfully!`);
         onClose();

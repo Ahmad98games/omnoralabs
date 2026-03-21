@@ -71,6 +71,17 @@ export const StorefrontApp: React.FC<StorefrontAppProps> = ({ initialPath, store
     const [loadError, setLoadError] = useState<string | null>(null);
     const [viewport, setViewport] = useState<Viewport>(detectViewport);
     const [currentPath, setCurrentPath] = useState(initialPath || window.location.pathname);
+    const [panicClicks, setPanicClicks] = useState(0);
+
+    const handlePanicClick = () => {
+        const next = panicClicks + 1;
+        setPanicClicks(next);
+        if (next >= 5) {
+            import('../../platform/kernel/OmnoraBootloader').then(({ OmnoraBootloader }) => {
+                OmnoraBootloader.executeHardReset();
+            });
+        }
+    };
 
     // ── Load StorefrontConfig from cloud or fallback ──────────────────────
     useEffect(() => {
@@ -126,6 +137,27 @@ export const StorefrontApp: React.FC<StorefrontAppProps> = ({ initialPath, store
         return () => { mounted = false; };
     }, [storeDomain]);
 
+    // ── Zombie-Tab Watcher ────────────────────────────────────────────────
+    useEffect(() => {
+        let cleanup = () => {};
+        import('../../platform/kernel/OmnoraBootloader').then(({ OmnoraBootloader }) => {
+            cleanup = OmnoraBootloader.watchZombieTab(
+                loading,
+                setLoading,
+                async () => {
+                    const loaded = await publisher.loadByDomain(storeDomain || resolveStoreDomain() || '');
+                    if (loaded) {
+                        setConfig(loaded);
+                        storefrontStore.setMerchantId(loaded.merchantId);
+                    } else {
+                        setLoadError('Fatal sync failure. No published store.');
+                    }
+                }
+            );
+        });
+        return () => cleanup();
+    }, [loading, storeDomain]);
+
     // ── Viewport listener ─────────────────────────────────────────────────
     useEffect(() => {
         const handleResize = () => setViewport(detectViewport());
@@ -163,7 +195,7 @@ export const StorefrontApp: React.FC<StorefrontAppProps> = ({ initialPath, store
     if (loading) {
         return (
             <div style={loadingStyle}>
-                <div style={spinnerStyle} />
+                <div style={spinnerStyle} onClick={handlePanicClick} title="Tap 5 times to execute system Hard Reset" />
                 <p style={{ color: '#a1a1aa', fontSize: '14px', marginTop: 16 }}>Loading storefront…</p>
             </div>
         );
