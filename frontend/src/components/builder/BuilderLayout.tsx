@@ -12,6 +12,24 @@ export const BuilderLayout: React.FC = () => {
     const [libraryOpen, setLibraryOpen] = useState(false);
     const [continueAnyway, setContinueAnyway] = useState(false);
 
+    const activePageId = useBuilderStore(state => state.activePageId);
+    const [lastValidPageId, setLastValidPageId] = useState<'home' | string>(activePageId || 'home');
+
+    // 🛡️ Page Switch Guard & Safety Net
+    useEffect(() => {
+        try {
+            if (activePageId && activePageId !== lastValidPageId) {
+                // Safely commit new page to tracked valid fallback history 
+                setLastValidPageId(activePageId);
+            }
+        } catch (e) {
+            console.error('[BuilderLayout] Page Switch Failure caught:', e);
+            // Fallback: Reset state atomically and route back to explicit home builder path
+            useBuilderStore.getState().setIsHydrating(false);
+            window.location.hash = `/builder/home`; // standard router-independent fallback replace
+        }
+    }, [activePageId]);
+
     useEffect(() => {
         const handleResize = () => setIsMobile(window.innerWidth < 1024);
         window.addEventListener('resize', handleResize);
