@@ -1,7 +1,9 @@
-import React, { useState, useRef } from 'react';
 import { useBuilder } from '../../context/BuilderContext';
-import { Globe, Plus, ChevronDown, ChevronUp, RotateCcw } from 'lucide-react';
+import { Globe, Plus, ChevronDown, ChevronUp, RotateCcw, AlertTriangle } from 'lucide-react';
 import { AddPageModal } from './AddPageModal';
+import { useBuilderStore } from '../../stores/useBuilderStore';
+import { nodeStore } from '../../platform/core/NodeStore';
+import { useSyncExternalStore } from 'react';
 
 const T = {
     bg:        'var(--bg-background)',
@@ -19,6 +21,12 @@ export const TopBarPageSelector: React.FC = () => {
     const {
         pages, activePageId, setActivePageId, deletePage
     } = useBuilder();
+
+    const nodes = useBuilderStore(state => state.nodes);
+    const pageLayouts = useSyncExternalStore(
+        React.useCallback((onStoreChange: () => void) => nodeStore.subscribe(onStoreChange), []),
+        () => nodeStore.getState().pageLayouts
+    );
 
     const [isOpen, setIsOpen] = useState(false);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -116,10 +124,20 @@ export const TopBarPageSelector: React.FC = () => {
                                                     transition: 'all 0.2s',
                                                 }}
                                             >
-                                                <div style={{
-                                                    width: 6, height: 6, borderRadius: '50%', flexShrink: 0,
-                                                    background: (p.status || 'draft') === 'live' ? T.success : T.warning,
-                                                }} />
+                                                {(() => {
+                                                    const layout = pageLayouts?.[id] || [];
+                                                    const isCorrupted = layout.length > 0 && layout.some((nodeId: string) => !nodes[nodeId]);
+                                                    
+                                                    if (isCorrupted) {
+                                                        return <AlertTriangle size={12} style={{ color: T.danger, flexShrink: 0 }} title="Broken Layout Nodes Map" />;
+                                                    }
+                                                    return (
+                                                        <div style={{
+                                                            width: 6, height: 6, borderRadius: '50%', flexShrink: 0,
+                                                            background: (p.status || 'draft') === 'live' ? T.success : T.warning,
+                                                        }} />
+                                                    );
+                                                })()}
                                                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                                                     <span>{p.title}</span>
                                                     <span style={{ fontSize: 10, opacity: 0.5 }}>{p.slug}</span>
