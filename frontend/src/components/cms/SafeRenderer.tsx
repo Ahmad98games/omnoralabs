@@ -90,6 +90,9 @@ export const SafeRenderer: React.FC<SafeRendererProps> = ({ blocks, loading, isB
     const [isClient, setIsClient] = useState(false);
     const [hydratedBlocks, setHydratedBlocks] = useState<any[]>([]);
     const [isForceRender, setIsForceRender] = useState(false);
+    const nodes = useBuilderStore(s => s.nodes); // 🛡️ Load Atomic Nodes
+    const lastDroppedNodeId = useBuilderStore(s => s.lastDroppedNodeId); // 🛡️ Animation Trackers
+
 
     // Timeout: If loading freezes over 5000ms natively force render what we have.
     useEffect(() => {
@@ -184,10 +187,13 @@ export const SafeRenderer: React.FC<SafeRendererProps> = ({ blocks, loading, isB
                     </div>
                 }>
                     <Suspense fallback={<div style={{ padding: '40px', textAlign: 'center', opacity: 0.5 }}>Loading {node.type}...</div>}>
-                        <Component {...finalProps} />
+                        <div className={node.id === lastDroppedNodeId ? 'dropped-block' : ''}>
+                            <Component {...finalProps} />
+                        </div>
                     </Suspense>
                 </ErrorBoundary>
             );
+
         });
     } catch (err) {
         console.error('[SafeRenderer] FATAL MAP CRASH:', err);

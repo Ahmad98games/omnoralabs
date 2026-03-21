@@ -21,6 +21,8 @@ export interface BuilderState {
     pages: Record<string, PageMetadata>;
     activePageId: string;
     selectedNodeId: string | null;
+    lastDroppedNodeId: string | null; // 🛡️ Animation Trackers for Sidebar Drops
+
     
     // Status
     saveStatus: 'idle' | 'saving' | 'saved' | 'error' | 'offline';
@@ -68,6 +70,8 @@ export const useBuilderStore = create<BuilderState>()(persist(immer((set, get) =
     pages: {},
     activePageId: '',
     selectedNodeId: null,
+    lastDroppedNodeId: null,
+
     saveStatus: 'idle',
     hasUnsavedChanges: false,
     lastUpdatedRemote: null,

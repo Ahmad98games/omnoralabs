@@ -335,6 +335,12 @@ const BlockCard = memo(({ block, onAdd }: { block: Block; onAdd: (b: Block) => v
 
     return (
         <div
+            draggable={true}
+            onDragStart={(e) => {
+                e.dataTransfer.setData('text/plain', block.type);
+                e.dataTransfer.effectAllowed = 'move';
+            }}
+            data-component-type={block.type}
             role="button"
             tabIndex={0}
             onClick={() => onAdd(block)}

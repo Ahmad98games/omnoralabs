@@ -13,7 +13,11 @@ import { SafeRenderer } from './SafeRenderer'; // 🛡️ Safe Renderer
     if (typeof document === 'undefined' || document.getElementById('omnora-lc-kf')) return;
     const s = document.createElement('style');
     s.id = 'omnora-lc-kf';
-    s.textContent = `@keyframes spin { to { transform: rotate(360deg); } }`;
+    s.textContent = `
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes dropIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        .dropped-block { animation: dropIn 0.2s cubic-bezier(0,0,0.2,1) !important; }
+    `;
     document.head.appendChild(s);
 })();
 

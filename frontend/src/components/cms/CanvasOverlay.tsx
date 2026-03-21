@@ -624,7 +624,9 @@ const CanvasOverlayInner: React.FC = () => {
 
     // Drag state
     const [dragId, setDragId] = useState<string | null>(null);
+    const [isHydrating, setIsHydrating] = useState(false); // 🛡️ Loading lock triggers during drops
     const [dropIndex, setDropIndex] = useState<number | null>(null);
+
     const [dropLineY, setDropLineY] = useState<number | null>(null);
     const [snapH, setSnapH] = useState(false);
     const [snapV, setSnapV] = useState(false);
@@ -840,8 +842,99 @@ const CanvasOverlayInner: React.FC = () => {
                     recordFriction('misclick');
                 }
             }}
-            style={{ pointerEvents: isTyping ? 'none' : 'auto' }}
+            onDragOver={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (isHydrating) return;
+                
+                const canvas = canvasEl();
+                if (!canvas) return;
+
+                const scrollOffset = canvas.scrollTop;
+                const rects = getNodeRects(nodeTree).map(r => ({
+                    ...r,
+                    absTop: r.top + scrollOffset,
+                    absBottom: r.bottom + scrollOffset
+                }));
+
+                const mouseAbsY = e.clientY + scrollOffset;
+                let targetIndex = rects.length;
+                let lineY: number | null = null;
+
+                if (rects.length === 0) {
+                    setDropIndex(0);
+                    setDropLineY(40); // Standard offset triggers top
+                    setDragId('__external__');
+                    return;
+                }
+
+                for (let i = 0; i < rects.length; i++) {
+                    const r = rects[i];
+                    const midY = (r.absTop + r.absBottom) / 2;
+                    if (mouseAbsY < midY) {
+                        targetIndex = r.index;
+                        lineY = r.absTop - scrollOffset - 1;
+                        break;
+                    }
+                    if (i === rects.length - 1) {
+                        targetIndex = rects.length;
+                        lineY = r.absBottom - scrollOffset + 1;
+                    }
+                }
+
+                setDropIndex(targetIndex);
+                setDropLineY(lineY);
+                setDragId('__external__');
+            }}
+            onDragLeave={(e) => {
+                e.preventDefault();
+                const related = e.relatedTarget as HTMLElement;
+                if (!related || !e.currentTarget.contains(related)) {
+                    setDropIndex(null); setDropLineY(null); setDragId(null);
+                }
+            }}
+            onDragEnd={() => {
+                setDropIndex(null); setDropLineY(null); setDragId(null);
+            }}
+            onDrop={async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (isHydrating) return;
+
+                const type = e.dataTransfer.getData('text/plain');
+                if (!type) return;
+
+                // Validate Components
+                const { DEFAULT_PROPS } = await import('../../components/cms/ComponentRegistry');
+                if (!DEFAULT_PROPS[type]) {
+                    import('react-hot-toast').then(({ toast }) => toast.error(`Unknown Component: ${type}`));
+                    setDropIndex(null); setDropLineY(null); setDragId(null);
+                    return;
+                }
+
+                setIsHydrating(true);
+                try {
+                    const { OmnoraKernel } = await import('../../platform/kernel/OmnoraKernel');
+                    const hydrated = await OmnoraKernel.getInstance().hydrate({ blocks: [{ type, props: {} }] });
+                    const props = hydrated?.blocks?.[0]?.props || {};
+
+                    const newId = addNode(type, props, null, dropIndex);
+                    // Trigger dropped animation
+                    const { useBuilderStore } = await import('../../stores/useBuilderStore');
+                    useBuilderStore.setState({ lastDroppedNodeId: newId });
+                    setTimeout(() => useBuilderStore.setState({ lastDroppedNodeId: null }), 1000);
+                    
+                    import('react-hot-toast').then(({ toast }) => toast.success(`Added ${type.replace(/_/g, ' ')}`));
+                } catch (err) {
+                    import('react-hot-toast').then(({ toast }) => toast.error("Hydration Failed"));
+                } finally {
+                    setIsHydrating(false);
+                    setDropIndex(null); setDropLineY(null); setDragId(null);
+                }
+            }}
+            style={{ pointerEvents: isTyping ? 'none' : 'auto', position: 'relative' }}
         >
+
             {ctxMenu && <ContextMenu menu={ctxMenu} onClose={() => setCtxMenu(null)} onAction={handleCtxAction} />}
 
             {/* Empty canvas */}
@@ -946,6 +1039,12 @@ const CanvasOverlayInner: React.FC = () => {
                 <div style={{ position: 'fixed', top: dropLineY, left: '50%', transform: 'translateX(-50%)', width: '80%', maxWidth: 900, height: 3, borderRadius: 3, background: ACCENT, boxShadow: `0 0 8px ${ACCENT}`, pointerEvents: 'none', zIndex: 10004 }}>
                     <div style={{ position: 'absolute', left: -5, top: '50%', transform: 'translateY(-50%)', width: 10, height: 10, borderRadius: '50%', background: ACCENT }} />
                     <div style={{ position: 'absolute', right: -5, top: '50%', transform: 'translateY(-50%)', width: 10, height: 10, borderRadius: '50%', background: ACCENT }} />
+                    {isHydrating && (
+                        <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)', background: '#1F2937', color: '#fff', fontSize: 10, padding: '4px 10px', borderRadius: 6, display: 'flex', alignItems: 'center', gap: 6, border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 4px 12px rgba(0,0,0,0.3)', whiteSpace: 'nowrap' }}>
+                            <div style={{ width: 12, height: 12, border: '1.5px solid #fff', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.6s linear infinite' }} />
+                            <span>Hydrating...</span>
+                        </div>
+                    )}
                 </div>
             )}
 
