@@ -2,6 +2,22 @@ import { toast } from 'react-hot-toast';
 
 export const OmnoraBootloader = {
     /**
+     * Persistence triggers for isolating safe routing switch frames
+     */
+    saveLastValidPageId: (pageId: string) => {
+        if (!pageId) return;
+        localStorage.setItem('omnora-last-valid-pageId', pageId);
+    },
+
+    getLastValidPageId: () => {
+        try {
+            return localStorage.getItem('omnora-last-valid-pageId') || 'home';
+        } catch (e) {
+            return 'home';
+        }
+    },
+
+    /**
      * ZOMBIE-TAB KILLER
      * If initialization stays TRUE for > 4000ms, it bypasses LocalStorage
      * and forces an external synchronization.
