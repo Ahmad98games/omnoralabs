@@ -465,8 +465,15 @@ export const LiveCanvas: React.FC = () => {
         </div>
     );
 
+    // Safety Net: if stuck in LoadingSpinner for > 5000ms, abort to SafeRenderer 
+    const [canvasLoadingTimeout, setCanvasLoadingTimeout] = useState(false);
+    useEffect(() => {
+        const timer = setTimeout(() => setCanvasLoadingTimeout(true), 5000);
+        return () => clearTimeout(timer);
+    }, []);
+
     const activePage = pages?.byId?.[activePageId] || null;
-    if (!activePage || !activePage.content) {
+    if ((!activePage) && !canvasLoadingTimeout) {
         return <LoadingSpinner />;
     }
 
