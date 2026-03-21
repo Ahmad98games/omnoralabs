@@ -162,21 +162,23 @@ const PageCard = ({ slug, onEdit, onDelete }: { slug: string; onEdit: () => void
 );
 
 // ─── Add Page Modal ───────────────────────────────────────────────────────────
-// Replace your addPage function with this:
-const addPage = async (name: string) => {
+const addPage = async (name: string, slugParam?: string, type?: string, templateData?: any) => {
     if (!name.trim()) return;
     
-    // 🛡️ CRITICAL: If localContent is null, initialize it instead of spreading null
     const currentContent = localContent || { pages: {} };
-    const slug = name.toLowerCase().replace(/[^a-z0-9]/g, '-');
+    const slug = slugParam || name.toLowerCase().replace(/[^a-z0-9]/g, '-');
 
     try {
-        const newPageData = { 
+        const newPageData = templateData ? {
+            title: name,
+            // Convert node objects back to list for legacy dashboard rendering compatibility if needed
+            layout: templateData.layout || [], 
+            nodes: templateData.nodes || {}
+        } : { 
             title: name, 
             layout: [{ type: 'hero', data: { headline: name } }] 
         };
 
-        // 1. Update UI immediately for "Snappy" feel
         setLocalContent({
             ...currentContent,
             pages: { ...currentContent.pages, [slug]: newPageData }
@@ -536,7 +538,13 @@ export default function SellerDashboard() {
             )}
 
             {/* Add page modal */}
-            {addPageOpen && <AddPageModal onClose={() => setAddPageOpen(false)} onAdd={addPage} />}
+            {addPageOpen && (
+                <AddPageModal 
+                    onClose={() => setAddPageOpen(false)} 
+                    onAdd={addPage} 
+                    existingPages={localContent?.pages || {}} 
+                />
+            )}
         </div>
     );
 }

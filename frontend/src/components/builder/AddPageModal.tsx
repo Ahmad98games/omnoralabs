@@ -7,14 +7,26 @@ import { toast } from 'react-hot-toast';
 import { NewPageInitializer } from '../../platform/kernel/NewPageInitializer';
 
 interface AddPageModalProps {
-    isOpen: boolean;
+    isOpen?: boolean;
     onClose: () => void;
+    onAdd?: (title: string, slug: string, type: string, templateData: any) => void;
+    existingPages?: Record<string, any>;
 }
 
 type TemplateType = 'blank' | 'product_detail' | 'about_contact' | 'duplicate';
 
-export const AddPageModal: React.FC<AddPageModalProps> = ({ isOpen, onClose }) => {
-    const { pages, addPage, nodeStore, pageLayouts } = useBuilder();
+export const AddPageModal: React.FC<AddPageModalProps> = ({ isOpen = true, onClose, onAdd, existingPages }) => {
+    let builderContext: any = {};
+    try {
+        builderContext = useBuilder();
+    } catch (e) {
+        // Safe fallback for standalone mode
+    }
+
+    const pages = existingPages || builderContext?.pages?.byId || {};
+    const addPage = onAdd || builderContext?.addPage;
+    const pageLayouts = builderContext?.pageLayouts || {};
+    const nodeStore = builderContext?.nodeStore;
     
     const [title, setTitle] = useState('');
     const [slug, setSlug] = useState('');
@@ -22,7 +34,7 @@ export const AddPageModal: React.FC<AddPageModalProps> = ({ isOpen, onClose }) =
     const [duplicatePageId, setDuplicatePageId] = useState('');
     
     const existingSlugs = useMemo(() => {
-        return Object.values(pages?.byId || {}).map((p: any) => p.slug);
+        return Object.keys(pages);
     }, [pages]);
 
     const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -81,7 +93,12 @@ export const AddPageModal: React.FC<AddPageModalProps> = ({ isOpen, onClose }) =
             return toast.error("System Error: Template contains null AST array. Action blocked.");
         }
 
-        addPage(title, slug, 'custom', templateData);
+        if (addPage) {
+            addPage(title, slug, 'custom', templateData);
+        } else {
+            console.error('[AddPageModal] No addPage function provided.');
+            return toast.error("Configuration Error: Unable to create page.");
+        }
         toast.success(`Page "${title}" created successfully!`);
         onClose();
         // Reset
