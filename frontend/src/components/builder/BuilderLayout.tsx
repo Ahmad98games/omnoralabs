@@ -1,3 +1,8 @@
+import React, { useState, useEffect } from 'react';
+import { Menu, X } from 'lucide-react';
+import { SmartSidebar } from '../cms/SmartSidebar';
+import { LiveCanvas } from '../cms/LiveCanvas';
+import { ElementLibrary } from '../cms/ElementLibrary';
 import { BuilderToolbar } from '../cms/BuilderToolbar';
 import { useBuilderStore } from '../../stores/useBuilderStore';
 import { useNavigate } from 'react-router-dom';
