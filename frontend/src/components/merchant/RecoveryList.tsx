@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { useAuth } from '../../../context/AuthContext';
-import { AbandonedCartService, AbandonedCartInfo } from '../../../services/AbandonedCartService';
+import { useAuth } from '../../context/AuthContext';
+import { AbandonedCartService, AbandonedCartInfo } from '../../services/AbandonedCartService';
 import { ShoppingCart, Phone, Clock, MessageCircle, AlertCircle, CheckCircle } from 'lucide-react';
 
 export interface ExtendedCartInfo extends AbandonedCartInfo {

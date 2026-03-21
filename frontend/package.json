@@ -19,6 +19,7 @@
     "@vercel/edge": "^1.1.1",
     "axios": "^1.6.8",
     "axios-retry": "^4.5.0",
+    "browser-image-compression": "^2.0.2",
     "firebase": "^12.6.0",
     "framer-motion": "^12.36.0",
     "immer": "^11.1.4",

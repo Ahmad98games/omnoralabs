@@ -15,10 +15,7 @@ export interface OmnoraImageProps {
     priority?: boolean;
 }
 
-
- * OmnoraImage: High-Fidelity Smart Image Asset with Lazy Loading and Blur-Up
-
- 
+// OmnoraImage: High-Fidelity Smart Image Asset with Lazy Loading and Blur-Up
 export const OmnoraImage: React.FC<OmnoraImageProps> = ({
     src,
     alt,
