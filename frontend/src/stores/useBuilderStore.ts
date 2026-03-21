@@ -4,6 +4,7 @@ import { persist } from 'zustand/middleware';
 import { produceWithPatches, applyPatches, enablePatches, Patch } from 'immer';
 import type { BuilderNode, PageMetadata } from '../context/BuilderContext';
 import { SyncManager } from './SyncManager';
+import { NewPageInitializer } from '../platform/kernel/NewPageInitializer';
 
 // Enable Immer Patches for Undo/Redo
 enablePatches();
@@ -40,6 +41,7 @@ export interface BuilderState {
     deleteNode: (id: string) => void;
     
     setPages: (pages: Record<string, PageMetadata>) => void;
+    addPage: (title: string, slug: string, type?: 'system' | 'template' | 'custom') => string;
     setActivePageId: (id: string) => void;
     setSelectedNodeId: (id: string | null) => void;
     
@@ -134,6 +136,50 @@ export const useBuilderStore = create<BuilderState>()(persist(immer((set, get) =
     },
 
     setPages: (pages) => set((state) => { state.pages = pages; }),
+    
+    addPage: (title, slug, type = 'custom') => {
+        const state = get() as any;
+        const safeSlug = slug.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^a-z0-9-/]/g, '');
+        
+        let finalSlug = safeSlug;
+        let counter = 1;
+        const existingSlugs = Object.values(state.pages).map((p: any) => p.slug);
+        
+        while (existingSlugs.includes(finalSlug)) {
+            counter++;
+            finalSlug = `${safeSlug}-${counter}`;
+        }
+
+        const id = crypto.randomUUID();
+        const now = new Date().toISOString();
+        const newPage: PageMetadata = {
+            id,
+            title,
+            slug: finalSlug,
+            type,
+            isLocked: type === 'system',
+            status: 'draft',
+            lastUpdated: now,
+            seoMeta: { title: `${title} | Omnora`, description: '' },
+        };
+
+        const blankAST = NewPageInitializer.generateBlankAST();
+
+        set((draft: any) => {
+            draft.pages[id] = newPage;
+            
+            if (blankAST && blankAST.nodes) {
+                draft.nodes = { ...draft.nodes, ...blankAST.nodes };
+            }
+            
+            draft.isHydrating = false;
+            draft.activePageId = id;
+            draft.hasUnsavedChanges = true;
+        });
+
+        return id;
+    },
+
     setActivePageId: (id) => set((state) => { state.activePageId = id; }),
     setSelectedNodeId: (id) => set((state) => { state.selectedNodeId = id; }),
     setSaveStatus: (status) => set((state) => { state.saveStatus = status; }),
