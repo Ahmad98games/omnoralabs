@@ -5,6 +5,7 @@ import { produceWithPatches, applyPatches, enablePatches, Patch } from 'immer';
 import type { BuilderNode, PageMetadata } from '../context/BuilderContext';
 import { SyncManager } from './SyncManager';
 import { NewPageInitializer } from '../platform/kernel/NewPageInitializer';
+import { OmnoraBootloader } from '../platform/kernel/OmnoraBootloader';
 
 // Enable Immer Patches for Undo/Redo
 enablePatches();
@@ -246,8 +247,8 @@ export const useBuilderStore = create<BuilderState>()(persist(immer((set, get) =
                 if (state) {
                     // Reset to initial state logic
                     state.nodes = {};
-                    state.pages = {}; // Corrected from pageLayouts to pages
-                    state.activePageId = 'home';
+                    state.pages = {}; 
+                    state.activePageId = OmnoraBootloader.getLastValidPageId();
                 }
             }
             // Set isHydrating to false after rehydration finishes (or fails)
