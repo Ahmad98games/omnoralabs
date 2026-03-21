@@ -155,7 +155,9 @@ export const SafeRenderer: React.FC<SafeRendererProps> = ({ blocks, loading, isB
 
     let renderedBlocks: React.ReactNode[] = [];
     try {
-        renderedBlocks = finalBlocks.map((node: any, index: number) => {
+        renderedBlocks = finalBlocks.map((blockId: any, index: number) => {
+            // Support both object passing or ID strings passing
+            const node = typeof blockId === 'string' ? nodes[blockId] : blockId;
             if (!node || !node.type) return null;
 
             const registryItem = ComponentRegistry[node.type];
