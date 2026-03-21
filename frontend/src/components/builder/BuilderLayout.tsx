@@ -1,12 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { Menu, X } from 'lucide-react';
-import { SmartSidebar } from '../cms/SmartSidebar';
-import { LiveCanvas } from '../cms/LiveCanvas';
-import { ElementLibrary } from '../cms/ElementLibrary';
 import { BuilderToolbar } from '../cms/BuilderToolbar';
 import { useBuilderStore } from '../../stores/useBuilderStore';
 import { useNavigate } from 'react-router-dom';
 import { NewPageInitializer } from '../../platform/kernel/NewPageInitializer';
+import { OmnoraBootloader } from '../../platform/kernel/OmnoraBootloader';
 
 // 🛡️ standard React ErrorBoundary for catching inner Canvas/Hydrating crashes
 class BuilderLayoutErrorBoundary extends React.Component<
@@ -76,6 +72,7 @@ const BuilderLayoutContent: React.FC = () => {
             if (activePageId && activePageId !== lastValidPageId) {
                 // Safely commit new page to tracked valid fallback history 
                 setLastValidPageId(activePageId);
+                OmnoraBootloader.saveLastValidPageId(activePageId);
             }
         } catch (e) {
             console.error('[BuilderLayout] Page Switch Failure caught:', e);
