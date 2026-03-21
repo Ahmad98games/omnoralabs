@@ -384,6 +384,14 @@ export const LiveCanvas: React.FC = () => {
     const containerRef = useRef<HTMLDivElement>(null);
     const [containerH, setContainerH] = useState(800);
     const [containerW, setContainerW] = useState(1200);
+    const [isMobileScreen, setIsMobileScreen] = useState(window.innerWidth < 1024);
+
+    // Track screen width for mobile editor padding clamping
+    useEffect(() => {
+        const handleResize = () => setIsMobileScreen(window.innerWidth < 1024);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     // Track container size for "fit" zoom
     useEffect(() => {
@@ -486,11 +494,12 @@ export const LiveCanvas: React.FC = () => {
                 background: isEdit ? '#000' : '#030304',
                 overflowX: 'hidden',
                 overflowY: 'auto',
-                padding: isEdit ? (preset.category === 'desktop' ? '24px 24px' : '24px') : 0,
+                padding: isEdit ? (isMobileScreen ? 0 : (preset.category === 'desktop' ? '24px 24px' : '24px')) : 0,
                 position: 'relative',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
+                width: isMobileScreen ? '100vw' : 'auto', // 🛡️ Spec 2: width: 100vw on mobile
             }}
         >
             {/* Ruler — Edit only */}

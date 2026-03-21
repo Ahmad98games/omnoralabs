@@ -56,6 +56,7 @@ import { StoreGenerator } from '../components/seller/StoreGenerator';
 import { InstallButton } from '../components/seller/InstallButton';
 import { RecoveryList } from '../components/merchant/RecoveryList';
 import { RefreshCw } from 'lucide-react';
+import { BuilderLayout } from '../components/builder/BuilderLayout';
 
 // ─── Auto-save manager (lives inside BuilderProvider) ─────────────────────────
 const AutoSaveManager: React.FC = () => {
@@ -453,16 +454,7 @@ export default function SellerDashboard() {
                         <BuilderProvider initialData={localContent?.pages?.home} isPreview={false} tenantId={user?.id} userName={user?.full_name || 'Your'}>
                             <AutoSaveManager />
                             <GlobalKeyboardShortcuts />
-                            <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
-                                <BuilderToolbar onToggleLibrary={() => setLibraryOpen(o => !o)} libraryOpen={libraryOpen} />
-                                <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-                                    <ElementLibrary isOpen={libraryOpen} onClose={() => setLibraryOpen(false)} />
-                                    <div style={{ flex: 1, overflow: 'hidden', position: 'relative', display: 'flex', flexDirection: 'column' }}>
-                                        <LiveCanvas />
-                                    </div>
-                                    <SmartSidebar />
-                                </div>
-                            </div>
+                            <BuilderLayout />
                             <TourOverlay isOpen={tourOpen} onClose={() => {
                                 setTourOpen(false);
                                 // Clean up URL
