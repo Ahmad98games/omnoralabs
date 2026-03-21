@@ -7,6 +7,8 @@ import { deepMergeProps, reportRegistryError, safeDeepUpdate, verifyInvariants }
 import { OmnoraContext, OmnoraMode } from './OmnoraContext';
 import type { DropPosition } from '../components/cms/ComponentWrapper';
 import { useSyncExternalStore } from 'react';
+import { NewPageInitializer } from '../platform/kernel/NewPageInitializer';
+import { useBuilderStore } from '../stores/useBuilderStore';
 
 const MAX_HISTORY_DEPTH = 100;
 
@@ -683,32 +685,20 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
         type: 'system' | 'template' | 'custom' = 'custom',
         templateData?: { nodes: Record<string, any>; layout: string[] }
     ) => {
-        const id = `${type}_${Date.now()}`;
-        const now = new Date().toISOString();
-        const newPage: PageMetadata = {
-            id,
-            title,
-            slug,
-            type,
-            isLocked: type === 'system',
-            status: 'draft',
-            lastUpdated: now,
-            seoMeta: { title: `${title} | Omnora`, description: '' },
-        };
-
-        if (templateData) {
-            nodeStore._update(() => ({
-                nodes: { ...nodeStore.getState().nodes, ...templateData.nodes }
-            }));
-            setPageLayouts(prev => ({ ...prev, [id]: templateData.layout }));
-        } else {
-            setPageLayouts(prev => ({ ...prev, [id]: [] }));
-        }
+        const id = useBuilderStore.getState().addPage(title, slug, type);
+        const newPage = useBuilderStore.getState().pages[id];
 
         setPages(prev => ({
             byId: { ...prev.byId, [id]: newPage },
             allIds: [...prev.allIds, id]
         }));
+        
+        if (templateData && templateData.layout) {
+            setPageLayouts(prev => ({ ...prev, [id]: templateData.layout }));
+        } else {
+            const blankAST = NewPageInitializer.generateBlankAST();
+            setPageLayouts(prev => ({ ...prev, [id]: blankAST.layout }));
+        }
 
         switchPage(id);
     }, [switchPage]);
