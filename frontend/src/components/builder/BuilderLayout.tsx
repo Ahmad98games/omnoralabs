@@ -5,8 +5,63 @@ import { LiveCanvas } from '../cms/LiveCanvas';
 import { ElementLibrary } from '../cms/ElementLibrary';
 import { BuilderToolbar } from '../cms/BuilderToolbar';
 import { useBuilderStore } from '../../stores/useBuilderStore';
+import { useNavigate } from 'react-router-dom';
+import { NewPageInitializer } from '../../platform/kernel/NewPageInitializer';
 
-export const BuilderLayout: React.FC = () => {
+// 🛡️ standard React ErrorBoundary for catching inner Canvas/Hydrating crashes
+class BuilderLayoutErrorBoundary extends React.Component<
+    { children: React.ReactNode; onGoBack: () => void; onResetPage: () => void }, 
+    { hasError: boolean; error: any }
+> {
+    constructor(props: any) {
+        super(props);
+        this.state = { hasError: false, error: null };
+    }
+
+    static getDerivedStateFromError(error: any) {
+        return { hasError: true, error };
+    }
+
+    componentDidCatch(error: any, errorInfo: any) {
+        console.error('[BuilderLayoutErrorBoundary] Crash caught:', error, errorInfo.componentStack);
+    }
+
+    render() {
+        if (this.state.hasError) {
+            return (
+                <div style={{ 
+                    minHeight: '100vh', display: 'flex', flexDirection: 'column', 
+                    alignItems: 'center', justifyContent: 'center', 
+                    background: '#09090b', color: '#fff', padding: 24, textAlign: 'center' 
+                }}>
+                    <div style={{ padding: '24px', background: '#121214', border: '1px solid #7f1d1d', borderRadius: '16px', maxWidth: '400px' }}>
+                        <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '0.5rem', color: '#ef4444' }}>⚠️ Layout Crashed</h2>
+                        <p style={{ color: '#a1a1aa', fontSize: '13px', lineHeight: '1.5', marginBottom: '2rem' }}>
+                            We encountered a fatal error rendering this page section. Choose an escape action to restore order.
+                        </p>
+                        <div style={{ display: 'flex', gap: '10px', flexDirection: 'column' }}>
+                            <button 
+                                onClick={this.props.onGoBack} 
+                                style={{ width: '100%', padding: '12px', background: '#27272a', borderRadius: 10, fontSize: '12px', fontWeight: 600, color: '#fff', cursor: 'pointer', border: 'none' }}
+                            >
+                                Go Back to Last Page
+                            </button>
+                            <button 
+                                onClick={this.props.onResetPage} 
+                                style={{ width: '100%', padding: '12px', background: '#7f1d1d', borderRadius: 10, fontSize: '12px', fontWeight: 800, color: '#fff', cursor: 'pointer', border: 'none' }}
+                            >
+                                Clear Page & Start Fresh
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+        return this.props.children;
+    }
+}
+
+const BuilderLayoutContent: React.FC = () => {
     const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [libraryOpen, setLibraryOpen] = useState(false);
@@ -188,5 +243,34 @@ export const BuilderLayout: React.FC = () => {
                 )}
             </div>
         </div>
+    );
+};
+
+export const BuilderLayout: React.FC = () => {
+    const navigate = useNavigate();
+    const activePageId = useBuilderStore(state => state.activePageId) || 'home';
+
+    const handleGoBack = () => {
+        // Safe Navigate back to standard explicit path to avoid empty backstacks
+        navigate(`/builder/home`); // or exact string matching dashboard home templates
+    };
+
+    const handleResetPage = () => {
+        const state = useBuilderStore.getState();
+        const activeId = state.activePageId;
+        if (activeId) {
+             const blankAST = NewPageInitializer.generateBlankAST();
+             useBuilderStore.setState((s: any) => {
+                 s.nodes = { ...s.nodes, ...blankAST.nodes };
+             });
+             // Also notify layout buffers
+             window.location.reload(); // Quick reset atomic trigger 
+        }
+    };
+
+    return (
+        <BuilderLayoutErrorBoundary onGoBack={handleGoBack} onResetPage={handleResetPage}>
+            <BuilderLayoutContent />
+        </BuilderLayoutErrorBoundary>
     );
 };
