@@ -1,16 +1,13 @@
-/**
- * CheckoutBlock: Checkout Form + Order Summary
- *
- * Reads cart via useCart, renders customer form + line item summary.
- * On submit: OrderStore.placeOrder() → CartStore.clearCart() → redirect to /thank-you.
- * Registered in BuilderRegistry as 'checkout_form'.
- */
 import React, { useState, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useCart, cartActions } from '../../hooks/useCart';
 import { orderStore, type OrderLineItem } from '../../platform/core/OrderStore';
 import { databaseClient } from '../../platform/core/DatabaseClient';
 import { supabase } from '../../lib/supabaseClient';
 import { useStorefront } from '../../context/StorefrontContext';
+import { PixelManager } from '../../utils/PixelManager';
+import { CouponValidator } from '../../utils/CouponValidator';
+import { AbandonedCartService } from '../../services/AbandonedCartService';
 
 // ─── Design Tokens ────────────────────────────────────────────────────────────
 
@@ -42,11 +39,34 @@ type PaymentMode = 'form' | 'processing' | 'stripe-redirect';
 
 export const CheckoutBlock: React.FC<CheckoutBlockProps> = ({ nodeId }) => {
     const cart = useCart();
+    const { state } = useStorefront();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [paymentMode, setPaymentMode] = useState<PaymentMode>('form');
     const [formData, setFormData] = useState({
         name: '', email: '', address: '', city: '', zip: '', phone: '',
     });
+
+    const cartIdRef = React.useRef(crypto.randomUUID());
+    const checkoutSessionIdRef = React.useRef(crypto.randomUUID());
+    const trackingEventIdRef = React.useRef(crypto.randomUUID());
+    const [checkoutError, setCheckoutError] = useState<string | null>(null);
+
+    // Auto-save draft logic for abandoned carts
+    React.useEffect(() => {
+        if (formData.phone.length > 5 && cart.items.length > 0) {
+            const timeout = setTimeout(() => {
+                AbandonedCartService.saveDraft({
+                    cart_id: cartIdRef.current,
+                    merchant_id: state.merchantId || 'default_merchant',
+                    customer_name: formData.name,
+                    customer_phone: formData.phone,
+                    cart_json: cart,
+                    cart_value: cart.finalTotal
+                });
+            }, 1000);
+            return () => clearTimeout(timeout);
+        }
+    }, [formData.phone, formData.name, cart]);
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [promoCode, setPromoCode] = useState('');
     const [promoStatus, setPromoStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
@@ -71,10 +91,10 @@ export const CheckoutBlock: React.FC<CheckoutBlockProps> = ({ nodeId }) => {
     const handleApplyPromo = async () => {
         if (!promoCode.trim()) return;
         setPromoStatus('loading');
-        const merchantId = 'default_merchant';
-        const result = await databaseClient.validateDiscountCode(promoCode.trim(), merchantId);
+        const merchantId = state.merchantId || 'default_merchant';
+        const result = await CouponValidator.validateCoupon(promoCode.trim(), merchantId);
         if (result) {
-            cartActions.applyDiscount({ code: result.code, type: result.type, value: result.value });
+            cartActions.applyDiscount({ id: result.id, code: result.code, type: result.type, value: result.value } as any);
             setPromoMsg(`Code ${result.code} applied! -${result.type === 'percentage' ? `${result.value}%` : `$${result.value.toFixed(2)}`}`);
             setPromoStatus('success');
         } else {
@@ -96,29 +116,48 @@ export const CheckoutBlock: React.FC<CheckoutBlockProps> = ({ nodeId }) => {
         if (!validate() || cart.items.length === 0) return;
 
         setIsSubmitting(true);
-        await new Promise(res => setTimeout(res, 800));
 
-        const lineItems: OrderLineItem[] = cart.items.map(item => ({
-            id: item.id, variantId: item.variantId, title: item.title,
-            price: item.price, quantity: item.quantity, image: item.image,
-        }));
+        // ── Distributed Checkout Idempotency Check ──
+        for (const item of lineItems) {
+            const { data, error } = await supabase.rpc('deduct_inventory_v2', {
+                p_id: item.id,
+                p_quantity: item.quantity,
+                p_session_key: checkoutSessionIdRef.current
+            });
+
+            if (error || (data && !data.success)) {
+                setIsSubmitting(false);
+                setCheckoutError(data?.error || error?.message || 'Maazrat! Ye item abhi abhi stock se khatam ho gaya.');
+                return;
+            }
+        }
+
+        PixelManager.trackEvent('Purchase', { value: cart.finalTotal, currency: 'USD', eventID: trackingEventIdRef.current });
+
+        if (cart.appliedDiscount && (cart.appliedDiscount as any).id) {
+            await CouponValidator.incrementUsedCount((cart.appliedDiscount as any).id);
+        }
 
         const orderId = orderStore.placeOrder(
             {
                 name: formData.name.trim(), email: formData.email.trim(),
                 address: formData.address.trim(), city: formData.city.trim(),
-                zip: formData.zip.trim(), phone: formData.phone.trim()
+                zip: formData.zip.trim(), phone: formData.phone.trim(),
+                tracking_event_id: trackingEventIdRef.current
             },
             lineItems, cart.finalTotal,
         );
+
+        // Smart Abandoned Cart: Auto-Conversion by Phone Number
+        if (formData.phone) {
+            AbandonedCartService.markRecoveredByPhone(formData.phone, state.merchantId || 'default_merchant');
+        }
 
         cartActions.clearCart();
         setIsSubmitting(false);
         window.location.hash = `#/thank-you?orderId=${orderId}`;
         window.dispatchEvent(new CustomEvent('omnora:navigate', { detail: { path: '/thank-you', orderId } }));
     }, [formData, cart, validate]);
-
-    const { state } = useStorefront();
 
     // ── Stripe Checkout (hosted checkout redirect) ───────────────────
     const handleStripeCheckout = useCallback(async () => {
@@ -232,13 +271,16 @@ export const CheckoutBlock: React.FC<CheckoutBlockProps> = ({ nodeId }) => {
                     }}
                 >
                     {isSubmitting && (
-                        <span style={{
-                            width: 16, height: 16,
-                            border: '2px solid rgba(255,255,255,0.3)',
-                            borderTopColor: '#fff', borderRadius: '50%',
-                            animation: 'omnoraCheckoutSpin 0.6s linear infinite',
-                            display: 'inline-block',
-                        }} />
+                        <motion.span
+                            animate={{ rotate: 360 }}
+                            transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+                            style={{
+                                width: 16, height: 16,
+                                border: '2px solid rgba(255,255,255,0.3)',
+                                borderTopColor: '#fff', borderRadius: '50%',
+                                display: 'inline-block',
+                            }} 
+                        />
                     )}
                     {isSubmitting && paymentMode !== 'stripe-redirect' ? 'Processing...' : `Place Order — $${grandTotal.toFixed(2)}`}
                 </button>
@@ -263,21 +305,74 @@ export const CheckoutBlock: React.FC<CheckoutBlockProps> = ({ nodeId }) => {
                     }}
                 >
                     {paymentMode === 'processing' && (
-                        <span style={{
-                            width: 16, height: 16,
-                            border: '2px solid rgba(255,255,255,0.3)',
-                            borderTopColor: '#fff', borderRadius: '50%',
-                            animation: 'omnoraCheckoutSpin 0.6s linear infinite',
-                            display: 'inline-block',
-                        }} />
+                        <motion.span
+                            animate={{ rotate: 360 }}
+                            transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+                            style={{
+                                width: 16, height: 16,
+                                border: '2px solid rgba(255,255,255,0.3)',
+                                borderTopColor: '#fff', borderRadius: '50%',
+                                display: 'inline-block',
+                            }} 
+                        />
                     )}
                     {paymentMode === 'stripe-redirect' ? '🔀 Redirecting to Stripe…'
                         : paymentMode === 'processing' ? 'Creating Session…'
                             : `💳 Pay with Card — $${grandTotal.toFixed(2)}`}
                 </button>
-
-                <style>{`@keyframes omnoraCheckoutSpin { to { transform: rotate(360deg); } }`}</style>
             </form>
+
+            {/* High-Priority Error Modal */}
+            <AnimatePresence>
+                {checkoutError && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        style={{
+                            position: 'fixed', inset: 0, zIndex: 9999,
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)'
+                        }}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9, y: 20 }}
+                            animate={{ scale: 1, y: 0 }}
+                            exit={{ scale: 0.9, y: 20 }}
+                            style={{
+                                background: T.surface, border: `1px solid ${T.danger}`,
+                                borderRadius: 20, padding: 32, maxWidth: 400, width: '90%',
+                                textAlign: 'center', boxShadow: '0 20px 60px rgba(255,77,106,0.3)'
+                            }}
+                        >
+                            <div style={{
+                                width: 64, height: 64, borderRadius: 32, background: 'rgba(255,77,106,0.1)',
+                                color: T.danger, fontSize: 32, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                margin: '0 auto 20px'
+                            }}>
+                                ⚠️
+                            </div>
+                            <h3 style={{ fontSize: 20, fontWeight: 800, color: '#fff', margin: '0 0 12px' }}>Order Failed</h3>
+                            <p style={{ fontSize: 15, color: T.textDim, margin: '0 0 24px', lineHeight: 1.5 }}>
+                                {checkoutError}
+                            </p>
+                            <button
+                                onClick={() => {
+                                    setCheckoutError(null);
+                                    checkoutSessionIdRef.current = crypto.randomUUID(); // Re-roll session ID so we can try again if they remove item
+                                }}
+                                style={{
+                                    background: T.danger, color: '#fff', border: 'none',
+                                    padding: '12px 24px', borderRadius: 10, fontSize: 14, fontWeight: 700,
+                                    cursor: 'pointer', width: '100%'
+                                }}
+                            >
+                                Try Again
+                            </button>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* Right: Order Summary */}
             <div style={{

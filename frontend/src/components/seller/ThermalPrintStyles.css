@@ -1,0 +1,31 @@
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    #thermal-print-view, #thermal-print-view * {
+        visibility: visible;
+    }
+    #thermal-print-view {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 80mm; /* Standard Thermal printer width */
+        font-family: 'Courier New', Courier, monospace;
+        color: #000 !important;
+        font-size: 12px;
+        line-height: 1.4;
+        margin: 0;
+        padding: 5mm;
+        background: white !important;
+    }
+    
+    html, body {
+        background: white !important;
+        margin: 0;
+        padding: 0;
+    }
+
+    button {
+        display: none !important;
+    }
+}

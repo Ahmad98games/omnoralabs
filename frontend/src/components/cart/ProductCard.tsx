@@ -10,6 +10,8 @@
 import React from 'react';
 import { StorefrontProvider, type Product } from '../../context/StorefrontContext';
 import { cartActions } from '../../hooks/useCart';
+import { useInventorySync } from '../../hooks/useInventorySync';
+import { OmnoraImage } from '../cms/OmnoraImage';
 
 // ─── Design Tokens ────────────────────────────────────────────────────────────
 
@@ -47,6 +49,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         ?? product.variants[0]
         ?? null;
 
+    const { isOutOfStock } = useInventorySync(product.id, (product as any).inventory_count !== undefined ? (product as any).inventory_count : 1);
+
+    const isAvailable = product.available && !isOutOfStock;
+
     const displayPrice = selectedVariant?.price ?? product.price;
     const comparePrice = selectedVariant?.compareAtPrice ?? product.compareAtPrice;
     const hasDiscount = comparePrice && comparePrice > displayPrice;
@@ -56,7 +62,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
     const handleQuickAdd = (e: React.MouseEvent) => {
         e.stopPropagation();
-        if (!product.available) return;
+        if (!isAvailable) return;
 
         cartActions.addItem({
             id: product.id,
@@ -107,17 +113,17 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                         paddingBottom: '100%', overflow: 'hidden',
                         background: T.surface2,
                     }}>
-                        <img
-                            src={product.featured_image}
-                            alt={product.title}
-                            style={{
-                                position: 'absolute', inset: 0,
-                                width: '100%', height: '100%',
-                                objectFit: 'cover',
-                                transition: 'transform 0.4s cubic-bezier(0.16,1,0.3,1)',
-                            }}
-                            onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                        />
+                        <div style={{ position: 'absolute', inset: 0 }}>
+                            <OmnoraImage
+                                src={product.featured_image}
+                                alt={product.title}
+                                isOutOfStock={isOutOfStock}
+                                style={{
+                                    width: '100%', height: '100%',
+                                    transition: 'transform 0.4s cubic-bezier(0.16,1,0.3,1)',
+                                }}
+                            />
+                        </div>
 
                         {/* Discount Badge */}
                         {hasDiscount && (
@@ -132,8 +138,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                             </div>
                         )}
 
-                        {/* Sold Out Badge */}
-                        {!product.available && (
+                        {/* Sold Out Badge (Original Fallback) */}
+                        {!isAvailable && !isOutOfStock && (
                             <div style={{
                                 position: 'absolute', top: 10, right: 10,
                                 background: 'rgba(0,0,0,0.7)', color: T.textDim,
@@ -146,7 +152,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                         )}
 
                         {/* Quick Add Button */}
-                        {product.available && (
+                        {isAvailable && (
                             <button
                                 data-quick-add
                                 onClick={handleQuickAdd}

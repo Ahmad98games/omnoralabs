@@ -7,6 +7,9 @@ import { useToast } from '../../context/ToastContext';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 
+import { PrintView } from './PrintView';
+import { generateInvoice, shareInvoiceToWhatsApp } from '../../utils/InvoiceGenerator';
+
 export const AdminOrderManager = () => {
     const { user } = useAuth();
     const { showToast } = useToast();
@@ -14,6 +17,16 @@ export const AdminOrderManager = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [updatingOrderId, setUpdatingOrderId] = useState<string | null>(null);
+    const [printOrder, setPrintOrder] = useState<Order | null>(null);
+
+    useEffect(() => {
+        if (printOrder) {
+            setTimeout(() => {
+                window.print();
+                setPrintOrder(null);
+            }, 300);
+        }
+    }, [printOrder]);
 
     const fetchOrders = async () => {
         if (!user) return;
@@ -189,7 +202,28 @@ export const AdminOrderManager = () => {
                                                 {updatingOrderId === order.id ? (
                                                     <Loader2 size={16} className="animate-spin text-indigo-500" />
                                                 ) : (
-                                                    <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity print:hidden">
+                                                        <button 
+                                                            onClick={() => generateInvoice(order, user?.user_metadata?.store_name || user?.user_metadata?.store_slug || 'My Store')}
+                                                            className="bg-gray-800 hover:bg-gray-700 text-gray-300 px-2 py-1 rounded text-[10px] font-bold uppercase transition-all"
+                                                            title="Download PDF Invoice"
+                                                        >
+                                                            PDF
+                                                        </button>
+                                                        <button 
+                                                            onClick={() => setPrintOrder(order)}
+                                                            className="bg-gray-800 hover:bg-gray-700 text-gray-300 px-2 py-1 rounded text-[10px] font-bold uppercase transition-all"
+                                                            title="Thermal Print Receipt"
+                                                        >
+                                                            Print
+                                                        </button>
+                                                        <button 
+                                                            onClick={() => shareInvoiceToWhatsApp(order, order.customerPhone || '')}
+                                                            className="bg-[#25D366]/20 hover:bg-[#25D366]/40 text-[#25D366] px-2 py-1 rounded text-[10px] font-bold uppercase transition-all"
+                                                            title="Share to WhatsApp"
+                                                        >
+                                                            WA
+                                                        </button>
                                                         {order.status === 'PAID' && (
                                                             <button 
                                                                 onClick={() => handleUpdateStatus(order.id, 'SHIPPED')}
@@ -220,6 +254,13 @@ export const AdminOrderManager = () => {
                     </table>
                 </div>
             </div>
+
+            {/* Hidden Thermal Print Component */}
+            {printOrder && (
+                <div className="fixed top-0 left-0 bg-white z-[9999] opacity-0 print:opacity-100">
+                    <PrintView order={printOrder} storeName={user?.user_metadata?.store_name || user?.user_metadata?.store_slug || 'Store'} />
+                </div>
+            )}
         </div>
     );
 };

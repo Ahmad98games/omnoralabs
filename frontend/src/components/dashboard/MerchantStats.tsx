@@ -16,12 +16,25 @@ export const MerchantStats: React.FC<MerchantStatsProps> = ({ merchantId }) => {
         pendingRevenue: 0,
         ordersCount: 0,
         visitorsCount: 1250, // Fallback/Mock for conversion rate math
+        abandonedTotal: 0,
+        recoveredTotal: 0
     });
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchStats = async () => {
             setLoading(true);
+
+            const { data: abandonedCarts } = await supabase
+                .from('abandoned_carts')
+                .select('recovered')
+                .eq('merchant_id', merchantId);
+
+            let abandoned = 0, recovered = 0;
+            if (abandonedCarts) {
+                abandoned = abandonedCarts.length;
+                recovered = abandonedCarts.filter(c => c.recovered).length;
+            }
 
             const { data: orders, error } = await supabase
                 .from('orders')
@@ -44,7 +57,9 @@ export const MerchantStats: React.FC<MerchantStatsProps> = ({ merchantId }) => {
                     ...prev,
                     totalRevenue: total,
                     pendingRevenue: pending,
-                    ordersCount: orders.length
+                    ordersCount: orders.length,
+                    abandonedTotal: abandoned,
+                    recoveredTotal: recovered
                 }));
             }
 
@@ -81,6 +96,17 @@ export const MerchantStats: React.FC<MerchantStatsProps> = ({ merchantId }) => {
                     {conversionRate}%
                 </h3>
                 <p style={{ color: '#444', fontSize: '10px', marginTop: 2 }}>Based on {stats.visitorsCount} uniques</p>
+            </div>
+
+            {/* Smart Cart Recovery Rate */}
+            <div style={{ background: '#13131a', padding: 20, borderRadius: 8, border: '1px solid #2a2a3a' }}>
+                <p style={{ color: '#888', fontSize: '12px' }}>Cart Recovery Rate</p>
+                <h3 style={{ color: '#ec4899', fontSize: '24px', fontWeight: 700, marginTop: 4 }}>
+                    {stats.abandonedTotal > 0 ? ((stats.recoveredTotal / stats.abandonedTotal) * 100).toFixed(1) : '0.0'}%
+                </h3>
+                <p style={{ color: '#444', fontSize: '10px', marginTop: 2 }}>
+                    Recovered: {stats.recoveredTotal} / {stats.abandonedTotal}
+                </p>
             </div>
         </div>
     );

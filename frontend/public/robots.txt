@@ -1,6 +1,16 @@
+# Global Omnora multi-tenant robots rules
 User-agent: *
 Allow: /
-Disallow: /admin
-Disallow: /api
+Allow: /p/*
+Allow: /s/*
 
+# Restrict critical paths
+Disallow: /admin/*
+Disallow: /checkout/*
+Disallow: /builder/*
+Disallow: /super-admin/*
+Disallow: /api/*
+
+# Edge Function routing for multi-tenant sitemaps
+# If using a custom domain, point to edge function internally
 Sitemap: https://omnora.com/sitemap.xml

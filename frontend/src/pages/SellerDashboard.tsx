@@ -54,6 +54,8 @@ import AdminPaymentSettings from '../components/admin/AdminPaymentSettings';
 const DomainSettings = React.lazy(() => import('../components/seller/DomainSettings').then(m => ({ default: m.DomainSettings })));
 import { StoreGenerator } from '../components/seller/StoreGenerator';
 import { InstallButton } from '../components/seller/InstallButton';
+import { RecoveryList } from '../components/merchant/RecoveryList';
+import { RefreshCw } from 'lucide-react';
 
 // ─── Auto-save manager (lives inside BuilderProvider) ─────────────────────────
 const AutoSaveManager: React.FC = () => {
@@ -108,6 +110,7 @@ const NAV = [
     { id: 'overview', label: 'Overview', icon: LayoutDashboard },
     { id: 'performance', label: 'Analytics', icon: TrendingUp },
     { id: 'orders', label: 'Orders', icon: ShoppingBag },
+    { id: 'recovery', label: 'Abandoned Carts', icon: RefreshCw },
     { id: 'inventory', label: 'Products', icon: Package },
     { id: 'product-editor', label: 'New Product', icon: Plus },
     { id: 'pages', label: 'Pages', icon: FileText },
@@ -403,6 +406,9 @@ export default function SellerDashboard() {
 
                     {/* ── Orders ── */}
                     {activeTab === 'orders' && <AdminOrderManager />}
+
+                    {/* ── Abandoned Cart Recovery ── */}
+                    {activeTab === 'recovery' && <RecoveryList />}
 
                     {/* ── Product Editor (Code-Split) ── */}
                     {activeTab === 'product-editor' && (

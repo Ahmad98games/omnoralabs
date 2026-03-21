@@ -1,6 +1,8 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { motion } from 'framer-motion';
 import { ComponentRegistry, DEFAULT_PROPS } from './ComponentRegistry';
+import { StoreTemporarilyPaused } from './StoreTemporarilyPaused';
+import { OmnoraKernel } from '../../platform/kernel/OmnoraKernel';
 
 class ErrorBoundary extends React.Component<
     { children: React.ReactNode; fallback?: React.ReactNode },
@@ -76,17 +78,32 @@ export const SkeletonLoader: React.FC = () => {
 interface SafeRendererProps {
     blocks?: any[];
     loading?: boolean;
+    isBuilder?: boolean;
+    fbPixelId?: string;
+    ttPixelId?: string;
+    walletDaysRemaining?: number;
 }
 
-export const SafeRenderer: React.FC<SafeRendererProps> = ({ blocks, loading }) => {
+export const SafeRenderer: React.FC<SafeRendererProps> = ({ blocks, loading, isBuilder = false, fbPixelId, ttPixelId, walletDaysRemaining }) => {
     const [isClient, setIsClient] = useState(false);
+    const [hydratedBlocks, setHydratedBlocks] = useState<any[]>([]);
 
     useEffect(() => {
         setIsClient(true);
-    }, []);
+        if (!isBuilder) {
+            import('../../utils/PixelManager').then(({ PixelManager }) => {
+                PixelManager.init(fbPixelId, ttPixelId);
+            });
+        }
+    }, [isBuilder, fbPixelId, ttPixelId]);
 
     useEffect(() => {
         if (!isClient || !blocks || blocks.length === 0) return;
+
+        // Omnora Kernel Shield
+        OmnoraKernel.getInstance().hydrate(blocks).then(ast => {
+            setHydratedBlocks(ast.blocks || ast);
+        });
 
         performance.mark('safe-render-start');
         
@@ -108,12 +125,18 @@ export const SafeRenderer: React.FC<SafeRendererProps> = ({ blocks, loading }) =
 
     if (loading) return <SkeletonLoader />;
     if (!isClient) return <div style={{ minHeight: '100vh', background: '#0e0e12' }} />; // Hydration Guard
-    if (!blocks || blocks.length === 0) return <BlankPagePlaceholder />;
+    
+    // Enforcement Middleware
+    if (!isBuilder && walletDaysRemaining !== undefined && walletDaysRemaining <= 0) {
+        return <StoreTemporarilyPaused />;
+    }
+
+    if (!hydratedBlocks || hydratedBlocks.length === 0) return <BlankPagePlaceholder />;
 
     return (
         <ErrorBoundary>
             <div style={{ position: 'relative', width: '100%' }}>
-                {blocks.map((node: any, index: number) => {
+                {hydratedBlocks.map((node: any, index: number) => {
                     if (!node || !node.type) return null;
 
                     const registryItem = ComponentRegistry[node.type];
@@ -121,7 +144,8 @@ export const SafeRenderer: React.FC<SafeRendererProps> = ({ blocks, loading }) =
 
                     // Support both React.lazy Exotic components or inline FC components
                     const Component = registryItem as React.FC<any>; 
-                    const finalProps = { ...DEFAULT_PROPS[node.type], ...(node.props || {}) };
+                    // Kernel has already safely sanitized node.props against DEFAULT_PROPS schema
+                    const finalProps = { ...(DEFAULT_PROPS[node.type]?.defaultProps || {}), ...(node.props || {}) };
 
                     return (
                         <ErrorBoundary key={node.id || index} fallback={<div style={{ padding: 12, border: '1px dashed #ef4444', color: '#ef4444', fontSize: '11px' }}>Failed mapping: {node.type}</div>}>

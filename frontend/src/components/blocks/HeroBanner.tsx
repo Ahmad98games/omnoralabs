@@ -6,6 +6,7 @@
  * Registered in BuilderRegistry as 'hero_banner'.
  */
 import React, { useState } from 'react';
+import { OmnoraImage } from '../cms/OmnoraImage';
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 
@@ -73,21 +74,16 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
         >
             {/* Background Image */}
             {bgImageUrl && (
-                <>
-                    <img 
-                        src={bgImageUrl} 
-                        onError={() => setImgUrl('https://images.unsplash.com/photo-1511556532299-8f662fc26c06?w=1600&q=80')} 
-                        style={{ display: 'none' }} 
-                        alt="bg-fallback-trigger"
+                <div style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
+                    <OmnoraImage
+                        src={bgImageUrl}
+                        alt={headline || 'Hero Banner'}
+                        width={1920} // LCP optimization resolution
+                        priority={true}
+                        aspectRatio="auto"
+                        style={{ position: 'absolute', inset: 0, height: '100%' }}
                     />
-                    <div style={{
-                        position: 'absolute', inset: 0,
-                        backgroundImage: `url(${imgUrl})`,
-                        backgroundSize: 'cover',
-                        backgroundPosition: 'center',
-                        transition: 'transform 8s ease-out',
-                    }} />
-                </>
+                </div>
             )}
 
             {/* Overlay */}

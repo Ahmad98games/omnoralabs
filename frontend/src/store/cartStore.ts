@@ -12,7 +12,8 @@ export interface CartProduct {
 export interface CartItem {
     product: CartProduct;
     quantity: number;
-    selectedVariant?: string;
+    variant_id?: string;
+    variant_name?: string;
 }
 
 interface CartState {
@@ -20,9 +21,9 @@ interface CartState {
     isCartOpen: boolean;
     
     // Actions
-    addItem: (product: CartProduct, variant?: string, qty?: number) => void;
-    removeItem: (productId: string, variant?: string) => void;
-    updateQuantity: (productId: string, qty: number, variant?: string) => void;
+    addItem: (product: CartProduct, variant_id?: string, variant_name?: string, qty?: number) => void;
+    removeItem: (productId: string, variant_id?: string) => void;
+    updateQuantity: (productId: string, qty: number, variant_id?: string) => void;
     clearCart: () => void;
     setCartOpen: (open: boolean) => void;
     
@@ -42,10 +43,10 @@ export const useCartStore = create<CartState>()(
             isCartOpen: false,
             _hasHydrated: false,
 
-            addItem: (product, variant, qty = 1) => {
+            addItem: (product, variant_id, variant_name, qty = 1) => {
                 set((state) => {
                     const existing = state.cartItems.find(
-                        (item) => item.product.id === product.id && item.selectedVariant === variant
+                        (item) => item.product.id === product.id && item.variant_id === variant_id
                     );
 
                     if (existing) {
@@ -58,29 +59,29 @@ export const useCartStore = create<CartState>()(
                     }
 
                     return {
-                        cartItems: [...state.cartItems, { product, quantity: qty, selectedVariant: variant }],
+                        cartItems: [...state.cartItems, { product, quantity: qty, variant_id, variant_name }],
                         isCartOpen: true,
                     };
                 });
             },
 
-            removeItem: (productId, variant) => {
+            removeItem: (productId, variant_id) => {
                 set((state) => ({
                     cartItems: state.cartItems.filter(
-                        (item) => !(item.product.id === productId && item.selectedVariant === variant)
+                        (item) => !(item.product.id === productId && item.variant_id === variant_id)
                     ),
                 }));
             },
 
-            updateQuantity: (productId, qty, variant) => {
+            updateQuantity: (productId, qty, variant_id) => {
                 if (qty <= 0) {
-                    get().removeItem(productId, variant);
+                    get().removeItem(productId, variant_id);
                     return;
                 }
 
                 set((state) => ({
                     cartItems: state.cartItems.map((item) =>
-                        item.product.id === productId && item.selectedVariant === variant
+                        item.product.id === productId && item.variant_id === variant_id
                             ? { ...item, quantity: qty }
                             : item
                     ),

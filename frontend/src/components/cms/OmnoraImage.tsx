@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { resizeImage } from '../../utils/ImageResizer';
+import { MediaProcessor } from '../../utils/MediaProcessor';
 
 export interface OmnoraImageProps {
     src: string;
@@ -11,15 +11,14 @@ export interface OmnoraImageProps {
     className?: string;
     style?: React.CSSProperties;
     objectFit?: 'cover' | 'contain' | 'fill';
+    isOutOfStock?: boolean;
+    priority?: boolean;
 }
 
-/**
+
  * OmnoraImage: High-Fidelity Smart Image Asset with Lazy Loading and Blur-Up
- * 
- * - Intersection Observer starts loading 200px away from viewport.
- * - Low-res blur placeholders seamlessly transition with `framer-motion`.
- * - Fixed Aspect Ratio avoids layout shift (CLS).
- */
+
+ 
 export const OmnoraImage: React.FC<OmnoraImageProps> = ({
     src,
     alt,
@@ -29,21 +28,23 @@ export const OmnoraImage: React.FC<OmnoraImageProps> = ({
     className = '',
     style = {},
     objectFit = 'cover',
+    isOutOfStock = false,
+    priority = false,
 }) => {
     const [isLoaded, setIsLoaded] = useState(false);
     const [isInView, setIsInView] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
 
     // Generate High-resolution & Low-res srcs
-    const lowResSrc = resizeImage(src, 20, undefined, 10);
-    const highResSrc = resizeImage(src, width, height, 80);
+    const lowResSrc = MediaProcessor.getBlurPlaceholder(src);
+    const highResSrc = MediaProcessor.getOptimizedUrl(src, width, height, 80);
     
     // Fallback handling state
     const [currentSrc, setCurrentSrc] = useState(highResSrc);
 
     // Sync highResSrc if src changes
     useEffect(() => {
-        setCurrentSrc(resizeImage(src, width, height, 80));
+        setCurrentSrc(MediaProcessor.getOptimizedUrl(src, width, height, 80));
     }, [src, width, height]);
 
     useEffect(() => {
@@ -56,7 +57,7 @@ export const OmnoraImage: React.FC<OmnoraImageProps> = ({
                     observer.disconnect(); // Load once
                 }
             },
-            { rootMargin: '200px' }
+            { threshold: 0.2 } // Precisely wait until 20% visible
         );
 
         if (containerRef.current) observer.observe(containerRef.current);
@@ -64,6 +65,35 @@ export const OmnoraImage: React.FC<OmnoraImageProps> = ({
     }, [src]);
 
     if (!src) return null;
+
+    if (priority) {
+        return (
+            <div
+                className={className}
+                style={{
+                    position: 'relative',
+                    width: '100%',
+                    overflow: 'hidden',
+                    aspectRatio,
+                    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                    ...style,
+                }}
+            >
+                <img
+                    src={highResSrc}
+                    alt={alt}
+                    {...({ fetchPriority: 'high' } as any)} // For TS React 18 compat
+                    style={{
+                        position: 'absolute',
+                        top: 0, left: 0, width: '100%', height: '100%',
+                        objectFit,
+                        zIndex: 2,
+                        filter: isOutOfStock ? 'grayscale(100%) opacity(0.8)' : 'none',
+                    }}
+                />
+            </div>
+        );
+    }
 
     return (
         <div
@@ -110,9 +140,38 @@ export const OmnoraImage: React.FC<OmnoraImageProps> = ({
                             top: 0, left: 0, width: '100%', height: '100%',
                             objectFit,
                             zIndex: 2,
+                            filter: isOutOfStock ? 'grayscale(100%) opacity(0.8)' : 'none',
+                            transition: 'filter 0.3s ease',
                         }}
                     />
                 </AnimatePresence>
+            )}
+
+            {isOutOfStock && (
+                <div style={{
+                    position: 'absolute',
+                    inset: 0,
+                    zIndex: 10,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: 'rgba(0,0,0,0.4)',
+                    backdropFilter: 'blur(2px)',
+                }}>
+                    <span style={{
+                        background: '#111',
+                        color: '#fff',
+                        padding: '8px 16px',
+                        borderRadius: '20px',
+                        fontSize: '14px',
+                        fontWeight: 800,
+                        letterSpacing: '0.1em',
+                        textTransform: 'uppercase',
+                        border: '1px solid rgba(255,255,255,0.1)'
+                    }}>
+                        Out of Stock
+                    </span>
+                </div>
             )}
         </div>
     );

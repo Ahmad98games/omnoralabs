@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { BuilderWrapper } from './cms/ComponentRegistry';
+import { BuilderWrapper } from './cms/BuilderWrapper';
 import { EditableText } from './cms/EditableComponents';
 import { useOmnora } from '../context/OmnoraContext';
 import { OmnoraRenderer } from './cms/OmnoraRenderer';

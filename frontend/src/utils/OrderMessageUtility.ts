@@ -8,7 +8,7 @@ export interface OrderDetails {
     orderId: string;
     total: number;
     currency: string;
-    items: { name: string; quantity: number }[];
+    items: { name: string; quantity: number; variant_name?: string }[];
     paymentMethod: {
         name: string;
         accountTitle: string;
@@ -16,20 +16,23 @@ export interface OrderDetails {
     };
     language: 'en' | 'ur_roman';
     screenshotUploadUrl?: string;
+    discountCode?: string;
+    discountValue?: number;
+    subtotal?: number;
 }
 
 export function generateOrderMessage(details: OrderDetails): string {
-    const { orderId, total, currency, items, paymentMethod, language, screenshotUploadUrl } = details;
+    const { orderId, total, subtotal, discountCode, discountValue, currency, items, paymentMethod, language, screenshotUploadUrl } = details;
 
     const isUrdu = language === 'ur_roman';
 
-    const itemText = items.map(item => `- ${item.name} (x${item.quantity})`).join('\n');
+    const itemText = items.map(item => `- ${item.name} ${item.variant_name ? `(${item.variant_name}) ` : ''}(x${item.quantity})`).join('\n');
 
     if (isUrdu) {
         return `*Naya Order Received!* 🛍️\n\n` +
                `*Order ID:* #${orderId}\n` +
                `*Item List:* \n${itemText}\n\n` +
-               `*Total Amount:* ${currency} ${total}\n\n` +
+               (discountCode ? `*Order Total:* ${currency} ${(subtotal || total + (discountValue || 0)).toFixed(2)} | *Discount (${discountCode}):* -${currency} ${discountValue?.toFixed(2)} | *Grand Total:* ${currency} ${total}\n\n` : `*Total Amount:* ${currency} ${total}\n\n`) +
                `*Payment details:* \n` +
                `- *Bank:* ${paymentMethod.name}\n` +
                `- *Title:* ${paymentMethod.accountTitle}\n` +
@@ -42,7 +45,7 @@ export function generateOrderMessage(details: OrderDetails): string {
     return `*New Order Placed!* 🛍️\n\n` +
            `*Order ID:* #${orderId}\n` +
            `*Items:* \n${itemText}\n\n` +
-           `*Total:* ${currency} ${total}\n\n` +
+           (discountCode ? `*Order Total:* ${currency} ${(subtotal || total + (discountValue || 0)).toFixed(2)} | *Discount (${discountCode}):* -${currency} ${discountValue?.toFixed(2)} | *Grand Total:* ${currency} ${total}\n\n` : `*Total:* ${currency} ${total}\n\n`) +
            `*Payment:* \n` +
            `- *Method:* ${paymentMethod.name}\n` +
            `- *Title:* ${paymentMethod.accountTitle}\n` +
