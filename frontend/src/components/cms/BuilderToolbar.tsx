@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { DevicePresetPanel, getPreset } from './DevicePresetPanel';
 import { AICopilotModal } from '../builder/AICopilotModal';
+import { TopBarPageSelector } from '../builder/TopBarPageSelector';
 
 interface BuilderPage {
     id: string;
@@ -394,23 +395,7 @@ export const BuilderToolbar: React.FC<Props> = ({ onToggleLibrary, libraryOpen }
 
                 <Divider />
 
-                {/* Page picker trigger */}
-                <button
-                    ref={pagePickerBtnRef}
-                    onClick={() => setOpenDropdown(v => v === 'page' ? null : 'page')}
-                    style={{
-                        height: 32, padding: '0 10px',
-                        background: showPagePicker ? T.accentSub : 'transparent',
-                        border: `1px solid ${showPagePicker ? T.accent : T.border}`,
-                        borderRadius: 7, color: showPagePicker ? T.accent : T.muted,
-                        cursor: 'pointer', display: 'flex', alignItems: 'center',
-                        gap: 5, fontSize: 12, fontWeight: 600, flexShrink: 0,
-                    }}
-                >
-                    <Globe size={13} />
-                    {safePages[activePageId]?.title || activePageId || 'Home'}
-                    {showPagePicker ? <ChevronUp size={11} /> : <ChevronDown size={11} />}
-                </button>
+                <TopBarPageSelector />
 
                 <Divider />
 

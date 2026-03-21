@@ -38,13 +38,13 @@ class ErrorBoundary extends React.Component<
     }
 }
 
-export const BlankPagePlaceholder: React.FC = () => {
+export const CanvasEmptyState: React.FC = () => {
     return (
         <div style={S_Placeholder}>
             <div style={{ fontSize: '32px', marginBottom: '12px' }}>🧩</div>
             <h3 style={{ color: '#fff', fontSize: '16px', fontWeight: 600, marginBottom: '6px' }}>Empty Canvas</h3>
             <p style={{ color: '#71717a', fontSize: '13px', maxWidth: '280px', margin: '0 auto 16px' }}>
-                Drag & Drop elements from the sidebar or use AI Forge to build your store.
+                Drag a block here to start building your store.
             </p>
             <div style={{ padding: '6px 12px', border: '1px dashed #333', borderRadius: '4px', fontSize: '11px', color: '#52525b' }}>
                 Canvas Ready
@@ -151,7 +151,7 @@ export const SafeRenderer: React.FC<SafeRendererProps> = ({ blocks, loading, isB
     if (!hydratedBlocks) return <SkeletonLoader />;
 
     const finalBlocks = Array.isArray(hydratedBlocks) ? hydratedBlocks : [];
-    if (finalBlocks.length === 0) return <BlankPagePlaceholder />;
+    if (finalBlocks.length === 0) return <CanvasEmptyState />;
 
     let renderedBlocks: React.ReactNode[] = [];
     try {
