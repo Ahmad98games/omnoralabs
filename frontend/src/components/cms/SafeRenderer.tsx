@@ -1,9 +1,12 @@
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect, Suspense, useRef } from 'react';
 import { motion } from 'framer-motion';
+import { useLocation } from 'react-router-dom';
+import { supabase } from '../../lib/supabaseClient';
 import { ComponentRegistry, DEFAULT_PROPS } from './ComponentRegistry';
 import { StoreTemporarilyPaused } from './StoreTemporarilyPaused';
 import { OmnoraKernel } from '../../platform/kernel/OmnoraKernel';
 import { useBuilderStore } from '../../stores/useBuilderStore';
+import { useAuth } from '../../context/AuthContext';
 import { StorefrontFallback } from './StorefrontFallback';
 
 class ErrorBoundary extends React.Component<
@@ -90,9 +93,53 @@ export const SafeRenderer: React.FC<SafeRendererProps> = ({ blocks, loading, isB
     const [isClient, setIsClient] = useState(false);
     const [hydratedBlocks, setHydratedBlocks] = useState<any[]>([]);
     const [isForceRender, setIsForceRender] = useState(false);
-    const nodes = useBuilderStore(s => s.nodes); // 🛡️ Load Atomic Nodes
-    const lastDroppedNodeId = useBuilderStore(s => s.lastDroppedNodeId); // 🛡️ Animation Trackers
+    const nodes = useBuilderStore(s => s.nodes); 
+    const lastDroppedNodeId = useBuilderStore(s => s.lastDroppedNodeId); 
+    const selectedNodeId = useBuilderStore(s => s.selectedNodeId);
+    const isDraggingGlobal = useBuilderStore(s => s.isDragging);
 
+    const { user } = useAuth();
+    const location = useLocation();
+    const [walletDays, setWalletDays] = useState<number | undefined>(walletDaysRemaining);
+    const billingCache = useRef<{ cachedDays?: number; lastCheckedRoute?: string }>({});
+
+    // 🛡️ Cached Billing Enforcement Query
+    useEffect(() => {
+        if (isBuilder || !user) return;
+
+        const checkBilling = async () => {
+            const currentRoute = location.pathname;
+            
+            if (billingCache.current.lastCheckedRoute === currentRoute && billingCache.current.cachedDays !== undefined) {
+                setWalletDays(billingCache.current.cachedDays);
+                return;
+            }
+
+            try {
+                const { data, error } = await supabase
+                    .from('merchants')
+                    .select('wallet_days_remaining')
+                    .eq('id', user.id)
+                    .single();
+
+                if (!error && data) {
+                    const days = data.wallet_days_remaining;
+                    setWalletDays(days);
+                    billingCache.current = { cachedDays: days, lastCheckedRoute: currentRoute };
+
+                    // 🛡️ Grace Period Invisible Audit Telemetry [-1, -3] bounds
+                    if (days <= -1 && days >= -3) {
+                         console.warn(`[Audit Telemetry] Store in grace-period: ${days} days left. Path: ${currentRoute}`);
+                         // Silent insert if system_logs was available
+                    }
+                }
+            } catch (err) {
+                console.error('[SafeRenderer] Billing query failure:', err);
+            }
+        };
+
+        checkBilling();
+    }, [isBuilder, user, location.pathname]);
 
     // Timeout: If loading freezes over 5000ms natively force render what we have.
     useEffect(() => {
@@ -133,7 +180,6 @@ export const SafeRenderer: React.FC<SafeRendererProps> = ({ blocks, loading, isB
                 const measure = performance.getEntriesByName('ast-render-duration')[0];
                 if (measure && measure.duration > 100) {
                     console.warn(`[SafeRenderer Performance] Render duration exceeds 100ms: ${measure.duration.toFixed(2)}ms`);
-                    // Log to Telemetry safely without crashing loop filters flawlessly triggers telemetry
                 }
                 performance.clearMarks('safe-render-start');
                 performance.clearMarks('safe-render-end');
@@ -147,8 +193,10 @@ export const SafeRenderer: React.FC<SafeRendererProps> = ({ blocks, loading, isB
     if (!isClient) return <div style={{ minHeight: '100vh', background: '#0e0e12' }} />; // Hydration Guard
     
     // Enforcement Middleware
-    if (!isBuilder && walletDaysRemaining !== undefined && walletDaysRemaining <= 0) {
-        return <StoreTemporarilyPaused />;
+    if (!isBuilder && walletDays !== undefined) {
+        if (walletDays <= -4) {
+             return <StoreTemporarilyPaused />;
+        }
     }
 
     if (!hydratedBlocks) return <SkeletonLoader />;
@@ -169,7 +217,11 @@ export const SafeRenderer: React.FC<SafeRendererProps> = ({ blocks, loading, isB
             // Support both React.lazy Exotic components or inline FC components
             const Component = registryItem as React.FC<any>; 
             // Kernel has already safely sanitized node.props against DEFAULT_PROPS schema
-            const finalProps = { ...(DEFAULT_PROPS[node.type]?.defaultProps || {}), ...(node.props || {}) };
+            const finalProps = { 
+                ...(DEFAULT_PROPS[node.type]?.defaultProps || {}), 
+                ...(node.props || {}), 
+                isBuilder 
+            };
 
             return (
                 <ErrorBoundary key={node.id || index} fallback={
@@ -187,8 +239,28 @@ export const SafeRenderer: React.FC<SafeRendererProps> = ({ blocks, loading, isB
                     </div>
                 }>
                     <Suspense fallback={<div style={{ padding: '40px', textAlign: 'center', opacity: 0.5 }}>Loading {node.type}...</div>}>
-                        <div className={node.id === lastDroppedNodeId ? 'dropped-block' : ''}>
-                            <Component {...finalProps} />
+                        <div style={{ position: 'relative', width: '100%' }}>
+                            {isBuilder && (
+                                <div 
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        useBuilderStore.getState().setSelectedNodeId(node.id);
+                                    }}
+                                    style={{
+                                        position: 'absolute',
+                                        inset: 0,
+                                        border: (selectedNodeId === node.id) ? '2px solid var(--accent-primary, #7c6dfa)' : 'none',
+                                        pointerEvents: (isDraggingGlobal || (selectedNodeId === node.id)) ? 'none' : 'auto',
+                                        zIndex: 10,
+                                        cursor: (selectedNodeId === node.id) ? 'default' : 'pointer',
+                                        borderRadius: '4px'
+                                    }}
+                                />
+                            )}
+                            <div className={node.id === lastDroppedNodeId ? 'dropped-block' : ''}>
+                                <Component {...finalProps} />
+                            </div>
                         </div>
                     </Suspense>
                 </ErrorBoundary>

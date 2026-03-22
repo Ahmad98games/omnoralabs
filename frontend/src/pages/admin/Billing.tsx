@@ -63,8 +63,17 @@ export const Billing: React.FC = () => {
     };
 
     return (
-        <div className="p-8 max-w-4xl mx-auto space-y-8">
+        <div className="p-8 max-w-4xl mx-auto space-y-6">
             <h1 className="text-3xl font-bold text-white">Billing & Subscriptions</h1>
+
+            {walletDays < 7 && walletDays > 0 && (
+                <div className="bg-amber-900/20 border border-amber-800 p-4 rounded-xl flex items-center gap-3 text-amber-400 text-sm shadow-lg">
+                    <span className="text-xl">⚠️</span>
+                    <div>
+                        <strong className="text-white font-semibold">Subscription Warning:</strong> Your store wallet expires in <span className="underline font-bold">{walletDays} days</span>. Please top up to avoid automatic dormancy.
+                    </div>
+                </div>
+            )}
             
             <div className="bg-[#18181b] p-6 rounded-xl border border-gray-800">
                 <h2 className="text-lg font-semibold text-gray-200 mb-4">Store Wallet</h2>

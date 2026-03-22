@@ -20,6 +20,7 @@
     "axios": "^1.6.8",
     "axios-retry": "^4.5.0",
     "browser-image-compression": "^2.0.2",
+    "dompurify": "^3.3.3",
     "firebase": "^12.6.0",
     "framer-motion": "^12.36.0",
     "immer": "^11.1.4",
@@ -37,6 +38,7 @@
     "zustand": "^5.0.11"
   },
   "devDependencies": {
+    "@types/dompurify": "^3.0.5",
     "@types/lodash": "^4.17.24",
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.2",

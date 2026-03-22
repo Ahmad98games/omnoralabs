@@ -21,17 +21,29 @@ export interface BuilderState {
     pages: Record<string, PageMetadata>;
     activePageId: string;
     selectedNodeId: string | null;
-    lastDroppedNodeId: string | null; // 🛡️ Animation Trackers for Sidebar Drops
+    lastDroppedNodeId: string | null;
 
-    
     // Status
     saveStatus: 'idle' | 'saving' | 'saved' | 'error' | 'offline';
     hasUnsavedChanges: boolean;
     lastUpdatedRemote: string | null;
 
+    // 🚀 Publish Hardening State
+    publishStatus: 'idle' | 'publishing' | 'success' | 'error';
+    publishError: string | null;
+    lastPublishedAt: string | null;
+
+    // 👁️ Live Preview State
+    isPreviewMode: boolean;
+    previewDevice: 'desktop' | 'tablet' | 'mobile';
+
     // History (Max 50)
     historyStack: Command[];
     historyIndex: number;
+
+    // Drag Tracking
+    isDragging: boolean;
+    setIsDragging: (val: boolean) => void;
 
     // Hydration stability
     isHydrating: boolean;
@@ -51,6 +63,15 @@ export interface BuilderState {
     setSaveStatus: (status: BuilderState['saveStatus']) => void;
     setHasUnsavedChanges: (has: boolean) => void;
     setLastUpdatedRemote: (time: string) => void;
+
+    // 🚀 Publish Setters
+    setPublishStatus: (status: BuilderState['publishStatus']) => void;
+    setPublishError: (err: string | null) => void;
+    setLastPublishedAt: (time: string | null) => void;
+
+    // 👁️ Preview Setters
+    setIsPreviewMode: (val: boolean) => void;
+    setPreviewDevice: (device: BuilderState['previewDevice']) => void;
 
     // History Actions
     executeCommand: (action: (draft: Record<string, BuilderNode>) => void) => void;
@@ -75,10 +96,20 @@ export const useBuilderStore = create<BuilderState>()(persist(immer((set, get) =
     saveStatus: 'idle',
     hasUnsavedChanges: false,
     lastUpdatedRemote: null,
+
+    publishStatus: 'idle',
+    publishError: null,
+    lastPublishedAt: null,
+
+    isPreviewMode: false,
+    previewDevice: 'desktop',
+
     historyStack: [],
     historyIndex: -1,
     isHydrating: false,
+    isDragging: false,
 
+    setIsDragging: (val) => set((state) => { state.isDragging = val; }),
     setIsHydrating: (val) => set((state) => { state.isHydrating = val; }),
 
     setNodes: (nodes) => set((state) => {
@@ -138,6 +169,11 @@ export const useBuilderStore = create<BuilderState>()(persist(immer((set, get) =
         get().executeCommand((draft) => {
             delete draft[id];
         });
+        set((state) => {
+            if (state.selectedNodeId === id) {
+                state.selectedNodeId = null;
+            }
+        });
     },
 
     setPages: (pages) => set((state) => { state.pages = pages; }),
@@ -190,6 +226,13 @@ export const useBuilderStore = create<BuilderState>()(persist(immer((set, get) =
     setSaveStatus: (status) => set((state) => { state.saveStatus = status; }),
     setHasUnsavedChanges: (has) => set((state) => { state.hasUnsavedChanges = has; }),
     setLastUpdatedRemote: (time) => set((state) => { state.lastUpdatedRemote = time; }),
+
+    setPublishStatus: (status) => set((state) => { state.publishStatus = status; }),
+    setPublishError: (err) => set((state) => { state.publishError = err; }),
+    setLastPublishedAt: (time) => set((state) => { state.lastPublishedAt = time; }),
+
+    setIsPreviewMode: (val) => set((state) => { state.isPreviewMode = val; }),
+    setPreviewDevice: (device) => set((state) => { state.previewDevice = device; }),
 
     undo: () => {
         const { historyIndex, historyStack, nodes } = get();

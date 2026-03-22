@@ -123,7 +123,7 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({ nodeId }) => {
     <motion.div 
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
-      className="flex flex-col gap-6 font-sans text-white"
+      className="flex flex-col gap-5 font-sans text-[var(--text-primary)]"
     >
       {/* Reset & Viewport Header */}
       <div className="flex items-center justify-between px-2">
@@ -133,16 +133,16 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({ nodeId }) => {
         
         <div className="flex items-center gap-4">
           {/* 🛡️ Viewport Switcher */}
-          <div className="flex bg-[#18181b] rounded-md p-0.5 border border-white/5">
+          <div className="flex bg-[var(--surface-raised)] rounded-md p-0.5 border border-[var(--border-subtle)]">
             <button 
               onClick={() => setActiveViewport('desktop')}
-              className={`p-1 rounded ${activeViewport === 'desktop' ? 'bg-[#D4AF37] text-black' : 'text-white/40'}`}
+              className={`p-1 rounded ${activeViewport === 'desktop' ? 'bg-[var(--accent-primary)] text-white' : 'text-[var(--text-secondary)]'}`}
             >
               <Monitor size={12} />
             </button>
             <button 
               onClick={() => setActiveViewport('mobile')}
-              className={`p-1 rounded ${activeViewport === 'mobile' ? 'bg-[#D4AF37] text-black' : 'text-white/40'}`}
+              className={`p-1 rounded ${activeViewport === 'mobile' ? 'bg-[var(--accent-primary)] text-white' : 'text-[var(--text-secondary)]'}`}
             >
               <Smartphone size={12} />
             </button>
@@ -150,7 +150,7 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({ nodeId }) => {
 
           <button 
             onClick={handleReset}
-            className="flex items-center gap-1 text-[10px] text-[#D4AF37] opacity-60 hover:opacity-100 transition-opacity"
+            className="flex items-center gap-1 text-[10px] text-[var(--accent-primary)] opacity-70 hover:opacity-100 transition-opacity"
           >
             <RefreshCw size={10} /> Reset
           </button>
@@ -160,10 +160,10 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({ nodeId }) => {
       {config.sections.map((section, sIdx) => (
         <div 
           key={sIdx}
-          className="bg-[#0e0e11] border border-white/5 rounded-lg p-4 space-y-4"
+          className="bg-[var(--surface-overlay)] border border-[var(--border-subtle)] rounded-lg p-4 space-y-4 shadow-sm"
         >
-          <div className="flex items-center gap-2 text-white/90 text-xs font-semibold pb-2 border-bottom border-white/5">
-            <section.icon size={14} className="text-[#D4AF37]" />
+          <div className="flex items-center gap-2 text-[var(--text-primary)] text-xs font-semibold pb-2 border-b border-[var(--border-subtle)]">
+            <section.icon size={14} className="text-[var(--accent-primary)]" />
             {section.title}
           </div>
 
@@ -207,7 +207,7 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({ nodeId }) => {
                       {field.type === 'text' && (
                         <input 
                           type="text"
-                          className="w-full bg-[#18181b] border border-white/5 rounded px-3 py-1.5 text-xs text-white focus:outline-none focus:border-[#D4AF37]/40"
+                          className="w-full bg-[var(--surface-raised)] border border-[var(--border-subtle)] rounded px-3 py-1.5 text-xs text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent-primary)]"
                           value={currentVal || ''}
                           placeholder={field.placeholder}
                           onChange={(e) => onChangeHandler(e.target.value)}
@@ -217,7 +217,7 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({ nodeId }) => {
                       {field.type === 'number' && (
                         <input 
                           type="number"
-                          className="w-full bg-[#18181b] border border-white/5 rounded px-3 py-1.5 text-xs text-white focus:outline-none focus:border-[#D4AF37]/40"
+                          className="w-full bg-[var(--surface-raised)] border border-[var(--border-subtle)] rounded px-3 py-1.5 text-xs text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent-primary)]"
                           value={currentVal || ''}
                           min={field.min}
                           max={field.max}
@@ -244,7 +244,7 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({ nodeId }) => {
 
                       {field.type === 'select' && (
                         <select 
-                          className="w-full bg-[#18181b] border border-white/5 rounded px-3 py-1.5 text-xs text-white focus:outline-none cursor-pointer"
+                          className="w-full bg-[var(--surface-raised)] border border-[var(--border-subtle)] rounded px-3 py-1.5 text-xs text-[var(--text-primary)] focus:outline-none cursor-pointer"
                           value={currentVal || ''}
                           onChange={(e) => onChangeHandler(e.target.value)}
                         >
@@ -277,7 +277,7 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({ nodeId }) => {
                       {(field.type === 'image' || field.type === 'video') && (
                         <div className="flex flex-col gap-2">
                           {currentVal && field.type === 'image' && (
-                            <img src={currentVal} alt={field.label} className="w-full h-32 object-cover rounded bg-[#18181b] border border-white/5" />
+                            <img src={currentVal} alt={field.label} className="w-full h-32 object-cover rounded bg-[var(--surface-raised)] border border-[var(--border-subtle)]" />
                           )}
                           <div className="flex items-center gap-2">
                             {field.type === 'image' ? (
@@ -295,9 +295,9 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({ nodeId }) => {
                                 />
                                 <label 
                                   htmlFor={`upload-${field.name}`}
-                                  className="flex-1 flex items-center justify-center gap-2 bg-[#18181b] border border-white/5 hover:border-[#D4AF37]/40 rounded px-3 py-1.5 text-xs text-white/80 cursor-pointer transition-colors"
+                                  className="flex-1 flex items-center justify-center gap-2 bg-[var(--surface-raised)] border border-[var(--border-subtle)] hover:border-[var(--accent-primary)]/40 rounded px-3 py-1.5 text-xs text-[var(--text-secondary)] cursor-pointer transition-colors"
                                 >
-                                  {uploading ? <Loader2 size={12} className="animate-spin text-[#D4AF37]" /> : <Upload size={12} />}
+                                  {uploading ? <Loader2 size={12} className="animate-spin text-[var(--accent-primary)]" /> : <Upload size={12} />}
                                   {uploading ? 'Uploading...' : 'Local Upload'}
                                 </label>
                               </>

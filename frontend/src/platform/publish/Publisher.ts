@@ -18,6 +18,19 @@ import { defaultTheme, ThemeConfig } from '../../components/cms/ThemeManager';
 import { PlatformBlock } from '../core/types';
 import { databaseClient } from '../core/DatabaseClient';
 import type { StorefrontConfig } from '../core/DatabaseTypes';
+import { getRegistryEntry } from '../core/Registry';
+import { useBuilderStore } from '../../stores/useBuilderStore';
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function stableStringify(obj: any): string {
+    if (typeof obj !== 'object' || obj === null) return JSON.stringify(obj);
+    if (Array.isArray(obj)) {
+        return `[${obj.map(stableStringify).join(',')}]`;
+    }
+    const keys = Object.keys(obj).sort();
+    return `{${keys.map(k => `"${k}":${stableStringify(obj[k])}`).join(',')}}`;
+}
 
 // ─── Interfaces ───────────────────────────────────────────────────────────────
 
@@ -36,6 +49,8 @@ class Publisher {
     compile(merchantId: string = 'default_merchant', themeOverrides?: Partial<ThemeConfig>): StorefrontConfig {
         const storeSnapshot = nodeStore.createSnapshot();
 
+        const store = useBuilderStore.getState();
+
         const config: StorefrontConfig = {
             buildId: `build_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
             publishedAt: new Date().toISOString(),
@@ -47,6 +62,8 @@ class Publisher {
 
             theme: { ...defaultTheme, ...themeOverrides },
             symbols: symbolManager.getAllSymbols(),
+            
+            pages: store.pages, // 📖 Serialize pages metadata Continuous animation maps
         };
 
         return config;
@@ -63,34 +80,69 @@ class Publisher {
         domain?: string,
         themeOverrides?: Partial<ThemeConfig>,
     ): Promise<string> {
-        const config = this.compile(merchantId, themeOverrides);
+        const store = useBuilderStore.getState();
+        store.setPublishStatus('publishing');
+        store.setPublishError(null);
 
-        // 1. Always save to localStorage as fallback
         try {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
-        } catch { /* storage full */ }
+            const config = this.compile(merchantId, themeOverrides);
 
-        // 2. If merchant context is available, push to cloud
-        if (merchantId && domain) {
+            // 1. Validate block types before publishing limits triggers
+            for (const [id, node] of Object.entries(config.nodes)) {
+                if (!getRegistryEntry(node.type)) {
+                    const err = `Publish rejected: Node "${id}" uses unknown block type "${node.type}".`;
+                    store.setPublishStatus('error');
+                    store.setPublishError(err);
+                    throw new Error(err);
+                }
+            }
+
+            // 2. Always save to localStorage as fallback
             try {
+                localStorage.setItem(STORAGE_KEY, stableStringify(config));
+            } catch { /* storage full */ }
+
+            // 3. If merchant context is available, push to cloud
+            if (merchantId && domain) {
+                // Atomic Diff comparison checks
+                const lastRecord = await databaseClient.getStoreConfigByMerchant(merchantId);
+                if (lastRecord && lastRecord.config) {
+                    const lastConfig = lastRecord.config as StorefrontConfig;
+                    const currentStr = stableStringify({ nodes: config.nodes, pageLayouts: config.pageLayouts });
+                    const lastStr = stableStringify({ nodes: lastConfig.nodes || {}, pageLayouts: lastConfig.pageLayouts || {} });
+
+                    if (currentStr === lastStr) {
+                        console.log('%c[Omnora Publisher] ☁️ Cloud diff empty, skipping push.%c', 'color: #34d399; font-weight: bold;');
+                        store.setPublishStatus('success');
+                        store.setLastPublishedAt(new Date().toISOString());
+                        return config.buildId;
+                    }
+                }
+
                 const record = await databaseClient.saveStoreConfig(merchantId, config, domain);
                 console.log(
-                    `%c[Omnora Publisher] ☁️ Cloud published!%c\n  Build: ${config.buildId}\n  Domain: ${record.domain}\n  Nodes: ${Object.keys(config.nodes).length}`,
+                    `%c[Omnora Publisher] ☁️ Cloud published!%c\n  Build: ${config.buildId}\n  Domain: ${record.domain}`,
                     'color: #34d399; font-weight: bold;',
                     'color: #a1a1aa;'
                 );
-            } catch (err) {
-                console.error('[Omnora Publisher] ❌ Cloud publish failed (localStorage OK):', err);
+            } else {
+                console.log(
+                    `%c[Omnora Publisher] 💾 Local publish (no merchant context)%c\n  Build: ${config.buildId}`,
+                    'color: #facc15; font-weight: bold;',
+                    'color: #a1a1aa;'
+                );
             }
-        } else {
-            console.log(
-                `%c[Omnora Publisher] 💾 Local publish (no merchant context)%c\n  Build: ${config.buildId}`,
-                'color: #facc15; font-weight: bold;',
-                'color: #a1a1aa;'
-            );
-        }
 
-        return config.buildId;
+            store.setPublishStatus('success');
+            store.setLastPublishedAt(new Date().toISOString());
+            return config.buildId;
+
+        } catch (err: any) {
+            console.error('[Omnora Publisher] ❌ Cloud publish failed:', err);
+            store.setPublishStatus('error');
+            store.setPublishError(err.message || 'Unknown publish error encountered.');
+            throw err;
+        }
     }
 
     /**

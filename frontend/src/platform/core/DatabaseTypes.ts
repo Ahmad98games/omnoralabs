@@ -2,6 +2,7 @@ import type { Product } from '../../context/StorefrontContext';
 import type { PlatformBlock } from '../core/types';
 import type { ThemeConfig } from '../../components/cms/ThemeManager';
 import type { SymbolBlueprint } from '../core/SymbolManager';
+import type { PageMetadata } from '../../context/BuilderContext';
 
 export interface StorefrontConfig {
     /** Unique build ID for cache invalidation */
@@ -26,6 +27,9 @@ export interface StorefrontConfig {
     merchantId: string;
     /** SEO metadata per page */
     seo?: Record<string, { title?: string; description?: string }>;
+    
+    /** 📖 Pages metadata (added for globalAnimations setup) */
+    pages?: Record<string, PageMetadata>;
 }
 
 export interface MerchantUser {

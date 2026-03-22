@@ -1,30 +1,49 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Instrument+Serif:ital@0;1&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-    /* --- OMNORA OS: CINEMATIC ENGINE --- */
-    --bg-background: #050505; /* Deep OLED Black */
-    --bg-surface: #121212;    /* elevated Panel */
-    --bg-surface-elevated: #1A1A1A;
+    /* --- OMNORA OS: SAAS REDESIGN (Light Mode Primary) --- */
+    --surface-base: #FAFAF9;
+    --surface-raised: #FFFFFF;
+    --surface-overlay: #F5F4F2;
     
-    --text-primary: #FFFFFF;
-    --text-secondary: #888888;
-    --text-muted: #555555;
+    --border-subtle: #E8E6E1;
+    --border-strong: #C9C7C1;
     
-    --accent-gold: #D4AF37; /* Omnora Gold */
-    --accent-gold-rgb: 212, 175, 55;
+    --text-primary: #1A1916;
+    --text-secondary: #6B6863;
+    --text-tertiary: #A09D99;
     
-    --border-primary: rgba(255, 255, 255, 0.05);
-    --border-secondary: rgba(255, 255, 255, 0.1);
+    --accent-primary: #FF6B35;
+    --accent-subtle: #FFF1EB;
     
-    --font-sans: 'Outfit', -apple-system, sans-serif;
-    --font-serif: 'Playfair Display', serif;
+    --success: #16A34A;
+    --warning: #D97706;
+    --danger: #DC2626;
+
+    --font-sans: 'Inter', -apple-system, sans-serif;
+    --font-serif: 'Instrument Serif', serif;
+    --font-mono: 'Geist Mono', monospace;
     
     --ease-cinematic: cubic-bezier(0.2, 0.8, 0.2, 1);
     --glass-blur: blur(20px) saturate(180%);
+}
+
+/* Dark Mode Overrides (Optional Toggle) */
+body[data-theme='dark'] {
+    --surface-base: #111110;
+    --surface-raised: #1C1B1A;
+    --surface-overlay: #161514;
+    
+    --border-subtle: #2A2826;
+    --border-strong: #3D3A37;
+    
+    --text-primary: #F2F0EC;
+    --text-secondary: #9C9890;
+    --text-tertiary: #6B6863;
 }
 
 * {
@@ -35,7 +54,7 @@
 }
 
 body {
-    background-color: var(--bg-background);
+    background-color: var(--surface-base);
     color: var(--text-primary);
     font-family: var(--font-sans);
     line-height: 1.5;
@@ -49,14 +68,14 @@ body {
     height: 6px;
 }
 ::-webkit-scrollbar-track {
-    background: var(--bg-background);
+    background: var(--surface-base);
 }
 ::-webkit-scrollbar-thumb {
-    background: var(--border-secondary);
+    background: var(--border-subtle);
     border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb:hover {
-    background: var(--accent-gold);
+    background: var(--accent-primary);
 }
 
 [data-theme='dark'] .container,

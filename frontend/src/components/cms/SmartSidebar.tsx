@@ -53,11 +53,11 @@ const GenericSchemaEditor: React.FC<{ nodeId: string; schema: any }> = ({ nodeId
     };
 
     const inputStyle: React.CSSProperties = {
-        width: '100%', padding: '10px 14px',
-        background: 'rgba(0,0,0,0.3)', border: '1px solid var(--border-primary)',
-        borderRadius: 10, color: '#fff', fontSize: '13px',
+        width: '100%', padding: '10px 12px',
+        background: 'var(--surface-raised)', border: '1px solid var(--border-subtle)',
+        borderRadius: 8, color: 'var(--text-primary)', fontSize: '13px',
         fontFamily: 'inherit', outline: 'none',
-        transition: 'all 0.3s var(--ease-cinematic)',
+        transition: 'border-color 0.15s',
     };
 
     return (
@@ -131,10 +131,10 @@ const GenericSchemaEditor: React.FC<{ nodeId: string; schema: any }> = ({ nodeId
                                 style={{
                                     padding: '6px 14px', borderRadius: 6, fontSize: 11, fontWeight: 600,
                                     cursor: 'pointer', border: '1px solid',
-                                    background: value ? 'rgba(var(--accent-gold-rgb), 0.1)' : 'rgba(255,255,255,0.03)',
-                                    borderColor: value ? 'var(--accent-gold)' : 'var(--border-primary)',
-                                    color: value ? 'var(--accent-gold)' : 'var(--text-secondary)',
-                                    transition: 'all 0.3s var(--ease-cinematic)',
+                                    background: value ? 'var(--accent-subtle)' : 'var(--surface-overlay)',
+                                    borderColor: value ? 'var(--accent-primary)' : 'var(--border-subtle)',
+                                    color: value ? 'var(--accent-primary)' : 'var(--text-secondary)',
+                                    transition: 'all 0.15s',
                                 }}
                             >
                                 {value ? '● ACTIVE' : '○ INACTIVE'}
@@ -227,124 +227,80 @@ export const SmartSidebar: React.FC = () => {
 
     return (
         <div className="smart-sidebar" style={{ 
-            width: '340px', 
-            background: 'var(--bg-surface)',
-            backdropFilter: 'var(--glass-blur)',
-            WebkitBackdropFilter: 'var(--glass-blur)',
+            width: window.innerWidth < 768 ? '100%' : '320px', 
+            background: 'var(--surface-base)',
             height: '100vh', 
-            borderLeft: '1px solid var(--border-primary)', 
+            borderLeft: '1px solid var(--border-subtle)', 
             display: 'flex', 
             flexDirection: 'column',
             zIndex: 40 
         }}>
-            {/* Top Toolbar */}
-            <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--border-primary)' }}>
-                <div style={{ display: 'flex', gap: '4px', padding: '4px', background: 'rgba(0,0,0,0.3)', borderRadius: '12px', border: '1px solid var(--border-primary)' }}>
-                    <button
-                        onClick={() => setMode('edit')}
-                        style={{ flex: 1, padding: '8px', borderRadius: '8px', background: mode === 'edit' ? 'var(--accent-gold)' : 'transparent', border: 'none', color: mode === 'edit' ? '#000' : 'var(--text-secondary)', fontSize: '12px', fontWeight: 800, cursor: 'pointer', transition: 'all 0.3s' }}
-                    >BUILD</button>
-                    <button
-                        onClick={() => setMode('preview')}
-                        style={{ flex: 1, padding: '8px', borderRadius: '8px', background: mode === 'preview' ? 'var(--accent-gold)' : 'transparent', border: 'none', color: mode === 'preview' ? '#000' : 'var(--text-secondary)', fontSize: '12px', fontWeight: 800, cursor: 'pointer', transition: 'all 0.3s' }}
-                    >EYE</button>
+            {/* Properties Header */}
+            <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border-subtle)', background: 'var(--surface-overlay)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div style={{ padding: '6px', background: 'var(--accent-primary)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Settings size={14} color="#FFF" />
+                    </div>
+                    <div>
+                        <div style={{ fontSize: '10px', color: 'var(--text-tertiary)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                            {selectedNode ? 'Configuring Block' : 'Document'}
+                        </div>
+                        <div style={{ fontSize: '13px', color: 'var(--text-primary)', fontWeight: 600 }}>
+                            {selectedNode ? (selectedNode.type.replace(/_/g, ' ')) : 'Page Settings'}
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div style={{ flex: 1, overflowY: 'auto' }}>
+            {selectedNode && (
+                <div style={{ display: 'flex', borderBottom: '1px solid var(--border-subtle)', background: 'var(--surface-overlay)' }}>
+                    <button
+                        onClick={() => setActiveTab('settings')}
+                        style={{
+                            flex: 1, padding: '14px', background: 'transparent', border: 'none',
+                            color: activeTab === 'settings' ? 'var(--accent-primary)' : 'var(--text-secondary)',
+                            borderBottom: activeTab === 'settings' ? '2px solid var(--accent-primary)' : '2px solid transparent',
+                            fontSize: '12px', fontWeight: 600, cursor: 'pointer',
+                            transition: 'all 0.1s'
+                        }}
+                    >
+                        Content
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('design')}
+                        style={{
+                            flex: 1, padding: '14px', background: 'transparent', border: 'none',
+                            color: activeTab === 'design' ? 'var(--accent-primary)' : 'var(--text-secondary)',
+                            borderBottom: activeTab === 'design' ? '2px solid var(--accent-primary)' : '2px solid transparent',
+                            fontSize: '12px', fontWeight: 600, cursor: 'pointer',
+                            transition: 'all 0.1s'
+                        }}
+                    >
+                        Style
+                    </button>
+                </div>
+            )}
+
+            <div style={{ flex: 1, overflowY: 'auto', padding: '20px' }}>
                 {!selectedNode ? (
-                    <div className="flex flex-col h-full">
-                        {/* 🛡️ Empty State Switcher Sequential! */}
-                        <div className="flex border-b border-white/5">
-                            <button 
-                                onClick={() => setEmptyTab('layers')}
-                                className={`flex-1 p-3 text-[10px] font-bold uppercase tracking-wider
-                                    ${emptyTab === 'layers' ? 'text-[#D4AF37] border-b-2 border-[#D4AF37]' : 'text-white/40'}
-                                `}
-                            >Layers</button>
-                            <button 
-                                onClick={() => setEmptyTab('settings')}
-                                className={`flex-1 p-3 text-[10px] font-bold uppercase tracking-wider
-                                    ${emptyTab === 'settings' ? 'text-[#D4AF37] border-b-2 border-[#D4AF37]' : 'text-white/40'}
-                                `}
-                            >Page Settings</button>
-                        </div>
-                        <div className="flex-1 overflow-y-auto">
-                            {emptyTab === 'layers' ? <NavigatorPanel /> : <div style={{ padding: '1rem' }}><PageSettingsPanel /></div>}
-                        </div>
-                    </div>
+                    <PageSettingsPanel />
                 ) : (
-                    <>
-                        {/* Two-Tab Navigation */}
-                        <div style={{ display: 'flex', borderBottom: '1px solid var(--border-primary)' }}>
-                            <button
-                                onClick={() => setActiveTab('settings')}
-                                style={{
-                                    flex: 1, padding: '16px', background: 'transparent', border: 'none',
-                                    color: activeTab === 'settings' ? 'var(--accent-gold)' : 'var(--text-secondary)',
-                                    borderBottom: activeTab === 'settings' ? '2px solid var(--accent-gold)' : '2px solid transparent',
-                                    fontSize: '11px', fontWeight: 800, cursor: 'pointer',
-                                    letterSpacing: '0.1em',
-                                    transition: 'all 0.3s var(--ease-cinematic)'
-                                }}
-                            >
-                                SETTINGS
-                            </button>
-                            <button
-                                onClick={() => setActiveTab('design')}
-                                style={{
-                                    flex: 1, padding: '16px', background: 'transparent', border: 'none',
-                                    color: activeTab === 'design' ? 'var(--accent-gold)' : 'var(--text-secondary)',
-                                    borderBottom: activeTab === 'design' ? '2px solid var(--accent-gold)' : '2px solid transparent',
-                                    fontSize: '11px', fontWeight: 800, cursor: 'pointer',
-                                    letterSpacing: '0.1em',
-                                    transition: 'all 0.3s var(--ease-cinematic)'
-                                }}
-                            >
-                                DESIGN
-                            </button>
-                        </div>
-
-                        <div style={{ padding: '1rem' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '1.5rem', padding: '12px', background: 'rgba(255,255,255,0.03)', borderRadius: '8px' }}>
-                                <div style={{ padding: '6px', background: 'var(--accent-primary, #7c6dfa)', borderRadius: '4px' }}>
-                                    <Settings size={14} color="#000" />
+                    activeTab === 'settings' ? (
+                        (() => {
+                            if (PROP_CONFIGS[selectedNode.type]) return <PropertyPanel nodeId={selectedNode.id} />;
+                            const ModuleEditor = MODULE_MAP[selectedNode.type];
+                            if (ModuleEditor) return <ModuleEditor nodeId={selectedNode.id} />;
+                            const entry = getRegistryEntry(selectedNode.type);
+                            if (entry?.propSchema) return <GenericSchemaEditor nodeId={selectedNode.id} schema={entry.propSchema} />;
+                            return (
+                                <div style={{ fontSize: '12px', color: 'var(--text-tertiary)', padding: '16px', textAlign: 'center', border: '1px dashed var(--border-subtle)', borderRadius: '8px' }}>
+                                    This component has no editable properties.
                                 </div>
-                                <div>
-                                    <div style={{ fontSize: '10px', color: '#a1a1aa', fontWeight: 700, textTransform: 'uppercase' }}>Configuring</div>
-                                    <div style={{ fontSize: '13px', color: '#fff', fontWeight: 600 }}>{selectedNode.type}</div>
-                                </div>
-                            </div>
-
-                            {activeTab === 'settings' ? (
-                                // Tab 1: Props Settings
-                                (() => {
-                                    // 🛡️ 1. Advanced Property Engine Overloads
-                                    if (PROP_CONFIGS[selectedNode.type]) {
-                                        return <PropertyPanel nodeId={selectedNode.id} />;
-                                    }
-
-                                    // 🛡️ 2. Legacy Module Editors Fallback
-                                    const ModuleEditor = MODULE_MAP[selectedNode.type];
-                                    if (ModuleEditor) return <ModuleEditor nodeId={selectedNode.id} />;
-
-                                    const entry = getRegistryEntry(selectedNode.type);
-                                    if (entry?.propSchema) {
-                                        return <GenericSchemaEditor nodeId={selectedNode.id} schema={entry.propSchema} />;
-                                    }
-
-                                    return (
-                                        <div style={{ fontSize: '11px', color: '#52525b', padding: '1rem', textAlign: 'center', border: '1px dashed #27272a', borderRadius: '8px' }}>
-                                            This component has no advanced properties defined in the Registry.
-                                        </div>
-                                    );
-                                })()
-                            ) : (
-                                // Tab 2: Visual Design Settings
-                                <StyleEditorPanel nodeId={selectedNode.id} />
-                            )}
-                        </div>
-                    </>
+                            );
+                        })()
+                    ) : (
+                        <StyleEditorPanel nodeId={selectedNode.id} />
+                    )
                 )}
             </div>
         </div>

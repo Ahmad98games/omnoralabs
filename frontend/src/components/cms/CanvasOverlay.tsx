@@ -18,13 +18,13 @@ import { FloatingParticles } from '../ui/FloatingParticles';
 import { LayerManager } from '../ui/LayerManager';
 
 // ─── Tokens ───────────────────────────────────────────────────────────────────
-const ACCENT = '#6366F1';
-const ACCENT_L = 'rgba(99,102,241,0.12)';
-const DANGER = '#EF4444';
+const ACCENT = 'var(--accent-primary)';
+const ACCENT_L = 'var(--accent-subtle)';
+const DANGER = 'var(--danger)';
 const DANGER_L = 'rgba(239,68,68,0.08)';
-const SNAP_COLOR = 'rgba(99,102,241,0.75)';
-const SPACING_COLOR = 'rgba(99,102,241,0.07)';
-const SPACING_BORDER = 'rgba(99,102,241,0.22)';
+const SNAP_COLOR = 'var(--accent-primary)';
+const SPACING_COLOR = 'rgba(255,107,53,0.04)';
+const SPACING_BORDER = 'rgba(255,107,53,0.15)';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 interface NodeRect { id: string; index: number; top: number; bottom: number; height: number; left: number; width: number; }
@@ -104,8 +104,8 @@ const ContextMenu = ({ menu, onClose, onAction }: {
         <div
             style={{
                 position: 'fixed', top: menu.y, left: menu.x,
-                background: '#1F2937', border: '1px solid rgba(255,255,255,0.12)',
-                borderRadius: 10, boxShadow: '0 16px 48px rgba(0,0,0,0.45)',
+                background: 'var(--surface-overlay)', border: '1px solid var(--border-subtle)',
+                borderRadius: 10, boxShadow: '0 8px 24px rgba(0,0,0,0.06)',
                 zIndex: 20000, minWidth: 190, padding: '4px 0',
                 fontFamily: "'Inter', system-ui, sans-serif",
                 animation: 'ctxFadeIn 0.12s ease',
@@ -151,10 +151,10 @@ const MiniBar = ({
             top: Math.max(4, rect.top - 34),
             left: rect.left,
             display: 'flex', alignItems: 'center', gap: 2,
-            background: isSelected ? ACCENT : '#1F2937',
+            background: 'var(--accent-primary)',
             borderRadius: '6px 6px 6px 0',
             padding: '4px 8px',
-            boxShadow: '0 4px 16px rgba(0,0,0,0.35)',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
             zIndex: 10001, pointerEvents: 'auto', userSelect: 'none',
         }}>
             <div
@@ -548,12 +548,12 @@ const ElementSelectionLayer: React.FC<{ selectedNodeId: string }> = ({ selectedN
                 <div style={{
                     position: 'fixed',
                     bottom: 80, left: '50%', transform: 'translateX(-50%)',
-                    background: '#1F2937', color: 'rgba(255,255,255,0.6)',
+                    background: 'var(--surface-overlay)', color: 'var(--text-secondary)',
                     padding: '6px 14px', borderRadius: 20,
                     fontSize: 12, fontWeight: 500, whiteSpace: 'nowrap',
                     zIndex: 10000, pointerEvents: 'none',
-                    border: '1px solid rgba(255,255,255,0.08)',
-                    boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
+                    border: '1px solid var(--border-subtle)',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
                     animation: 'etPop 0.2s cubic-bezier(0.16,1,0.3,1)',
                 }}>
                     <style>{`@keyframes etPop { from { opacity:0; transform: translateX(-50%) translateY(8px); } to { opacity:1; transform: translateX(-50%) translateY(0); } }`}</style>
@@ -645,6 +645,9 @@ const CanvasOverlayInner: React.FC = () => {
         dragStartPos.current = { x: e.clientX, y: e.clientY };
         isDragging.current = false;
 
+        // Toggle global drag state for overlay transparency
+        import('../../stores/useBuilderStore').then(m => m.useBuilderStore.getState().setIsDragging(true));
+
         const canvas = canvasEl();
         if (!canvas) return;
 
@@ -706,6 +709,10 @@ const CanvasOverlayInner: React.FC = () => {
 
         const onMouseUp = () => {
             stopAutoScroll();
+            
+            // Clear global drag state for overlays
+            import('../../stores/useBuilderStore').then(m => m.useBuilderStore.getState().setIsDragging(false));
+
             if (isDragging.current) {
                 if (dropIndex !== null) {
                     moveNodeToIndex(id, dropIndex);
@@ -940,9 +947,9 @@ const CanvasOverlayInner: React.FC = () => {
             {/* Empty canvas */}
             {rootNodes.length === 0 && (
                 <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none', zIndex: 5000 }}>
-                    <div style={{ background: '#fff', border: '2px dashed #E5E7EB', borderRadius: 16, padding: '40px 48px', textAlign: 'center', maxWidth: 420, pointerEvents: 'auto', boxShadow: '0 8px 32px rgba(0,0,0,0.08)' }}>
+                    <div style={{ background: 'var(--surface-overlay)', border: '2px dashed var(--border-subtle)', borderRadius: 16, padding: '40px 48px', textAlign: 'center', maxWidth: 420, pointerEvents: 'auto', boxShadow: '0 4px 16px rgba(0,0,0,0.04)' }}>
                         <div style={{ fontSize: 40, marginBottom: 12 }}>🏗️</div>
-                        <h3 style={{ margin: '0 0 8px', fontSize: 18, fontWeight: 700, color: '#111827' }}>Your store is empty</h3>
+                        <h3 style={{ margin: '0 0 8px', fontSize: 18, fontWeight: 700, color: 'var(--text-primary)' }}>Your store is empty</h3>
                         <p style={{ margin: '0 0 20px', fontSize: 14, color: '#6B7280', lineHeight: 1.6 }}>Start with a Hero section to make a strong first impression.</p>
                         <button
                             onClick={() => addNode('hero', { headline: 'Welcome to our Store', subheadline: 'Discover amazing products', ctaText: 'Shop Now' })}
@@ -964,7 +971,7 @@ const CanvasOverlayInner: React.FC = () => {
             {/* Hover mini-bar */}
             {hovId && hovRect && hoveredNode && !dragId && (
                 <>
-                    <div style={{ position: 'fixed', top: hovRect.top, left: hovRect.left, width: hovRect.width, height: hovRect.height, border: '1.5px dashed rgba(99,102,241,0.45)', pointerEvents: 'none', zIndex: 10000, borderRadius: 2 }} />
+                    <div style={{ position: 'fixed', top: hovRect.top, left: hovRect.left, width: hovRect.width, height: hovRect.height, border: '1.5px dashed var(--accent-primary)', opacity: 0.6, pointerEvents: 'none', zIndex: 10000, borderRadius: 2 }} />
                     <MiniBar rect={hovRect} nodeId={hovId} isSelected={false} onDragStart={startDrag} />
                 </>
             )}
@@ -1010,10 +1017,12 @@ const CanvasOverlayInner: React.FC = () => {
                         position: 'fixed',
                         top: selRect.bottom + 6, left: selRect.left + selRect.width / 2,
                         transform: 'translateX(-50%)',
-                        background: '#1F2937', color: 'rgba(255,255,255,0.55)',
-                        padding: '2px 8px', borderRadius: 4,
+                        background: 'var(--surface-overlay)', color: 'var(--text-secondary)',
+                        padding: '3px 10px', borderRadius: 5,
                         fontSize: 11, fontWeight: 600, whiteSpace: 'nowrap',
                         zIndex: 10000, pointerEvents: 'none',
+                        border: '1px solid var(--border-subtle)',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
                     }}>
                         {liveBlockSize ? `${liveBlockSize.w} × ${liveBlockSize.h}` : `${Math.round(selRect.width)} × ${Math.round(selRect.height)}`}
                         {selectedNode.styles?.width && <span style={{ color: ACCENT, marginLeft: 6 }}>{selectedNode.styles.width}</span>}
@@ -1031,7 +1040,7 @@ const CanvasOverlayInner: React.FC = () => {
                 const el = findEl(dragId);
                 const r = el?.getBoundingClientRect();
                 if (!r) return null;
-                return <div style={{ position: 'fixed', top: r.top, left: r.left, width: r.width, height: r.height, background: 'rgba(99,102,241,0.08)', border: '2px dashed rgba(99,102,241,0.4)', borderRadius: 4, pointerEvents: 'none', zIndex: 10003 }} />;
+                return <div style={{ position: 'fixed', top: r.top, left: r.left, width: r.width, height: r.height, background: 'rgba(255,107,53,0.05)', border: '2px dashed var(--accent-primary)', opacity: 0.8, borderRadius: 4, pointerEvents: 'none', zIndex: 10003 }} />;
             })()}
 
             {/* Drop line */}
@@ -1040,8 +1049,8 @@ const CanvasOverlayInner: React.FC = () => {
                     <div style={{ position: 'absolute', left: -5, top: '50%', transform: 'translateY(-50%)', width: 10, height: 10, borderRadius: '50%', background: ACCENT }} />
                     <div style={{ position: 'absolute', right: -5, top: '50%', transform: 'translateY(-50%)', width: 10, height: 10, borderRadius: '50%', background: ACCENT }} />
                     {isHydrating && (
-                        <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)', background: '#1F2937', color: '#fff', fontSize: 10, padding: '4px 10px', borderRadius: 6, display: 'flex', alignItems: 'center', gap: 6, border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 4px 12px rgba(0,0,0,0.3)', whiteSpace: 'nowrap' }}>
-                            <div style={{ width: 12, height: 12, border: '1.5px solid #fff', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.6s linear infinite' }} />
+                        <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)', background: 'var(--surface-overlay)', color: 'var(--text-primary)', fontSize: 10, padding: '4px 10px', borderRadius: 6, display: 'flex', alignItems: 'center', gap: 6, border: '1px solid var(--border-subtle)', boxShadow: '0 4px 12px rgba(0,0,0,0.06)', whiteSpace: 'nowrap' }}>
+                            <div style={{ width: 12, height: 12, border: '1.5px solid var(--accent-primary)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.6s linear infinite' }} />
                             <span>Hydrating...</span>
                         </div>
                     )}
@@ -1069,7 +1078,7 @@ const CanvasOverlayInner: React.FC = () => {
 
 // ─── Conversion hint ──────────────────────────────────────────────────────────
 const ConvHint = ({ color, label }: { color: string; label: string }) => (
-    <div style={{ background: '#fff', border: `1.5px solid ${color}`, borderRadius: 8, padding: '8px 12px', fontSize: 12, color: '#374151', fontWeight: 500, boxShadow: '0 4px 12px rgba(0,0,0,0.08)', display: 'flex', alignItems: 'center', gap: 8, maxWidth: 280 }}>
+    <div style={{ background: 'var(--surface-overlay)', border: `1.5px solid ${color}`, borderRadius: 8, padding: '8px 12px', fontSize: 12, color: 'var(--text-primary)', fontWeight: 500, boxShadow: '0 4px 12px rgba(0,0,0,0.04)', display: 'flex', alignItems: 'center', gap: 8, maxWidth: 280 }}>
         <span style={{ fontSize: 14 }}>⚠️</span><span>{label}</span>
     </div>
 );

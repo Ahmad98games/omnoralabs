@@ -8,21 +8,40 @@
 import React, { useState } from 'react';
 import { OmnoraImage } from '../cms/OmnoraImage';
 
+const VideoBackground = React.memo(({ url, isBuilder }: { url: string; isBuilder: boolean }) => {
+    if (isBuilder) {
+        return (
+            <div style={{ position: 'absolute', inset: 0, background: '#111', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#666', fontSize: '11px', fontStyle: 'italic' }}>
+                🎬 Background Video (Builder Placeholder)
+            </div>
+        );
+    }
+    return (
+        <video autoPlay muted loop playsInline style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: 0 }}>
+            <source src={url} type="video/mp4" />
+        </video>
+    );
+});
+
 // ─── Props ────────────────────────────────────────────────────────────────────
 
 export interface HeroBannerProps {
     nodeId: string;
+    isBuilder?: boolean;
     headline?: string;
     subheadline?: string;
-    bgImageUrl?: string;
+    backgroundType?: 'color' | 'image' | 'video';
     bgColor?: string;
+    imageSrc?: string;
+    bgVideoUrl?: string;
     overlayOpacity?: number;
-    overlayColor?: string;
-    alignment?: 'left' | 'center' | 'right';
-    ctaText?: string;
-    ctaLink?: string;
-    ctaColor?: string;
-    height?: string;
+    textAlign?: 'left' | 'center' | 'right';
+    minHeight?: number;
+    buttonStyle?: 'filled' | 'outline' | 'ghost';
+    buttonColor?: string;
+    textColor?: string;
+    ctaLabel?: string;
+    ctaUrl?: string;
     showCta?: boolean;
     children?: React.ReactNode;
 }
@@ -31,21 +50,24 @@ export interface HeroBannerProps {
 
 export const HeroBanner: React.FC<HeroBannerProps> = ({
     nodeId,
+    isBuilder = false,
     headline = 'Elevate Your Style',
-    subheadline = 'Discover our curated collection of premium timepieces, crafted for the modern connoisseur.',
-    bgImageUrl = 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1600&q=80',
-    bgColor = '#0a0a0f',
-    overlayOpacity = 0.55,
-    overlayColor = '#000000',
-    alignment = 'center',
-    ctaText = 'Shop Now',
-    ctaLink = '#',
-    ctaColor = '#7c6dfa',
-    height = '70vh',
+    subheadline = 'Crafted for the modern connoisseur.',
+    backgroundType = 'color',
+    bgColor = '#f3f4f6',
+    imageSrc = '',
+    bgVideoUrl = '',
+    overlayOpacity = 30,
+    textAlign = 'center',
+    minHeight = 400,
+    buttonStyle = 'filled',
+    buttonColor = '#7c6dfa',
+    textColor = '#000000',
+    ctaLabel = 'Shop Now',
+    ctaUrl = '#',
     showCta = true,
 }) => {
     const [ctaHov, setCtaHov] = useState(false);
-    const [imgUrl, setImgUrl] = useState(bgImageUrl);
 
     const alignMap = {
         left: 'flex-start',
@@ -53,8 +75,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
         right: 'flex-end',
     } as const;
 
-    const textAlign = alignment;
-    const alignItems = alignMap[alignment];
+    const alignItems = alignMap[textAlign];
 
     return (
         <section
@@ -62,23 +83,25 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
             style={{
                 position: 'relative',
                 width: '100%',
-                height,
-                minHeight: 320,
+                minHeight: `${minHeight}px`,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: alignItems,
                 overflow: 'hidden',
                 fontFamily: "'Inter', -apple-system, sans-serif",
-                background: bgColor,
+                background: backgroundType === 'color' ? bgColor : 'transparent',
             }}
         >
+            {/* Background Video */}
+            {backgroundType === 'video' && bgVideoUrl && <VideoBackground url={bgVideoUrl} isBuilder={isBuilder} />}
+
             {/* Background Image */}
-            {bgImageUrl && (
+            {backgroundType === 'image' && imageSrc && (
                 <div style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
                     <OmnoraImage
-                        src={bgImageUrl}
+                        src={imageSrc}
                         alt={headline || 'Hero Banner'}
-                        width={1920} // LCP optimization resolution
+                        width={1920}
                         priority={true}
                         aspectRatio="auto"
                         style={{ position: 'absolute', inset: 0, height: '100%' }}
@@ -87,12 +110,15 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
             )}
 
             {/* Overlay */}
-            <div style={{
-                position: 'absolute', inset: 0,
-                background: overlayColor,
-                opacity: overlayOpacity,
-                transition: 'opacity 0.3s',
-            }} />
+            {backgroundType === 'image' && (
+                <div style={{
+                    position: 'absolute', inset: 0,
+                    background: '#000000',
+                    opacity: overlayOpacity / 100,
+                    transition: 'opacity 0.3s',
+                    zIndex: 1
+                }} />
+            )}
 
             {/* Content */}
             <div style={{
@@ -107,22 +133,23 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
                 gap: 20,
             }}>
                 <h1 style={{
-                    fontSize: 'clamp(28px, 5vw, 56px)',
+                    fontSize: 'clamp(2rem, 5vw, 4rem)',
                     fontWeight: 900,
-                    color: '#ffffff',
+                    color: textColor,
                     margin: 0,
                     lineHeight: 1.08,
                     letterSpacing: '-0.04em',
-                    textShadow: '0 2px 20px rgba(0,0,0,0.3)',
+                    textShadow: '0 2px 20px rgba(0,0,0,0.1)',
                 }}>
                     {headline}
                 </h1>
 
                 {subheadline && (
                     <p style={{
-                        fontSize: 'clamp(14px, 1.5vw, 18px)',
+                        fontSize: 'clamp(1rem, 2vw, 1.25rem)',
                         fontWeight: 400,
-                        color: 'rgba(255,255,255,0.75)',
+                        color: textColor,
+                        opacity: 0.85,
                         margin: 0,
                         lineHeight: 1.6,
                         maxWidth: 540,
@@ -131,9 +158,11 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
                     </p>
                 )}
 
-                {showCta && ctaText && (
+                {showCta && ctaLabel && (
                     <a
-                        href={ctaLink}
+                        href={isBuilder ? undefined : ctaUrl}
+                        target={isBuilder ? undefined : "_blank"}
+                        rel={isBuilder ? undefined : "noopener noreferrer"}
                         onMouseEnter={() => setCtaHov(true)}
                         onMouseLeave={() => setCtaHov(false)}
                         style={{
@@ -142,38 +171,28 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
                             gap: 8,
                             marginTop: 8,
                             padding: '14px 32px',
-                            background: ctaHov
-                                ? ctaColor
-                                : `linear-gradient(135deg, ${ctaColor}, ${adjustBrightness(ctaColor, 30)})`,
-                            border: 'none',
+                            background: buttonStyle === 'filled' 
+                                ? (ctaHov ? buttonColor : `linear-gradient(135deg, ${buttonColor}, ${adjustBrightness(buttonColor, 30)})`)
+                                : 'transparent',
+                            border: buttonStyle === 'outline' ? `2px solid ${buttonColor}` : 'none',
                             borderRadius: 12,
-                            color: '#ffffff',
+                            color: buttonStyle === 'filled' ? '#ffffff' : buttonColor,
                             fontSize: 15,
                             fontWeight: 700,
                             textDecoration: 'none',
                             letterSpacing: '0.02em',
-                            cursor: 'pointer',
+                            cursor: isBuilder ? 'default' : 'pointer',
                             transition: 'all 0.25s cubic-bezier(0.16,1,0.3,1)',
                             transform: ctaHov ? 'translateY(-2px)' : 'translateY(0)',
-                            boxShadow: ctaHov
-                                ? `0 8px 30px ${ctaColor}60`
-                                : `0 4px 20px ${ctaColor}30`,
+                            opacity: buttonStyle === 'ghost' ? (ctaHov ? 1 : 0.8) : 1,
+                            boxShadow: buttonStyle === 'filled' ? (ctaHov ? `0 8px 30px ${buttonColor}60` : `0 4px 20px ${buttonColor}30`) : 'none'
                         }}
                     >
-                        {ctaText}
+                        {ctaLabel}
                         <span style={{ fontSize: 16, transition: 'transform 0.2s', transform: ctaHov ? 'translateX(3px)' : 'none' }}>→</span>
                     </a>
                 )}
             </div>
-
-            {/* Bottom Gradient Fade */}
-            <div style={{
-                position: 'absolute',
-                bottom: 0, left: 0, right: 0,
-                height: 100,
-                background: `linear-gradient(transparent, ${bgColor})`,
-                pointerEvents: 'none',
-            }} />
         </section>
     );
 };

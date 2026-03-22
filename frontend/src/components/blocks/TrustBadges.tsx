@@ -26,77 +26,73 @@ const DEFAULT_BADGES: TrustBadge[] = [
 
 export interface TrustBadgesProps {
     nodeId: string;
-    badgeStyle?: 'minimal' | 'filled' | 'outline';
+    isBuilder?: boolean;
+    badgeStyle?: 'minimal' | 'filled' | 'outline' | 'icon-text' | 'icon-only' | 'text-only';
     iconColor?: string;
     textColor?: string;
     bgColor?: string;
-    layout?: 'horizontal' | 'vertical';
+    layout?: 'horizontal' | 'grid' | 'row';
     columns?: number;
+    iconSize?: number;
     gap?: number;
-    showSublabels?: boolean;
-    badge1Label?: string;
-    badge1Icon?: string;
-    badge2Label?: string;
-    badge2Icon?: string;
-    badge3Label?: string;
-    badge3Icon?: string;
-    badge4Label?: string;
-    badge4Icon?: string;
+    badges?: TrustBadge[];
     children?: React.ReactNode;
 }
+
+// ─── SVG Icons Map ──────────────────────────────────────────────────────────
+
+const SVG_ICONS: Record<string, React.ReactNode> = {
+    'shield-check': <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10zM9 12l2 2 4-4"/></svg>,
+    'truck': <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8l4 4v4h-4zm-8 11a2 2 0 100-4 2 2 0 000 4zm10 0a2 2 0 100-4 2 2 0 000 4z"/></svg>,
+    'return-arrow': <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 14L4 9l5-5M4 9h12a5 5 0 015 5v3"/></svg>,
+    'lock': <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>,
+    'star': <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14l-5-4.87 6.91-1.01L12 2z"/></svg>,
+    'clock': <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>,
+    'phone': <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.06 12.06 0 01.88 2.53 2 2 0 01-.44 1.94L7.8 9.9a16 16 0 006.3 6.3l1.73-1.73 a2 2 0 011.94-.44 12.06 12.06 0 012.53.88 2 2 0 011.72 2z"/></svg>
+};
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export const TrustBadges: React.FC<TrustBadgesProps> = ({
     nodeId,
-    badgeStyle = 'filled',
+    isBuilder = false,
+    badgeStyle = 'icon-text',
     iconColor = '#7c6dfa',
     textColor = '#f0f0f5',
     bgColor = '#13131a',
-    layout = 'horizontal',
-    columns = 4,
+    layout = 'row',
+    columns = 3,
+    iconSize = 32,
     gap = 14,
-    showSublabels = true,
-    badge1Label,
-    badge1Icon,
-    badge2Label,
-    badge2Icon,
-    badge3Label,
-    badge3Icon,
-    badge4Label,
-    badge4Icon,
+    badges = DEFAULT_BADGES,
 }) => {
-    // Build badge list from props or defaults
-    const badges: TrustBadge[] = [
-        { icon: badge1Icon || DEFAULT_BADGES[0].icon, label: badge1Label || DEFAULT_BADGES[0].label, sublabel: DEFAULT_BADGES[0].sublabel },
-        { icon: badge2Icon || DEFAULT_BADGES[1].icon, label: badge2Label || DEFAULT_BADGES[1].label, sublabel: DEFAULT_BADGES[1].sublabel },
-        { icon: badge3Icon || DEFAULT_BADGES[2].icon, label: badge3Label || DEFAULT_BADGES[2].label, sublabel: DEFAULT_BADGES[2].sublabel },
-        { icon: badge4Icon || DEFAULT_BADGES[3].icon, label: badge4Label || DEFAULT_BADGES[3].label, sublabel: DEFAULT_BADGES[3].sublabel },
-    ];
 
-    const isVertical = layout === 'vertical';
+    const isGrid = layout === 'grid';
 
     return (
         <div
             data-node-id={nodeId}
             style={{
                 display: 'grid',
-                gridTemplateColumns: isVertical ? '1fr' : `repeat(${columns}, 1fr)`,
+                gridTemplateColumns: isGrid ? `repeat(${columns}, 1fr)` : `repeat(${badges.length}, 1fr)`,
                 gap,
                 padding: '20px 24px',
                 fontFamily: "'Inter', -apple-system, sans-serif",
+                background: bgColor,
+                borderRadius: 14,
             }}
         >
             {badges.map((badge, i) => (
                 <BadgeItem
                     key={i}
                     badge={badge}
-                    style={badgeStyle}
+                    style={badgeStyle === 'minimal' ? 'minimal' : badgeStyle === 'outline' ? 'outline' : 'filled'}
                     iconColor={iconColor}
                     textColor={textColor}
                     bgColor={bgColor}
-                    isVertical={isVertical}
-                    showSublabel={showSublabels}
+                    isVertical={isGrid}
+                    showSublabel={badgeStyle !== 'icon-only'}
+                    iconSize={iconSize}
                 />
             ))}
         </div>
@@ -113,7 +109,8 @@ const BadgeItem: React.FC<{
     bgColor: string;
     isVertical: boolean;
     showSublabel: boolean;
-}> = ({ badge, style: badgeStyle, iconColor, textColor, bgColor, isVertical, showSublabel }) => {
+    iconSize: number;
+}> = ({ badge, style: badgeStyle, iconColor, textColor, bgColor, isVertical, showSublabel, iconSize }) => {
     const [hov, setHov] = useState(false);
 
     const baseStyle: React.CSSProperties = {
@@ -159,47 +156,53 @@ const BadgeItem: React.FC<{
             onMouseLeave={() => setHov(false)}
         >
             {/* Icon */}
-            <div style={{
-                width: badgeStyle === 'minimal' ? 36 : 44,
-                height: badgeStyle === 'minimal' ? 36 : 44,
-                borderRadius: 10,
-                background: `${iconColor}12`,
-                border: `1px solid ${iconColor}20`,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: badgeStyle === 'minimal' ? 18 : 20,
-                flexShrink: 0,
-                transition: 'transform 0.2s',
-                transform: hov ? 'scale(1.08)' : 'scale(1)',
-            }}>
-                {badge.icon}
-            </div>
+            {badgeStyle !== 'text-only' && (
+                <div style={{
+                    width: iconSize + 12,
+                    height: iconSize + 12,
+                    borderRadius: 10,
+                    background: `${iconColor}12`,
+                    border: `1px solid ${iconColor}20`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: iconColor,
+                    flexShrink: 0,
+                    transition: 'transform 0.2s',
+                    transform: hov ? 'scale(1.08)' : 'scale(1)',
+                }}>
+                    {React.isValidElement(SVG_ICONS[badge.icon]) ? 
+                        React.cloneElement(SVG_ICONS[badge.icon] as React.ReactElement, { width: iconSize, height: iconSize }) 
+                        : badge.icon}
+                </div>
+            )}
 
             {/* Text */}
-            <div style={isVertical ? { flex: 1 } : undefined}>
-                <p style={{
-                    fontSize: 13,
-                    fontWeight: 700,
-                    color: textColor,
-                    margin: 0,
-                    lineHeight: 1.3,
-                    letterSpacing: '-0.01em',
-                }}>
-                    {badge.label}
-                </p>
-                {showSublabel && badge.sublabel && (
+            {badgeStyle !== 'icon-only' && (
+                <div style={isVertical ? { flex: 1 } : undefined}>
                     <p style={{
-                        fontSize: 11,
-                        color: '#8b8ba0',
-                        margin: '3px 0 0',
+                        fontSize: 13,
+                        fontWeight: 700,
+                        color: textColor,
+                        margin: 0,
                         lineHeight: 1.3,
-                        fontWeight: 500,
+                        letterSpacing: '-0.01em',
                     }}>
-                        {badge.sublabel}
+                        {badge.text}
                     </p>
-                )}
-            </div>
+                    {showSublabel && badge.subtext && (
+                        <p style={{
+                            fontSize: 11,
+                            color: '#8b8ba0',
+                            margin: '3px 0 0',
+                            lineHeight: 1.3,
+                            fontWeight: 500,
+                        }}>
+                            {badge.subtext}
+                        </p>
+                    )}
+                </div>
+            )}
         </div>
     );
 };

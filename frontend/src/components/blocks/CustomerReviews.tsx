@@ -21,11 +21,15 @@ export interface Review {
 
 export interface CustomerReviewsProps {
     nodeId: string;
+    isBuilder?: boolean;
     headline?: string;
-    layout?: 'grid' | 'slider';
+    layout?: 'grid' | 'carousel' | 'masonry';
     starColor?: string;
     bgColor?: string;
     columns?: number;
+    showStarSummary?: boolean;
+    showVerifiedBadge?: boolean;
+    cardStyle?: 'flat' | 'bordered' | 'elevated';
     reviews?: Review[];
     children?: React.ReactNode;
 }
@@ -35,8 +39,6 @@ export interface CustomerReviewsProps {
 const DEFAULT_REVIEWS: Review[] = [
     { author: 'Sarah M.', rating: 5, content: 'Absolutely stunning quality! The craftsmanship is impeccable and it arrived beautifully packaged. Worth every penny.', date: '2 days ago' },
     { author: 'James K.', rating: 5, content: 'I\'ve ordered from many stores online, but this one truly stands out. Fast shipping, premium materials, and incredible attention to detail.', date: '1 week ago' },
-    { author: 'Emily R.', rating: 4, content: 'Beautiful product and great customer service. Only wish it came in more color options. Will definitely be ordering again!', date: '2 weeks ago' },
-    { author: 'David L.', rating: 5, content: 'The build quality exceeded my expectations. This is luxury at its finest. Already recommending it to everyone I know.', date: '3 weeks ago' },
 ];
 
 // ─── Tokens ───────────────────────────────────────────────────────────────────
@@ -54,14 +56,19 @@ const T = {
 
 export const CustomerReviews: React.FC<CustomerReviewsProps> = ({
     nodeId,
+    isBuilder = false,
     headline = 'What Our Customers Say',
     layout = 'grid',
     starColor = '#fbbf24',
     bgColor = 'transparent',
     columns = 2,
+    showStarSummary = true,
+    showVerifiedBadge = true,
+    cardStyle = 'flat',
     reviews = DEFAULT_REVIEWS,
 }) => {
-    const isSlider = layout === 'slider';
+    const isCarousel = layout === 'carousel';
+    const isMasonry = layout === 'masonry';
 
     return (
         <div
@@ -82,7 +89,7 @@ export const CustomerReviews: React.FC<CustomerReviewsProps> = ({
             )}
 
             {/* Average Rating */}
-            {reviews.length > 0 && (
+            {showStarSummary && reviews.length > 0 && (
                 <div style={{
                     textAlign: 'center', marginBottom: 28,
                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
@@ -98,10 +105,13 @@ export const CustomerReviews: React.FC<CustomerReviewsProps> = ({
             )}
 
             {/* Cards */}
-            <div style={isSlider ? {
+            <div style={isCarousel ? {
                 display: 'flex', gap: 16, overflowX: 'auto',
                 scrollSnapType: 'x mandatory', padding: '4px 0',
                 scrollbarWidth: 'none',
+            } : isMasonry ? {
+                columnCount: columns,
+                columnGap: 16,
             } : {
                 display: 'grid',
                 gridTemplateColumns: `repeat(${columns}, 1fr)`,
@@ -112,7 +122,10 @@ export const CustomerReviews: React.FC<CustomerReviewsProps> = ({
                         key={i}
                         review={review}
                         starColor={starColor}
-                        isSlider={isSlider}
+                        isSlider={isCarousel}
+                        isMasonry={isMasonry}
+                        cardStyle={cardStyle}
+                        showVerifiedBadge={showVerifiedBadge}
                     />
                 ))}
             </div>
@@ -122,28 +135,36 @@ export const CustomerReviews: React.FC<CustomerReviewsProps> = ({
 
 // ─── Review Card ──────────────────────────────────────────────────────────────
 
-const ReviewCard: React.FC<{ review: Review; starColor: string; isSlider: boolean }> = ({
-    review, starColor, isSlider,
+const ReviewCard: React.FC<{ 
+    review: Review; 
+    starColor: string; 
+    isSlider: boolean; 
+    isMasonry?: boolean;
+    cardStyle?: 'flat' | 'bordered' | 'elevated';
+    showVerifiedBadge?: boolean;
+}> = ({
+    review, starColor, isSlider, isMasonry = false, cardStyle = 'flat', showVerifiedBadge = true,
 }) => {
     const [hov, setHov] = useState(false);
 
+    const baseStyle: React.CSSProperties = {
+        background: T.surface,
+        border: cardStyle === 'bordered' ? `1px solid ${T.border}` : `1px solid ${hov ? '#3a3a5a' : 'transparent'}`,
+        borderRadius: 14,
+        padding: '22px 20px',
+        display: 'flex', flexDirection: 'column', gap: 14,
+        transition: 'all 0.2s cubic-bezier(0.16,1,0.3,1)',
+        transform: hov ? 'translateY(-3px)' : 'none',
+        boxShadow: cardStyle === 'elevated' ? '0 10px 30px rgba(0,0,0,0.25)' : hov ? '0 8px 30px rgba(0,0,0,0.2)' : 'none',
+        ...(isSlider ? { minWidth: 300, scrollSnapAlign: 'start', flexShrink: 0 } : {}),
+        ...(isMasonry ? { breakInside: 'avoid', marginBottom: 16 } : {}),
+    };
     return (
         <div
             onMouseEnter={() => setHov(true)}
             onMouseLeave={() => setHov(false)}
-            style={{
-                background: T.surface,
-                border: `1px solid ${hov ? '#3a3a5a' : T.border}`,
-                borderRadius: 14,
-                padding: '22px 20px',
-                display: 'flex', flexDirection: 'column', gap: 14,
-                transition: 'all 0.2s cubic-bezier(0.16,1,0.3,1)',
-                transform: hov ? 'translateY(-3px)' : 'none',
-                boxShadow: hov ? '0 8px 30px rgba(0,0,0,0.2)' : 'none',
-                ...(isSlider ? { minWidth: 300, scrollSnapAlign: 'start', flexShrink: 0 } : {}),
-            }}
+            style={baseStyle}
         >
-            {/* Stars */}
             <Stars rating={review.rating} color={starColor} size={14} />
 
             {/* Content */}
@@ -177,13 +198,15 @@ const ReviewCard: React.FC<{ review: Review; starColor: string; isSlider: boolea
                         </span>
                     )}
                 </div>
-                <span style={{
-                    marginLeft: 'auto', fontSize: 10, fontWeight: 600,
-                    color: '#34d399', background: 'rgba(52,211,153,0.1)',
-                    padding: '3px 8px', borderRadius: 4,
-                }}>
-                    Verified
-                </span>
+                {showVerifiedBadge && (
+                    <span style={{
+                        marginLeft: 'auto', fontSize: 10, fontWeight: 600,
+                        color: '#34d399', background: 'rgba(52,211,153,0.1)',
+                        padding: '3px 8px', borderRadius: 4,
+                    }}>
+                        Verified
+                    </span>
+                 )}
             </div>
         </div>
     );

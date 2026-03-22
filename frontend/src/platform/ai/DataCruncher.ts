@@ -19,36 +19,40 @@ export class DataCruncher {
      * stripping out massive DB columns into a highly minified token-efficient 
      * JSON payload for LLM processing (Max ~500 tokens).
      */
-    static async captureStoreState(merchantId: string): Promise<MinifiedStoreState | null> {
+    static async captureStoreState(merchantId: string, signal?: AbortSignal): Promise<MinifiedStoreState | null> {
         try {
             const sevenDaysAgo = new Date();
             sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
             const dateIso = sevenDaysAgo.toISOString();
 
-            // Fire parallel queries to prevent waterfall latency
+            // Fire parallel queries with AbortSignal
             const [ordersRes, productsRes, trackingRes, merchantRes] = await Promise.all([
                 // 1. Orders last 7 days
                 supabase.from('orders')
                         .select('total_amount, created_at')
                         .eq('merchant_id', merchantId)
-                        .gte('created_at', dateIso),
+                        .gte('created_at', dateIso)
+                        .abortSignal(signal),
                 
-                // 2. Products -> find distinct low-stock via raw fetch (using variants JSONB or raw stock)
+                // 2. Products
                 supabase.from('products')
                         .select('title, stock, variants')
-                        .eq('merchant_id', merchantId),
+                        .eq('merchant_id', merchantId)
+                        .abortSignal(signal),
 
-                // 3. Tracking Logs -> success rate inside the last 7 days
+                // 3. Tracking Logs
                 supabase.from('tracking_logs')
                         .select('status')
                         .eq('merchant_id', merchantId)
-                        .gte('created_at', dateIso),
+                        .gte('created_at', dateIso)
+                        .abortSignal(signal),
 
                 // 4. Wallet/Subscription Health
                 supabase.from('merchants')
                         .select('wallet_days_remaining')
                         .eq('id', merchantId)
                         .single()
+                        .abortSignal(signal)
             ]);
 
             // Crunch Orders

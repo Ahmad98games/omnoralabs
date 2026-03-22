@@ -10,21 +10,20 @@ import React, { useState } from 'react';
 // ─── Interfaces ───────────────────────────────────────────────────────────────
 
 export interface Feature {
-    iconName: string;
+    icon: string;
     title: string;
     description: string;
 }
-
-// ─── Props ────────────────────────────────────────────────────────────────────
 
 export interface FeaturesGridProps {
     nodeId: string;
     headline?: string;
     columns?: number;
-    iconStyle?: 'outline' | 'solid';
-    iconColor?: string;
-    bgColor?: string;
     gap?: number;
+    iconSize?: number;
+    iconColor?: string;
+    iconBackground?: string;
+    cardStyle?: 'flat' | 'bordered' | 'elevated';
     features?: Feature[];
     children?: React.ReactNode;
 }
@@ -32,10 +31,9 @@ export interface FeaturesGridProps {
 // ─── Default Data ─────────────────────────────────────────────────────────────
 
 const DEFAULT_FEATURES: Feature[] = [
-    { iconName: '🚀', title: 'Lightning Fast Delivery', description: 'Free express shipping on orders over $50. Get your items in 2-3 business days.' },
-    { iconName: '🛡️', title: 'Secure Payments', description: '256-bit SSL encryption protects every transaction. Your data is always safe with us.' },
-    { iconName: '⭐', title: 'Premium Quality', description: 'Handcrafted from the finest materials by skilled artisans. Built to last a lifetime.' },
-    { iconName: '💬', title: '24/7 Support', description: 'Our dedicated team is always here to help. Reach us via chat, email, or phone anytime.' },
+    { icon: '🚀', title: 'Lightning Delivery', description: 'Free express shipping on orders over $50. Get your items in 2-3 business days.' },
+    { icon: '🛡️', title: 'Secure Payments', description: '256-bit SSL encryption protects every transaction. Your data is always safe with us.' },
+    { icon: '⭐', title: 'Premium Quality', description: 'Handcrafted from the finest materials by skilled artisans. Built to last a lifetime.' },
 ];
 
 // ─── Tokens ───────────────────────────────────────────────────────────────────
@@ -53,11 +51,12 @@ const T = {
 export const FeaturesGrid: React.FC<FeaturesGridProps> = ({
     nodeId,
     headline = 'Why Choose Us',
-    columns = 4,
-    iconStyle = 'solid',
+    columns = 3,
+    iconSize = 32,
     iconColor = '#7c6dfa',
-    bgColor = 'transparent',
-    gap = 16,
+    iconBackground,
+    cardStyle = 'bordered',
+    gap = 24,
     features = DEFAULT_FEATURES,
 }) => {
     return (
@@ -65,7 +64,7 @@ export const FeaturesGrid: React.FC<FeaturesGridProps> = ({
             data-node-id={nodeId}
             style={{
                 fontFamily: "'Inter', -apple-system, sans-serif",
-                padding: '32px 0', background: bgColor,
+                padding: '32px 0',
             }}
         >
             {headline && (
@@ -87,8 +86,10 @@ export const FeaturesGrid: React.FC<FeaturesGridProps> = ({
                     <FeatureCard
                         key={i}
                         feature={feature}
-                        iconStyle={iconStyle}
+                        iconSize={iconSize}
                         iconColor={iconColor}
+                        iconBackground={iconBackground}
+                        cardStyle={cardStyle}
                     />
                 ))}
             </div>
@@ -99,11 +100,16 @@ export const FeaturesGrid: React.FC<FeaturesGridProps> = ({
 // ─── Feature Card ─────────────────────────────────────────────────────────────
 
 const FeatureCard: React.FC<{
-    feature: Feature; iconStyle: 'outline' | 'solid'; iconColor: string;
-}> = ({ feature, iconStyle, iconColor }) => {
+    feature: Feature; 
+    iconSize: number; 
+    iconColor: string; 
+    iconBackground?: string;
+    cardStyle?: 'flat' | 'bordered' | 'elevated';
+}> = ({ feature, iconSize, iconColor, iconBackground, cardStyle = 'bordered' }) => {
     const [hov, setHov] = useState(false);
 
-    const isSolid = iconStyle === 'solid';
+    const isElevated = cardStyle === 'elevated';
+    const isBordered = cardStyle === 'bordered';
 
     return (
         <div
@@ -111,26 +117,25 @@ const FeatureCard: React.FC<{
             onMouseLeave={() => setHov(false)}
             style={{
                 background: T.surface,
-                border: `1px solid ${hov ? iconColor + '40' : T.border}`,
+                border: isBordered ? `1px solid ${T.border}` : `1px solid ${hov ? iconColor + '40' : 'transparent'}`,
                 borderRadius: 14,
                 padding: '24px 20px',
                 textAlign: 'center',
                 display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14,
                 transition: 'all 0.25s cubic-bezier(0.16,1,0.3,1)',
                 transform: hov ? 'translateY(-4px)' : 'none',
-                boxShadow: hov ? `0 12px 32px ${iconColor}12` : 'none',
+                boxShadow: isElevated ? '0 12px 30px rgba(0,0,0,0.25)' : hov ? `0 12px 32px ${iconColor}12` : 'none',
             }}
         >
             <div style={{
-                width: 52, height: 52, borderRadius: 14,
-                background: isSolid ? `${iconColor}18` : 'transparent',
-                border: isSolid ? `1px solid ${iconColor}25` : `2px solid ${iconColor}40`,
+                width: iconSize + 24, height: iconSize + 24, borderRadius: '50%',
+                background: iconBackground || `${iconColor}18`,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 24,
+                fontSize: iconSize,
                 transition: 'transform 0.2s',
-                transform: hov ? 'scale(1.1)' : 'scale(1)',
+                transform: hov ? 'scale(1.08)' : 'scale(1)',
             }}>
-                {feature.iconName}
+                {feature.icon}
             </div>
             <h3 style={{
                 fontSize: 14, fontWeight: 700, color: T.text,

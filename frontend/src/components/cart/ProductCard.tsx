@@ -29,13 +29,15 @@ const T = {
     success: '#34d399',
 };
 
-// ─── Props ────────────────────────────────────────────────────────────────────
-
 export interface ProductCardProps {
     product: Product;
-    /** If true, render the built-in card UI. If false, render children with scoped context only. */
     renderBuiltIn?: boolean;
     children?: React.ReactNode;
+    cardStyle?: 'minimal' | 'bordered' | 'shadowed';
+    imageAspectRatio?: 'square' | 'portrait' | 'landscape';
+    showPrice?: boolean;
+    showAddToCart?: boolean;
+    showBadge?: boolean;
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -44,6 +46,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     product,
     renderBuiltIn = true,
     children,
+    cardStyle = 'minimal',
+    imageAspectRatio = 'square',
+    showPrice = true,
+    showAddToCart = true,
+    showBadge = true,
 }) => {
     const selectedVariant = product.variants.find(v => v.id === product.selectedVariantId)
         ?? product.variants[0]
@@ -78,13 +85,20 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         cartActions.openCart();
     };
 
+    const ASPECT_RATIOS = {
+        square: '100%',
+        portrait: '133%', 
+        landscape: '56.25%', 
+    };
+
     return (
         <StorefrontProvider scopedProduct={product}>
             {renderBuiltIn ? (
                 <div
                     style={{
                         background: T.surface,
-                        border: `1px solid ${T.border}`,
+                        border: cardStyle === 'bordered' ? `1px solid ${T.border}` : 'none',
+                        boxShadow: cardStyle === 'shadowed' ? '0 4px 16px rgba(0,0,0,0.08)' : 'none',
                         borderRadius: 14,
                         overflow: 'hidden',
                         transition: 'all 0.25s cubic-bezier(0.16,1,0.3,1)',
@@ -93,24 +107,25 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                         position: 'relative',
                     }}
                     onMouseEnter={e => {
-                        e.currentTarget.style.borderColor = T.accent;
-                        e.currentTarget.style.transform = 'translateY(-4px)';
-                        e.currentTarget.style.boxShadow = '0 12px 40px rgba(0,0,0,0.3)';
-                        const btn = e.currentTarget.querySelector('[data-quick-add]') as HTMLElement;
-                        if (btn) btn.style.opacity = '1';
+                        if (cardStyle === 'bordered') e.currentTarget.style.borderColor = T.accent;
+                        if (cardStyle === 'shadowed') {
+                            e.currentTarget.style.transform = 'translateY(-4px)';
+                            e.currentTarget.style.boxShadow = '0 12px 40px rgba(0,0,0,0.2)';
+                        }
                     }}
                     onMouseLeave={e => {
-                        e.currentTarget.style.borderColor = T.border;
-                        e.currentTarget.style.transform = 'translateY(0)';
-                        e.currentTarget.style.boxShadow = 'none';
-                        const btn = e.currentTarget.querySelector('[data-quick-add]') as HTMLElement;
-                        if (btn) btn.style.opacity = '0';
+                        if (cardStyle === 'bordered') e.currentTarget.style.borderColor = T.border;
+                        if (cardStyle === 'shadowed') {
+                            e.currentTarget.style.transform = 'translateY(0)';
+                            e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.08)';
+                        }
                     }}
                 >
                     {/* Image */}
                     <div style={{
                         position: 'relative', width: '100%',
-                        paddingBottom: '100%', overflow: 'hidden',
+                        paddingBottom: ASPECT_RATIOS[imageAspectRatio], 
+                        overflow: 'hidden',
                         background: T.surface2,
                     }}>
                         <div style={{ position: 'absolute', inset: 0 }}>
@@ -126,63 +141,20 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                         </div>
 
                         {/* Discount Badge */}
-                        {hasDiscount && (
+                        {showBadge && hasDiscount && (
                             <div style={{
                                 position: 'absolute', top: 10, left: 10,
                                 background: T.danger, color: '#fff',
                                 fontSize: 10, fontWeight: 800,
                                 padding: '4px 8px', borderRadius: 6,
-                                letterSpacing: '0.05em',
                             }}>
                                 -{discountPct}%
                             </div>
-                        )}
-
-                        {/* Sold Out Badge (Original Fallback) */}
-                        {!isAvailable && !isOutOfStock && (
-                            <div style={{
-                                position: 'absolute', top: 10, right: 10,
-                                background: 'rgba(0,0,0,0.7)', color: T.textDim,
-                                fontSize: 10, fontWeight: 700,
-                                padding: '4px 8px', borderRadius: 6,
-                                textTransform: 'uppercase', letterSpacing: '0.08em',
-                            }}>
-                                Sold Out
-                            </div>
-                        )}
-
-                        {/* Quick Add Button */}
-                        {isAvailable && (
-                            <button
-                                data-quick-add
-                                onClick={handleQuickAdd}
-                                style={{
-                                    position: 'absolute', bottom: 10, left: 10, right: 10,
-                                    padding: '10px 0',
-                                    background: 'rgba(124,109,250,0.9)',
-                                    backdropFilter: 'blur(8px)',
-                                    border: 'none', borderRadius: 8,
-                                    color: '#fff', fontSize: 12, fontWeight: 700,
-                                    cursor: 'pointer', opacity: 0,
-                                    transition: 'opacity 0.2s, transform 0.2s',
-                                    letterSpacing: '0.05em',
-                                    textTransform: 'uppercase',
-                                }}
-                            >
-                                Quick Add
-                            </button>
                         )}
                     </div>
 
                     {/* Info */}
                     <div style={{ padding: '14px 16px 16px' }}>
-                        <p style={{
-                            fontSize: 11, fontWeight: 600, color: T.textMuted,
-                            margin: '0 0 4px', textTransform: 'uppercase',
-                            letterSpacing: '0.08em',
-                        }}>
-                            {product.vendor}
-                        </p>
                         <p style={{
                             fontSize: 14, fontWeight: 600, color: T.text,
                             margin: '0 0 8px', lineHeight: 1.3,
@@ -190,46 +162,36 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                         }}>
                             {product.title}
                         </p>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                            <span style={{
-                                fontSize: 15, fontWeight: 800, color: T.accent,
-                                letterSpacing: '-0.02em',
-                            }}>
-                                ${displayPrice.toFixed(2)}
-                            </span>
-                            {hasDiscount && (
-                                <span style={{
-                                    fontSize: 12, color: T.textMuted,
-                                    textDecoration: 'line-through',
-                                }}>
-                                    ${comparePrice.toFixed(2)}
+                        {showPrice && (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                <span style={{ fontSize: 15, fontWeight: 800, color: T.accent }}>
+                                    ${displayPrice.toFixed(2)}
                                 </span>
-                            )}
-                        </div>
-
-                        {/* Variant Swatches (mini) */}
-                        {product.options.length > 0 && product.options[0].values.length > 1 && (
-                            <div style={{
-                                display: 'flex', gap: 4, marginTop: 10,
-                                flexWrap: 'wrap',
-                            }}>
-                                {product.options[0].values.slice(0, 4).map(val => (
-                                    <span key={val} style={{
-                                        fontSize: 10, color: T.textDim,
-                                        background: T.surface2,
-                                        border: `1px solid ${T.border}`,
-                                        padding: '2px 8px', borderRadius: 4,
-                                        fontWeight: 500,
-                                    }}>
-                                        {val}
+                                {hasDiscount && (
+                                    <span style={{ fontSize: 12, color: T.textMuted, textDecoration: 'line-through' }}>
+                                        ${comparePrice.toFixed(2)}
                                     </span>
-                                ))}
+                                )}
                             </div>
+                        )}
+
+                        {showAddToCart && isAvailable && (
+                            <button
+                                onClick={handleQuickAdd}
+                                style={{
+                                    width: '100%', marginTop: '14px', padding: '10px',
+                                    background: T.accent, border: 'none', borderRadius: '8px',
+                                    color: '#fff', fontSize: '13px', fontWeight: 700,
+                                    cursor: 'pointer', transition: 'background 0.2s',
+                                    textAlign: 'center'
+                                }}
+                            >
+                                Buy Now
+                            </button>
                         )}
                     </div>
                 </div>
             ) : (
-                /* Custom children with scoped context */
                 children
             )}
         </StorefrontProvider>

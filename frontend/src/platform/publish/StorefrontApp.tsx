@@ -251,6 +251,8 @@ export const StorefrontApp: React.FC<StorefrontAppProps> = ({ initialPath, store
                     nodes={config.nodes}
                     rootIds={rootIds}
                     viewport={viewport}
+                    pageId={resolvedRoute?.layoutId}
+                    globalAnimations={config.pages?.[resolvedRoute?.layoutId || 'index']?.globalAnimations ?? true}
                 />
             </div>
         </StorefrontProvider>

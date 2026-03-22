@@ -7,15 +7,15 @@ import { nodeStore } from '../../platform/core/NodeStore';
 import { useSyncExternalStore } from 'react';
 
 const T = {
-    bg:        'var(--bg-background)',
-    border:    'var(--border-primary)',
+    bg:        'var(--surface-overlay)',
+    border:    'var(--border-subtle)',
     text:      'var(--text-primary)',
     muted:     'var(--text-secondary)',
-    accent:    'var(--accent-gold)',
-    accentSub: 'rgba(var(--accent-gold-rgb), 0.1)',
-    danger:    '#EF4444',
-    success:   '#10B981',
-    warning:   '#F59E0B',
+    accent:    'var(--accent-primary)',
+    accentSub: 'var(--accent-subtle)',
+    danger:    'var(--danger)',
+    success:   'var(--success)',
+    warning:   'var(--warning)',
 } as const;
 
 export const TopBarPageSelector: React.FC = () => {
@@ -39,6 +39,48 @@ export const TopBarPageSelector: React.FC = () => {
     const systemPages = pageIds.filter((id: string) => safePages[id]?.type === 'system');
     const templatePages = pageIds.filter((id: string) => safePages[id]?.type === 'template');
     const customPages = pageIds.filter((id: string) => safePages[id]?.type === 'custom');
+
+    const isMobile = window.innerWidth < 768;
+
+    if (isMobile) {
+        return (
+            <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', padding: '4px 6px', whiteSpace: 'nowrap', flex: 1, alignItems: 'center' }}>
+                {pageIds.map((id) => {
+                    const p = safePages[id];
+                    const isActive = id === activePageId;
+                    if (!p) return null;
+                    return (
+                        <button
+                            key={id}
+                            onClick={() => setActivePageId(id)}
+                            style={{
+                                padding: '6px 14px', borderRadius: '20px', 
+                                background: isActive ? T.accentSub : 'rgba(0,0,0,0.03)',
+                                border: `1px solid ${isActive ? T.accent : 'rgba(0,0,0,0.05)'}`,
+                                color: isActive ? T.accent : '#d1d5db',
+                                fontSize: '12px', fontWeight: 600, cursor: 'pointer',
+                                transition: 'all 0.2s', flexShrink: 0
+                            }}
+                        >
+                            {p.title}
+                        </button>
+                    );
+                })}
+                <button
+                    onClick={() => setIsAddModalOpen(true)}
+                    style={{
+                        width: 32, height: 32, borderRadius: '50%', 
+                        background: 'rgba(0,0,0,0.03)',
+                        border: `1px solid rgba(0,0,0,0.05)`,
+                        color: T.muted, cursor: 'pointer', flexShrink: 0,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center'
+                    }}
+                >
+                    <Plus size={14} />
+                </button>
+            </div>
+        );
+    }
 
     return (
         <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -90,9 +132,9 @@ export const TopBarPageSelector: React.FC = () => {
                             position: 'absolute',
                             top: 44,
                             left: 140, // Position relative to layout start
-                            background: '#0e0e12', border: `1px solid ${T.border}`,
+                            background: 'var(--surface-overlay)', border: `1px solid ${T.border}`,
                             borderRadius: 10, minWidth: 220, padding: 6,
-                            zIndex: 9999, boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+                            zIndex: 9999, boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
                             fontFamily: "'Inter', system-ui, sans-serif",
                             maxHeight: '350px', overflowY: 'auto'
                         }}
@@ -119,7 +161,7 @@ export const TopBarPageSelector: React.FC = () => {
                                                     flex: 1, padding: '8px 10px',
                                                     background: isActive ? T.accentSub : 'none',
                                                     border: 'none', borderRadius: 7,
-                                                    color: isActive ? T.accent : '#fff',
+                                                    color: isActive ? T.accent : 'var(--text-primary)',
                                                     display: 'flex', alignItems: 'center', gap: 8,
                                                     cursor: 'pointer', fontSize: 13, fontWeight: 500, textAlign: 'left',
                                                     transition: 'all 0.2s',

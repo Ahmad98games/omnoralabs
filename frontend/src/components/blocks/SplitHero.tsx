@@ -12,7 +12,9 @@ import React, { useState } from 'react';
 export interface SplitHeroProps {
     nodeId: string;
     imagePosition?: 'left' | 'right';
-    imageUrl?: string;
+    imageSrc?: string;
+    imageObjectFit?: 'cover' | 'contain';
+    splitRatio?: number;
     headline?: string;
     richText?: string;
     ctaText?: string;
@@ -39,7 +41,9 @@ const T = {
 export const SplitHero: React.FC<SplitHeroProps> = ({
     nodeId,
     imagePosition = 'right',
-    imageUrl = 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&q=80',
+    imageSrc = 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&q=80',
+    imageObjectFit = 'cover',
+    splitRatio = 50,
     headline = 'Crafted for the Modern Connoisseur',
     richText = 'Every piece in our collection tells a story of precision engineering and timeless design. Discover what sets us apart from the ordinary.',
     ctaText = 'Explore Collection',
@@ -54,9 +58,13 @@ export const SplitHero: React.FC<SplitHeroProps> = ({
 
     const alignMap = { top: 'flex-start', center: 'center', bottom: 'flex-end' } as const;
 
+    const leftWidth = `${splitRatio}%`;
+    const rightWidth = `${100 - splitRatio}%`;
+
     const textContent = (
         <div style={{
-            flex: 1, padding: '48px 40px',
+            flex: `0 0 ${imagePosition === 'right' ? leftWidth : rightWidth}`, 
+            padding: '48px 40px',
             display: 'flex', flexDirection: 'column',
             justifyContent: alignMap[verticalAlignment],
             gap: 20, minWidth: 280,
@@ -106,15 +114,16 @@ export const SplitHero: React.FC<SplitHeroProps> = ({
 
     const imageContent = (
         <div style={{
-            flex: 1, minWidth: 280, minHeight: 300,
+            flex: `0 0 ${imagePosition === 'left' ? leftWidth : rightWidth}`, 
+            minWidth: 280, minHeight: 300,
             overflow: 'hidden', position: 'relative',
         }}>
             <img
-                src={imageUrl}
+                src={imageSrc}
                 alt={headline}
                 style={{
                     width: '100%', height: '100%',
-                    objectFit: 'cover', display: 'block',
+                    objectFit: imageObjectFit, display: 'block',
                     minHeight: 300,
                 }}
                 onError={(e) => {

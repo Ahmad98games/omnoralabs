@@ -25,6 +25,7 @@ export interface PageMetadata {
     };
     type?: 'system' | 'template' | 'custom';
     isLocked?: boolean;
+    globalAnimations?: boolean; // 🎬 Global animation toggle
 }
 
 export interface BuilderNode {

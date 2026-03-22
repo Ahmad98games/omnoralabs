@@ -1,13 +1,6 @@
-/**
- * CountdownTimer: Conversion-Driving Countdown Block
- *
- * Ticks down to a target date using a pure React hook (no external libs).
- * Supports inline and boxed layouts, custom colors, and title text.
- * Registered in BuilderRegistry as 'countdown_timer'.
- */
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 
-// ─── Countdown Hook ───────────────────────────────────────────────────────────
+// ─── Countdown Types ─────────────────────────────────────────────────────────
 
 interface TimeLeft {
     days: number;
@@ -17,10 +10,46 @@ interface TimeLeft {
     expired: boolean;
 }
 
-function useCountdown(targetDate: string): TimeLeft {
-    const target = useMemo(() => new Date(targetDate).getTime(), [targetDate]);
+export interface CountdownTimerProps {
+    nodeId: string;
+    isBuilder?: boolean;
+    targetDate?: string;
+    expiredMessage?: string;
+    expiredAction?: 'hide' | 'show-text' | 'redirect';
+    redirectUrl?: string;
+    style?: 'minimal' | 'boxed' | 'inline';
+    digitColor?: string;
+    labelColor?: string;
+    digitBackground?: string;
+    backgroundColor?: string;
+    labelDays?: string;
+    labelHours?: string;
+    labelMinutes?: string;
+    labelSeconds?: string;
+    children?: React.ReactNode;
+}
 
+// ─── Component ────────────────────────────────────────────────────────────────
+
+export const CountdownTimer: React.FC<CountdownTimerProps> = ({
+    nodeId,
+    isBuilder = false,
+    targetDate = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
+    expiredMessage = 'This offer has ended',
+    expiredAction = 'show-text',
+    redirectUrl = '#',
+    style = 'boxed',
+    digitColor = '#7c6dfa',
+    labelColor = '#5a5a70',
+    digitBackground = 'rgba(124, 109, 250, 0.1)',
+    backgroundColor = '#13131a',
+    labelDays = 'Days',
+    labelHours = 'Hours',
+    labelMinutes = 'Min',
+    labelSeconds = 'Sec',
+}) => {
     const calcTimeLeft = (): TimeLeft => {
+        const target = new Date(targetDate).getTime();
         const diff = target - Date.now();
         if (diff <= 0) return { days: 0, hours: 0, minutes: 0, seconds: 0, expired: true };
         return {
@@ -35,64 +64,44 @@ function useCountdown(targetDate: string): TimeLeft {
     const [timeLeft, setTimeLeft] = useState<TimeLeft>(calcTimeLeft);
 
     useEffect(() => {
-        const timer = setInterval(() => setTimeLeft(calcTimeLeft()), 1000);
+        if (isBuilder) return; // Disable ticking in builder context to prevent canvas re-render lag
+
+        const timer = setInterval(() => {
+            const current = calcTimeLeft();
+            setTimeLeft(current);
+            if (current.expired && expiredAction === 'redirect' && redirectUrl && redirectUrl !== '#') {
+                window.location.replace(redirectUrl);
+            }
+        }, 1000);
+
         return () => clearInterval(timer);
-    }, [target]);
+    }, [targetDate, isBuilder, expiredAction, redirectUrl]);
 
-    return timeLeft;
-}
-
-// ─── Props ────────────────────────────────────────────────────────────────────
-
-export interface CountdownTimerProps {
-    nodeId: string;
-    targetDate?: string;
-    title?: string;
-    expiredMessage?: string;
-    themeColor?: string;
-    bgColor?: string;
-    layout?: 'inline' | 'boxed';
-    showLabels?: boolean;
-    showDays?: boolean;
-    children?: React.ReactNode;
-}
-
-// ─── Component ────────────────────────────────────────────────────────────────
-
-export const CountdownTimer: React.FC<CountdownTimerProps> = ({
-    nodeId,
-    targetDate = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
-    title = '🔥 Flash Sale Ends In',
-    expiredMessage = 'Sale has ended!',
-    themeColor = '#7c6dfa',
-    bgColor = '#13131a',
-    layout = 'boxed',
-    showLabels = true,
-    showDays = true,
-}) => {
-    const timeLeft = useCountdown(targetDate);
-
-    const isBoxed = layout === 'boxed';
-
-    const segments: { value: number; label: string }[] = [
-        ...(showDays ? [{ value: timeLeft.days, label: 'Days' }] : []),
-        { value: timeLeft.hours, label: 'Hours' },
-        { value: timeLeft.minutes, label: 'Min' },
-        { value: timeLeft.seconds, label: 'Sec' },
+    const segments = [
+        { value: timeLeft.days, label: labelDays },
+        { value: timeLeft.hours, label: labelHours },
+        { value: timeLeft.minutes, label: labelMinutes },
+        { value: timeLeft.seconds, label: labelSeconds },
     ];
 
     if (timeLeft.expired) {
-        return (
-            <div data-node-id={nodeId} style={{
-                padding: 24, textAlign: 'center',
-                background: bgColor, borderRadius: 14,
-                border: `1px solid #2a2a3a`,
-                fontFamily: "'Inter', sans-serif",
-            }}>
-                <span style={{ fontSize: 16, color: '#8b8ba0', fontWeight: 600 }}>{expiredMessage}</span>
-            </div>
-        );
+        if (expiredAction === 'hide') return null;
+        if (expiredAction === 'show-text' || expiredAction === 'redirect') {
+            return (
+                <div data-node-id={nodeId} style={{
+                    padding: 24, textAlign: 'center',
+                    background: backgroundColor, borderRadius: 14,
+                    border: `1px solid rgba(255,255,255,0.08)`,
+                    fontFamily: "'Inter', sans-serif",
+                }}>
+                    <span style={{ fontSize: 16, color: '#8b8ba0', fontWeight: 600 }}>{expiredMessage}</span>
+                </div>
+            );
+        }
     }
+
+    const isBoxed = style === 'boxed';
+    const isInline = style === 'inline';
 
     return (
         <div
@@ -101,33 +110,18 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({
                 display: 'flex',
                 flexDirection: isBoxed ? 'column' : 'row',
                 alignItems: 'center',
-                gap: isBoxed ? 18 : 16,
-                padding: isBoxed ? '28px 32px' : '16px 24px',
-                background: bgColor,
-                border: `1px solid ${themeColor}25`,
-                borderRadius: 14,
+                gap: isBoxed ? 18 : 12,
+                padding: isBoxed ? '24px 32px' : '12px 20px',
+                background: backgroundColor,
+                borderRadius: 12,
                 fontFamily: "'Inter', -apple-system, sans-serif",
                 justifyContent: 'center',
             }}
         >
-            {/* Title */}
-            {title && (
-                <span style={{
-                    fontSize: isBoxed ? 15 : 13,
-                    fontWeight: 700,
-                    color: '#f0f0f5',
-                    letterSpacing: '-0.01em',
-                    whiteSpace: 'nowrap',
-                }}>
-                    {title}
-                </span>
-            )}
-
-            {/* Digits */}
             <div style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: isBoxed ? 10 : 8,
+                gap: isBoxed ? 10 : 6,
             }}>
                 {segments.map((seg, i) => (
                     <React.Fragment key={seg.label}>
@@ -135,9 +129,9 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({
                             <span style={{
                                 fontSize: isBoxed ? 24 : 18,
                                 fontWeight: 800,
-                                color: themeColor,
+                                color: digitColor,
                                 opacity: 0.5,
-                                animation: 'omnoraCountdownPulse 1s ease-in-out infinite',
+                                animation: isBuilder ? 'none' : 'omnoraCountdownPulse 1s ease-in-out infinite',
                             }}>
                                 :
                             </span>
@@ -146,27 +140,25 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({
                             display: 'flex',
                             flexDirection: 'column',
                             alignItems: 'center',
-                            minWidth: isBoxed ? 68 : 46,
+                            minWidth: isBoxed ? 60 : 38,
                         }}>
                             <span style={{
-                                fontSize: isBoxed ? 32 : 22,
+                                fontSize: isBoxed ? 32 : 20,
                                 fontWeight: 900,
-                                color: themeColor,
-                                letterSpacing: '-0.03em',
-                                lineHeight: 1,
+                                color: digitColor,
                                 fontVariantNumeric: 'tabular-nums',
-                                background: `${themeColor}10`,
+                                background: digitBackground,
                                 borderRadius: 8,
                                 padding: isBoxed ? '10px 14px' : '6px 10px',
-                                border: `1px solid ${themeColor}20`,
+                                border: `1px solid ${digitColor}20`,
                             }}>
                                 {String(seg.value).padStart(2, '0')}
                             </span>
-                            {showLabels && (
+                            {!isInline && (
                                 <span style={{
                                     fontSize: 9,
                                     fontWeight: 600,
-                                    color: '#5a5a70',
+                                    color: labelColor,
                                     textTransform: 'uppercase',
                                     letterSpacing: '0.1em',
                                     marginTop: 6,

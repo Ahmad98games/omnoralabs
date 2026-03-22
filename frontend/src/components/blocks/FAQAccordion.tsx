@@ -6,6 +6,7 @@
  * Registered in BuilderRegistry as 'faq_accordion'.
  */
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import DOMPurify from 'dompurify';
 
 // ─── Interfaces ───────────────────────────────────────────────────────────────
 
@@ -19,10 +20,13 @@ export interface FAQItem {
 export interface FAQAccordionProps {
     nodeId: string;
     title?: string;
-    themeColor?: string;
-    bgColor?: string;
-    allowMultipleOpen?: boolean;
-    items?: FAQItem[];
+    faqs?: FAQItem[];
+    defaultOpen?: number;
+    allowMultiple?: boolean;
+    iconStyle?: 'plus-minus' | 'chevron' | 'arrow';
+    borderStyle?: 'full' | 'bottom-only' | 'none';
+    headingColor?: string;
+    accentColor?: string;
     children?: React.ReactNode;
 }
 
@@ -52,34 +56,36 @@ const T = {
 export const FAQAccordion: React.FC<FAQAccordionProps> = ({
     nodeId,
     title = 'Frequently Asked Questions',
-    themeColor = '#7c6dfa',
-    bgColor = 'transparent',
-    allowMultipleOpen = false,
-    items = DEFAULT_ITEMS,
+    faqs = DEFAULT_ITEMS,
+    defaultOpen = 0,
+    allowMultiple = false,
+    iconStyle = 'plus-minus',
+    borderStyle = 'full',
+    headingColor = '#f0f0f5',
+    accentColor = '#7c6dfa',
 }) => {
-    const [openIndices, setOpenIndices] = useState<Set<number>>(new Set());
+    const [openIndices, setOpenIndices] = useState<Set<number>>(new Set(defaultOpen >= 0 ? [defaultOpen] : []));
 
     const toggle = useCallback((index: number) => {
         setOpenIndices(prev => {
-            const next = new Set(allowMultipleOpen ? prev : []);
+            const next = new Set(allowMultiple ? prev : []);
             if (prev.has(index)) next.delete(index);
             else next.add(index);
             return next;
         });
-    }, [allowMultipleOpen]);
+    }, [allowMultiple]);
 
     return (
         <div
             data-node-id={nodeId}
             style={{
                 fontFamily: "'Inter', -apple-system, sans-serif",
-                padding: '32px 0',
-                background: bgColor,
+                padding: '32px 16px',
             }}
         >
             {title && (
                 <h2 style={{
-                    fontSize: 22, fontWeight: 800, color: T.text,
+                    fontSize: 22, fontWeight: 800, color: headingColor,
                     margin: '0 0 24px', letterSpacing: '-0.03em',
                     textAlign: 'center',
                 }}>
@@ -91,13 +97,15 @@ export const FAQAccordion: React.FC<FAQAccordionProps> = ({
                 maxWidth: 700, margin: '0 auto',
                 display: 'flex', flexDirection: 'column', gap: 8,
             }}>
-                {items.map((item, i) => (
+                {faqs.map((item, i) => (
                     <AccordionItem
                         key={i}
                         item={item}
                         isOpen={openIndices.has(i)}
                         onToggle={() => toggle(i)}
-                        themeColor={themeColor}
+                        accentColor={accentColor}
+                        iconStyle={iconStyle}
+                        borderStyle={borderStyle}
                     />
                 ))}
             </div>
@@ -108,10 +116,18 @@ export const FAQAccordion: React.FC<FAQAccordionProps> = ({
 // ─── Accordion Item ───────────────────────────────────────────────────────────
 
 const AccordionItem: React.FC<{
-    item: FAQItem; isOpen: boolean; onToggle: () => void; themeColor: string;
-}> = ({ item, isOpen, onToggle, themeColor }) => {
+    item: FAQItem; 
+    isOpen: boolean; 
+    onToggle: () => void; 
+    accentColor: string;
+    iconStyle: 'plus-minus' | 'chevron' | 'arrow';
+    borderStyle: 'full' | 'bottom-only' | 'none';
+}> = ({ item, isOpen, onToggle, accentColor, iconStyle, borderStyle }) => {
     const contentRef = useRef<HTMLDivElement>(null);
     const [height, setHeight] = useState(0);
+
+    const isFull = borderStyle === 'full';
+    const isBottom = borderStyle === 'bottom-only';
 
     useEffect(() => {
         if (contentRef.current) {
@@ -122,10 +138,12 @@ const AccordionItem: React.FC<{
     return (
         <div style={{
             background: T.surface,
-            border: `1px solid ${isOpen ? themeColor + '40' : T.border}`,
-            borderRadius: 12,
+            border: isFull ? `1px solid ${isOpen ? accentColor + '40' : T.border}` : 'none',
+            borderBottom: isBottom ? `1px solid ${T.border}` : undefined,
+            borderRadius: isFull ? 12 : 0,
             overflow: 'hidden',
             transition: 'border-color 0.2s',
+            marginBottom: isFull ? 8 : 0,
         }}>
             <button
                 onClick={onToggle}
@@ -143,12 +161,13 @@ const AccordionItem: React.FC<{
                     {item.question}
                 </span>
                 <span style={{
-                    fontSize: 18, color: themeColor,
+                    fontSize: 16, color: accentColor,
                     transition: 'transform 0.25s cubic-bezier(0.16,1,0.3,1)',
-                    transform: isOpen ? 'rotate(45deg)' : 'rotate(0)',
+                    transform: isOpen && iconStyle === 'plus-minus' ? 'rotate(45deg)' : isOpen ? 'rotate(180deg)' : 'rotate(0)',
                     flexShrink: 0, fontWeight: 300,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}>
-                    +
+                    {iconStyle === 'plus-minus' ? '+' : iconStyle === 'chevron' ? '▼' : '↓'}
                 </span>
             </button>
             <div style={{
@@ -160,7 +179,9 @@ const AccordionItem: React.FC<{
                     fontSize: 13, color: T.textDim,
                     lineHeight: 1.7, fontWeight: 400,
                 }}>
-                    {item.answer}
+                    {typeof DOMPurify !== 'undefined' ? (
+                        <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(item.answer) }} />
+                    ) : item.answer}
                 </div>
             </div>
         </div>

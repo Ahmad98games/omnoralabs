@@ -1,0 +1,118 @@
+src/app/api/dns-check/route.ts(1,30): error TS2307: Cannot find module 'next/server' or its corresponding type declarations.
+src/app/store/[merchant_slug]/[page_slug]/page.tsx(4,10): error TS2305: Module '"../../../../utils/SEOManager"' has no exported member 'formatMetadata'.
+src/app/store/[merchant_slug]/[page_slug]/page.tsx(48,39): error TS2339: Property 'name' does not exist on type '{ slug: any; name: any; }[]'.
+src/app/store/[merchant_slug]/track/[order_id]/page.tsx(55,51): error TS2339: Property 'payment_methods' does not exist on type '{ id: any; slug: any; payment_methods: any; }[]'.
+src/components/blocks/SiteFooter.tsx(171,34): error TS2339: Property 'heading' does not exist on type 'FooterColumn'.
+src/components/blocks/TrustBadges.tsx(159,14): error TS2367: This comparison appears to be unintentional because the types '"outline" | "filled" | "minimal"' and '"text-only"' have no overlap.
+src/components/blocks/TrustBadges.tsx(175,91): error TS2769: No overload matches this call.
+  The last overload gave the following error.
+    Object literal may only specify known properties, and 'width' does not exist in type 'Partial<unknown> & Attributes'.
+src/components/blocks/TrustBadges.tsx(181,14): error TS2367: This comparison appears to be unintentional because the types '"outline" | "filled" | "minimal"' and '"icon-only"' have no overlap.
+src/components/blocks/TrustBadges.tsx(191,32): error TS2339: Property 'text' does not exist on type 'TrustBadge'.
+src/components/blocks/TrustBadges.tsx(193,44): error TS2339: Property 'subtext' does not exist on type 'TrustBadge'.
+src/components/blocks/TrustBadges.tsx(201,36): error TS2339: Property 'subtext' does not exist on type 'TrustBadge'.
+src/components/blocks/WhatsAppFloating.tsx(67,21): error TS1117: An object literal cannot have multiple properties with the same name.
+src/components/builder/AddPageModal.tsx(4,10): error TS2300: Duplicate identifier 'cloneNodeTree'.
+src/components/builder/AddPageModal.tsx(5,10): error TS2300: Duplicate identifier 'cloneNodeTree'.
+src/components/builder/AddPageModal.tsx(91,44): error TS2339: Property 'nodes' does not exist on type '{ nodes: { [x: string]: { id: string; type: string; parentId: null; children: never[]; props: { headline: string; subheadline: string; text?: undefined; }; styles: {}; } | { id: string; type: string; parentId: null; children: never[]; props: { ...; }; styles: {}; }; }; layout: string[]; } | { ...; } | { ...; } | { ....'.
+  Property 'nodes' does not exist on type '{ clonedNodes: Record<string, any>; clonedLayout: string[]; }'.
+src/components/builder/AddPageModal.tsx(91,78): error TS2339: Property 'nodes' does not exist on type '{ nodes: { [x: string]: { id: string; type: string; parentId: null; children: never[]; props: { headline: string; subheadline: string; text?: undefined; }; styles: {}; } | { id: string; type: string; parentId: null; children: never[]; props: { ...; }; styles: {}; }; }; layout: string[]; } | { ...; } | { ...; } | { ....'.
+  Property 'nodes' does not exist on type '{ clonedNodes: Record<string, any>; clonedLayout: string[]; }'.
+src/components/builder/TopBarPageSelector.tsx(48,31): error TS7006: Parameter 'id' implicitly has an 'any' type.
+src/components/builder/TopBarPageSelector.tsx(175,132): error TS2322: Type '{ size: number; style: { color: "var(--danger)"; flexShrink: number; }; title: string; }' is not assignable to type 'IntrinsicAttributes & Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>'.
+  Property 'title' does not exist on type 'IntrinsicAttributes & Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>'.
+src/components/cart/CheckoutBlock.tsx(144,28): error TS2304: Cannot find name 'lineItems'.
+src/components/cart/CheckoutBlock.tsx(169,17): error TS2353: Object literal may only specify known properties, and 'tracking_event_id' does not exist in type 'OrderCustomer'.
+src/components/cart/CheckoutBlock.tsx(171,13): error TS2304: Cannot find name 'lineItems'.
+src/components/cart/FeaturedProduct.tsx(105,69): error TS2339: Property 'image' does not exist on type 'Product | { title: string; price: number; compareAtPrice: number; description: string; image: string; }'.
+  Property 'image' does not exist on type 'Product'.
+src/components/cart/ProductGrid.tsx(159,51): error TS2339: Property 'category_id' does not exist on type 'Product'.
+src/components/cart/ProductGrid.tsx(169,14): error TS2304: Cannot find name 'vibeQuery'.
+src/components/cart/ProductGrid.tsx(170,13): error TS2304: Cannot find name 'setVibeTags'.
+src/components/cart/ProductGrid.tsx(173,9): error TS2304: Cannot find name 'setIsVibeLoading'.
+src/components/cart/ProductGrid.tsx(175,82): error TS2304: Cannot find name 'vibeQuery'.
+src/components/cart/ProductGrid.tsx(177,17): error TS2304: Cannot find name 'setVibeTags'.
+src/components/cart/ProductGrid.tsx(181,13): error TS2304: Cannot find name 'setVibeTags'.
+src/components/cart/ProductGrid.tsx(181,25): error TS2304: Cannot find name 'vibeQuery'.
+src/components/cart/ProductGrid.tsx(181,91): error TS7006: Parameter 'w' implicitly has an 'any' type.
+src/components/cart/ProductGrid.tsx(183,13): error TS2304: Cannot find name 'setIsVibeLoading'.
+src/components/cart/ProductGrid.tsx(187,86): error TS2552: Cannot find name 'collection'. Did you mean 'collectionId'?
+src/components/cart/ProductGrid.tsx(188,14): error TS7006: Parameter 'p' implicitly has an 'any' type.
+src/components/cart/ProductGrid.tsx(194,46): error TS2304: Cannot find name 'activeCardStyle'.
+src/components/cart/ProductGrid.tsx(195,103): error TS2304: Cannot find name 'activeAspect'.
+src/components/cms/BuilderToolbar.tsx(465,60): error TS2345: Argument of type '(v: "page" | "device" | null) => "overflow" | null' is not assignable to parameter of type 'SetStateAction<"page" | "device" | null>'.
+  Type '(v: "page" | "device" | null) => "overflow" | null' is not assignable to type '(prevState: "page" | "device" | null) => "page" | "device" | null'.
+    Type '"overflow" | null' is not assignable to type '"page" | "device" | null'.
+      Type '"overflow"' is not assignable to type '"page" | "device" | null'.
+src/components/cms/BuilderToolbar.tsx(465,65): error TS2367: This comparison appears to be unintentional because the types '"page" | "device" | null' and '"overflow"' have no overlap.
+src/components/cms/BuilderToolbar.tsx(468,45): error TS2367: This comparison appears to be unintentional because the types '"page" | "device" | null' and '"overflow"' have no overlap.
+src/components/cms/BuilderToolbar.tsx(469,54): error TS2367: This comparison appears to be unintentional because the types '"page" | "device" | null' and '"overflow"' have no overlap.
+src/components/cms/BuilderToolbar.tsx(470,40): error TS2367: This comparison appears to be unintentional because the types '"page" | "device" | null' and '"overflow"' have no overlap.
+src/components/cms/BuilderToolbar.tsx(611,41): error TS2367: This comparison appears to be unintentional because the types '"page" | "device" | null' and '"overflow"' have no overlap.
+src/components/cms/BuilderToolbar.tsx(644,14): error TS2304: Cannot find name 'JobMonitor'.
+src/components/cms/GranularErrorBoundary.tsx(2,10): error TS2614: Module '"../../api/client"' has no exported member 'trackEvent'. Did you mean to use 'import trackEvent from "../../api/client"' instead?
+src/components/cms/NavigatorPanel.tsx(29,34): error TS7006: Parameter 'id' implicitly has an 'any' type.
+src/components/merchant/RecoveryList.tsx(31,33): error TS2339: Property 'user_metadata' does not exist on type 'User'.
+src/components/merchant/RecoveryList.tsx(74,30): error TS2339: Property 'last_recovery_at' does not exist on type 'AbandonedCartInfo'.
+src/components/merchant/RecoveryList.tsx(75,56): error TS2339: Property 'last_recovery_at' does not exist on type 'AbandonedCartInfo'.
+src/components/seller/AdminOrderManager.tsx(207,105): error TS2339: Property 'user_metadata' does not exist on type 'User'.
+src/components/seller/AdminOrderManager.tsx(207,140): error TS2339: Property 'user_metadata' does not exist on type 'User'.
+src/components/seller/AdminOrderManager.tsx(221,112): error TS2551: Property 'customerPhone' does not exist on type 'Order'. Did you mean 'customerName'?
+src/components/seller/AdminOrderManager.tsx(261,68): error TS2339: Property 'user_metadata' does not exist on type 'User'.
+src/components/seller/AdminOrderManager.tsx(261,103): error TS2339: Property 'user_metadata' does not exist on type 'User'.
+src/components/seller/AiInsights.tsx(3,25): error TS2307: Cannot find module '../../../context/AuthContext' or its corresponding type declarations.
+src/components/seller/AiInsights.tsx(4,30): error TS2307: Cannot find module '../../../platform/ai/DataCruncher' or its corresponding type declarations.
+src/components/seller/AiInsights.tsx(5,26): error TS2307: Cannot find module '../../../lib/supabaseClient' or its corresponding type declarations.
+src/components/seller/AiInsights.tsx(132,21): error TS2322: Type '(signal?: AbortSignal) => Promise<void>' is not assignable to type 'MouseEventHandler<HTMLButtonElement>'.
+  Types of parameters 'signal' and 'event' are incompatible.
+    Type 'MouseEvent<HTMLButtonElement, MouseEvent>' is missing the following properties from type 'AbortSignal': aborted, onabort, reason, throwIfAborted, and 3 more.
+src/components/seller/MerchantStats.tsx(2,26): error TS2307: Cannot find module '../../../lib/supabaseClient' or its corresponding type declarations.
+src/components/seller/MerchantStats.tsx(3,25): error TS2307: Cannot find module '../../../context/AuthContext' or its corresponding type declarations.
+src/components/seller/MerchantStats.tsx(35,38): error TS7006: Parameter 'sum' implicitly has an 'any' type.
+src/components/seller/MerchantStats.tsx(35,43): error TS7006: Parameter 'o' implicitly has an 'any' type.
+src/components/seller/PrintView.tsx(32,28): error TS2339: Property 'lineItems' does not exist on type 'Order'.
+src/components/storefront/CartDrawer.tsx(42,37): error TS2339: Property 'selectedVariant' does not exist on type 'CartItem'.
+src/components/storefront/CartDrawer.tsx(164,59): error TS2339: Property 'selectedVariant' does not exist on type 'CartItem'.
+src/components/storefront/CartDrawer.tsx(166,67): error TS2339: Property 'selectedVariant' does not exist on type 'CartItem'.
+src/components/storefront/CartDrawer.tsx(171,101): error TS2339: Property 'selectedVariant' does not exist on type 'CartItem'.
+src/components/storefront/CartDrawer.tsx(182,128): error TS2339: Property 'selectedVariant' does not exist on type 'CartItem'.
+src/components/storefront/CartDrawer.tsx(190,128): error TS2339: Property 'selectedVariant' does not exist on type 'CartItem'.
+src/components/ui/LayerManager.tsx(60,51): error TS7053: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type 'DynamicStyleState'.
+src/context/BuilderContext.tsx(1056,82): error TS2322: Type '(id: string) => void' is not assignable to type '(id: string) => string'.
+  Type 'void' is not assignable to type 'string'.
+src/pages/admin/Billing.tsx(2,26): error TS2307: Cannot find module '../../../lib/supabaseClient' or its corresponding type declarations.
+src/pages/admin/Billing.tsx(3,25): error TS2307: Cannot find module '../../../context/AuthContext' or its corresponding type declarations.
+src/pages/admin/Billing.tsx(4,26): error TS2307: Cannot find module '../../../context/ToastContext' or its corresponding type declarations.
+src/pages/Checkout.tsx(4,18): error TS2614: Module '"../api/client"' has no exported member 'trackEvent'. Did you mean to use 'import trackEvent from "../api/client"' instead?
+src/pages/Checkout.tsx(156,53): error TS2304: Cannot find name '_id'.
+src/pages/Checkout.tsx(164,37): error TS2304: Cannot find name 'orderNumber'.
+src/pages/Product.tsx(88,26): error TS2345: Argument of type 'number' is not assignable to parameter of type 'string'.
+src/pages/SellerDashboard.tsx(169,28): error TS2304: Cannot find name 'localContent'.
+src/pages/SellerDashboard.tsx(183,9): error TS2304: Cannot find name 'setLocalContent'.
+src/pages/SellerDashboard.tsx(191,9): error TS2304: Cannot find name 'setAddPageOpen'.
+src/pages/SellerDashboard.tsx(192,9): error TS2304: Cannot find name 'showToast'.
+src/pages/SellerDashboard.tsx(195,9): error TS2304: Cannot find name 'showToast'.
+src/pages/SellerDashboard.tsx(197,9): error TS2304: Cannot find name 'fetchContent'.
+src/pages/SellerDashboard.tsx(204,19): error TS2339: Property 'handleLogoutCleanup' does not exist on type 'AuthContextType'.
+src/pages/SellerDashboard.tsx(326,29): error TS2339: Property 'full_name' does not exist on type 'User'.
+src/pages/SellerDashboard.tsx(454,136): error TS2339: Property 'full_name' does not exist on type 'User'.
+src/pages/SellerDashboard.tsx(534,18): error TS2304: Cannot find name 'AddPageModal'.
+src/pages/super-admin/Payments.tsx(2,26): error TS2307: Cannot find module '../../../lib/supabaseClient' or its corresponding type declarations.
+src/pages/super-admin/SuperAdminPaymentController.ts(1,26): error TS2307: Cannot find module '../../../lib/supabaseClient' or its corresponding type declarations.
+src/platform/ai/DataCruncher.ts(35,38): error TS2345: Argument of type 'AbortSignal | undefined' is not assignable to parameter of type 'AbortSignal'.
+  Type 'undefined' is not assignable to type 'AbortSignal'.
+src/platform/ai/DataCruncher.ts(41,38): error TS2345: Argument of type 'AbortSignal | undefined' is not assignable to parameter of type 'AbortSignal'.
+  Type 'undefined' is not assignable to type 'AbortSignal'.
+src/platform/ai/DataCruncher.ts(48,38): error TS2345: Argument of type 'AbortSignal | undefined' is not assignable to parameter of type 'AbortSignal'.
+  Type 'undefined' is not assignable to type 'AbortSignal'.
+src/platform/ai/DataCruncher.ts(55,26): error TS2339: Property 'abortSignal' does not exist on type 'PostgrestBuilder<any, { wallet_days_remaining: any; }, false>'.
+src/platform/ai/DataCruncher.ts(60,43): error TS7006: Parameter 'sum' implicitly has an 'any' type.
+src/platform/ai/DataCruncher.ts(60,48): error TS7006: Parameter 'o' implicitly has an 'any' type.
+src/platform/ai/DataCruncher.ts(64,46): error TS7006: Parameter 'p' implicitly has an 'any' type.
+src/platform/ai/DataCruncher.ts(83,40): error TS7006: Parameter 'l' implicitly has an 'any' type.
+src/stores/useBuilderStore.ts(290,17): error TS7006: Parameter 'state' implicitly has an 'any' type.
+src/stores/useBuilderStore.ts(290,24): error TS7006: Parameter 'error' implicitly has an 'any' type.
+src/utils/InvoiceGenerator.ts(30,29): error TS2339: Property 'lineItems' does not exist on type 'Order'.
+src/utils/PixelManager.ts(33,14): error TS1345: An expression of type 'void' cannot be tested for truthiness.
+src/utils/PixelManager.ts(48,14): error TS1345: An expression of type 'void' cannot be tested for truthiness.
+src/utils/SEOManager.ts(29,44): error TS2554: Expected 1 arguments, but got 4.

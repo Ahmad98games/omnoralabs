@@ -43,35 +43,35 @@ export const PageSettingsPanel: React.FC = () => {
 
     return (
         <div style={{
-            fontFamily: "'Inter', sans-serif",
-            color: '#e4e4e7',
+            fontFamily: "var(--font-sans)",
+            color: 'var(--text-primary)',
             display: 'flex', flexDirection: 'column', gap: '24px',
         }}>
             {/* Header */}
             <div style={{
                 display: 'flex', alignItems: 'center', gap: '8px',
-                padding: '12px', background: 'rgba(255,255,255,0.03)',
-                borderRadius: '8px'
+                padding: '12px', background: 'var(--surface-raised)',
+                borderRadius: '8px', border: '1px solid var(--border-subtle)'
             }}>
-                <div style={{ padding: '6px', background: '#34d399', borderRadius: '4px' }}>
-                    <FileText size={14} color="#000" />
+                <div style={{ padding: '6px', background: 'var(--accent-primary)', borderRadius: '4px' }}>
+                    <FileText size={14} color="#FFF" />
                 </div>
                 <div>
-                    <div style={{ fontSize: '10px', color: '#a1a1aa', fontWeight: 700, textTransform: 'uppercase' }}>Page Settings</div>
-                    <div style={{ fontSize: '13px', color: '#fff', fontWeight: 600 }}>{activePage?.title || 'Global Page'}</div>
+                    <div style={{ fontSize: '10px', color: 'var(--text-tertiary)', fontWeight: 700, textTransform: 'uppercase' }}>Page Settings</div>
+                    <div style={{ fontSize: '13px', color: 'var(--text-primary)', fontWeight: 600 }}>{activePage?.title || 'Global Page'}</div>
                 </div>
             </div>
 
             {/* SEO Fields */}
             <div style={{
-                background: '#0e0e11', border: '1px solid #27272a',
+                background: 'var(--surface-overlay)', border: '1px solid var(--border-subtle)',
                 borderRadius: '8px', padding: '16px'
             }}>
                 <div style={{
                     display: 'flex', alignItems: 'center', gap: '8px',
-                    marginBottom: '16px', color: '#e4e4e7', fontSize: '13px', fontWeight: 600
+                    marginBottom: '16px', color: 'var(--text-primary)', fontSize: '13px', fontWeight: 600
                 }}>
-                    <span style={{ color: '#a1a1aa' }}><Search size={14} /></span> SEO & Meta Tags
+                    <span style={{ color: 'var(--accent-primary)' }}><Search size={14} /></span> SEO & Meta Tags
                 </div>
 
                 {/* Page Title */}
@@ -129,22 +129,46 @@ export const PageSettingsPanel: React.FC = () => {
                 {/* Live Preview */}
                 <div style={{
                     marginTop: 8, padding: '12px',
-                    background: '#18181b', borderRadius: '6px',
-                    border: '1px solid #27272a'
+                    background: 'var(--surface-raised)', borderRadius: '6px',
+                    border: '1px solid var(--border-subtle)'
                 }}>
-                    <div style={{ fontSize: '10px', color: '#71717a', fontWeight: 600, textTransform: 'uppercase', marginBottom: 8 }}>
+                    <div style={{ fontSize: '10px', color: 'var(--text-tertiary)', fontWeight: 600, textTransform: 'uppercase', marginBottom: 8 }}>
                         Search Preview
                     </div>
                     <div style={{ fontSize: '14px', color: '#8ab4f8', fontWeight: 600, marginBottom: 4, wordBreak: 'break-word' }}>
                         {previewTitle}
                     </div>
-                    <div style={{ fontSize: '11px', color: '#a1a1aa', lineHeight: 1.5, wordBreak: 'break-word' }}>
+                    <div style={{ fontSize: '11px', color: 'var(--text-secondary)', lineHeight: 1.5, wordBreak: 'break-word' }}>
                         {previewDescription}
                     </div>
-                    <div style={{ fontSize: '11px', color: '#34d399', marginTop: 4 }}>
+                    <div style={{ fontSize: '11px', color: 'var(--accent-primary)', marginTop: 4 }}>
                         omnorastore.com/{activePage?.slug || ''}
                     </div>
                 </div>
+            </div>
+
+            {/* Global Animations Toggle */}
+            <div style={{
+                background: 'var(--surface-overlay)', border: '1px solid var(--border-subtle)',
+                borderRadius: '8px', padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between'
+            }}>
+                <div>
+                    <div style={{ fontSize: '13px', color: 'var(--text-primary)', fontWeight: 600 }}>Page Animations</div>
+                    <div style={{ fontSize: '11px', color: 'var(--text-tertiary)', marginTop: '2px' }}>Enable storefront entry animations.</div>
+                </div>
+                <button
+                    onClick={() => activePageId && updatePageMeta(activePageId, 'globalAnimations', !(activePage?.globalAnimations ?? true))}
+                    style={{
+                        padding: '6px 14px', borderRadius: 6, fontSize: 11, fontWeight: 600,
+                        cursor: 'pointer', border: '1px solid',
+                        background: (activePage?.globalAnimations ?? true) ? 'var(--accent-subtle)' : 'var(--surface-overlay)',
+                        borderColor: (activePage?.globalAnimations ?? true) ? 'var(--accent-primary)' : 'var(--border-subtle)',
+                        color: (activePage?.globalAnimations ?? true) ? 'var(--accent-primary)' : 'var(--text-secondary)',
+                        transition: 'all 0.15s',
+                    }}
+                >
+                    {(activePage?.globalAnimations ?? true) ? '● ACTIVE' : '○ INACTIVE'}
+                </button>
             </div>
         </div>
     );
@@ -153,16 +177,16 @@ export const PageSettingsPanel: React.FC = () => {
 // ─── Style Constants ──────────────────────────────────────────────────────────
 
 const labelStyle: React.CSSProperties = {
-    fontSize: '10px', color: '#71717a', fontWeight: 600,
+    fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 600,
     textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '6px'
 };
 
 const inputStyle: React.CSSProperties = {
     width: '100%', padding: '8px 10px', fontSize: '12px',
-    background: '#18181b', border: '1px solid #27272a',
-    borderRadius: '4px', color: '#f4f4f5', fontFamily: 'monospace'
+    background: 'var(--surface-raised)', border: '1px solid var(--border-subtle)',
+    borderRadius: '6px', color: 'var(--text-primary)', fontFamily: 'monospace', outline: 'none'
 };
 
 const hintStyle: React.CSSProperties = {
-    fontSize: '10px', color: '#52525b', marginTop: 4, fontStyle: 'italic'
+    fontSize: '10px', color: 'var(--text-tertiary)', marginTop: 4, fontStyle: 'italic'
 };

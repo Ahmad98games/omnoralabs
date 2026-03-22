@@ -4,60 +4,116 @@ import { useAuth } from '../../../context/AuthContext';
 import { DataCruncher } from '../../../platform/ai/DataCruncher';
 import { supabase } from '../../../lib/supabaseClient';
 
-interface Insight {
+export interface ActionCard {
+    id: string;
+    type: "CREATE_COUPON" | "RESTOCK_ALERT" | "RECOVER_CHECKOUT" | "BOOST_PRODUCT" | "REVIEW_REQUEST";
     title: string;
     description: string;
-    impact_score: number;
-    action_type: 'CREATE_COUPON' | 'RESTOCK_ITEM' | 'PAUSED_WARNING' | 'GENERIC';
-    suggested_payload?: any;
+    impact: "high" | "medium" | "low";
+    payload: Record<string, any>;
+    expiresAt?: string;
 }
+
+const isValidActionCard = (card: any): card is ActionCard => {
+    return (
+        card &&
+        typeof card.id === 'string' &&
+        ['CREATE_COUPON', 'RESTOCK_ALERT', 'RECOVER_CHECKOUT', 'BOOST_PRODUCT', 'REVIEW_REQUEST'].includes(card.type) &&
+        typeof card.title === 'string' &&
+        typeof card.description === 'string' &&
+        ['high', 'medium', 'low'].includes(card.impact) &&
+        typeof card.payload === 'object'
+    );
+};
 
 export const AiInsights: React.FC = () => {
     const { user } = useAuth();
-    const [insights, setInsights] = useState<Insight[]>([]);
+    const [insights, setInsights] = useState<ActionCard[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const loadInsights = async () => {
+    const loadInsights = async (signal?: AbortSignal) => {
         if (!user) return;
         setIsLoading(true);
         setError(null);
 
         try {
-            // 1. Pull hyper-dense store state using DataCruncher natively
-            const state = await DataCruncher.captureStoreState(user.id);
+            const state = await DataCruncher.captureStoreState(user.id, signal);
             if (!state) throw new Error("Could not parse store state.");
 
-            // 2. Transmit to Edge LLM gateway
             const { data, error: fnError } = await supabase.functions.invoke('ai-advisor', {
                 body: { store_data: state }
             });
 
             if (fnError || !data?.insights) throw new Error(fnError?.message || 'AI Engine failed to compute.');
 
-            setInsights(data.insights);
+            // 🛡️ 1. Temporal Dismissal Cleanups (Expiry > 24h)
+            const dismissed = JSON.parse(localStorage.getItem('omnora_dismissed_cards') || '{}');
+            const now = Date.now();
+            Object.keys(dismissed).forEach(id => {
+                 if (now - dismissed[id] > 24 * 60 * 60 * 1000) {
+                      delete dismissed[id]; 
+                 }
+            });
+            localStorage.setItem('omnora_dismissed_cards', JSON.stringify(dismissed));
+
+            // 🛡️ 2. Validation Checks & Dismiss Filtering
+            const validatedCards = (data.insights as any[]).filter((c: any) => {
+                 if (!isValidActionCard(c)) {
+                      console.warn('[AiInsights] Discarded malformed ActionCard:', c);
+                      return false;
+                 }
+                 return !dismissed[c.id]; // Exclude dismissed
+            });
+
+            setInsights(validatedCards);
         } catch (err: any) {
-            setError(err.message);
+            if (err.name !== 'AbortError') setError(err.message);
         } finally {
             setIsLoading(false);
         }
     };
 
-    // Auto-fetch on mount
+    // 🛡️ Visibility Tab Abort Controller Aggregation skips
     useEffect(() => {
-        loadInsights();
+        const controller = new AbortController();
+        const handleVisibilityChange = () => {
+             if (document.hidden) {
+                  controller.abort();
+             } else {
+                  // Re-evaluate when Tab becomes active triggers again nicely
+                  loadInsights(controller.signal);
+             }
+        };
+
+        loadInsights(controller.signal);
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+
+        return () => {
+             controller.abort();
+             document.removeEventListener('visibilitychange', handleVisibilityChange);
+        };
     }, [user]);
 
-    const handleActionClick = (actionType: string, payload: any) => {
-        if (actionType === 'CREATE_COUPON') {
+    const handleDismiss = (id: string) => {
+         const dismissed = JSON.parse(localStorage.getItem('omnora_dismissed_cards') || '{}');
+         dismissed[id] = Date.now(); // Store current timestamp triggers
+         localStorage.setItem('omnora_dismissed_cards', JSON.stringify(dismissed));
+         setInsights(prev => prev.filter(c => c.id !== id));
+    };
+
+    const handleActionClick = (type: ActionCard['type'], payload: Record<string, any>) => {
+        if (type === 'CREATE_COUPON') {
             const code = payload?.code || 'BOOST10';
-            // Trigger global Modal/Toast or navigate natively to coupon builder
-            window.alert(`[Omnora Co-Pilot Engine]\nRouting to Coupon Manager to auto-generate: ${code}`);
-        } else if (actionType === 'RESTOCK_ITEM') {
+            window.alert(`[Omnora Co-Pilot] Pre-filling Coupon Modal with code: ${code}`);
+        } else if (type === 'RESTOCK_ALERT') {
             const sku = payload?.sku || 'Unknown';
-            window.alert(`[Omnora Co-Pilot Engine]\nRouting to Inventory Matrix to replenish SKU: ${sku}`);
+            window.alert(`[Omnora Co-Pilot] Navigating to Inventory for SKU: ${sku}`);
+        } else if (type === 'RECOVER_CHECKOUT') {
+            const phone = payload?.phone || '';
+            window.alert(`[Omnora Co-Pilot] Opening WhatsApp for checkout recovery to: ${phone}`);
         } else {
-            console.log('Action recorded:', actionType, payload);
+            console.log('Action recorded:', type, payload);
         }
     };
 
@@ -99,18 +155,17 @@ export const AiInsights: React.FC = () => {
                         </motion.div>
                     )}
 
-                    {insights.map((insight, idx) => (
+                    {insights.map((insight) => (
                         <motion.div
-                            key={idx}
+                            key={insight.id}
                             initial={{ opacity: 0, y: 15 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: idx * 0.1 }}
                             className="group flex flex-col md:flex-row gap-6 items-start bg-gradient-to-r from-[#14141a] to-[#121118] p-6 rounded-xl border border-gray-800 hover:border-indigo-500/30 transition-all shadow-xl"
                         >
                             <div className="flex-1 space-y-2">
                                 <div className="flex items-center space-x-3">
-                                    <span className={`px-2 py-0.5 rounded text-xs font-black uppercase tracking-wider ${insight.impact_score > 7 ? 'bg-red-500/20 text-red-500' : 'bg-indigo-500/20 text-indigo-400'}`}>
-                                        Impact: {insight.impact_score}/10
+                                    <span className={`px-2 py-0.5 rounded text-xs font-black uppercase tracking-wider ${insight.impact === 'high' ? 'bg-red-500/20 text-red-500' : insight.impact === 'medium' ? 'bg-amber-500/20 text-amber-500' : 'bg-indigo-500/20 text-indigo-400'}`}>
+                                        {insight.impact} Impact
                                     </span>
                                     <h3 className="text-lg font-bold text-white leading-tight">
                                         {insight.title}
@@ -121,16 +176,25 @@ export const AiInsights: React.FC = () => {
                                 </p>
                             </div>
 
-                            {insight.action_type !== 'GENERIC' && (
+                            <div className="flex flex-col md:flex-row gap-3 mt-4 md:mt-0 items-center">
                                 <button 
-                                    onClick={() => handleActionClick(insight.action_type, insight.suggested_payload)}
-                                    className="shrink-0 w-full md:w-auto mt-4 md:mt-0 px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-sm font-bold uppercase tracking-wider transition-colors shadow-lg shadow-indigo-900/20"
+                                     onClick={() => handleDismiss(insight.id)}
+                                     className="text-gray-500 hover:text-gray-300 text-xs font-medium underline px-2 py-1"
                                 >
-                                    {insight.action_type === 'CREATE_COUPON' && '🚀 Deploy Recovery Code'}
-                                    {insight.action_type === 'RESTOCK_ITEM' && '📦 Open Variant Matrix'}
-                                    {insight.action_type === 'PAUSED_WARNING' && '💳 Top Up Wallet'}
+                                     Dismiss
                                 </button>
-                            )}
+                                
+                                <button 
+                                    onClick={() => handleActionClick(insight.type, insight.payload)}
+                                    className="shrink-0 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-sm font-bold uppercase tracking-wider transition-colors shadow-lg shadow-indigo-900/20"
+                                >
+                                    {insight.type === 'CREATE_COUPON' && '🚀 Deploy Code'}
+                                    {insight.type === 'RESTOCK_ALERT' && '📦 Restock Variant'}
+                                    {insight.type === 'RECOVER_CHECKOUT' && '💬 Whatsapp Owner'}
+                                    {insight.type === 'BOOST_PRODUCT' && '📈 Boost Views'}
+                                    {insight.type === 'REVIEW_REQUEST' && '⭐ Request Reviews'}
+                                </button>
+                            </div>
                         </motion.div>
                     ))}
                 </AnimatePresence>

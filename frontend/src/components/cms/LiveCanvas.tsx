@@ -466,11 +466,9 @@ export const LiveCanvas: React.FC = () => {
                 zIndex: 1,
             }}
         >
-            <SafeRenderer blocks={blocks} loading={isLoading}>
-                <ShadowHost designSystem={designSystem} theme={theme} mode={mode} safeTop={safeTop} safeBottom={safeBottom}>
-                    <RenderTree blocks={blocks} />
-                </ShadowHost>
-            </SafeRenderer>
+            <ShadowHost designSystem={designSystem} theme={theme} mode={mode} safeTop={safeTop} safeBottom={safeBottom}>
+                <SafeRenderer blocks={blocks} loading={isLoading} isBuilder={isEdit} />
+            </ShadowHost>
             {isEdit && <CanvasOverlay />}
             {showSafeAreaOverlay && isEdit && <SafeAreaOverlay safeTop={safeTop} safeBottom={safeBottom} w={typeof canvasDisplayW === 'number' ? canvasDisplayW : 1200} h={canvasDisplayH} />}
             {(isPhone || isTablet) && isEdit && <FoldMarker h={canvasDisplayH} />}

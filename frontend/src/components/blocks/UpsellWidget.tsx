@@ -15,11 +15,14 @@ import { useCart, cartActions } from '../../hooks/useCart';
 
 export interface UpsellWidgetProps {
     nodeId: string;
+    isBuilder?: boolean;
     title?: string;
-    maxItems?: number;
-    layout?: 'horizontal' | 'compact';
+    maxProducts?: number;
+    position?: 'pre-checkout' | 'post-add-to-cart' | 'cart-page';
+    displayStyle?: 'popup' | 'inline' | 'sticky-bar';
+    discountPercent?: number;
+    backgroundColor?: string;
     accentColor?: string;
-    bgColor?: string;
     children?: React.ReactNode;
 }
 
@@ -39,11 +42,14 @@ const T = {
 
 export const UpsellWidget: React.FC<UpsellWidgetProps> = ({
     nodeId,
+    isBuilder = false,
     title = 'Frequently Bought Together',
-    maxItems = 3,
-    layout = 'horizontal',
+    maxProducts = 2,
+    position = 'pre-checkout',
+    displayStyle = 'inline',
+    discountPercent = 10,
     accentColor = '#7c6dfa',
-    bgColor = '#13131a',
+    backgroundColor = '#13131a',
 }) => {
     const { state } = useStorefront();
     const cart = useCart();
@@ -55,12 +61,15 @@ export const UpsellWidget: React.FC<UpsellWidgetProps> = ({
 
         return allProducts
             .filter((p: Product) => !cartIds.has(p.id))
-            .slice(0, maxItems);
-    }, [state.collection, cart.items, maxItems]);
+            .slice(0, maxProducts);
+    }, [state.collection, cart.items, maxProducts]);
 
-    if (upsellProducts.length === 0) {
+    if (upsellProducts.length === 0 && !isBuilder) {
         return null; // Hide if nothing to upsell
     }
+
+    const isSticky = displayStyle === 'sticky-bar';
+    const isPopup = displayStyle === 'popup' && !isBuilder;
 
     return (
         <div
@@ -68,9 +77,17 @@ export const UpsellWidget: React.FC<UpsellWidgetProps> = ({
             style={{
                 fontFamily: "'Inter', -apple-system, sans-serif",
                 padding: '24px',
-                background: bgColor,
+                background: backgroundColor,
                 border: `1px solid ${T.border}`,
-                borderRadius: 14,
+                borderRadius: isSticky ? 0 : 14,
+                position: isSticky ? 'fixed' : isPopup ? 'fixed' : 'relative',
+                bottom: isSticky ? 0 : isPopup ? '50%' : undefined,
+                left: isSticky ? 0 : isPopup ? '50%' : undefined,
+                transform: isPopup ? 'translate(-50%, -50%)' : undefined,
+                width: isSticky ? '100%' : isPopup ? '400px' : 'auto',
+                boxSizing: 'border-box',
+                zIndex: isSticky || isPopup ? 9999 : 1,
+                boxShadow: isSticky || isPopup ? '0 -4px 30px rgba(0,0,0,0.4)' : 'none',
             }}
         >
             <h3 style={{
@@ -82,17 +99,22 @@ export const UpsellWidget: React.FC<UpsellWidgetProps> = ({
 
             <div style={{
                 display: 'flex',
-                flexDirection: layout === 'compact' ? 'column' : 'row',
+                flexDirection: 'row',
                 gap: 12,
+                overflowX: 'auto',
             }}>
                 {upsellProducts.map((product: Product) => (
                     <UpsellCard
                         key={product.id}
                         product={product}
                         accentColor={accentColor}
-                        isCompact={layout === 'compact'}
+                        isCompact={isSticky}
+                        discountPercent={discountPercent}
                     />
                 ))}
+                {isBuilder && upsellProducts.length === 0 && (
+                    <p style={{ fontSize: 13, color: T.textDim }}>[Upsell Suggestions Loading...]</p>
+                )}
             </div>
         </div>
     );
@@ -104,11 +126,12 @@ const UpsellCard: React.FC<{
     product: Product;
     accentColor: string;
     isCompact: boolean;
-}> = ({ product, accentColor, isCompact }) => {
+    discountPercent?: number;
+}> = ({ product, accentColor, isCompact, discountPercent = 0 }) => {
     const [adding, setAdding] = useState(false);
     const [added, setAdded] = useState(false);
 
-    const imgSrc = product.images[0]?.src || '';
+    const imgSrc = product.images?.[0]?.src || '';
 
     const handleAdd = useCallback(() => {
         setAdding(true);
@@ -171,19 +194,14 @@ const UpsellCard: React.FC<{
                     <span style={{ fontSize: 13, fontWeight: 700, color: accentColor }}>
                         ${product.price.toFixed(2)}
                     </span>
-                    {hasDiscount && (
-                        <>
-                            <span style={{ fontSize: 11, color: T.textMuted, textDecoration: 'line-through' }}>
-                                ${product.compareAtPrice!.toFixed(2)}
-                            </span>
-                            <span style={{
-                                fontSize: 9, fontWeight: 700, color: T.success,
-                                background: 'rgba(52,211,153,0.1)',
-                                padding: '2px 6px', borderRadius: 4,
-                            }}>
-                                -{discount}%
-                            </span>
-                        </>
+                    {(discountPercent > 0 || hasDiscount) && (
+                        <span style={{
+                            fontSize: 9, fontWeight: 700, color: T.success,
+                            background: 'rgba(52,211,153,0.1)',
+                            padding: '2px 6px', borderRadius: 4,
+                        }}>
+                            Save {discountPercent > 0 ? discountPercent : discount}%
+                        </span>
                     )}
                 </div>
 

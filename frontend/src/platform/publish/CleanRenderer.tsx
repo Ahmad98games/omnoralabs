@@ -21,21 +21,35 @@ import { PlatformBlock } from '../core/types';
 import { precomputeAdjacencyMap } from '../core/normalize';
 import { useGlobalThemeStore } from '../../stores/useGlobalThemeStore';
 
-// ─── Animation Presets (shared with ComponentWrapper) ─────────────────────────
+// ─── Animation Styles Stylesheet ───────────────────────────────────────────────
+const AnimationStyles = () => (
+    <style>{`
+        @media (prefers-reduced-motion: no-preference) {
+            .omnora-anim-entry {
+                opacity: 0;
+                transition: opacity 600ms cubic-bezier(0.16, 1, 0.3, 1), 
+                            transform 600ms cubic-bezier(0.16, 1, 0.3, 1), 
+                            filter 600ms ease;
+                will-change: opacity, transform;
+            }
+            
+            .omnora-anim-entry.visible {
+                opacity: 1 !important;
+                transform: translate(0, 0) scale(1) !important;
+                filter: blur(0px) !important;
+            }
 
-const ANIM_INITIAL: Record<string, React.CSSProperties> = {
-    fadeIn: { opacity: 0 },
-    slideUp: { opacity: 0, transform: 'translateY(40px)' },
-    zoomIn: { opacity: 0, transform: 'scale(0.85)' },
-    blurReveal: { opacity: 0, filter: 'blur(12px)' },
-};
+            /* Type Presets */
+            .omnora-anim-fadein { opacity: 0; }
+            .omnora-anim-slideup { opacity: 0; transform: translateY(40px); }
+            .omnora-anim-zoomin { opacity: 0; transform: scale(0.92); }
+            .omnora-anim-blur { opacity: 0; filter: blur(12px); }
 
-const ANIM_FINAL: Record<string, React.CSSProperties> = {
-    fadeIn: { opacity: 1 },
-    slideUp: { opacity: 1, transform: 'translateY(0)' },
-    zoomIn: { opacity: 1, transform: 'scale(1)' },
-    blurReveal: { opacity: 1, filter: 'blur(0px)' },
-};
+            /* Default Blocks Fallbacks */
+            .omnora-anim-def-hero { opacity: 0; transform: scale(0.98); }
+        }
+    `}</style>
+);
 
 // ─── Clean Render Context ─────────────────────────────────────────────────────
 
@@ -43,6 +57,7 @@ interface CleanRenderContextType {
     nodes: Record<string, PlatformBlock>;
     adjacencyMap: Record<string, string[]>;
     viewport: 'desktop' | 'tablet' | 'mobile';
+    globalAnimations: boolean;
 }
 
 const CleanRenderContext = createContext<CleanRenderContextType | null>(null);
@@ -57,8 +72,10 @@ const useCleanRender = () => {
 
 export interface CleanRendererProps {
     nodes: Record<string, PlatformBlock>;
-    rootIds: string[];     // top-level block IDs for the current page
+    rootIds: string[]; // top-level block IDs for the current page
     viewport?: 'desktop' | 'tablet' | 'mobile';
+    pageId?: string;    // 🛡️ Stale render guard identifier
+    globalAnimations?: boolean; // 🎬 Global animation toggle
 }
 
 /**
@@ -69,8 +86,45 @@ export const CleanRenderer: React.FC<CleanRendererProps> = React.memo(({
     nodes,
     rootIds,
     viewport = 'desktop',
+    pageId = 'default_page',
+    globalAnimations = true,
 }) => {
-    const adjacencyMap = useMemo(() => precomputeAdjacencyMap(nodes), [nodes]);
+    // 👁️ Live Preview Overrides
+    const [liveNodes, setLiveNodes] = useState<Record<string, PlatformBlock>>(nodes);
+    const isPreview = useMemo(() => {
+        if (typeof window === 'undefined') return false;
+        return new URLSearchParams(window.location.search).get('preview') === 'true';
+    }, []);
+
+    // Sync live nodes if prop nodes changes on static renders
+    useEffect(() => {
+        setLiveNodes(nodes);
+    }, [nodes]);
+
+    useEffect(() => {
+        if (!isPreview) return;
+
+        const handleMessage = (e: MessageEvent) => {
+            // 🛡️ 1. Origin Security Validation Guard
+            if (e.origin !== window.location.origin) return;
+
+            // 🛡️ 2. Type Guard & Stale Render check
+            if (e.data?.type === 'OMNORA_PREVIEW_UPDATE') {
+                if (e.data.activePageId && e.data.activePageId !== pageId) {
+                    // Ignore stale updates from different pages in flight triggers
+                    return; 
+                }
+                if (e.data.nodes) {
+                    setLiveNodes(e.data.nodes);
+                }
+            }
+        };
+
+        window.addEventListener('message', handleMessage);
+        return () => window.removeEventListener('message', handleMessage);
+    }, [isPreview, pageId]);
+
+    const adjacencyMap = useMemo(() => precomputeAdjacencyMap(liveNodes), [liveNodes]);
     const adSensePublisherId = useGlobalThemeStore((s) => s.adSensePublisherId);
 
     // Inject AdSense script safely if configured
@@ -89,18 +143,33 @@ export const CleanRenderer: React.FC<CleanRendererProps> = React.memo(({
     }, [adSensePublisherId]);
 
     const contextValue = useMemo<CleanRenderContextType>(() => ({
-        nodes,
+        nodes: liveNodes,
         adjacencyMap,
         viewport,
-    }), [nodes, adjacencyMap, viewport]);
+        globalAnimations,
+    }), [liveNodes, adjacencyMap, viewport, globalAnimations]);
 
     if (!rootIds || rootIds.length === 0) return null;
 
     return (
         <CleanRenderContext.Provider value={contextValue}>
-            {rootIds.map(id => (
-                <CleanNode key={`clean-${id}`} id={id} />
-            ))}
+            <AnimationStyles />
+            <div style={{ position: 'relative', width: '100%' }}>
+                {/* 🛡️ Interaction Blocker Overlay during Preview Mode maps */}
+                {isPreview && (
+                    <div 
+                        style={{ 
+                            position: 'fixed', inset: 0, zIndex: 9999, 
+                            background: 'rgba(0,0,0,0.01)', cursor: 'not-allowed' 
+                        }} 
+                        title="(Preview Mode) Interactions Disabled" 
+                    />
+                )}
+
+                {rootIds.map(id => (
+                    <CleanNode key={`clean-${id}`} id={id} />
+                ))}
+            </div>
         </CleanRenderContext.Provider>
     );
 });
@@ -109,9 +178,10 @@ export const CleanRenderer: React.FC<CleanRendererProps> = React.memo(({
 
 interface CleanNodeProps {
     id: string;
+    index?: number;
 }
 
-const CleanNode: React.FC<CleanNodeProps> = React.memo(({ id }) => {
+const CleanNode: React.FC<CleanNodeProps> = React.memo(({ id, index = 0 }) => {
     const { nodes, adjacencyMap, viewport } = useCleanRender();
     const node = nodes[id];
     if (!node) return null;
@@ -131,8 +201,8 @@ const CleanNode: React.FC<CleanNodeProps> = React.memo(({ id }) => {
     const childIds = adjacencyMap[id];
     const children = (canHaveChildren && childIds && childIds.length > 0) ? (
         <>
-            {childIds.map((childId: string) => (
-                <CleanNode key={`clean-${childId}`} id={childId} />
+            {childIds.map((childId: string, idx: number) => (
+                <CleanNode key={`clean-${childId}`} id={childId} index={idx} />
             ))}
         </>
     ) : null;
@@ -153,6 +223,7 @@ const CleanNode: React.FC<CleanNodeProps> = React.memo(({ id }) => {
             type={node.type}
             style={activeStyles}
             animations={hasAnim ? node.animations : undefined}
+            index={index}
         >
             <Component {...node.props} nodeId={id}>
                 {children}
@@ -160,6 +231,17 @@ const CleanNode: React.FC<CleanNodeProps> = React.memo(({ id }) => {
         </CleanAnimatedDiv>
     );
 });
+
+// ─── Default Animation Type Mappings ───────────────────────────────────────────
+
+const DEFAULT_ANIMATIONS: Record<string, { type: string; duration?: number; stagger?: number }> = {
+    hero_banner: { type: 'def-hero', duration: 600 },
+    product_grid: { type: 'slideup', stagger: 80, duration: 600 },
+    text_section: { type: 'fadein', duration: 400 },
+    trust_badges: { type: 'fadein', stagger: 60 },
+    customer_reviews: { type: 'slideup' },
+    faq_accordion: { type: 'none' }, // 🛡️ Interactive contents bypass
+};
 
 // ─── Clean Animated Div (IntersectionObserver only) ───────────────────────────
 
@@ -173,21 +255,24 @@ interface CleanAnimatedDivProps {
         delay: number;
         once: boolean;
     };
+    index?: number;
     children: React.ReactNode;
 }
 
 /**
  * CleanAnimatedDiv: A minimal DOM wrapper for each block.
- * No pointer events, no drag logic, no hover outlines.
- * Only handles: styles, responsive layout, and scroll-triggered animations.
  */
-const CleanAnimatedDiv: React.FC<CleanAnimatedDivProps> = ({ nodeId, type, style, animations, children }) => {
+const CleanAnimatedDiv: React.FC<CleanAnimatedDivProps> = ({ nodeId, type, style, animations, index = 0, children }) => {
     const ref = useRef<HTMLDivElement>(null);
     const [visible, setVisible] = useState(false);
-    const hasAnim = !!animations && animations.type !== 'none';
+    const { globalAnimations } = useCleanRender();
+
+    const defaultAnim = DEFAULT_ANIMATIONS[type.toLowerCase()] || { type: 'fadein' };
+    const resolvedType = animations?.type !== 'none' ? (animations?.type || defaultAnim.type) : 'none';
+    const hasAnim = resolvedType !== 'none';
 
     useEffect(() => {
-        if (!hasAnim) { setVisible(true); return; }
+        if (!hasAnim || !globalAnimations) { setVisible(true); return; }
         const el = ref.current;
         if (!el) return;
         const obs = new IntersectionObserver(
@@ -201,26 +286,44 @@ const CleanAnimatedDiv: React.FC<CleanAnimatedDivProps> = ({ nodeId, type, style
         );
         obs.observe(el);
         return () => obs.disconnect();
-    }, [hasAnim, animations?.once]);
+    }, [hasAnim, animations?.once, globalAnimations]);
 
     const animStyle: React.CSSProperties = useMemo(() => {
-        if (!hasAnim || !animations) return {};
-        const dur = animations.duration ?? 600;
-        const del = animations.delay ?? 0;
-        const initial = ANIM_INITIAL[animations.type] || {};
-        const final_ = ANIM_FINAL[animations.type] || {};
-        const active = visible ? final_ : initial;
+        if (!hasAnim || !globalAnimations) return {};
+        
+        const baseDelay = animations?.delay ?? 0;
+        const staggerConstant = defaultAnim.stagger ?? 0;
+        const staggerDelay = staggerConstant ? Math.min(index, 4) * staggerConstant : 0; // 🛡️ Cap at index 4 (320ms max)
+        const delay = baseDelay + staggerDelay;
+        const dur = animations?.duration ?? defaultAnim.duration ?? 600;
+
         return {
-            ...active,
-            transition: `opacity ${dur}ms ease ${del}ms, transform ${dur}ms ease ${del}ms, filter ${dur}ms ease ${del}ms`,
+            transitionDuration: `${dur}ms`,
+            transitionDelay: `${delay}ms`,
         };
-    }, [hasAnim, animations, visible]);
+    }, [hasAnim, animations, globalAnimations, index, defaultAnim]);
+
+    // 🛡️ Bypasses adding component nodes frames if animations toggled off
+    if (!globalAnimations) {
+        return (
+            <div
+                id={nodeId}
+                className={`omnora-live ${type.toLowerCase()}`}
+                style={{ position: 'relative', width: '100%', ...style }}
+                data-omnora-node={nodeId}
+            >
+                {children}
+            </div>
+        );
+    }
+
+    const animTypeClass = resolvedType.toLowerCase();
 
     return (
         <div
             ref={ref}
             id={nodeId}
-            className={`omnora-live ${type.toLowerCase()}`}
+            className={`omnora-live ${type.toLowerCase()} ${hasAnim ? `omnora-anim-entry omnora-anim-${animTypeClass}` : ''} ${visible ? 'visible' : ''}`}
             style={{
                 position: 'relative',
                 width: '100%',

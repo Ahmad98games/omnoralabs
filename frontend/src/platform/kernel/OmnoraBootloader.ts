@@ -54,11 +54,21 @@ export const OmnoraBootloader = {
         
         setTimeout(() => {
             try {
-                localStorage.clear();
-                sessionStorage.clear();
-                // Clear any IndexedDB offline caches if present
+                // Scoped memory flush: Only remove Omnora-prefixed keys to avoid breaking session tokens
+                const keysToRemove: string[] = [];
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key && (key.startsWith('omnora') || key.includes('omnora'))) {
+                        keysToRemove.push(key);
+                    }
+                }
+                keysToRemove.forEach(k => localStorage.removeItem(k));
+                
+                sessionStorage.clear(); // Safe to clear or scoped similarly
+                
+                // Scoped IndexedDB wipes
                 indexedDB.databases().then(dbs => {
-                    dbs.forEach(db => { if (db.name) indexedDB.deleteDatabase(db.name); });
+                    dbs.forEach(db => { if (db.name && db.name.includes('omnora')) indexedDB.deleteDatabase(db.name); });
                 });
             } catch (e) {
                 // Ignore storage clearing blocks

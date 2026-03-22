@@ -75,22 +75,24 @@ const ASPECT_RATIOS: Record<ImageAspect, string> = {
 
 export interface ProductGridProps {
     nodeId: string;
+    isBuilder?: boolean;
+    title?: string;
     columns?: number;
     gap?: number;
     limit?: number;
-    showFilter?: boolean;
-    cardStyle?: CardStyle;
-    imageAspect?: ImageAspect;
-    selectionMode?: 'category' | 'specific';
-    source?: 'recent' | 'featured' | string; // 🛡️ Dynamic Source: 'recent', 'featured', 'category:[ID]'
-    productIds?: string[];
-    categorySlug?: string;
-    children?: React.ReactNode;
+    productSource?: 'auto' | 'collection' | 'bestsellers' | 'manual';
+    collectionId?: string;
+    productIds?: string | string[];
+    cardStyle?: 'minimal' | 'bordered' | 'shadowed';
+    imageAspectRatio?: 'square' | 'portrait' | 'landscape';
+    showPrice?: boolean;
+    showAddToCart?: boolean;
+    showBadge?: boolean;
 }
 
 // ─── Sort Utility ─────────────────────────────────────────────────────────────
 
-function sortProducts(products: Product[], sortKey: SortKey): Product[] {
+function sortProducts(products: any[], sortKey: string): any[] {
     switch (sortKey) {
         case 'price-asc':
             return [...products].sort((a, b) => a.price - b.price);
@@ -110,27 +112,22 @@ function sortProducts(products: Product[], sortKey: SortKey): Product[] {
 
 export const ProductGrid: React.FC<ProductGridProps> = ({
     nodeId,
+    isBuilder = false,
+    title = '',
     columns = 3,
     gap = 20,
     limit = 12,
-    showFilter = true,
-    cardStyle = 'minimal',
-    imageAspect = 'portrait',
-    selectionMode = 'category',
-    source = '', // 🛡️ Dynamic Source
+    productSource = 'auto',
+    collectionId = '',
     productIds = [],
-    categorySlug = '',
+    cardStyle = 'minimal',
+    imageAspectRatio = 'portrait',
+    showPrice = true,
+    showAddToCart = true,
+    showBadge = true,
 }) => {
     const { state } = useStorefront();
-    const collection = state.collection;
     const [sortKey, setSortKey] = useState<SortKey>('default');
-
-    // Visual Sifting States
-    const [vibeQuery, setVibeQuery] = useState('');
-    const [vibeTags, setVibeTags] = useState<string[]>([]);
-    const [isVibeLoading, setIsVibeLoading] = useState(false);
-    const [selectedCategory, setSelectedCategory] = useState<string>('all');
-    const [hoveredProduct, setHoveredProduct] = useState<Product | null>(null);
 
     const { 
         data: liveProducts = [], 
@@ -146,66 +143,26 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
         staleTime: 5 * 60 * 1000, 
     });
 
-    // Clamp columns to safe range
-    const safeColumns = Math.max(1, Math.min(6, columns));
-    const safeGap = Math.max(0, gap);
-    const safeLimit = Math.max(1, limit);
-    const activeCardStyle = CARD_STYLES[cardStyle] || CARD_STYLES.minimal;
-    const activeAspect = ASPECT_RATIOS[imageAspect] || ASPECT_RATIOS.portrait;
+    const safeColumns = Number(columns);
+    const safeGap = Number(gap);
+    const safeLimit = Number(limit);
 
-    // Phase 47: Dynamic CMS filtering — category or specific products
     const productsToRender = useMemo(() => {
-        const sourceItems = liveProducts.length > 0 ? liveProducts : (collection?.fullProducts ?? []);
-        let filtered = sourceItems;
+        let filtered = liveProducts;
 
-        // 🛡️ Dynamic Source Overrides Sequential!
-        const activeSource = source || selectionMode;
-        if (activeSource === 'recent') {
-            filtered = [...filtered].sort((a, b) => b.id.localeCompare(a.id)); // Fallback ID sort Sequential!
-        } else if (activeSource === 'featured') {
-            filtered = filtered.filter(p => p.tags?.some(t => t.toLowerCase() === 'featured'));
-        } else if (typeof activeSource === 'string' && activeSource.startsWith('category:')) {
-            const catId = activeSource.split(':')[1]?.toLowerCase();
-            if (catId) {
-                filtered = filtered.filter(p => 
-                    p.type?.toLowerCase() === catId || 
-                    p.tags?.some(t => t.toLowerCase() === catId)
-                );
+        if (productSource === 'manual') {
+            const idList = typeof productIds === 'string' ? productIds.split(',').map(id => id.trim()) : productIds;
+            if (idList.length > 0) {
+                filtered = idList.map(id => liveProducts.find(p => p.id === id)).filter(Boolean) as Product[];
             }
+        } else if (productSource === 'collection' && collectionId) {
+            filtered = liveProducts.filter(p => p.category_id === collectionId || p.type?.toLowerCase() === collectionId.toLowerCase());
+        } else if (productSource === 'bestsellers') {
+            filtered = liveProducts.filter(p => p.tags?.some(t => t.toLowerCase() === 'best seller' || t.toLowerCase() === 'popular'));
         }
 
-        // 1. AI Vibe Search Filter
-        if (vibeTags.length > 0) {
-            filtered = filtered.filter(p => 
-                p.tags?.some(t => vibeTags.includes(t.toLowerCase())) ||
-                p.title.toLowerCase().split(' ').some(word => vibeTags.includes(word))
-            );
-        }
-
-        // 2. Pill Category Filter
-        if (selectedCategory !== 'all') {
-            filtered = filtered.filter(p => 
-                p.tags?.some(t => t.toLowerCase() === selectedCategory) ||
-                (p.type && p.type.toLowerCase() === selectedCategory)
-            );
-        }
-
-        // Legacy selection modes fallback Sequential
-        if (activeSource === 'specific' && productIds.length > 0) {
-            filtered = productIds
-                .map(id => sourceItems.find(p => p.id === id))
-                .filter(Boolean) as Product[];
-        } else if (activeSource === 'category' && categorySlug) {
-             const slug = categorySlug.toLowerCase();
-             filtered = filtered.filter(p =>
-                 p.tags?.some(t => t.toLowerCase() === slug) ||
-                 (p.type && p.type.toLowerCase() === slug)
-             );
-        }
-
-        const sorted = sortProducts(filtered, sortKey);
-        return sorted.slice(0, safeLimit);
-    }, [liveProducts, collection, sortKey, safeLimit, selectionMode, source, categorySlug, productIds, vibeTags, selectedCategory]);
+        return sortProducts(filtered, sortKey).slice(0, safeLimit);
+    }, [liveProducts, productSource, productIds, collectionId, sortKey, safeLimit]);
 
     const handleVibeSearch = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -277,166 +234,41 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
 
     return (
         <div data-node-id={nodeId} style={{ fontFamily: "'Inter', -apple-system, sans-serif" }}>
-            
-            {/* AI Vibe Search - Terminal Style */}
-            <div style={{ marginBottom: 24 }}>
-                <form onSubmit={handleVibeSearch} style={{ display: 'flex', gap: 12 }}>
-                    <div style={{ flex: 1, background: '#030303', border: '1px solid rgba(201,160,99,0.2)', borderRadius: 4, display: 'flex', alignItems: 'center', padding: '0 16px', fontFamily: 'monospace' }}>
-                        <span style={{ color: '#C9A063', fontSize: 13, marginRight: 8 }}>[VIBE_SEARCH] &gt;</span>
-                        <input
-                            type="text"
-                            value={vibeQuery}
-                            onChange={(e) => setVibeQuery(e.target.value)}
-                            placeholder="Describe your style (e.g. something dark and elegant)..."
-                            style={{ flex: 1, background: 'transparent', border: 'none', color: '#fff', fontSize: 14, outline: 'none', padding: '12px 0', fontFamily: 'monospace' }}
-                        />
-                    </div>
-                </form>
-                {vibeTags.length > 0 && (
-                    <div style={{ marginTop: 8, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                        {vibeTags.map(tag => (
-                            <span key={tag} style={{ fontSize: 11, background: 'rgba(201,160,99,0.1)', color: '#C9A063', padding: '4px 8px', borderRadius: 2, border: '1px solid rgba(201,160,99,0.2)', fontFamily: 'monospace' }}>
-                                #{tag}
-                            </span>
-                        ))}
-                        <button onClick={() => { setVibeQuery(''); setVibeTags([]); }} style={{ fontSize: 11, color: '#94A3B8', background: 'transparent', border: 'none', cursor: 'pointer' }}>Clear</button>
-                    </div>
-                )}
-            </div>
-
-            {/* Pill Toggles Filter Bar */}
-            <div style={{ display: 'flex', gap: 8, overflowX: 'auto', marginBottom: 24, paddingBottom: 8 }}>
-                {categories.map((cat: any) => (
-                    <button
-                        key={cat}
-                        onClick={() => setSelectedCategory(cat)}
-                        style={{
-                            padding: '6px 16px',
-                            borderRadius: 20,
-                            border: selectedCategory === cat ? '1px solid #C9A063' : '1px solid rgba(255,255,255,0.1)',
-                            background: selectedCategory === cat ? 'rgba(201,160,99,0.1)' : 'transparent',
-                            color: selectedCategory === cat ? '#C9A063' : '#94A3B8',
-                            fontSize: 12,
-                            fontWeight: 600,
-                            textTransform: 'capitalize',
-                            cursor: 'pointer',
-                            whiteSpace: 'nowrap',
-                            transition: 'all 0.2s'
-                        }}
-                    >
-                        {cat}
-                    </button>
-                ))}
-            </div>
-
-            {/* Filter Bar */}
-            {showFilter && productsToRender.length > 1 && (
-                <div style={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    marginBottom: 32, padding: '12px 20px',
-                    background: 'rgba(255,255,255,0.02)', borderRadius: 12,
-                    border: `1px solid rgba(255,255,255,0.05)`,
-                    backdropFilter: 'blur(10px)',
+            {title && (
+                <h2 style={{ 
+                    fontSize: '26px', fontWeight: 800, color: '#fff', 
+                    marginBottom: '24px', letterSpacing: '-0.02em',
+                    fontFamily: 'var(--font-heading, inherit)' 
                 }}>
-                    <span style={{
-                        fontSize: 13, color: T.textDim, fontWeight: 500, letterSpacing: '0.05em', textTransform: 'uppercase'
-                    }}>
-                        {productsToRender.length} {productsToRender.length === 1 ? 'Piece' : 'Pieces'}
-                    </span>
-                    <select
-                        value={sortKey}
-                        onChange={e => setSortKey(e.target.value as SortKey)}
-                        style={{
-                            background: 'transparent', border: 'none',
-                            color: T.text, fontSize: 13, fontWeight: 500,
-                            cursor: 'pointer', outline: 'none',
-                            fontFamily: 'inherit',
-                        }}
-                    >
-                        <option value="default">Featured Selection</option>
-                        <option value="price-asc">Price: Ascending</option>
-                        <option value="price-desc">Price: Descending</option>
-                        <option value="title-asc">Alphabetical: A-Z</option>
-                        <option value="title-desc">Alphabetical: Z-A</option>
-                    </select>
-                </div>
+                    {title}
+                </h2>
             )}
 
-            {/* Grid — utilizes Framer Motion to prevent Flicker stagger */}
-            <motion.div 
-                layout 
+            <div 
                 style={{
                      display: 'grid',
                      gridTemplateColumns: `repeat(${safeColumns}, 1fr)`,
-                     gap: safeGap,
+                     gap: `${safeGap}px`,
                 }}
             >
-                <AnimatePresence>
-                    {productsToRender.map((product, index) => (
-                        <motion.div 
-                            key={product.id} 
-                            layout
-                            initial={{ opacity: 0, y: 15 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.95 }}
-                            transition={{ duration: 0.3, delay: index * 0.04 }}
-                            style={activeCardStyle}
-                            className="relative group"
-                            onMouseEnter={() => setHoveredProduct(product)}
-                            onMouseLeave={() => setHoveredProduct(null)}
-                        >
-                                {/* Image with aspect ratio control */}
-                                <div style={{ aspectRatio: activeAspect, overflow: 'hidden', background: '#111', position: 'relative' }}>
-                                    <OmnoraImage 
-                                        src={product.featured_image || product.images?.[0]?.src} 
-                                        alt={product.title} 
-                                        aspectRatio={activeAspect} 
-                                        width={500}
-                                        className="transition-transform duration-500 group-hover:scale-105"
-                                    />
-
-                                    {hoveredProduct?.id === product.id && (
-                                        <div className="absolute inset-0 bg-black/40 backdrop-blur-sm flex flex-col items-center justify-center p-4 animate-fade-in pointer-events-none md:pointer-events-auto">
-                                            <div style={{ background: '#0A0A0A', border: '1px solid rgba(201,160,99,0.3)', padding: 12, borderRadius: 2, textAlign: 'center', width: '90%', maxWidth: 200 }}>
-                                                <p style={{ fontSize: 11, color: '#C9A063', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 4 }}>Quick View</p>
-                                                <p style={{ fontSize: 12, color: '#fff', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{product.title}</p>
-                                                <button style={{ marginTop: 8, background: '#C9A063', color: '#000', border: 'none', padding: '4px 12px', fontSize: 11, fontWeight: 700, cursor: 'pointer', width: '100%', borderRadius: 1 }}>
-                                                    View Details
-                                                </button>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-
-                            {/* Product Info */}
-                            <div style={{
-                                padding: cardStyle === 'minimal' ? '14px 0' : '14px 16px',
-                            }}>
-                                <div style={{
-                                    fontSize: 13, fontWeight: 600, color: T.text,
-                                    marginBottom: 6, lineHeight: 1.3,
-                                    letterSpacing: '-0.01em',
-                                }}>
-                                    {product.title}
-                                </div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                    <span style={{ fontSize: 14, fontWeight: 700, color: T.text }}>
-                                        ${product.price?.toFixed(2)}
-                                    </span>
-                                    {product.compareAtPrice && product.compareAtPrice > product.price && (
-                                        <span style={{
-                                            fontSize: 12, color: T.textMuted,
-                                            textDecoration: 'line-through',
-                                        }}>
-                                            ${product.compareAtPrice.toFixed(2)}
-                                        </span>
-                                    )}
-                                </div>
+                {productsToRender.map((product) => (
+                    <div key={product.id} style={{ position: 'relative' }}>
+                        <ProductCard 
+                            product={product} 
+                            cardStyle={cardStyle}
+                            imageAspectRatio={imageAspectRatio}
+                            showPrice={showPrice}
+                            showAddToCart={showAddToCart}
+                            showBadge={showBadge}
+                        />
+                        {isBuilder && (
+                            <div style={{ position: 'absolute', top: 12, left: 12, background: 'rgba(0,0,0,0.7)', padding: '4px 8px', borderRadius: '4px', color: '#D4AF37', fontSize: '10px', fontWeight: 700, zIndex: 10 }}>
+                                Product Preview
                             </div>
-                        </motion.div>
-                    ))}
-                </AnimatePresence>
-            </motion.div>
+                        )}
+                    </div>
+                ))}
+            </div>
         </div>
     );
 };

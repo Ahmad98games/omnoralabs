@@ -1,7 +1,8 @@
 import React, { useState, useMemo, memo, useCallback } from 'react';
 import { useBuilder } from '../../context/BuilderContext';
 import { BLOCK_TYPES as SECTION_TYPES } from '../../platform/core/Registry';
-import { X, Search, ChevronRight } from 'lucide-react';
+import { X, Search, ChevronRight, Eye } from 'lucide-react';
+import { NavigatorPanel } from './NavigatorPanel'; 
 
 // ─── Tokens ───────────────────────────────────────────────────────────────────
 const T = {
@@ -253,11 +254,11 @@ const ConversionScore = memo(({ nodeTypes }: { nodeTypes: string[] }) => {
     const [open, setOpen] = useState(false);
     const items = SCORE_ITEMS.map(item => ({ ...item, done: item.types.some(t => nodeTypes.includes(t)) }));
     const score = items.reduce((sum, item) => sum + (item.done ? item.pts : 0), 0);
-    const scoreColor = score >= 70 ? '#10B981' : score >= 40 ? '#F59E0B' : '#EF4444';
+    const scoreColor = score >= 70 ? 'var(--success)' : score >= 40 ? 'var(--warning)' : 'var(--danger)';
     const missing = items.filter(i => !i.done);
 
     return (
-        <div style={{ borderBottom: `1px solid ${T.border}` }}>
+        <div style={{ borderTop: `1px solid var(--border-subtle)`, background: 'var(--surface-overlay)' }}>
             {/* Header row */}
             <button
                 type="button"
@@ -330,57 +331,115 @@ const ConversionScore = memo(({ nodeTypes }: { nodeTypes: string[] }) => {
 // ─── Block card ───────────────────────────────────────────────────────────────
 const BlockCard = memo(({ block, onAdd }: { block: Block; onAdd: (b: Block) => void }) => {
     const [hovered, setHovered] = useState(false);
+    const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(null);
+    const [showConfirm, setShowConfirm] = useState(false);
+
     const PreviewComp = Preview[block.preview] || Preview.generic;
     const badge = block.badge ? BADGE_CONFIG[block.badge] : null;
 
+    const handleTouchStart = () => {
+         if (window.innerWidth >= 768) return;
+         const timer = setTimeout(() => {
+              setShowConfirm(true);
+         }, 500); 
+         setLongPressTimer(timer);
+    };
+
+    const handleTouchEnd = () => {
+         if (longPressTimer) {
+              clearTimeout(longPressTimer);
+              setLongPressTimer(null);
+         }
+    };
+
+    const handleTouchMove = () => {
+         if (longPressTimer) {
+              clearTimeout(longPressTimer);
+              setLongPressTimer(null);
+         }
+    };
+
     return (
+        <>
         <div
             draggable={true}
             onDragStart={(e) => {
+                if (window.innerWidth < 768) {
+                    e.preventDefault(); // Disable drag on mobile sheets
+                    return;
+                }
                 e.dataTransfer.setData('text/plain', block.type);
                 e.dataTransfer.effectAllowed = 'move';
             }}
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+            onTouchMove={handleTouchMove}
             data-component-type={block.type}
             role="button"
             tabIndex={0}
-            onClick={() => onAdd(block)}
+            onClick={() => { if (window.innerWidth >= 768) onAdd(block); }}
             onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onAdd(block); }}
             onMouseEnter={() => setHovered(true)}
             onMouseLeave={() => setHovered(false)}
             aria-label={`Add ${block.label} section`}
             style={{
-                background: hovered ? T.accentBg : 'rgba(255,255,255,0.02)',
-                border: `1px solid ${hovered ? 'rgba(99,102,241,0.5)' : T.border}`,
-                borderRadius: 12, cursor: 'pointer', overflow: 'hidden',
-                transition: 'all .2s ease', marginBottom: 8,
-                boxShadow: hovered ? '0 4px 12px rgba(99,102,241,0.15)' : 'none',
-                outline: 'none'
+                background: hovered ? 'var(--surface-overlay)' : 'var(--surface-raised)',
+                border: `1px solid ${hovered ? 'var(--accent-primary)' : 'var(--border-subtle)'}`,
+                borderRadius: 8, cursor: 'pointer', overflow: 'hidden',
+                transition: 'all .15s ease', marginBottom: 12,
+                boxShadow: hovered ? '0 4px 12px rgba(0,0,0,0.04)' : 'none',
+                outline: 'none',
+                touchAction: 'pan-y'
             }}
         >
-            {/* Preview */}
-            <div style={{ width: '100%', height: 64, overflow: 'hidden', borderBottom: `1px solid ${T.border}`, background: 'rgba(0,0,0,0.2)', position: 'relative' }}>
-                <div style={{ opacity: 0.6, transform: 'scale(0.9)', transformOrigin: 'top center' }}>
+            {/* Preview Thumbnail */}
+            <div style={{ width: '100%', height: 100, overflow: 'hidden', borderBottom: `1px solid var(--border-subtle)`, background: 'var(--surface-overlay)', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ opacity: 0.8, transform: 'scale(1.0)', transition: 'transform 0.2s' }}>
                     <PreviewComp />
                 </div>
                 {hovered && (
-                    <div style={{ position: 'absolute', inset: 0, background: 'rgba(99,102,241,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <div style={{ background: T.accent, color: '#fff', fontSize: 12, fontWeight: 700, padding: '4px 14px', borderRadius: 20 }}>+ Add</div>
+                    <div style={{ position: 'absolute', inset: 0, background: 'rgba(255,107,53,0.03)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <div style={{ background: 'var(--accent-primary)', color: '#fff', fontSize: 12, fontWeight: 600, padding: '5px 14px', borderRadius: 6, boxShadow: '0 2px 8px rgba(255,107,53,0.25)' }}>+ Add</div>
                     </div>
                 )}
             </div>
             {/* Info */}
-            <div style={{ padding: '10px 12px' }}>
-                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8, marginBottom: 3 }}>
-                    <span style={{ fontSize: 13, fontWeight: 600, color: T.text }}>{block.label}</span>
+            <div style={{ padding: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8, marginBottom: 4 }}>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{block.label}</span>
                     {badge && (
-                        <span style={{ fontSize: 10, fontWeight: 600, color: badge.color, background: badge.bg, padding: '2px 7px', borderRadius: 5, flexShrink: 0 }}>
-                            {badge.label}
+                        <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-secondary)', background: 'var(--surface-overlay)', border: '1px solid var(--border-subtle)', padding: '2px 6px', borderRadius: 4, flexShrink: 0 }}>
+                            {badge.label.replace(/^[^\s]+\s/, '')} {/* Remove Emojis for clean badges */}
                         </span>
                     )}
                 </div>
-                <p style={{ fontSize: 11, color: T.muted, margin: 0, lineHeight: 1.5 }}>{block.description}</p>
+                <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: 0, lineHeight: 1.4 }}>{block.description}</p>
             </div>
         </div>
+
+            {showConfirm && (
+                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(5px)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+                    <div style={{ background: '#0e0e12', border: '1px solid #1c1c1f', borderRadius: 16, padding: 20, width: '100%', maxWidth: 310, textAlign: 'center', boxShadow: '0 20px 50px rgba(0,0,0,0.5)' }}>
+                        <h3 style={{ fontSize: 15, fontWeight: 700, color: '#fff', marginBottom: 6 }}>Add Section?</h3>
+                        <p style={{ fontSize: 13, color: '#d1d5db', marginBottom: 20 }}>Do you want to add <strong>{block.label}</strong> to your page?</p>
+                        <div style={{ display: 'flex', gap: 10 }}>
+                            <button 
+                                onClick={() => setShowConfirm(false)}
+                                style={{ flex: 1, padding: '11px', background: '#1c1c1f', border: 'none', borderRadius: 10, color: '#fff', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
+                            >
+                                Cancel
+                            </button>
+                            <button 
+                                onClick={() => { onAdd(block); setShowConfirm(false); }}
+                                style={{ flex: 1, padding: '11px', background: 'var(--accent-gold, #D4AF37)', border: 'none', borderRadius: 10, color: '#000', fontSize: 12, fontWeight: 800, cursor: 'pointer' }}
+                            >
+                                Add
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </>
     );
 });
 
@@ -402,24 +461,23 @@ const CategorySection = memo(({ category, onAdd, query }: { category: Category; 
                 onClick={() => setOpen(o => !o)}
                 aria-expanded={open}
                 style={{
-                    width: '100%', padding: '10px 16px',
-                    background: 'none', border: 'none',
+                    width: '100%', padding: '12px 16px',
+                    background: 'var(--surface-overlay)', border: 'none',
                     display: 'flex', alignItems: 'center', gap: 8,
                     cursor: 'pointer', textAlign: 'left',
                     position: 'sticky', top: 0, zIndex: 2,
-                    backdropFilter: 'blur(8px)', backgroundColor: 'rgba(249,250,251,0.95)',
-                    borderBottom: `1px solid ${T.border}`,
+                    borderBottom: `1px solid var(--border-subtle)`,
                 }}
             >
-                <span style={{ fontSize: 14 }}>{category.emoji}</span>
-                <span style={{ flex: 1, fontSize: 12, fontWeight: 600, color: T.sub }}>{category.label}</span>
-                <span style={{ fontSize: 11, color: T.faint, background: '#F3F4F6', padding: '1px 7px', borderRadius: 4 }}>
+                <span style={{ fontSize: 13 }}>{category.emoji}</span>
+                <span style={{ flex: 1, fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{category.label}</span>
+                <span style={{ fontSize: 11, color: 'var(--text-secondary)', background: 'rgba(0,0,0,0.03)', padding: '2px 7px', borderRadius: 4 }}>
                     {filtered.length}
                 </span>
-                <ChevronRight size={13} color={T.faint} style={{ transform: open ? 'rotate(90deg)' : 'none', transition: 'transform .2s' }} />
+                <ChevronRight size={13} color="var(--text-tertiary)" style={{ transform: open ? 'rotate(90deg)' : 'none', transition: 'transform .15s' }} />
             </button>
             {open && (
-                <div style={{ padding: '8px 12px' }}>
+                <div style={{ padding: '16px 16px 4px' }}>
                     {filtered.map(b => <BlockCard key={b.type + b.label} block={b} onAdd={onAdd} />)}
                 </div>
             )}
@@ -447,81 +505,82 @@ export const ElementLibrary: React.FC<Props> = ({ isOpen, onClose }) => {
         if (id) selectNode(id);
     }, [addNode, selectNode]);
 
+    const [activeTab, setActiveTab] = useState<'elements' | 'layers'>('elements');
+
     if (!isOpen) return null;
 
     return (
         <aside style={{
-            width: 320, height: '100vh', background: T.bg,
-            backdropFilter: 'blur(40px)', WebkitBackdropFilter: 'blur(40px)',
-            borderRight: `1px solid ${T.border}`,
+            width: 280, height: '100vh', background: 'var(--surface-overlay)',
+            borderRight: '1px solid var(--border-subtle)',
             display: 'flex', flexDirection: 'column',
             overflow: 'hidden', flexShrink: 0,
-            fontFamily: "'Inter', system-ui, sans-serif",
+            fontFamily: "var(--font-sans)",
             position: 'relative', zIndex: 40
         }}>
-            {/* Header */}
-            <div style={{ padding: '24px 20px 16px', borderBottom: `1px solid ${T.border}`, background: 'transparent', flexShrink: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-                    <div>
-                        <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: T.text }}>Add sections</p>
-                        <p style={{ margin: '2px 0 0', fontSize: 12, color: T.muted }}>Click to add to your page</p>
-                    </div>
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        aria-label="Close Element Library"
-                        style={{ background: '#F3F4F6', border: 'none', borderRadius: 7, width: 30, height: 30, color: T.muted, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                    >
-                        <X size={15} />
-                    </button>
+            {/* Header / Tabs */}
+            <div style={{ borderBottom: '1px solid var(--border-subtle)', background: 'transparent', flexShrink: 0 }}>
+                {/* Minimal Tab Switcher */}
+                <div style={{ display: 'flex', borderBottom: '1px solid var(--border-subtle)' }}>
+                    {(['elements', 'layers'] as const).map(t => (
+                        <button
+                            key={t}
+                            onClick={() => setActiveTab(t)}
+                            style={{
+                                flex: 1, padding: '14px 0', background: 'none', border: 'none',
+                                color: activeTab === t ? 'var(--text-primary)' : 'var(--text-secondary)',
+                                fontSize: 13, fontWeight: activeTab === t ? 600 : 400, cursor: 'pointer',
+                                position: 'relative', textTransform: 'capitalize', transition: 'all 0.15s'
+                            }}
+                        >
+                            {t}
+                            {activeTab === t && (
+                                <div style={{ position: 'absolute', bottom: -1, left: '25%', right: '25%', height: 2, background: 'var(--accent-primary)', borderRadius: 2 }} />
+                            )}
+                        </button>
+                    ))}
                 </div>
-                {/* Search */}
-                <div style={{ position: 'relative' }}>
-                    <Search size={14} color={T.faint} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)' }} />
-                    <input
-                        value={query} onChange={e => setQuery(e.target.value)}
-                        placeholder="Search sections…"
-                        aria-label="Search sections"
-                        style={{
-                            width: '100%', height: 40,
-                            background: 'rgba(0,0,0,0.3)', border: `1px solid ${T.border}`,
-                            borderRadius: 8, paddingLeft: 36, paddingRight: 12,
-                            color: T.text, fontSize: 13, outline: 'none', boxSizing: 'border-box',
-                            transition: 'border-color 0.2s',
-                        }}
-                        onFocus={e => (e.target.style.borderColor = T.accent)}
-                        onBlur={e => (e.target.style.borderColor = T.border)}
-                    />
-                </div>
-            </div>
 
-            {/* Conversion Score */}
-            <ConversionScore nodeTypes={nodeTypes} />
-
-            {/* Content */}
-            <div style={{ flex: 1, overflowY: 'auto', paddingBottom: 20 }}>
-                {query.trim() ? (
-                    <div style={{ padding: '12px 12px' }}>
-                        {searchResults.length === 0 ? (
-                            <div style={{ textAlign: 'center', padding: '40px 20px', color: T.faint, fontSize: 13 }}>No results for "{query}"</div>
-                        ) : (
-                            <>
-                                <p style={{ fontSize: 12, color: T.muted, marginBottom: 10 }}>{searchResults.length} result{searchResults.length !== 1 ? 's' : ''}</p>
-                                {searchResults.map(b => <BlockCard key={b.type + b.label} block={b} onAdd={handleAdd} />)}
-                            </>
-                        )}
+                {activeTab === 'elements' && (
+                    <div style={{ padding: '16px 16px 12px' }}>
+                        {/* Search */}
+                        <div style={{ position: 'relative' }}>
+                            <Search size={14} color="var(--text-tertiary)" style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)' }} />
+                            <input
+                                value={query} onChange={e => setQuery(e.target.value)}
+                                placeholder="Search sections…"
+                                style={{
+                                    width: '100%', height: 36,
+                                    background: 'var(--surface-raised)', border: '1px solid var(--border-subtle)',
+                                    borderRadius: 6, paddingLeft: 32, paddingRight: 12,
+                                    color: 'var(--text-primary)', fontSize: 13, outline: 'none', boxSizing: 'border-box',
+                                    transition: 'border-color 0.15s',
+                                }}
+                                onFocus={e => (e.target.style.borderColor = 'var(--border-strong)')}
+                                onBlur={e => (e.target.style.borderColor = 'var(--border-subtle)')}
+                            />
+                        </div>
                     </div>
-                ) : (
-                    CATEGORIES.map(cat => <CategorySection key={cat.id} category={cat} onAdd={handleAdd} query="" />)
                 )}
             </div>
 
-            {/* Tip */}
-            <div style={{ padding: '10px 16px', borderTop: `1px solid ${T.border}`, background: T.bg, flexShrink: 0 }}>
-                <p style={{ fontSize: 12, color: T.muted, margin: 0, textAlign: 'center' }}>
-                    💡 Tip: Hero → Products → Trust Badges for a great store
-                </p>
+            {/* Content Grouping */}
+            <div style={{ flex: 1, overflowY: 'auto' }}>
+                {activeTab === 'elements' ? (
+                    query.trim() ? (
+                        <div style={{ padding: '12px' }}>
+                            {searchResults.map(b => <BlockCard key={b.type + b.label} block={b} onAdd={handleAdd} />)}
+                        </div>
+                    ) : (
+                        CATEGORIES.map(cat => <CategorySection key={cat.id} category={cat} onAdd={handleAdd} query="" />)
+                    )
+                ) : (
+                    <NavigatorPanel />
+                )}
             </div>
+
+            {/* Footer Relocated Score Indicator */}
+            <ConversionScore nodeTypes={nodeTypes} />
         </aside>
     );
 };

@@ -99,17 +99,17 @@ export const StyleEditorPanel: React.FC<StyleEditorProps> = ({ nodeId }) => {
 
     return (
         <div style={{
-            fontFamily: "'Inter', sans-serif",
-            color: '#e4e4e7',
-            display: 'flex', flexDirection: 'column', gap: '24px'
+            fontFamily: "var(--font-sans)",
+            color: 'var(--text-primary)',
+            display: 'flex', flexDirection: 'column', gap: '20px'
         }}>
             {/* Context Badge */}
             <div style={{
-                fontSize: '11px', padding: '6px 10px',
-                background: 'rgba(124, 109, 250, 0.1)',
-                border: '1px solid rgba(124, 109, 250, 0.2)',
-                borderRadius: '6px', color: '#a78bfa',
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between'
+                fontSize: '11px', padding: '6px 12px',
+                background: 'var(--accent-subtle)',
+                border: '1px solid var(--accent-primary)',
+                borderRadius: '6px', color: 'var(--accent-primary)',
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between', opacity: 0.9
             }}>
                 <span style={{ fontWeight: 600 }}>Editing Style At:</span>
                 <span style={{ textTransform: 'uppercase', fontWeight: 800, letterSpacing: '0.05em' }}>
@@ -147,7 +147,7 @@ export const StyleEditorPanel: React.FC<StyleEditorProps> = ({ nodeId }) => {
                 </GridTwoCol>
 
                 <Label style={{ marginTop: 12 }}>Alignment</Label>
-                <div style={{ display: 'flex', gap: 4, background: '#18181b', padding: 4, borderRadius: 6, width: 'fit-content' }}>
+                <div style={{ display: 'flex', gap: 4, background: 'var(--surface-raised)', padding: 4, borderRadius: 6, width: 'fit-content', border: '1px solid var(--border-subtle)' }}>
                     <IconButton
                         active={activeStyles.textAlign === 'left'}
                         onClick={() => handleStyleChange('textAlign', 'left')}
@@ -204,9 +204,9 @@ export const StyleEditorPanel: React.FC<StyleEditorProps> = ({ nodeId }) => {
                     value={anim.type}
                     onChange={(e) => handleAnimationChange('type', e.target.value)}
                     style={{
-                        width: '100%', padding: '6px 8px', fontSize: '12px',
-                        background: '#18181b', border: '1px solid #27272a',
-                        borderRadius: '4px', color: '#f4f4f5', fontFamily: 'monospace',
+                        width: '100%', padding: '8px 10px', fontSize: '12px',
+                        background: 'var(--surface-raised)', border: '1px solid var(--border-subtle)',
+                        borderRadius: '6px', color: 'var(--text-primary)', fontFamily: 'monospace',
                         marginBottom: 12, cursor: 'pointer'
                     }}
                 >
@@ -235,12 +235,12 @@ export const StyleEditorPanel: React.FC<StyleEditorProps> = ({ nodeId }) => {
                     onClick={handlePlayPreview}
                     style={{
                         marginTop: 16, width: '100%', padding: '10px',
-                        background: 'linear-gradient(135deg, #7c6dfa 0%, #a78bfa 100%)',
+                        background: 'var(--accent-primary)',
                         border: 'none', borderRadius: '6px',
-                        color: '#fff', fontSize: '12px', fontWeight: 700,
+                        color: '#fff', fontSize: '12px', fontWeight: 600,
                         cursor: 'pointer', display: 'flex', alignItems: 'center',
                         justifyContent: 'center', gap: '8px',
-                        transition: 'opacity 0.15s ease',
+                        transition: 'opacity 0.1s ease',
                     }}
                     onMouseOver={(e) => (e.currentTarget.style.opacity = '0.85')}
                     onMouseOut={(e) => (e.currentTarget.style.opacity = '1')}
@@ -256,14 +256,15 @@ export const StyleEditorPanel: React.FC<StyleEditorProps> = ({ nodeId }) => {
 
 const Section: React.FC<{ title: string, icon: React.ReactNode, children: React.ReactNode }> = ({ title, icon, children }) => (
     <div style={{
-        background: '#0e0e11', border: '1px solid #27272a',
+        background: 'var(--surface-overlay)', border: '1px solid var(--border-subtle)',
         borderRadius: '8px', padding: '16px'
     }}>
         <div style={{
             display: 'flex', alignItems: 'center', gap: '8px',
-            marginBottom: '16px', color: '#e4e4e7', fontSize: '13px', fontWeight: 600
+            marginBottom: '16px', color: 'var(--text-primary)', fontSize: '12px', fontWeight: 600,
+            textTransform: 'uppercase', letterSpacing: '0.04em'
         }}>
-            <span style={{ color: '#a1a1aa' }}>{icon}</span> {title}
+            <span style={{ color: 'var(--accent-primary)' }}>{icon}</span> {title}
         </div>
         {children}
     </div>
@@ -290,9 +291,9 @@ const LabelInput: React.FC<{ label: string, value: string, placeholder?: string,
             placeholder={placeholder}
             onChange={(e) => onChange(e.target.value)}
             style={{
-                width: '100%', padding: '6px 8px', fontSize: '12px',
-                background: '#18181b', border: '1px solid #27272a',
-                borderRadius: '4px', color: '#f4f4f5', fontFamily: 'monospace'
+                width: '100%', padding: '8px 10px', fontSize: '12px',
+                background: 'var(--surface-raised)', border: '1px solid var(--border-subtle)',
+                borderRadius: '6px', color: 'var(--text-primary)', fontFamily: 'monospace', outline: 'none'
             }}
         />
     </div>

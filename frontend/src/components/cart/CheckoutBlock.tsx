@@ -30,6 +30,14 @@ const T = {
 
 export interface CheckoutBlockProps {
     nodeId: string;
+    isBuilder?: boolean;
+    layout?: 'single-page' | 'multi-step';
+    showOrderSummary?: boolean;
+    showPromoCode?: boolean;
+    showExpressCheckout?: boolean;
+    primaryColor?: string;
+    requirePhone?: boolean;
+    termsUrl?: string;
     children?: React.ReactNode;
 }
 
@@ -37,7 +45,17 @@ type PaymentMode = 'form' | 'processing' | 'stripe-redirect';
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export const CheckoutBlock: React.FC<CheckoutBlockProps> = ({ nodeId }) => {
+export const CheckoutBlock: React.FC<CheckoutBlockProps> = ({ 
+    nodeId,
+    isBuilder = false,
+    layout = 'single-page',
+    showOrderSummary = true,
+    showPromoCode = true,
+    showExpressCheckout = false,
+    primaryColor = '#7c6dfa',
+    requirePhone = false,
+    termsUrl = '',
+}) => {
     const cart = useCart();
     const { state } = useStorefront();
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -78,9 +96,14 @@ export const CheckoutBlock: React.FC<CheckoutBlockProps> = ({ nodeId }) => {
         if (!formData.email.trim()) e.email = 'Email is required';
         else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) e.email = 'Invalid email';
         if (!formData.address.trim()) e.address = 'Address is required';
+        
+        if (requirePhone && !formData.phone.trim() && !isBuilder) {
+            e.phone = 'Phone number is required';
+        }
+
         setErrors(e);
         return Object.keys(e).length === 0;
-    }, [formData]);
+    }, [formData, requirePhone, isBuilder]);
 
     const handleChange = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData(prev => ({ ...prev, [field]: e.target.value }));
@@ -240,7 +263,7 @@ export const CheckoutBlock: React.FC<CheckoutBlockProps> = ({ nodeId }) => {
                 <Section title="Contact Information">
                     <FormField label="Full Name" value={formData.name} onChange={handleChange('name')} error={errors.name} placeholder="John Doe" />
                     <FormField label="Email" value={formData.email} onChange={handleChange('email')} error={errors.email} placeholder="john@example.com" type="email" />
-                    <FormField label="Phone (Optional)" value={formData.phone} onChange={handleChange('phone')} placeholder="+1 (555) 000-0000" />
+                    <FormField label={requirePhone ? "Phone *" : "Phone (Optional)"} value={formData.phone} onChange={handleChange('phone')} placeholder="+1 (555) 000-0000" error={requirePhone ? errors.phone : undefined} />
                 </Section>
 
                 {/* Shipping Section */}
@@ -252,6 +275,26 @@ export const CheckoutBlock: React.FC<CheckoutBlockProps> = ({ nodeId }) => {
                     </div>
                 </Section>
 
+                {/* Express Checkout */}
+                {showExpressCheckout && (
+                    <Section title="Express Checkout">
+                        <div style={{ display: 'flex', gap: 12 }}>
+                            <div style={{ flex: 1, height: 44, background: '#000', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}> Pay (Demo)</div>
+                            <div style={{ flex: 1, height: 44, background: '#fff', border: '1px solid #000', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#000', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>G Pay (Demo)</div>
+                        </div>
+                    </Section>
+                )}
+
+                {/* Terms and Conditions checkbox block */}
+                {termsUrl && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '0 4px' }}>
+                        <input type="checkbox" id="terms_check" required style={{ cursor: 'pointer' }} />
+                        <label htmlFor="terms_check" style={{ fontSize: 12, color: T.textDim, cursor: 'pointer' }}>
+                            I agree to the <a href={termsUrl} target="_blank" rel="noreferrer" style={{ color: primaryColor, textDecoration: 'underline' }}>Terms and Conditions</a>
+                        </label>
+                    </div>
+                )}
+
                 {/* Submit */}
                 <button
                     type="submit"
@@ -260,13 +303,13 @@ export const CheckoutBlock: React.FC<CheckoutBlockProps> = ({ nodeId }) => {
                         width: '100%', padding: '16px 24px',
                         background: isSubmitting
                             ? T.surface2
-                            : `linear-gradient(135deg, ${T.accent}, #9b8aff)`,
+                            : `linear-gradient(135deg, ${primaryColor}, ${primaryColor}dd)`,
                         border: 'none', borderRadius: 12,
                         color: '#fff', fontSize: 15, fontWeight: 700,
                         cursor: isSubmitting ? 'not-allowed' : 'pointer',
                         letterSpacing: '0.02em',
                         transition: 'all 0.25s cubic-bezier(0.16,1,0.3,1)',
-                        boxShadow: isSubmitting ? 'none' : `0 4px 20px rgba(124,109,250,0.3)`,
+                        boxShadow: isSubmitting ? 'none' : `0 4px 20px ${primaryColor}40`,
                         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                     }}
                 >
@@ -359,7 +402,7 @@ export const CheckoutBlock: React.FC<CheckoutBlockProps> = ({ nodeId }) => {
                             <button
                                 onClick={() => {
                                     setCheckoutError(null);
-                                    checkoutSessionIdRef.current = crypto.randomUUID(); // Re-roll session ID so we can try again if they remove item
+                                    checkoutSessionIdRef.current = crypto.randomUUID();
                                 }}
                                 style={{
                                     background: T.danger, color: '#fff', border: 'none',
@@ -375,138 +418,142 @@ export const CheckoutBlock: React.FC<CheckoutBlockProps> = ({ nodeId }) => {
             </AnimatePresence>
 
             {/* Right: Order Summary */}
-            <div style={{
-                background: T.surface,
-                border: `1px solid ${T.border}`,
-                borderRadius: 14,
-                padding: 24,
-                alignSelf: 'start',
-                position: 'sticky',
-                top: 80,
-            }}>
-                <h3 style={{
-                    fontSize: 14, fontWeight: 700, color: T.text,
-                    margin: '0 0 16px', letterSpacing: '-0.01em',
+            {showOrderSummary && (
+                <div style={{
+                    background: T.surface,
+                    border: `1px solid ${T.border}`,
+                    borderRadius: 14,
+                    padding: 24,
+                    alignSelf: 'start',
+                    position: 'sticky',
+                    top: 80,
                 }}>
-                    Order Summary
-                </h3>
+                    <h3 style={{
+                        fontSize: 14, fontWeight: 700, color: T.text,
+                        margin: '0 0 16px', letterSpacing: '-0.01em',
+                    }}>
+                        Order Summary
+                    </h3>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                    {cart.items.map(item => (
-                        <div key={`${item.id}-${item.variantId || 'd'}`} style={{
-                            display: 'flex', alignItems: 'center', gap: 12,
-                        }}>
-                            <div style={{
-                                width: 48, height: 48, borderRadius: 8,
-                                overflow: 'hidden', background: T.surface2, flexShrink: 0,
-                                position: 'relative',
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                        {cart.items.map(item => (
+                            <div key={`${item.id}-${item.variantId || 'd'}`} style={{
+                                display: 'flex', alignItems: 'center', gap: 12,
                             }}>
-                                <img src={item.image} alt={item.title} style={{
-                                    width: '100%', height: '100%', objectFit: 'cover',
-                                }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-                                <span style={{
-                                    position: 'absolute', top: -4, right: -4,
-                                    width: 18, height: 18, borderRadius: 9,
-                                    background: T.accent, color: '#fff',
-                                    fontSize: 9, fontWeight: 800,
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                <div style={{
+                                    width: 48, height: 48, borderRadius: 8,
+                                    overflow: 'hidden', background: T.surface2, flexShrink: 0,
+                                    position: 'relative',
                                 }}>
-                                    {item.quantity}
+                                    <img src={item.image} alt={item.title} style={{
+                                        width: '100%', height: '100%', objectFit: 'cover',
+                                    }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                                    <span style={{
+                                        position: 'absolute', top: -4, right: -4,
+                                        width: 18, height: 18, borderRadius: 9,
+                                        background: primaryColor, color: '#fff',
+                                        fontSize: 9, fontWeight: 800,
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    }}>
+                                        {item.quantity}
+                                    </span>
+                                </div>
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                    <p style={{
+                                        fontSize: 12, fontWeight: 600, color: T.text,
+                                        margin: 0, whiteSpace: 'nowrap',
+                                        overflow: 'hidden', textOverflow: 'ellipsis',
+                                    }}>
+                                        {item.title}
+                                    </p>
+                                </div>
+                                <span style={{ fontSize: 13, fontWeight: 700, color: T.text, flexShrink: 0 }}>
+                                    ${(item.price * item.quantity).toFixed(2)}
                                 </span>
                             </div>
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                                <p style={{
-                                    fontSize: 12, fontWeight: 600, color: T.text,
-                                    margin: 0, whiteSpace: 'nowrap',
-                                    overflow: 'hidden', textOverflow: 'ellipsis',
-                                }}>
-                                    {item.title}
-                                </p>
-                            </div>
-                            <span style={{ fontSize: 13, fontWeight: 700, color: T.text, flexShrink: 0 }}>
-                                ${(item.price * item.quantity).toFixed(2)}
-                            </span>
-                        </div>
-                    ))}
-                </div>
+                        ))}
+                    </div>
 
-                <div style={{
-                    borderTop: `1px solid ${T.border}`,
-                    marginTop: 16, paddingTop: 16,
-                    display: 'flex', flexDirection: 'column', gap: 8,
-                }}>
-                    <SummaryRow label="Subtotal" value={`$${cart.totalAmount.toFixed(2)}`} />
-
-                    {/* Promo Code Input */}
-                    {!cart.appliedDiscount ? (
-                        <div style={{ display: 'flex', gap: 6 }}>
-                            <input
-                                value={promoCode}
-                                onChange={e => setPromoCode(e.target.value.toUpperCase())}
-                                placeholder="Promo code"
-                                onKeyDown={e => { if (e.key === 'Enter') handleApplyPromo(); }}
-                                style={{
-                                    flex: 1, padding: '7px 10px', background: T.surface2,
-                                    border: `1px solid ${T.border}`, borderRadius: 6,
-                                    color: T.text, fontSize: 11, fontWeight: 600,
-                                    fontFamily: 'monospace', outline: 'none',
-                                    letterSpacing: '0.05em',
-                                }}
-                            />
-                            <button
-                                onClick={handleApplyPromo}
-                                disabled={promoStatus === 'loading'}
-                                style={{
-                                    padding: '7px 14px', background: T.accent,
-                                    border: 'none', borderRadius: 6,
-                                    color: '#fff', fontSize: 10, fontWeight: 700,
-                                    cursor: 'pointer', opacity: promoStatus === 'loading' ? 0.5 : 1,
-                                }}
-                            >
-                                {promoStatus === 'loading' ? '…' : 'Apply'}
-                            </button>
-                        </div>
-                    ) : (
-                        <div style={{
-                            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                            padding: '5px 8px', borderRadius: 6,
-                            background: 'rgba(52,211,153,0.08)',
-                        }}>
-                            <span style={{ fontSize: 11, fontWeight: 700, color: T.success }}>
-                                🏷️ {cart.appliedDiscount.code}
-                            </span>
-                            <button onClick={handleRemovePromo} style={{
-                                background: 'none', border: 'none', color: T.textMuted,
-                                fontSize: 11, cursor: 'pointer', fontWeight: 600,
-                            }}>Remove</button>
-                        </div>
-                    )}
-
-                    {promoMsg && (
-                        <p style={{
-                            fontSize: 10, fontWeight: 600, margin: 0,
-                            color: promoStatus === 'success' ? T.success : T.danger,
-                        }}>{promoMsg}</p>
-                    )}
-
-                    {cart.discountAmount > 0 && (
-                        <SummaryRow label="Discount" value={`-$${cart.discountAmount.toFixed(2)}`} accent />
-                    )}
-
-                    <SummaryRow label="Tax (8%)" value={`$${tax.toFixed(2)}`} />
-                    <SummaryRow label="Shipping" value="Free" dimValue />
                     <div style={{
                         borderTop: `1px solid ${T.border}`,
-                        paddingTop: 12, marginTop: 4,
-                        display: 'flex', justifyContent: 'space-between',
+                        marginTop: 16, paddingTop: 16,
+                        display: 'flex', flexDirection: 'column', gap: 8,
                     }}>
-                        <span style={{ fontSize: 14, fontWeight: 700, color: T.text }}>Total</span>
-                        <span style={{ fontSize: 18, fontWeight: 800, color: T.accent, letterSpacing: '-0.02em' }}>
-                            ${grandTotal.toFixed(2)}
-                        </span>
+                        <SummaryRow label="Subtotal" value={`$${cart.totalAmount.toFixed(2)}`} />
+
+                        {/* Promo Code Input */}
+                        {showPromoCode && (
+                            !cart.appliedDiscount ? (
+                                <div style={{ display: 'flex', gap: 6 }}>
+                                    <input
+                                        value={promoCode}
+                                        onChange={e => setPromoCode(e.target.value.toUpperCase())}
+                                        placeholder="Promo code"
+                                        onKeyDown={e => { if (e.key === 'Enter') handleApplyPromo(); }}
+                                        style={{
+                                            flex: 1, padding: '7px 10px', background: T.surface2,
+                                            border: `1px solid ${T.border}`, borderRadius: 6,
+                                            color: T.text, fontSize: 11, fontWeight: 600,
+                                            fontFamily: 'monospace', outline: 'none',
+                                            letterSpacing: '0.05em',
+                                        }}
+                                    />
+                                    <button
+                                        onClick={handleApplyPromo}
+                                        disabled={promoStatus === 'loading'}
+                                        style={{
+                                            padding: '7px 14px', background: primaryColor,
+                                            border: 'none', borderRadius: 6,
+                                            color: '#fff', fontSize: 10, fontWeight: 700,
+                                            cursor: 'pointer', opacity: promoStatus === 'loading' ? 0.5 : 1,
+                                        }}
+                                    >
+                                        {promoStatus === 'loading' ? '…' : 'Apply'}
+                                    </button>
+                                </div>
+                            ) : (
+                                <div style={{
+                                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                                    padding: '5px 8px', borderRadius: 6,
+                                    background: `${primaryColor}15`,
+                                }}>
+                                    <span style={{ fontSize: 11, fontWeight: 700, color: primaryColor }}>
+                                        🏷️ {cart.appliedDiscount.code}
+                                    </span>
+                                    <button onClick={handleRemovePromo} style={{
+                                        background: 'none', border: 'none', color: T.textMuted,
+                                        fontSize: 11, cursor: 'pointer', fontWeight: 600,
+                                    }}>Remove</button>
+                                </div>
+                            )
+                        )}
+
+                        {promoMsg && (
+                            <p style={{
+                                fontSize: 10, fontWeight: 600, margin: 0,
+                                color: promoStatus === 'success' ? T.success : T.danger,
+                            }}>{promoMsg}</p>
+                        )}
+
+                        {cart.discountAmount > 0 && (
+                            <SummaryRow label="Discount" value={`-$${cart.discountAmount.toFixed(2)}`} accent />
+                        )}
+
+                        <SummaryRow label="Tax (8%)" value={`$${tax.toFixed(2)}`} />
+                        <SummaryRow label="Shipping" value="Free" dimValue />
+                        <div style={{
+                            borderTop: `1px solid ${T.border}`,
+                            paddingTop: 12, marginTop: 4,
+                            display: 'flex', justifyContent: 'space-between',
+                        }}>
+                            <span style={{ fontSize: 14, fontWeight: 700, color: T.text }}>Total</span>
+                            <span style={{ fontSize: 18, fontWeight: 800, color: primaryColor, letterSpacing: '-0.02em' }}>
+                                ${grandTotal.toFixed(2)}
+                            </span>
+                        </div>
                     </div>
                 </div>
-            </div>
+            )}
         </div>
     );
 };

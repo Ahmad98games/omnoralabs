@@ -8,6 +8,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useCart, cartActions } from '../../hooks/useCart';
 import { databaseClient } from '../../platform/core/DatabaseClient';
+import { supabase } from '../../lib/supabaseClient';
 
 // ─── Design Tokens ────────────────────────────────────────────────────────────
 
@@ -26,36 +27,94 @@ const T = {
     success: '#34d399',
 };
 
+export interface CartDrawerProps {
+    isBuilder?: boolean;
+    triggerIcon?: 'bag' | 'cart' | 'basket';
+    drawerPosition?: 'right' | 'left';
+    showProductImages?: boolean;
+    showQuantityControls?: boolean;
+    upsellEnabled?: boolean;
+    upsellTitle?: string;
+    upsellProductIds?: string[]; // 🛍️ Added upsell array pool source
+    showFreeShippingBar?: boolean;
+    freeShippingThreshold?: number;
+    checkoutButtonText?: string;
+    checkoutButtonColor?: string;
+    children?: React.ReactNode;
+}
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export const CartDrawer: React.FC = () => {
+export const CartDrawer: React.FC<CartDrawerProps> = ({
+    isBuilder = false,
+    triggerIcon = 'bag',
+    drawerPosition = 'right',
+    showProductImages = true,
+    showQuantityControls = true,
+    upsellEnabled = false,
+    upsellTitle = 'You Might Also Like',
+    showFreeShippingBar = false,
+    freeShippingThreshold = 50,
+    checkoutButtonText = 'Proceed to Checkout',
+    checkoutButtonColor = '#7c6dfa',
+    upsellProductIds = [],
+}) => {
     const cart = useCart();
     const backdropRef = useRef<HTMLDivElement>(null);
     const [promoCode, setPromoCode] = useState('');
     const [promoStatus, setPromoStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
     const [promoMsg, setPromoMsg] = useState('');
+    const [upsellProducts, setUpsellProducts] = useState<any[]>([]);
+
+    const isOpen = isBuilder || cart.isOpen;
+
+    // 🛡️ Fetch Real Upsells using pool IDs from the storefront config
+    useEffect(() => {
+        if (!upsellEnabled || !upsellProductIds?.length) {
+            setUpsellProducts([]);
+            return;
+        }
+
+        const fetchUpsells = async () => {
+            try {
+                const { data } = await supabase
+                    .from('products')
+                    .select('id, title, price, image')
+                    .in('id', upsellProductIds);
+                
+                if (data) {
+                    // Filter out items already inside the cart
+                    const filtered = data.filter(p => !cart.items.some(i => i.id === p.id));
+                    setUpsellProducts(filtered);
+                }
+            } catch (err) {
+                console.error('[CartDrawer] Error fetching upsell products:', err);
+            }
+        };
+        fetchUpsells();
+    }, [upsellEnabled, upsellProductIds, cart.items]);
 
     // Lock body scroll when cart is open
     useEffect(() => {
-        if (cart.isOpen) {
+        if (isOpen && !isBuilder) {
             document.body.style.overflow = 'hidden';
         } else {
             document.body.style.overflow = '';
         }
         return () => { document.body.style.overflow = ''; };
-    }, [cart.isOpen]);
+    }, [isOpen, isBuilder]);
 
     // Close on Escape
     useEffect(() => {
         const onKey = (e: KeyboardEvent) => {
-            if (e.key === 'Escape' && cart.isOpen) cartActions.closeCart();
+            if (e.key === 'Escape' && cart.isOpen && !isBuilder) cartActions.closeCart();
         };
         window.addEventListener('keydown', onKey);
         return () => window.removeEventListener('keydown', onKey);
-    }, [cart.isOpen]);
+    }, [cart.isOpen, isBuilder]);
 
     const handleBackdropClick = (e: React.MouseEvent) => {
-        if (e.target === backdropRef.current) cartActions.closeCart();
+        if (e.target === backdropRef.current && !isBuilder) cartActions.closeCart();
     };
 
     const handleCheckout = () => {
@@ -98,9 +157,9 @@ export const CartDrawer: React.FC = () => {
                     background: 'rgba(0,0,0,0.6)',
                     backdropFilter: 'blur(4px)',
                     zIndex: 99990,
-                    opacity: cart.isOpen ? 1 : 0,
-                    pointerEvents: cart.isOpen ? 'auto' : 'none',
-                    transition: 'opacity 0.3s cubic-bezier(0.16,1,0.3,1)',
+                    opacity: isOpen ? 1 : 0,
+                    pointerEvents: isOpen ? 'auto' : 'none',
+                    transition: isBuilder ? 'none' : 'opacity 0.3s cubic-bezier(0.16,1,0.3,1)',
                 }}
             />
 
@@ -109,19 +168,21 @@ export const CartDrawer: React.FC = () => {
                 style={{
                     position: 'fixed',
                     top: 0,
-                    right: 0,
+                    right: drawerPosition === 'right' ? 0 : 'auto',
+                    left: drawerPosition === 'left' ? 0 : 'auto',
                     bottom: 0,
                     width: 420,
                     maxWidth: '90vw',
                     background: T.bg,
-                    borderLeft: `1px solid ${T.border}`,
+                    borderLeft: drawerPosition === 'right' ? `1px solid ${T.border}` : 'none',
+                    borderRight: drawerPosition === 'left' ? `1px solid ${T.border}` : 'none',
                     zIndex: 99991,
-                    transform: cart.isOpen ? 'translateX(0)' : 'translateX(100%)',
-                    transition: 'transform 0.35s cubic-bezier(0.16,1,0.3,1)',
+                    transform: isOpen ? 'translateX(0)' : drawerPosition === 'left' ? 'translateX(-100%)' : 'translateX(100%)',
+                    transition: isBuilder ? 'none' : 'transform 0.35s cubic-bezier(0.16,1,0.3,1)',
                     display: 'flex',
                     flexDirection: 'column',
                     fontFamily: "'Inter', -apple-system, sans-serif",
-                    boxShadow: cart.isOpen ? '-20px 0 60px rgba(0,0,0,0.5)' : 'none',
+                    boxShadow: isOpen ? (drawerPosition === 'right' ? '-20px 0 60px rgba(0,0,0,0.5)' : '20px 0 60px rgba(0,0,0,0.5)') : 'none',
                 }}
             >
                 {/* Header */}
@@ -145,21 +206,45 @@ export const CartDrawer: React.FC = () => {
                             </span>
                         )}
                     </div>
-                    <button
-                        onClick={cartActions.closeCart}
-                        style={{
-                            background: T.surface, border: `1px solid ${T.border}`,
-                            borderRadius: 8, width: 32, height: 32,
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            cursor: 'pointer', color: T.textDim, fontSize: 14,
-                            transition: 'all 0.15s',
-                        }}
-                        onMouseEnter={e => { e.currentTarget.style.background = T.surface2; e.currentTarget.style.color = T.text; }}
-                        onMouseLeave={e => { e.currentTarget.style.background = T.surface; e.currentTarget.style.color = T.textDim; }}
-                    >
-                        ✕
-                    </button>
+                    {!isBuilder && (
+                        <button
+                            onClick={cartActions.closeCart}
+                            style={{
+                                background: T.surface, border: `1px solid ${T.border}`,
+                                borderRadius: 8, width: 32, height: 32,
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                cursor: 'pointer', color: T.textDim, fontSize: 14,
+                                transition: 'all 0.15s',
+                            }}
+                            onMouseEnter={e => { e.currentTarget.style.background = T.surface2; e.currentTarget.style.color = T.text; }}
+                            onMouseLeave={e => { e.currentTarget.style.background = T.surface; e.currentTarget.style.color = T.textDim; }}
+                        >
+                            ✕
+                        </button>
+                    )}
                 </div>
+
+                {/* Free Shipping Bar */}
+                {showFreeShippingBar && (
+                    <div style={{ padding: '12px 24px', background: T.surface2, borderBottom: `1px solid ${T.border}` }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, fontSize: 11, color: T.textDim }}>
+                            <span style={{ fontWeight: 600 }}>Free Shipping Progress</span>
+                            <span>
+                                {cart.totalAmount >= freeShippingThreshold 
+                                    ? "Unlocked! 🎉" 
+                                    : `$${Math.max(0, freeShippingThreshold - cart.totalAmount).toFixed(2)} away`}
+                            </span>
+                        </div>
+                        <div style={{ height: 6, background: T.bg, borderRadius: 3, overflow: 'hidden' }}>
+                            <div style={{ 
+                                height: '100%', 
+                                width: `${Math.min(100, (cart.totalAmount / freeShippingThreshold) * 100)}%`, 
+                                background: T.success,
+                                transition: 'width 0.3s ease'
+                            }} />
+                        </div>
+                    </div>
+                )}
 
                 {/* Items */}
                 <div style={{
@@ -183,14 +268,49 @@ export const CartDrawer: React.FC = () => {
                     ) : (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                             {cart.items.map(item => (
-                                <CartItemRow key={`${item.id}-${item.variantId || 'default'}`} item={item} />
+                                <CartItemRow 
+                                    key={`${item.id}-${item.variantId || 'default'}`} 
+                                    item={item} 
+                                    showProductImages={showProductImages}
+                                    showQuantityControls={showQuantityControls}
+                                />
                             ))}
+
+                            {/* Upsell Widget */}
+                            {upsellEnabled && upsellProducts.length > 0 && (
+                                <div style={{ marginTop: 12, padding: '14px', background: T.surface, borderRadius: 12, border: `1px solid ${T.border}` }}>
+                                    <h4 style={{ fontSize: 13, fontWeight: 700, color: T.text, margin: '0 0 10px' }}>{upsellTitle}</h4>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                                        {upsellProducts.map(prod => (
+                                            <div key={prod.id} style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                                                <div style={{ width: 44, height: 44, borderRadius: 8, background: T.surface2, flexShrink: 0, overflow: 'hidden' }}>
+                                                    {prod.image ? (
+                                                        <img src={prod.image} alt={prod.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                    ) : (
+                                                        <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>🎁</div>
+                                                    )}
+                                                </div>
+                                                <div style={{ flex: 1, minWidth: 0 }}>
+                                                    <p style={{ fontSize: 12, fontWeight: 600, color: T.text, margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{prod.title}</p>
+                                                    <p style={{ fontSize: 13, fontWeight: 700, color: T.accent, margin: '4px 0 0' }}>+${prod.price.toFixed(2)}</p>
+                                                </div>
+                                                <button 
+                                                    onClick={() => cartActions.addItem({ id: prod.id, title: prod.title, price: prod.price, image: prod.image || '' })}
+                                                    style={{ padding: '6px 14px', background: T.accent, border: 'none', borderRadius: 8, color: '#fff', fontSize: 11, fontWeight: 700, cursor: 'pointer' }}
+                                                >
+                                                    Add
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
 
                 {/* Footer */}
-                {cart.items.length > 0 && (
+                {(cart.items.length > 0 || isBuilder) && (
                     <div style={{
                         borderTop: `1px solid ${T.border}`,
                         padding: '20px 24px',
@@ -214,6 +334,7 @@ export const CartDrawer: React.FC = () => {
                             <div style={{ display: 'flex', gap: 6, marginBottom: 8 }}>
                                 <input
                                     value={promoCode}
+                                    disabled={isBuilder}
                                     onChange={e => setPromoCode(e.target.value.toUpperCase())}
                                     placeholder="Promo code"
                                     onKeyDown={e => { if (e.key === 'Enter') handleApplyPromo(); }}
@@ -227,12 +348,12 @@ export const CartDrawer: React.FC = () => {
                                 />
                                 <button
                                     onClick={handleApplyPromo}
-                                    disabled={promoStatus === 'loading'}
+                                    disabled={promoStatus === 'loading' || isBuilder}
                                     style={{
                                         padding: '8px 16px', background: T.accent,
                                         border: 'none', borderRadius: 8,
                                         color: '#fff', fontSize: 11, fontWeight: 700,
-                                        cursor: 'pointer', opacity: promoStatus === 'loading' ? 0.5 : 1,
+                                        cursor: 'pointer', opacity: promoStatus === 'loading' || isBuilder ? 0.5 : 1,
                                     }}
                                 >
                                     {promoStatus === 'loading' ? '…' : 'Apply'}
@@ -292,25 +413,19 @@ export const CartDrawer: React.FC = () => {
                         {/* Checkout Button */}
                         <button
                             onClick={handleCheckout}
+                            disabled={isBuilder}
                             style={{
                                 width: '100%', padding: '14px 24px',
-                                background: `linear-gradient(135deg, ${T.accent}, #9b8aff)`,
+                                background: checkoutButtonColor,
                                 border: 'none', borderRadius: 12,
                                 color: '#fff', fontSize: 14, fontWeight: 700,
                                 cursor: 'pointer', letterSpacing: '0.03em',
                                 transition: 'all 0.2s cubic-bezier(0.16,1,0.3,1)',
-                                boxShadow: `0 4px 20px rgba(124,109,250,0.3)`,
-                            }}
-                            onMouseEnter={e => {
-                                e.currentTarget.style.transform = 'translateY(-1px)';
-                                e.currentTarget.style.boxShadow = '0 8px 30px rgba(124,109,250,0.45)';
-                            }}
-                            onMouseLeave={e => {
-                                e.currentTarget.style.transform = 'translateY(0)';
-                                e.currentTarget.style.boxShadow = '0 4px 20px rgba(124,109,250,0.3)';
+                                boxShadow: `0 4px 20px rgba(124,109,250,0.1)`,
+                                opacity: isBuilder ? 0.8 : 1
                             }}
                         >
-                            Proceed to Checkout — ${cart.finalTotal.toFixed(2)}
+                            {checkoutButtonText} — ${cart.finalTotal.toFixed(2)}
                         </button>
 
                         {/* Clear Cart */}
@@ -336,7 +451,11 @@ export const CartDrawer: React.FC = () => {
 
 // ─── Cart Item Row ────────────────────────────────────────────────────────────
 
-const CartItemRow: React.FC<{ item: import('../../platform/core/CartStore').CartItem }> = ({ item }) => {
+const CartItemRow: React.FC<{ 
+    item: import('../../platform/core/CartStore').CartItem;
+    showProductImages?: boolean;
+    showQuantityControls?: boolean;
+}> = ({ item, showProductImages = true, showQuantityControls = true }) => {
     return (
         <div style={{
             display: 'flex', gap: 14,
@@ -345,17 +464,19 @@ const CartItemRow: React.FC<{ item: import('../../platform/core/CartStore').Cart
             transition: 'border-color 0.15s',
         }}>
             {/* Product Image */}
-            <div style={{
-                width: 72, height: 72, borderRadius: 8, overflow: 'hidden',
-                background: T.surface2, flexShrink: 0,
-            }}>
-                <img
-                    src={item.image}
-                    alt={item.title}
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                    onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                />
-            </div>
+            {showProductImages && (
+                <div style={{
+                    width: 72, height: 72, borderRadius: 8, overflow: 'hidden',
+                    background: T.surface2, flexShrink: 0,
+                }}>
+                    <img
+                        src={item.image}
+                        alt={item.title}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                    />
+                </div>
+            )}
 
             {/* Info */}
             <div style={{ flex: 1, minWidth: 0 }}>
@@ -382,20 +503,26 @@ const CartItemRow: React.FC<{ item: import('../../platform/core/CartStore').Cart
 
                 {/* Quantity Controls */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <QtyButton
-                        label="−"
-                        onClick={() => cartActions.updateQuantity(item.id, item.quantity - 1, item.variantId)}
-                    />
-                    <span style={{
-                        width: 32, textAlign: 'center',
-                        fontSize: 12, fontWeight: 700, color: T.text,
-                    }}>
-                        {item.quantity}
-                    </span>
-                    <QtyButton
-                        label="+"
-                        onClick={() => cartActions.updateQuantity(item.id, item.quantity + 1, item.variantId)}
-                    />
+                    {showQuantityControls ? (
+                        <>
+                            <QtyButton
+                                label="−"
+                                onClick={() => cartActions.updateQuantity(item.id, item.quantity - 1, item.variantId)}
+                            />
+                            <span style={{
+                                width: 32, textAlign: 'center',
+                                fontSize: 12, fontWeight: 700, color: T.text,
+                            }}>
+                                {item.quantity}
+                            </span>
+                            <QtyButton
+                                label="+"
+                                onClick={() => cartActions.updateQuantity(item.id, item.quantity + 1, item.variantId)}
+                            />
+                        </>
+                    ) : (
+                        <span style={{ fontSize: 12, color: T.textDim, fontWeight: 500 }}>Qty: {item.quantity}</span>
+                    )}
 
                     {/* Remove */}
                     <button

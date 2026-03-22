@@ -8,6 +8,7 @@ import { useBuilderStore } from '../../stores/useBuilderStore';
 import { useNavigate } from 'react-router-dom';
 import { NewPageInitializer } from '../../platform/kernel/NewPageInitializer';
 import { OmnoraBootloader } from '../../platform/kernel/OmnoraBootloader';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // 🛡️ standard React ErrorBoundary for catching inner Canvas/Hydrating crashes
 class BuilderLayoutErrorBoundary extends React.Component<
@@ -64,12 +65,34 @@ class BuilderLayoutErrorBoundary extends React.Component<
 
 const BuilderLayoutContent: React.FC = () => {
     const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+    const [isMobileSheet, setIsMobileSheet] = useState(window.innerWidth < 768);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [snapIndex, setSnapIndex] = useState(1); // 0=hidden, 1=40%, 2=90%
     const [libraryOpen, setLibraryOpen] = useState(false);
     const [continueAnyway, setContinueAnyway] = useState(false);
 
     const activePageId = useBuilderStore(state => state.activePageId);
     const [lastValidPageId, setLastValidPageId] = useState<'home' | string>(activePageId || 'home');
+
+    // 👁️ Preview Sync States
+    const isPreviewMode = useBuilderStore(state => state.isPreviewMode);
+    const previewDevice = useBuilderStore(state => state.previewDevice);
+    const nodes = useBuilderStore(state => state.nodes);
+    const iframeRef = React.useRef<HTMLIFrameElement>(null);
+
+    // 👁️ Live Preview postMessage Dispatcher (Debounced 300ms)
+    useEffect(() => {
+        if (!isPreviewMode) return;
+        const timer = setTimeout(() => {
+            if (iframeRef.current?.contentWindow) {
+                iframeRef.current.contentWindow.postMessage(
+                    { type: 'OMNORA_PREVIEW_UPDATE', nodes, activePageId },
+                    window.location.origin
+                );
+            }
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [nodes, isPreviewMode, activePageId]);
 
     // 🛡️ Page Switch Guard & Safety Net
     useEffect(() => {
@@ -101,43 +124,8 @@ const BuilderLayoutContent: React.FC = () => {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    // ── Not-Supported Guard ───────────────────────────────────────────────
-    if (window.innerWidth < 768 && !continueAnyway) {
-        return (
-            <div style={{ 
-                minHeight: '100vh', 
-                display: 'flex', 
-                flexDirection: 'column', 
-                alignItems: 'center', 
-                justifyContent: 'center', 
-                background: '#09090b', 
-                color: '#fff', 
-                padding: 24, 
-                textAlign: 'center' 
-            }}>
-                <div style={{ padding: '24px', background: '#121214', border: '1px solid #27272a', borderRadius: '16px', maxWidth: '400px' }}>
-                    <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '0.5rem', color: '#facc15' }}>Omnora Optimized</h2>
-                    <p style={{ color: '#a1a1aa', fontSize: '13px', lineHeight: '1.5', marginBottom: '2rem' }}>
-                        The Builder is best experienced on Desktop for visual accuracy. Switch to Preview Mode or Continue Anyway.
-                    </p>
-                    <div style={{ display: 'flex', gap: '10px', flexDirection: 'column' }}>
-                        <button 
-                            onClick={() => window.open('/preview', '_blank')} 
-                            style={{ width: '100%', padding: '12px', background: '#27272a', borderRadius: 10, fontSize: '12px', fontWeight: 600, color: '#fff', cursor: 'pointer', border: 'none' }}
-                        >
-                            Switch to Preview Mode
-                        </button>
-                        <button 
-                            onClick={() => setContinueAnyway(true)} 
-                            style={{ width: '100%', padding: '12px', background: 'var(--accent-gold, #D4AF37)', borderRadius: 10, fontSize: '12px', fontWeight: 800, color: '#000', cursor: 'pointer', border: 'none' }}
-                        >
-                            Continue Anyway
-                        </button>
-                    </div>
-                </div>
-            </div>
-        );
-    }
+    // ── Not-Supported Guard Removed ───────────────────────────────────────
+    // Enabled full-width Canvas for viewports < 768px natively.
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden', position: 'relative' }}>
@@ -155,12 +143,16 @@ const BuilderLayoutContent: React.FC = () => {
 
                 {/* Main Canvas Area (Z-INDEX 10) */}
                 <div style={{ 
-                    flex: 1, 
+                    flex: isPreviewMode ? '1 1 50%' : 1, 
                     overflow: 'hidden', 
                     position: 'relative', 
                     display: 'flex', 
                     flexDirection: 'column',
-                    zIndex: 10 
+                    zIndex: 10,
+                    minWidth: isPreviewMode && !isMobile ? '480px' : 'auto',
+                    borderRight: isPreviewMode && !isMobile ? '1px solid #27272a' : 'none',
+                    transition: 'all 0.3s ease',
+                    width: '100%'
                 }}>
                     {isMobile && (
                         <button 
@@ -168,76 +160,104 @@ const BuilderLayoutContent: React.FC = () => {
                             style={{ 
                                 position: 'absolute', 
                                 right: 16, 
-                                top: 16, 
+                                bottom: 16, // Moved to bottom for thumb reachability
                                 zIndex: 80, 
                                 background: 'rgba(18,18,20,0.85)', 
                                 backdropFilter: 'blur(8px)',
                                 border: '1px solid rgba(255,255,255,0.05)', 
-                                padding: '10px 14px', 
-                                borderRadius: '10px', 
+                                padding: '12px 16px', 
+                                borderRadius: '14px', 
                                 cursor: 'pointer', 
                                 color: '#D4AF37',
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: '6px',
-                                fontSize: '12px',
+                                fontSize: '13px',
                                 fontWeight: 'bold',
-                                boxShadow: '0 4px 20px rgba(0,0,0,0.4)'
+                                boxShadow: '0 8px 32px rgba(0,0,0,0.5)'
                             }}
                         >
-                            <Menu size={16} /> Layers
+                            <Menu size={16} /> Edit Props
                         </button>
                     )}
                     <LiveCanvas />
                 </div>
 
-                {/* SmartSidebar (Z-INDEX 90) */}
-                {isMobile ? (
-                    <>
+                {/* 👁️ Live Preview IFrame Area (Z-INDEX 10) */}
+                {isPreviewMode && (
+                    <div style={{ 
+                        flex: 1, 
+                        display: 'flex', 
+                        justifyContent: 'center', 
+                        alignItems: 'center', 
+                        background: '#09090b', 
+                        overflow: 'hidden',
+                        zIndex: 10
+                    }}>
+                        <iframe 
+                            ref={iframeRef}
+                            src={`/?preview=true`} 
+                            style={{ 
+                                width: previewDevice === 'mobile' ? '375px' : previewDevice === 'tablet' ? '768px' : '100%', 
+                                height: '100%', 
+                                border: 'none',
+                                background: '#050508',
+                                transition: 'width 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                                boxShadow: '0 10px 50px rgba(0,0,0,0.6)'
+                            }} 
+                        />
+                    </div>
+                )}
+
+                {/* SmartSidebar (Z-INDEX 90 / 200) */}
+                {isMobileSheet ? (
+                    <AnimatePresence>
                         {isSidebarOpen && (
-                            <div 
-                                onClick={() => setIsSidebarOpen(false)}
-                                style={{ 
-                                    position: 'fixed', 
-                                    inset: 0, 
-                                    background: 'rgba(0,0,0,0.4)', 
-                                    backdropFilter: 'blur(4px)', 
-                                    WebkitBackdropFilter: 'blur(4px)',
-                                    zIndex: 89 
-                                }} 
-                            />
-                        )}
-                        <div style={{
-                            position: 'fixed', 
-                            right: 0, 
-                            top: 0, 
-                            bottom: 0,
-                            transform: isSidebarOpen ? 'translateX(0)' : 'translateX(100%)',
-                            transition: 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
-                            zIndex: 90,
-                            width: '340px'
-                        }}>
-                            {isSidebarOpen && (
-                                <button 
-                                    onClick={() => setIsSidebarOpen(false)}
+                            <>
+                                <motion.div 
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    onClick={() => { setIsSidebarOpen(false); setSnapIndex(1); }}
                                     style={{ 
-                                        position: 'absolute', 
-                                        left: -40, 
-                                        top: 16, 
-                                        background: '#121214', 
-                                        border: '1px solid rgba(255,255,255,0.05)', 
-                                        padding: 8, 
-                                        borderRadius: '8px 0 0 8px', 
-                                        color: '#fff',
-                                        cursor: 'pointer'
+                                        position: 'fixed', inset: 0, 
+                                        background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(5px)', 
+                                        zIndex: 199 
+                                    }} 
+                                />
+                                <motion.div
+                                    initial={{ y: '100%' }}
+                                    animate={{ y: snapIndex === 0 ? '100%' : `${100 - (snapIndex === 1 ? 40 : 90)}%` }}
+                                    exit={{ y: '100%' }}
+                                    transition={{ type: 'spring', damping: 22, stiffness: 200 }}
+                                    drag="y"
+                                    dragConstraints={{ top: 0, bottom: 0 }}
+                                    dragElastic={0.15}
+                                    onDragEnd={(e, info) => {
+                                         if (info.offset.y > 120) {
+                                              if (snapIndex === 2) setSnapIndex(1);
+                                              else { setSnapIndex(0); setIsSidebarOpen(false); }
+                                         } else if (info.offset.y < -120) {
+                                              if (snapIndex === 1) setSnapIndex(2);
+                                         }
+                                    }}
+                                    style={{
+                                        position: 'fixed', bottom: 0, left: 0, right: 0,
+                                        height: '90vh', background: '#09090b', borderTop: '1px solid #1c1c1f',
+                                        borderRadius: '24px 24px 0 0', zIndex: 200, padding: '12px 0 0',
+                                        boxShadow: '0 -15px 50px rgba(0,0,0,0.7)', overflow: 'hidden',
+                                        display: 'flex', flexDirection: 'column'
                                     }}
                                 >
-                                    <X size={16} />
-                                </button>
-                            )}
-                            <SmartSidebar />
-                        </div>
-                    </>
+                                     {/* Drag Handle trigger */}
+                                     <div style={{ width: 45, height: 5, background: '#27272a', borderRadius: 3, margin: '0 auto 16px', cursor: 'grab', flexShrink: 0 }} />
+                                     <div style={{ flex: 1, overflowY: 'auto' }}>
+                                          <SmartSidebar />
+                                     </div>
+                                </motion.div>
+                            </>
+                        )}
+                    </AnimatePresence>
                 ) : (
                     <div style={{ zIndex: 90 }}>
                         <SmartSidebar />

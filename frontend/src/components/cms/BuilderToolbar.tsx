@@ -22,15 +22,15 @@ interface BuilderPage {
 
 // ─── Tokens ───────────────────────────────────────────────────────────────────
 const T = {
-    bg:        'var(--bg-background)',
-    border:    'var(--border-primary)',
+    bg:        'var(--surface-overlay)',
+    border:    'var(--border-subtle)',
     text:      'var(--text-primary)',
     muted:     'var(--text-secondary)',
-    accent:    'var(--accent-gold)',
-    accentSub: 'rgba(var(--accent-gold-rgb), 0.1)',
-    danger:    '#EF4444',
-    success:   '#10B981',
-    warning:   '#F59E0B',
+    accent:    'var(--accent-primary)',
+    accentSub: 'var(--accent-subtle)',
+    danger:    'var(--danger)',
+    success:   'var(--success)',
+    warning:   'var(--warning)',
 } as const;
 
 // ─── One-time keyframe injection ──────────────────────────────────────────────
@@ -124,7 +124,8 @@ interface Props {
     libraryOpen: boolean;
 }
 
-import { JobMonitor } from './JobMonitor';
+import { useBuilderStore } from '../../stores/useBuilderStore';
+import { publisher } from '../../platform/publish/Publisher';
 
 export const BuilderToolbar: React.FC<Props> = ({ onToggleLibrary, libraryOpen }) => {
     const {
@@ -139,7 +140,37 @@ export const BuilderToolbar: React.FC<Props> = ({ onToggleLibrary, libraryOpen }
         showSafeAreaOverlay, toggleSafeAreaOverlay,
     } = useBuilder();
 
-    // ... (rest of state logic)
+    // 🚀 Publish Hardening Zustand State
+    const publishStatus = useBuilderStore(state => state.publishStatus);
+    const publishError = useBuilderStore(state => state.publishError);
+    const lastPublishedAt = useBuilderStore(state => state.lastPublishedAt);
+    const setPublishError = useBuilderStore(state => state.setPublishError);
+    const setPublishStatus = useBuilderStore(state => state.setPublishStatus);
+
+    // 👁️ Live Preview Zustand State
+    const isPreviewMode = useBuilderStore(state => state.isPreviewMode);
+    const setIsPreviewMode = useBuilderStore(state => state.setIsPreviewMode);
+    const previewDevice = useBuilderStore(state => state.previewDevice);
+    const setPreviewDevice = useBuilderStore(state => state.setPreviewDevice);
+
+    const [relativeTime, setRelativeTime] = useState<string>('');
+
+    // ⏱️ Relative Time Tracker (Updates every 60s)
+    useEffect(() => {
+        if (!lastPublishedAt) { setRelativeTime(''); return; }
+        const update = () => {
+            const diff = Date.now() - new Date(lastPublishedAt).getTime();
+            const sec = Math.floor(diff / 1000);
+            const min = Math.floor(sec / 60);
+            if (min === 0) setRelativeTime(`${sec}s ago`);
+            else if (min < 60) setRelativeTime(`${min}m ago`);
+            else setRelativeTime('Today');
+        };
+        update();
+        const timer = setInterval(update, 60000);
+        return () => clearInterval(timer);
+    }, [lastPublishedAt]);
+
     const [openDropdown, setOpenDropdown] = useState<'page' | 'device' | null>(null);
     const showPagePicker   = openDropdown === 'page';
     const showDevicePicker = openDropdown === 'device';
@@ -148,9 +179,7 @@ export const BuilderToolbar: React.FC<Props> = ({ onToggleLibrary, libraryOpen }
     const [addingPage,  setAddingPage]  = useState(false);
     const [newPageName, setNewPageName] = useState('');
     const [isCopilotOpen, setIsCopilotOpen] = useState(false);
-    const [publishing, setPublishing] = useState(false);
 
-    // ... (other refs and hooks)
     const pagePickerBtnRef   = useRef<HTMLButtonElement>(null);
     const devicePickerBtnRef = useRef<HTMLButtonElement>(null);
 
@@ -160,7 +189,6 @@ export const BuilderToolbar: React.FC<Props> = ({ onToggleLibrary, libraryOpen }
     const safePages = pages?.byId ?? {};
     const pageIds = pages?.allIds ?? [];
 
-    // ... (grouping logic)
     const systemPages = pageIds.filter((id: string) => safePages[id]?.type === 'system');
     const templatePages = pageIds.filter((id: string) => safePages[id]?.type === 'template');
     const customPages = pageIds.filter((id: string) => safePages[id]?.type === 'custom');
@@ -172,13 +200,12 @@ export const BuilderToolbar: React.FC<Props> = ({ onToggleLibrary, libraryOpen }
     const isProcessing = saveStatus === 'processing' || !!activeJobId;
 
     const handlePublish = async () => {
-        setPublishing(true);
         try {
-            await publishLive();
+            const merchantId = 'demo_merchant'; // or resolve from context
+            const domain = 'demo.omnora.com';
+            await publisher.publishSite(merchantId, domain);
         } catch (err) {
-            console.error('[BuilderToolbar] publishLive failed:', err);
-        } finally {
-            setPublishing(false);
+            console.error('[BuilderToolbar] publishSite failed:', err);
         }
     };
 
@@ -358,17 +385,41 @@ export const BuilderToolbar: React.FC<Props> = ({ onToggleLibrary, libraryOpen }
             )}
         </>
     ) : null;
-
+    
     return (
         <>
+            {/* 🛑 Inline Error Banner */}
+            {publishStatus === 'error' && publishError && (
+                <div style={{ 
+                    background: '#FEF2F2', borderBottom: '1px solid #FCA5A5', 
+                    padding: '8px 14px', display: 'flex', alignItems: 'center', gap: 12,
+                    position: 'relative', zIndex: 100,
+                    fontFamily: "'Inter', sans-serif",
+                }}>
+                     <span style={{ color: '#B91C1C', fontSize: 13, fontWeight: 500, flex: 1 }}>
+                          ⚠️ Publish Failed: {publishError}
+                     </span>
+                     <button 
+                         onClick={handlePublish}
+                         style={{ 
+                             background: '#B91C1C', color: '#fff', border: 'none', 
+                             borderRadius: 6, padding: '5px 12px', fontSize: 12, 
+                             fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s'
+                         }}
+                     >
+                          Retry
+                     </button>
+                </div>
+            )}
+
             <div
                 className="builder-toolbar-container"
                 style={{
-                    height: 52, background: T.bg,
+                    height: 48, background: T.bg,
                     borderBottom: `1px solid ${T.border}`,
                     display: 'flex', alignItems: 'center',
                     padding: '0 14px', gap: 8, flexShrink: 0,
-                    fontFamily: "'Inter', system-ui, sans-serif",
+                    fontFamily: "var(--font-sans)",
                     // FIX: no overflow:auto — that creates a new fixed-position containing block
                     // that traps portaled children. Use clip instead so text doesn't overflow
                     // but fixed-position descendants are unaffected.
@@ -377,125 +428,213 @@ export const BuilderToolbar: React.FC<Props> = ({ onToggleLibrary, libraryOpen }
                 }}
             >
                 {/* Brand */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0, marginRight: 4 }}>
-                    <div style={{
-                        width: 26, height: 26, borderRadius: 7, background: 'var(--accent-gold)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: 13, fontWeight: 800, color: '#000',
-                        boxShadow: '0 0 15px rgba(var(--accent-gold-rgb), 0.3)',
-                    }}>O</div>
-                    <span style={{ fontSize: 13, fontWeight: 800, color: T.text, letterSpacing: '-0.02em' }}>Omnora OS <span style={{ color: T.muted, fontWeight: 400 }}>Builder</span></span>
-                </div>
-
-                <Divider />
-
-                <ToolBtn onClick={onToggleLibrary} active={libraryOpen}>
-                    <Plus size={13} /> Elements
-                </ToolBtn>
-
-                <Divider />
-
-                <TopBarPageSelector />
-
-                <Divider />
-
-                {/* Device picker trigger */}
-                <button
-                    ref={devicePickerBtnRef}
-                    onClick={() => setOpenDropdown(v => v === 'device' ? null : 'device')}
-                    style={{
-                        height: 32, padding: '0 10px',
-                        background: showDevicePicker ? T.accentSub : 'transparent',
-                        border: `1px solid ${showDevicePicker ? T.accent : T.border}`,
-                        borderRadius: 7, color: showDevicePicker ? T.accent : T.muted,
-                        cursor: 'pointer', display: 'flex', alignItems: 'center',
-                        gap: 5, fontSize: 12, fontWeight: 600, flexShrink: 0,
-                    }}
-                >
-                    <span>{activeDevice.category === 'phone' ? '📱' : activeDevice.category === 'tablet' ? '📟' : '🖥️'}</span>
-                    <span style={{ maxWidth: 90, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {activeDevice.name}
-                    </span>
-                    <span style={{ color: T.muted, fontSize: 11 }}>{displayW}×{displayH}</span>
-                    {showDevicePicker ? <ChevronUp size={11} /> : <ChevronDown size={11} />}
-                </button>
-
-                {activeDevice.category !== 'desktop' && (
-                    <ToolBtn
-                        onClick={() => setOrientation(orientation === 'portrait' ? 'landscape' : 'portrait')}
-                        title="Rotate"
-                    >
-                        <RotateCcw
-                            size={13}
-                            style={{
-                                transform: orientation === 'landscape' ? 'rotate(-90deg)' : 'none',
-                                transition: 'transform .3s',
-                            }}
-                        />
-                    </ToolBtn>
+                {/* Brand */}
+                {window.innerWidth >= 1024 && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0, marginRight: 4 }}>
+                        <div style={{
+                            width: 26, height: 26, borderRadius: 7, background: 'var(--accent-gold)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            fontSize: 13, fontWeight: 800, color: '#000',
+                            boxShadow: '0 0 15px rgba(var(--accent-gold-rgb), 0.3)',
+                        }}>O</div>
+                        <span style={{ fontSize: 13, fontWeight: 800, color: T.text, letterSpacing: '-0.02em' }}>Omnora OS <span style={{ color: T.muted, fontWeight: 400 }}>Builder</span></span>
+                    </div>
                 )}
 
-                <Divider />
+                {window.innerWidth < 1024 && window.innerWidth >= 768 && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0, marginRight: 4 }}>
+                        <div style={{
+                            width: 26, height: 26, borderRadius: 7, background: 'var(--accent-gold)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            fontSize: 13, fontWeight: 800, color: '#000',
+                        }}>O</div>
+                    </div>
+                )}
 
-                <ToolBtn onClick={undo} title="Undo"><Undo2 size={13} /></ToolBtn>
-                <ToolBtn onClick={redo} title="Redo"><Redo2 size={13} /></ToolBtn>
+                {window.innerWidth < 768 ? (
+                    // 📱 MOBILE TOOLBAR LAYOUT
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, flex: 1, overflow: 'hidden' }}>
+                        <div style={{ flex: 1, minWidth: 0, overflowX: 'auto' }}>
+                            <TopBarPageSelector />
+                        </div>
 
-                <Divider />
+                        <SaveIndicator saveStatus={saveStatus} hasUnsavedChanges={hasUnsavedChanges} />
 
-                <div style={{ display: 'flex', border: `1px solid ${T.border}`, borderRadius: 8, overflow: 'hidden', flexShrink: 0 }}>
-                    {(['edit', 'preview'] as const).map(m => (
-                        <button key={m} onClick={() => setMode(m)} style={{
-                            height: 32, padding: '0 12px',
-                            background: mode === m ? '#F3F4F6' : 'transparent',
-                            border: 'none', color: mode === m ? T.text : T.muted,
-                            cursor: 'pointer', display: 'flex', alignItems: 'center',
-                            gap: 5, fontSize: 13, fontWeight: mode === m ? 600 : 400,
-                        }}>
-                            {m === 'edit' ? <><Edit3 size={13} /> Edit</> : <><Eye size={13} /> Preview</>}
+                        {/* Overflow Menu with ⋯ icon */}
+                        <button
+                            onClick={() => setOpenDropdown(v => v === 'overflow' ? null : 'overflow')}
+                            style={{
+                                height: 32, width: 32, borderRadius: 8,
+                                background: openDropdown === 'overflow' ? T.accentSub : 'transparent',
+                                border: `1px solid ${openDropdown === 'overflow' ? T.accent : T.border}`,
+                                color: openDropdown === 'overflow' ? T.accent : '#fff',
+                                cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center'
+                            }}
+                        >
+                            <span style={{ fontSize: 16, fontWeight: 800 }}>⋮</span>
                         </button>
-                    ))}
+
+                        <button
+                            onClick={handlePublish}
+                            disabled={publishStatus === 'publishing'}
+                            style={{
+                                height: 32, padding: '0 12px', background: 'var(--accent-gold)', border: 'none',
+                                cursor: publishStatus === 'publishing' ? 'not-allowed' : 'pointer'
+                            }}
+                        >
+                            {publishStatus === 'publishing' ? '...' : 'Publish'}
+                        </button>
+                    </div>
+                ) : (
+                    // 🖥️ DESKTOP TOOLBAR LAYOUT
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flex: 1 }}>
+                        
+                        {/* ─── LEFT ZONE ─── */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                            {/* Logo Mark (Icon Only) */}
+                            <div style={{
+                                width: 24, height: 24, borderRadius: 6, background: 'var(--accent-primary)',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                fontSize: 13, fontWeight: 800, color: '#FFFFFF', cursor: 'default'
+                            }}>O</div>
+                            
+                            <Divider />
+                            <TopBarPageSelector />
+                        </div>
+
+                        {/* ─── CENTER ZONE ─── */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, position: 'absolute', left: '50%', transform: 'translateX(-50%)' }}>
+                            {/* Device Segmented Control */}
+                            <div style={{ display: 'flex', background: 'rgba(0,0,0,0.03)', border: `1px solid ${T.border}`, borderRadius: 8, padding: 2 }}>
+                                {(['desktop', 'tablet', 'phone'] as const).map(d => {
+                                    const isSel = activeDevice.category === d;
+                                    return (
+                                        <button
+                                            key={d}
+                                            onClick={() => setDevicePreset(d === 'desktop' ? 'desktop_1440' : d === 'tablet' ? 'ipad_air' : 'iphone_14')}
+                                            style={{
+                                                height: 28, width: 34, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                background: isSel ? 'var(--surface-raised)' : 'transparent',
+                                                border: 'none', borderRadius: 6, cursor: 'pointer',
+                                                boxShadow: isSel ? '0 1px 2px rgba(0,0,0,0.05)' : 'none',
+                                                transition: 'all 0.15s'
+                                            }}
+                                        >
+                                            <span style={{ fontSize: 13, filter: isSel ? 'none' : 'grayscale(1)', opacity: isSel ? 1 : 0.6 }}>
+                                                {d === 'desktop' ? '🖥️' : d === 'tablet' ? '📟' : '📱'}
+                                            </span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                            
+                            {/* Read-Only Canvas Zoom */}
+                            <div style={{ fontSize: 13, color: T.muted, fontWeight: 500, padding: '0 8px' }}>
+                                100%
+                            </div>
+                        </div>
+
+                        {/* ─── RIGHT ZONE ─── */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                            {/* Undo / Redo */}
+                            <div style={{ display: 'flex', gap: 2 }}>
+                                <button onClick={undo} style={{ height: 32, width: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', color: T.text, cursor: 'pointer' }}>
+                                    <Undo2 size={14} />
+                                </button>
+                                <button onClick={redo} style={{ height: 32, width: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', color: T.text, cursor: 'pointer' }}>
+                                    <Redo2 size={14} />
+                                </button>
+                            </div>
+
+                            <Divider />
+
+                            {/* Preview Toggle (Ghost) */}
+                            <button 
+                                onClick={() => setIsPreviewMode(!isPreviewMode)}
+                                style={{
+                                    height: 32, padding: '0 12px', background: isPreviewMode ? 'var(--surface-raised)' : 'none',
+                                    border: isPreviewMode ? `1px solid ${T.border}` : '1px solid transparent', borderRadius: 6,
+                                    color: T.text, fontSize: 13, fontWeight: 500, cursor: 'pointer',
+                                    display: 'flex', alignItems: 'center', gap: 6, transition: 'all 0.15s'
+                                }}
+                            >
+                                {isPreviewMode ? <Edit3 size={14} /> : <Eye size={14} />}
+                                <span style={{ fontSize: 13 }}>{isPreviewMode ? 'Edit' : 'Preview'}</span>
+                            </button>
+
+                            {/* AI Magic */}
+                            <button 
+                                onClick={() => setIsCopilotOpen(true)}
+                                style={{
+                                    height: 32, padding: '0 12px', background: 'none', border: 'none',
+                                    color: 'var(--accent-primary)', fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                                    display: 'flex', alignItems: 'center', gap: 6
+                                }}
+                            >
+                                <Sparkles size={14} />
+                                AI Magic
+                            </button>
+
+                            <Divider />
+
+                            {/* Save Status & Relative Time */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                <SaveIndicator saveStatus={saveStatus} hasUnsavedChanges={hasUnsavedChanges} />
+                                {relativeTime && (
+                                    <span style={{ fontSize: 11, color: T.muted }}>
+                                        ({relativeTime})
+                                    </span>
+                                )}
+                            </div>
+
+                            {/* Publish Button */}
+                            <button
+                                onClick={handlePublish}
+                                disabled={publishStatus === 'publishing'}
+                                style={{
+                                    height: 36, padding: '0 16px', background: 'var(--accent-primary)', border: 'none',
+                                    borderRadius: 6, color: '#FFFFFF', cursor: publishStatus === 'publishing' ? 'not-allowed' : 'pointer',
+                                    display: 'flex', alignItems: 'center', gap: 6, fontSize: 14, fontWeight: 500,
+                                    opacity: publishStatus === 'publishing' ? 0.7 : 1, transition: 'all 0.15s',
+                                    boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                                }}
+                            >
+                                {publishStatus === 'publishing' ? <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> : <Globe size={14} />}
+                                {publishStatus === 'success' ? 'Published' : 'Publish'}
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+
+            {/* 📱 MOBILE OVERFLOW MENU */}
+            {window.innerWidth < 768 && openDropdown === 'overflow' && (
+                <div style={{
+                    position: 'absolute', top: 52, right: 14, background: '#121214', 
+                    border: '1px solid #1c1c1f', borderRadius: 12, padding: 6, 
+                    zIndex: 210, width: 170, boxShadow: '0 15px 40px rgba(0,0,0,0.6)',
+                    fontFamily: "'Inter', sans-serif"
+                }}>
+                    <div style={{ display: 'flex', gap: 4, marginBottom: 4 }}>
+                        <button onClick={undo} style={{ flex: 1, padding: '8px', background: 'transparent', border: '1px solid #1c1c1f', borderRadius: 8, color: '#fff', display: 'flex', justifyContent: 'center' }}><Undo2 size={13} /></button>
+                        <button onClick={redo} style={{ flex: 1, padding: '8px', background: 'transparent', border: '1px solid #1c1c1f', borderRadius: 8, color: '#fff', display: 'flex', justifyContent: 'center' }}><Redo2 size={13} /></button>
+                    </div>
+                    <div style={{ borderTop: '1px solid #1c1c1f', margin: '6px 0' }} />
+                    <button 
+                        onClick={() => { setIsPreviewMode(!isPreviewMode); setOpenDropdown(null); }}
+                        style={{ width: '100%', padding: '9px 12px', background: 'transparent', border: 'none', borderRadius: 8, color: '#fff', fontSize: 13, display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}
+                    >
+                        {isPreviewMode ? <Edit3 size={13} /> : <Eye size={13} />}
+                        <span>{isPreviewMode ? 'View Edit' : 'Preview'}</span>
+                    </button>
+                    <button 
+                        onClick={() => { onToggleLibrary(); setOpenDropdown(null); }}
+                        style={{ width: '100%', padding: '9px 12px', background: 'transparent', border: 'none', borderRadius: 8, color: '#fff', fontSize: 13, display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', marginTop: 3 }}
+                    >
+                        <Plus size={13} /> <span>Elements</span>
+                    </button>
                 </div>
-                
-                <Divider />
-
-                <ToolBtn onClick={() => setIsCopilotOpen(true)} title="AI Magic Copilot" active={isCopilotOpen}>
-                    <Sparkles size={13} className="text-indigo-500" />
-                    <span className="text-indigo-600">AI Magic</span>
-                </ToolBtn>
-
-                <ToolBtn onClick={() => window.open('/builder/help', '_blank')} title="Help Guide">
-                    <HelpCircle size={13} /> Help
-                </ToolBtn>
-
-                <div style={{ flex: 1, minWidth: 12 }} />
-
-                <SaveIndicator saveStatus={saveStatus} hasUnsavedChanges={hasUnsavedChanges} />
-
-                <div data-tour="save-button">
-                    <ToolBtn onClick={() => saveDraft()}>
-                        <Save size={13} /> Save
-                    </ToolBtn>
-                </div>
-
-                <button
-                    onClick={handlePublish}
-                    disabled={publishing}
-                    style={{
-                        height: 32, padding: '0 18px', background: 'var(--accent-gold)', border: 'none',
-                        borderRadius: 8, color: '#000', cursor: publishing ? 'not-allowed' : 'pointer',
-                        display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 700,
-                        opacity: publishing ? 0.7 : 1, flexShrink: 0,
-                        boxShadow: '0 4px 15px rgba(var(--accent-gold-rgb), 0.2)',
-                        transition: 'all 0.3s ease',
-                    }}
-                >
-                    {publishing
-                        // FIX: spin keyframe is now defined via one-time head injection above.
-                        ? <Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} />
-                        : <Globe size={13} />
-                    }
-                    {publishing ? 'Publishing…' : 'Publish'}
-                </button>
+            )}
             </div>
 
             {/* FIX: portal — dropdowns escape the toolbar's stacking context entirely */}

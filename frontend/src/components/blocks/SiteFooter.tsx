@@ -28,17 +28,23 @@ interface SocialLink {
 
 export interface SiteFooterProps {
     nodeId: string;
-    storeName?: string;
-    storeDescription?: string;
-    bgColor?: string;
-    textColor?: string;
-    accentColor?: string;
+    isBuilder?: boolean;
     columns?: FooterColumn[];
+    maxColumns?: number;
+    logoSrc?: string;
+    logoAlt?: string;
+    tagline?: string;
     socialLinks?: SocialLink[];
-    showPaymentIcons?: boolean;
+    showNewsletter?: boolean;
+    newsletterHeading?: string;
+    newsletterPlaceholder?: string;
+    newsletterButtonText?: string;
     copyrightText?: string;
-    /** Phase 17: Dynamic nav menu from DatabaseClient */
-    navMenu?: { label: string; url: string }[];
+    backgroundColor?: string;
+    textColor?: string;
+    linkHoverColor?: string;
+    dividerColor?: string;
+    paddingY?: number;
     children?: React.ReactNode;
 }
 
@@ -91,90 +97,90 @@ const T = {
 
 export const SiteFooter: React.FC<SiteFooterProps> = ({
     nodeId,
-    storeName = 'Omnora',
-    storeDescription = 'Premium curated goods for the modern connoisseur. Crafted with passion, delivered with care.',
-    bgColor = '#0a0a12',
+    isBuilder = false,
+    columns = [],
+    maxColumns = 3,
+    logoSrc,
+    logoAlt = "Logo",
+    tagline = "Stay in the loop",
+    socialLinks = [],
+    showNewsletter = true,
+    newsletterHeading = "Stay in the loop",
+    newsletterPlaceholder = "Enter your email",
+    newsletterButtonText = "Subscribe",
+    copyrightText = `© ${new Date().getFullYear()} Your Store. All rights reserved.`,
+    backgroundColor = '#0a0a12',
     textColor = '#e8e8f0',
-    accentColor = '#7c6dfa',
-    columns = DEFAULT_COLUMNS,
-    socialLinks = DEFAULT_SOCIALS,
-    showPaymentIcons = true,
-    copyrightText = `© ${new Date().getFullYear()} Omnora. All rights reserved.`,
-    navMenu,
+    linkHoverColor = '#7c6dfa',
+    dividerColor = '#1e1e3a',
+    paddingY = 64
 }) => {
-    // If navMenu is provided, create a "Navigation" column from it and prepend
-    const resolvedColumns: FooterColumn[] = navMenu && navMenu.length > 0
-        ? [{ title: 'Navigation', links: navMenu }, ...columns]
-        : columns;
     return (
         <footer
             data-node-id={nodeId}
             style={{
-                background: bgColor, color: textColor,
+                background: backgroundColor, color: textColor,
                 fontFamily: "'Inter', -apple-system, sans-serif",
-                padding: '48px 40px 24px',
+                padding: `${paddingY}px 40px 24px`,
             }}
         >
             {/* Main Grid */}
             <div style={{
                 display: 'grid',
-                gridTemplateColumns: `1.4fr ${resolvedColumns.map(() => '1fr').join(' ')}`,
+                gridTemplateColumns: `1.4fr repeat(${maxColumns}, 1fr) ${showNewsletter ? '1.4fr' : ''}`,
                 gap: 40,
                 marginBottom: 40,
             }}>
                 {/* Brand Column */}
                 <div>
-                    <h3 style={{
-                        fontSize: 20, fontWeight: 900, margin: '0 0 12px',
-                        letterSpacing: '-0.03em', color: textColor,
-                    }}>
-                        {storeName}
-                    </h3>
-                    <p style={{
-                        fontSize: 12, color: T.textDim, lineHeight: 1.7,
-                        margin: '0 0 20px', maxWidth: 260,
-                    }}>
-                        {storeDescription}
-                    </p>
+                    {logoSrc ? (
+                        <img src={logoSrc} alt={logoAlt} style={{ maxHeight: 40, marginBottom: 16 }} />
+                    ) : (
+                        <h3 style={{ fontSize: 20, fontWeight: 900, margin: '0 0 12px', color: textColor }}>
+                            {logoAlt}
+                        </h3>
+                    )}
+                    {tagline && (
+                        <p style={{ fontSize: 13, color: '#8888a8', lineHeight: 1.6, margin: '0 0 20px', maxWidth: 260 }}>
+                            {tagline}
+                        </p>
+                    )}
 
                     {/* Social Icons */}
                     <div style={{ display: 'flex', gap: 8 }}>
                         {socialLinks.map((s, i) => (
-                            <a key={i} href={s.url} target="_blank" rel="noopener noreferrer" style={{
+                            <a key={i} href={isBuilder ? undefined : s.url} target="_blank" rel="noopener noreferrer" style={{
                                 width: 34, height: 34, borderRadius: 8,
-                                background: `${accentColor}12`,
-                                border: `1px solid ${accentColor}20`,
+                                background: 'rgba(255,255,255,0.05)',
+                                border: `1px solid ${dividerColor}`,
                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                color: accentColor, fontSize: 13, fontWeight: 800,
+                                color: textColor, fontSize: 14,
                                 textDecoration: 'none',
-                                transition: 'all 0.15s',
+                                cursor: isBuilder ? 'default' : 'pointer'
                             }}>
-                                {SOCIAL_ICONS[s.platform] || s.platform.charAt(0)}
+                                {SOCIAL_ICONS[s.platform] || s.platform.charAt(0).toUpperCase()}
                             </a>
                         ))}
                     </div>
                 </div>
 
                 {/* Link Columns */}
-                {resolvedColumns.map((col, i) => (
+                {columns.map((col, i) => (
                     <div key={i}>
-                        <h4 style={{
-                            fontSize: 11, fontWeight: 700, color: T.textMuted,
-                            textTransform: 'uppercase', letterSpacing: '0.1em',
-                            margin: '0 0 16px',
-                        }}>
-                            {col.title}
+                        <h4 style={{ fontSize: 11, fontWeight: 700, color: '#555570', textTransform: 'uppercase', letterSpacing: '0.12em', margin: '0 0 16px' }}>
+                            {col.heading || col.title}
                         </h4>
                         <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
                             {col.links.map((link, j) => (
                                 <li key={j}>
-                                    <a href={link.url} style={{
-                                        fontSize: 13, color: T.textDim,
+                                    <a href={isBuilder ? undefined : link.url} style={{
+                                        fontSize: 13, color: '#8888a8',
                                         textDecoration: 'none', fontWeight: 500,
                                         transition: 'color 0.15s',
+                                        cursor: isBuilder ? 'default' : 'pointer'
                                     }}
-                                        onMouseEnter={e => { (e.target as HTMLElement).style.color = accentColor; }}
-                                        onMouseLeave={e => { (e.target as HTMLElement).style.color = T.textDim; }}
+                                        onMouseEnter={e => { if (!isBuilder) (e.target as HTMLElement).style.color = linkHoverColor; }}
+                                        onMouseLeave={e => { if (!isBuilder) (e.target as HTMLElement).style.color = '#8888a8'; }}
                                     >
                                         {link.label}
                                     </a>
@@ -183,34 +189,48 @@ export const SiteFooter: React.FC<SiteFooterProps> = ({
                         </ul>
                     </div>
                 ))}
+
+                {/* Newsletter Column */}
+                {showNewsletter && (
+                    <div>
+                        <h4 style={{ fontSize: 11, fontWeight: 700, color: '#555570', textTransform: 'uppercase', letterSpacing: '0.12em', margin: '0 0 16px' }}>
+                            {newsletterHeading}
+                        </h4>
+                        <div style={{ display: 'flex', gap: 8, maxWidth: 280 }}>
+                            <input 
+                                type="email" 
+                                placeholder={newsletterPlaceholder} 
+                                disabled={isBuilder}
+                                style={{
+                                    flex: 1, padding: '8px 12px', borderRadius: 8,
+                                    background: 'rgba(255,255,255,0.05)', border: `1px solid ${dividerColor}`,
+                                    color: '#fff', fontSize: 13,
+                                }} 
+                            />
+                            <button 
+                                onClick={e => isBuilder && e.preventDefault()}
+                                style={{
+                                    padding: '8px 16px', borderRadius: 8,
+                                    background: linkHoverColor, color: '#fff',
+                                    border: 'none', fontWeight: 600, fontSize: 13,
+                                    cursor: isBuilder ? 'default' : 'pointer'
+                                }}
+                            >
+                                {newsletterButtonText}
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* Divider */}
-            <div style={{ height: 1, background: T.border, marginBottom: 20 }} />
+            <div style={{ height: 1, background: dividerColor, marginBottom: 20 }} />
 
             {/* Bottom Row */}
-            <div style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                flexWrap: 'wrap', gap: 16,
-            }}>
-                <span style={{ fontSize: 11, color: T.textMuted }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
+                <span style={{ fontSize: 12, color: '#555570' }}>
                     {copyrightText}
                 </span>
-
-                {showPaymentIcons && (
-                    <div style={{ display: 'flex', gap: 6 }}>
-                        {PAYMENT_ICONS.map(p => (
-                            <span key={p} style={{
-                                padding: '4px 10px', borderRadius: 4,
-                                background: '#14142a', border: `1px solid ${T.border}`,
-                                fontSize: 9, fontWeight: 700, color: T.textDim,
-                                letterSpacing: '0.04em',
-                            }}>
-                                {p}
-                            </span>
-                        ))}
-                    </div>
-                )}
             </div>
         </footer>
     );
