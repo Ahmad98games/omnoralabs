@@ -9,6 +9,9 @@ import { useBuilderStore } from '../../stores/useBuilderStore';
 import { useAuth } from '../../context/AuthContext';
 import { StorefrontFallback } from './StorefrontFallback';
 
+import { NodesContext } from '../../context/BuilderContext';
+import { useContext } from 'react';
+
 // ─── Error Boundary ───────────────────────────────────────────────────────────
 
 class ErrorBoundary extends React.Component<
@@ -110,12 +113,16 @@ export const SafeRenderer: React.FC<SafeRendererProps> = ({
     const [hydratedStorefrontBlocks, setHydratedStorefrontBlocks] = useState<any[]>([]);
     const [isForceRender, setIsForceRender] = useState(false);
 
-    // Builder state — only consumed when isBuilder is true
-    const nodes = useBuilderStore(s => s.nodes);
+    const nodesContext = useContext(NodesContext);
+
+    // Builder state — uses Context when building to synchronize with Sidebars/Toolbar
+    const nodes = isBuilder ? (nodesContext?.nodes || {}) : {};
+    const activePageId = isBuilder ? (nodesContext?.activePageId || '') : '';
+    const pageLayouts = isBuilder ? (nodesContext?.pageLayouts || {}) : {};
+    const selectedNodeId = isBuilder ? nodesContext?.selectedNodeId : null;
+
     const lastDroppedNodeId = useBuilderStore(s => s.lastDroppedNodeId);
-    const selectedNodeId = useBuilderStore(s => s.selectedNodeId);
     const isDraggingGlobal = useBuilderStore(s => s.isDragging);
-    const activePageId = useBuilderStore(s => s.activePageId);
     const isHydrating = useBuilderStore(s => s.isHydrating);
 
     const { user } = useAuth();
@@ -242,7 +249,7 @@ export const SafeRenderer: React.FC<SafeRendererProps> = ({
         }
 
         // Safe block resolution — never throws on undefined
-        const rawBuilderBlocks = nodes?.[activePageId];
+        const rawBuilderBlocks = pageLayouts?.[activePageId];
         const safeBuilderBlocks = Array.isArray(rawBuilderBlocks) ? rawBuilderBlocks : [];
 
         // Guard: page exists but has no blocks yet
