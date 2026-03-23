@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import { useNavigate } from 'react-router-dom';
 import { User, Package, MapPin, Key, LogOut, Loader2, ChevronRight, Plus, Trash2 } from 'lucide-react';
-import './CustomerProfile.css';
 
 interface Address {
     id: string;
