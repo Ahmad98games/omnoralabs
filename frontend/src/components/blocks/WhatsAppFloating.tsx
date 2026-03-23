@@ -52,7 +52,6 @@ export const WhatsAppFloating: React.FC<WhatsAppFloatingProps> = ({
                     borderRadius: isInline ? '28px' : '50%',
                     background: buttonColor, 
                     color: '#fff',
-                    display: 'flex', 
                     alignItems: 'center', 
                     justifyContent: 'center',
                     gap: 8,
