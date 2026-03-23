@@ -10,6 +10,7 @@ import {
 import { DevicePresetPanel, getPreset } from './DevicePresetPanel';
 import { AICopilotModal } from '../builder/AICopilotModal';
 import { TopBarPageSelector } from '../builder/TopBarPageSelector';
+import { JobMonitor } from './JobMonitor';
 
 interface BuilderPage {
     id: string;
