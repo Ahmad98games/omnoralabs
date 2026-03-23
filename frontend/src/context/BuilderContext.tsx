@@ -421,7 +421,7 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
                 const tree: Record<string, BuilderNode> = {
                     [defaultHeroId]: {
                         id: defaultHeroId,
-                        type: 'hero',
+                        type: 'hero_banner',
                         parentId: null,
                         children: [],
                         props: {

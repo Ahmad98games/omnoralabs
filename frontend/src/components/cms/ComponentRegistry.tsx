@@ -339,6 +339,7 @@ export const DEFAULT_PROPS: Record<string, ComponentSchema> = {
 
 export const ComponentRegistry: Record<string, React.LazyExoticComponent<React.FC<any>> | React.FC<any>> = {
     'hero_banner': React.lazy(() => import('../blocks/HeroBanner').then(m => ({ default: m.HeroBanner }))),
+    'hero': React.lazy(() => import('../blocks/HeroBanner').then(m => ({ default: m.HeroBanner }))), // Legacy alias fallback
     'split_hero': React.lazy(() => import('../blocks/SplitHero').then(m => ({ default: m.SplitHero }))),
     'product_grid': React.lazy(() => import('../cart/ProductGrid').then(m => ({ default: m.ProductGrid }))),
     'featured_product': React.lazy(() => import('../cart/FeaturedProduct').then(m => ({ default: m.FeaturedProduct }))),
