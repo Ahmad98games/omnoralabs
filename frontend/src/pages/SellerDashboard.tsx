@@ -163,37 +163,81 @@ const PageCard = ({ slug, onEdit, onDelete }: { slug: string; onEdit: () => void
 );
 
 // ─── Add Page Modal ───────────────────────────────────────────────────────────
-const addPage = async (name: string, slugParam?: string, type?: string, templateData?: any) => {
+const addPage = async (name: string, slugParam?: string, type: 'custom' | 'system' | 'template' = 'custom', templateData?: any) => {
     if (!name.trim()) return;
     
     const currentContent = localContent || { pages: {} };
-    const slug = slugParam || name.toLowerCase().replace(/[^a-z0-9]/g, '-');
+    const id = crypto.randomUUID(); // 🛡️ Add ID for Builder Invariant Normalization
+    
+    let baseSlug = (slugParam || name)
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+    
+    if (!baseSlug) baseSlug = 'untitled';
+
+    const existingSlugs = Object.values(currentContent.pages || {}).map((p: any) => p.slug);
+    let finalSlug = baseSlug;
+    let counter = 2;
+    while (existingSlugs.includes(finalSlug)) {
+        finalSlug = `${baseSlug}-${counter}`;
+        counter++;
+    }
 
     try {
+        const defaultHeroId = `node_hero_${Date.now()}`;
+        
         const newPageData = templateData ? {
-            title: name,
-            // Convert node objects back to list for legacy dashboard rendering compatibility if needed
+            id,
+            title: name.trim() || 'Untitled Page',
+            slug: finalSlug,
+            type,
+            status: 'draft',
+            createdAt: new Date().toISOString(),
+            lastUpdated: new Date().toISOString(),
             layout: templateData.layout || [], 
             nodes: templateData.nodes || {}
         } : { 
-            title: name, 
-            layout: [{ type: 'hero', data: { headline: name } }] 
+            id,
+            title: name.trim() || 'Untitled Page',
+            slug: finalSlug,
+            type,
+            status: 'draft',
+            createdAt: new Date().toISOString(),
+            lastUpdated: new Date().toISOString(),
+            layout: [defaultHeroId],
+            nodes: {
+                [defaultHeroId]: {
+                    id: defaultHeroId,
+                    type: 'hero',
+                    parentId: null,
+                    children: [],
+                    props: {
+                        headline: `Welcome to ${name}`,
+                        subheadline: "Drag and drop blocks to start building",
+                        ctaText: "Shop Now"
+                    },
+                    styles: {},
+                    schemaVersion: 2,
+                    createdAt: new Date().toISOString()
+                }
+            }
         };
 
         setLocalContent({
             ...currentContent,
-            pages: { ...currentContent.pages, [slug]: newPageData }
+            pages: { ...currentContent.pages, [finalSlug]: newPageData }
         });
 
         // 2. Sync with Backend
-        await client.post('/cms/pages', { slug, pageData: newPageData });
+        await client.post('/cms/pages', { slug: finalSlug, pageData: newPageData });
         
         setAddPageOpen(false);
         showToast('Page forged successfully', 'success');
     } catch (err) {
         console.error('[Omnora OS] Forge Failed:', err);
         showToast('Forge failed. Database rejected the link.', 'error');
-        // Rollback UI state if needed
         fetchContent(); 
     }
 };
