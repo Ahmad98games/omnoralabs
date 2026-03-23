@@ -9,6 +9,8 @@ import { useBuilderStore } from '../../stores/useBuilderStore';
 import { useAuth } from '../../context/AuthContext';
 import { StorefrontFallback } from './StorefrontFallback';
 
+// ─── Error Boundary ───────────────────────────────────────────────────────────
+
 class ErrorBoundary extends React.Component<
     { children: React.ReactNode; fallback?: React.ReactNode },
     { hasError: boolean; error: Error | null }
@@ -41,17 +43,23 @@ class ErrorBoundary extends React.Component<
     }
 }
 
+// ─── Empty State ──────────────────────────────────────────────────────────────
+
 export const CanvasEmptyState: React.FC<{ message?: string; subMessage?: string }> = ({ message, subMessage }) => {
     return (
         <div style={S_Placeholder}>
             <div style={{ fontSize: '28px', marginBottom: '12px', color: '#a1a1aa' }}>✦</div>
-            <h3 style={{ color: '#fff', fontSize: '15px', fontWeight: 600, marginBottom: '6px' }}>{message || 'Empty Canvas'}</h3>
+            <h3 style={{ color: '#fff', fontSize: '15px', fontWeight: 600, marginBottom: '6px' }}>
+                {message || 'Empty Canvas'}
+            </h3>
             <p style={{ color: '#71717a', fontSize: '13px', maxWidth: '320px', margin: '0 auto', lineHeight: '1.5' }}>
                 {subMessage || 'Drag a block here to start building your store.'}
             </p>
         </div>
     );
 };
+
+// ─── Skeleton Loader ──────────────────────────────────────────────────────────
 
 export const SkeletonLoader: React.FC = () => {
     return (
@@ -77,6 +85,8 @@ export const SkeletonLoader: React.FC = () => {
     );
 };
 
+// ─── Props ────────────────────────────────────────────────────────────────────
+
 interface SafeRendererProps {
     blocks?: any[];
     loading?: boolean;
@@ -86,12 +96,23 @@ interface SafeRendererProps {
     walletDaysRemaining?: number;
 }
 
-export const SafeRenderer: React.FC<SafeRendererProps> = ({ blocks, loading, isBuilder = false, fbPixelId, ttPixelId, walletDaysRemaining }) => {
+// ─── SafeRenderer ─────────────────────────────────────────────────────────────
+
+export const SafeRenderer: React.FC<SafeRendererProps> = ({
+    blocks,
+    loading,
+    isBuilder = false,
+    fbPixelId,
+    ttPixelId,
+    walletDaysRemaining,
+}) => {
     const [isClient, setIsClient] = useState(false);
-    const [hydratedBlocks, setHydratedBlocks] = useState<any[]>([]);
+    const [hydratedStorefrontBlocks, setHydratedStorefrontBlocks] = useState<any[]>([]);
     const [isForceRender, setIsForceRender] = useState(false);
-    const nodes = useBuilderStore(s => s.nodes); 
-    const lastDroppedNodeId = useBuilderStore(s => s.lastDroppedNodeId); 
+
+    // Builder state — only consumed when isBuilder is true
+    const nodes = useBuilderStore(s => s.nodes);
+    const lastDroppedNodeId = useBuilderStore(s => s.lastDroppedNodeId);
     const selectedNodeId = useBuilderStore(s => s.selectedNodeId);
     const isDraggingGlobal = useBuilderStore(s => s.isDragging);
     const activePageId = useBuilderStore(s => s.activePageId);
@@ -102,14 +123,17 @@ export const SafeRenderer: React.FC<SafeRendererProps> = ({ blocks, loading, isB
     const [walletDays, setWalletDays] = useState<number | undefined>(walletDaysRemaining);
     const billingCache = useRef<{ cachedDays?: number; lastCheckedRoute?: string }>({});
 
-    // 🛡️ Cached Billing Enforcement Query
+    // ── Billing enforcement (storefront only) ──────────────────────────────
     useEffect(() => {
         if (isBuilder || !user) return;
 
         const checkBilling = async () => {
             const currentRoute = location.pathname;
-            
-            if (billingCache.current.lastCheckedRoute === currentRoute && billingCache.current.cachedDays !== undefined) {
+
+            if (
+                billingCache.current.lastCheckedRoute === currentRoute &&
+                billingCache.current.cachedDays !== undefined
+            ) {
                 setWalletDays(billingCache.current.cachedDays);
                 return;
             }
@@ -126,10 +150,8 @@ export const SafeRenderer: React.FC<SafeRendererProps> = ({ blocks, loading, isB
                     setWalletDays(days);
                     billingCache.current = { cachedDays: days, lastCheckedRoute: currentRoute };
 
-                    // 🛡️ Grace Period Invisible Audit Telemetry [-1, -3] bounds
                     if (days <= -1 && days >= -3) {
-                         console.warn(`[Audit Telemetry] Store in grace-period: ${days} days left. Path: ${currentRoute}`);
-                         // Silent insert if system_logs was available
+                        console.warn(`[Audit] Store in grace period: ${days} days. Path: ${currentRoute}`);
                     }
                 }
             } catch (err) {
@@ -140,19 +162,20 @@ export const SafeRenderer: React.FC<SafeRendererProps> = ({ blocks, loading, isB
         checkBilling();
     }, [isBuilder, user, location.pathname]);
 
-    // Timeout: If loading freezes over 5000ms natively force render what we have.
+    // ── Force-render escape hatch (5s loading freeze) ─────────────────────
     useEffect(() => {
         if (!loading) {
             setIsForceRender(false);
             return;
         }
         const timer = setTimeout(() => {
-            console.warn('[SafeRenderer] Infinite load threshold hit (>5s). Aborting and native rendering.');
+            console.warn('[SafeRenderer] Load threshold exceeded (>5s). Force-rendering.');
             setIsForceRender(true);
         }, 5000);
         return () => clearTimeout(timer);
     }, [loading]);
 
+    // ── Client mount + pixel init ──────────────────────────────────────────
     useEffect(() => {
         setIsClient(true);
         if (!isBuilder) {
@@ -162,120 +185,248 @@ export const SafeRenderer: React.FC<SafeRendererProps> = ({ blocks, loading, isB
         }
     }, [isBuilder, fbPixelId, ttPixelId]);
 
+    // ── Storefront block hydration via OmnoraKernel ────────────────────────
+    // Only runs when blocks prop is provided (storefront path).
+    // Builder path uses nodes from Zustand directly — never uses this state.
     useEffect(() => {
         if (!isClient || !blocks || blocks.length === 0) return;
 
-        // Omnora Kernel Shield
         OmnoraKernel.getInstance().hydrate(blocks).then(ast => {
-            setHydratedBlocks(ast.blocks || ast);
+            setHydratedStorefrontBlocks(ast.blocks || ast);
         });
 
         performance.mark('safe-render-start');
-        
         return () => {
             performance.mark('safe-render-end');
             try {
                 performance.measure('ast-render-duration', 'safe-render-start', 'safe-render-end');
                 const measure = performance.getEntriesByName('ast-render-duration')[0];
                 if (measure && measure.duration > 100) {
-                    console.warn(`[SafeRenderer Performance] Render duration exceeds 100ms: ${measure.duration.toFixed(2)}ms`);
+                    console.warn(`[SafeRenderer] Render exceeded 100ms: ${measure.duration.toFixed(2)}ms`);
                 }
                 performance.clearMarks('safe-render-start');
                 performance.clearMarks('safe-render-end');
                 performance.clearMeasures('ast-render-duration');
-            } catch (err) { /* silent measures failure */ }
+            } catch { /* ignore */ }
         };
     }, [blocks, isClient]);
 
-    if (!blocks) return <SkeletonLoader />;
-    if (loading && !isForceRender) return <SkeletonLoader />;
-    if (!isClient) return <div style={{ minHeight: '100vh', background: '#0e0e12' }} />; // Hydration Guard
-    
-    // Enforcement Middleware
-    if (!isBuilder && walletDays !== undefined) {
-        if (walletDays <= -4) {
-             return <StoreTemporarilyPaused />;
+    // ── Early returns ──────────────────────────────────────────────────────
+
+    // Hydration guard — prevents SSR mismatch flash
+    if (!isClient) {
+        return <div style={{ minHeight: '100vh', background: '#0e0e12' }} />;
+    }
+
+    // Loading state with escape hatch
+    if (loading && !isForceRender) {
+        return <SkeletonLoader />;
+    }
+
+    // Billing hard lock (storefront only, never in builder)
+    if (!isBuilder && walletDays !== undefined && walletDays <= -4) {
+        return <StoreTemporarilyPaused />;
+    }
+
+    // ── BUILDER RENDER PATH ────────────────────────────────────────────────
+    // Uses Zustand nodes directly. Completely separate from storefront path.
+    if (isBuilder) {
+        // Guard: no active page selected
+        if (!activePageId) {
+            return (
+                <CanvasEmptyState
+                    message="No page selected"
+                    subMessage="Select a page from the toolbar above to start editing."
+                />
+            );
         }
+
+        // Safe block resolution — never throws on undefined
+        const rawBuilderBlocks = nodes?.[activePageId];
+        const safeBuilderBlocks = Array.isArray(rawBuilderBlocks) ? rawBuilderBlocks : [];
+
+        // Guard: page exists but has no blocks yet
+        if (safeBuilderBlocks.length === 0 && !isHydrating) {
+            return (
+                <CanvasEmptyState
+                    message="This page is empty"
+                    subMessage="Open the Elements panel on the left and drag a block to get started."
+                />
+            );
+        }
+
+        // Guard: still hydrating
+        if (isHydrating) {
+            return <SkeletonLoader />;
+        }
+
+        return (
+            <ErrorBoundary fallback={<StorefrontFallback />}>
+                <div style={{ position: 'relative', width: '100%' }}>
+                    {safeBuilderBlocks.map((blockId: any, index: number) => {
+                        const node = typeof blockId === 'string' ? nodes[blockId] : blockId;
+                        if (!node || !node.type) return null;
+
+                        const registryItem = ComponentRegistry[node.type];
+                        if (!registryItem) return null;
+
+                        const Component = registryItem as React.FC<any>;
+                        const finalProps = {
+                            ...(DEFAULT_PROPS[node.type]?.defaultProps || {}),
+                            ...(node.props || {}),
+                            isBuilder: true,
+                        };
+
+                        return (
+                            <ErrorBoundary
+                                key={node.id || index}
+                                fallback={
+                                    <div style={{
+                                        padding: 24,
+                                        border: '1px solid #7f1d1d',
+                                        background: '#450a0a',
+                                        color: '#fca5a5',
+                                        borderRadius: 8,
+                                        margin: '12px',
+                                        textAlign: 'center',
+                                    }}>
+                                        <h3 style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '8px' }}>
+                                            ⚠️ Block Crashed ({node.type})
+                                        </h3>
+                                        <p style={{ fontSize: '11px', opacity: 0.8, marginBottom: '16px' }}>
+                                            This component encountered a fatal runtime error.
+                                        </p>
+                                        <button
+                                            onClick={() => useBuilderStore.getState().deleteNode(node.id)}
+                                            style={{
+                                                padding: '6px 12px',
+                                                background: '#7f1d1d',
+                                                color: '#fff',
+                                                border: 'none',
+                                                borderRadius: '4px',
+                                                cursor: 'pointer',
+                                                fontSize: '12px',
+                                                fontWeight: 'bold',
+                                            }}
+                                        >
+                                            🗑️ Delete Corrupted Block
+                                        </button>
+                                    </div>
+                                }
+                            >
+                                <Suspense fallback={
+                                    <div style={{ padding: '40px', textAlign: 'center', opacity: 0.5 }}>
+                                        Loading {node.type}...
+                                    </div>
+                                }>
+                                    <div style={{ position: 'relative', width: '100%' }}>
+                                        {/* Selection overlay — captures clicks without modifying block styles */}
+                                        <div
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                useBuilderStore.getState().setSelectedNodeId(node.id);
+                                            }}
+                                            style={{
+                                                position: 'absolute',
+                                                inset: 0,
+                                                border: selectedNodeId === node.id
+                                                    ? '2px solid var(--accent-primary, #FF6B35)'
+                                                    : 'none',
+                                                // Pointer events logic:
+                                                // - During drag: none (let drag system handle)
+                                                // - When selected: none (let inner elements be interactive)
+                                                // - Unselected: auto (capture the selection click)
+                                                pointerEvents: (isDraggingGlobal || selectedNodeId === node.id)
+                                                    ? 'none'
+                                                    : 'auto',
+                                                zIndex: 10,
+                                                cursor: selectedNodeId === node.id ? 'default' : 'pointer',
+                                                borderRadius: '4px',
+                                            }}
+                                        />
+                                        <div className={node.id === lastDroppedNodeId ? 'dropped-block' : ''}>
+                                            <Component {...finalProps} />
+                                        </div>
+                                    </div>
+                                </Suspense>
+                            </ErrorBoundary>
+                        );
+                    })}
+                </div>
+            </ErrorBoundary>
+        );
     }
 
-    if (!hydratedBlocks) return <SkeletonLoader />;
+    // ── STOREFRONT RENDER PATH ─────────────────────────────────────────────
+    // Uses blocks prop hydrated through OmnoraKernel.
+    // Completely separate from builder path above.
 
-    const activeBlocks = nodes?.[activePageId] as any;
-    const safeBlocks = Array.isArray(activeBlocks) ? activeBlocks : [];
-
-    if (!activePageId) {
-        return <CanvasEmptyState message="No page selected" subMessage="Select a page from the toolbar above to start editing." />;
+    // No blocks prop provided at all
+    if (!blocks) {
+        return <SkeletonLoader />;
     }
 
-    if (safeBlocks.length === 0 && !isHydrating) {
-        return <CanvasEmptyState message="This page is empty" subMessage="Open the Elements panel on the left and drag a block to get started." />;
+    // Blocks provided but kernel hydration not yet complete
+    if (blocks.length > 0 && hydratedStorefrontBlocks.length === 0) {
+        return <SkeletonLoader />;
+    }
+
+    // Empty storefront page
+    if (hydratedStorefrontBlocks.length === 0) {
+        return (
+            <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <p style={{ color: '#71717a', fontSize: '14px' }}>This page has no content yet.</p>
+            </div>
+        );
     }
 
     let renderedBlocks: React.ReactNode[] = [];
     try {
-        renderedBlocks = safeBlocks.map((blockId: any, index: number) => {
-            // Support both object passing or ID strings passing
-            const node = typeof blockId === 'string' ? nodes[blockId] : blockId;
+        renderedBlocks = hydratedStorefrontBlocks.map((node: any, index: number) => {
             if (!node || !node.type) return null;
 
             const registryItem = ComponentRegistry[node.type];
             if (!registryItem) return null;
 
-            // Support both React.lazy Exotic components or inline FC components
-            const Component = registryItem as React.FC<any>; 
-            // Kernel has already safely sanitized node.props against DEFAULT_PROPS schema
-            const finalProps = { 
-                ...(DEFAULT_PROPS[node.type]?.defaultProps || {}), 
-                ...(node.props || {}), 
-                isBuilder 
+            const Component = registryItem as React.FC<any>;
+            const finalProps = {
+                ...(DEFAULT_PROPS[node.type]?.defaultProps || {}),
+                ...(node.props || {}),
+                isBuilder: false,
             };
 
             return (
-                <ErrorBoundary key={node.id || index} fallback={
-                    <div style={{ padding: 24, border: '1px solid #7f1d1d', background: '#450a0a', color: '#fca5a5', borderRadius: 8, margin: '12px', textAlign: 'center' }}>
-                        <h3 style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '8px' }}>⚠️ Block Crashed ({node.type})</h3>
-                        <p style={{ fontSize: '11px', opacity: 0.8, marginBottom: '16px' }}>This component encountered a fatal runtime error and was halted.</p>
-                        {isBuilder && (
-                            <button 
-                                onClick={() => useBuilderStore.getState().deleteNode(node.id)}
-                                style={{ padding: '6px 12px', background: '#7f1d1d', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' }}
-                            >
-                                [ 🗑️ Delete Corrupted Block ]
-                            </button>
-                        )}
-                    </div>
-                }>
-                    <Suspense fallback={<div style={{ padding: '40px', textAlign: 'center', opacity: 0.5 }}>Loading {node.type}...</div>}>
-                        <div style={{ position: 'relative', width: '100%' }}>
-                            {isBuilder && (
-                                <div 
-                                    onClick={(e) => {
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                        useBuilderStore.getState().setSelectedNodeId(node.id);
-                                    }}
-                                    style={{
-                                        position: 'absolute',
-                                        inset: 0,
-                                        border: (selectedNodeId === node.id) ? '2px solid var(--accent-primary, #7c6dfa)' : 'none',
-                                        pointerEvents: (isDraggingGlobal || (selectedNodeId === node.id)) ? 'none' : 'auto',
-                                        zIndex: 10,
-                                        cursor: (selectedNodeId === node.id) ? 'default' : 'pointer',
-                                        borderRadius: '4px'
-                                    }}
-                                />
-                            )}
-                            <div className={node.id === lastDroppedNodeId ? 'dropped-block' : ''}>
-                                <Component {...finalProps} />
-                            </div>
+                <ErrorBoundary
+                    key={node.id || index}
+                    fallback={
+                        <div style={{
+                            padding: 24,
+                            border: '1px solid #7f1d1d',
+                            background: '#450a0a',
+                            color: '#fca5a5',
+                            borderRadius: 8,
+                            margin: '12px',
+                            textAlign: 'center',
+                        }}>
+                            <h3 style={{ fontSize: '14px', fontWeight: 'bold' }}>
+                                ⚠️ Section Failed ({node.type})
+                            </h3>
                         </div>
+                    }
+                >
+                    <Suspense fallback={
+                        <div style={{ padding: '40px', textAlign: 'center', opacity: 0.5 }}>
+                            Loading section...
+                        </div>
+                    }>
+                        <Component {...finalProps} />
                     </Suspense>
                 </ErrorBoundary>
             );
-
         });
     } catch (err) {
-        console.error('[SafeRenderer] FATAL MAP CRASH:', err);
+        console.error('[SafeRenderer] FATAL STOREFRONT MAP CRASH:', err);
         return <StorefrontFallback />;
     }
 
@@ -288,13 +439,29 @@ export const SafeRenderer: React.FC<SafeRendererProps> = ({ blocks, loading, isB
     );
 };
 
+// ─── Styles ───────────────────────────────────────────────────────────────────
+
 const S_ErrorFallback: React.CSSProperties = {
-    padding: '20px', textAlign: 'center', background: '#1C1616', color: '#EF4444',
-    borderRadius: '8px', border: '1px solid #7F1D1D', margin: '12px', fontFamily: 'monospace'
+    padding: '20px',
+    textAlign: 'center',
+    background: '#1C1616',
+    color: '#EF4444',
+    borderRadius: '8px',
+    border: '1px solid #7F1D1D',
+    margin: '12px',
+    fontFamily: 'monospace',
 };
 
 const S_Placeholder: React.CSSProperties = {
-    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-    height: '60vh', width: '100%', textAlign: 'center',
-    border: '2px dashed #27272a', borderRadius: '12px', background: 'rgba(0,0,0,0.2)', padding: '20px'
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: '60vh',
+    width: '100%',
+    textAlign: 'center',
+    border: '2px dashed #27272a',
+    borderRadius: '12px',
+    background: 'rgba(0,0,0,0.2)',
+    padding: '20px',
 };

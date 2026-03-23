@@ -35,6 +35,7 @@ import { AdminProductManager } from '../components/seller/AdminProductManager';
 import { AdminOrderManager } from '../components/seller/AdminOrderManager';
 import { AdminOverview } from '../components/seller/AdminOverview';
 import SellerAnalytics from '../components/seller/SellerAnalytics';
+import SellerProfile from './seller/SellerProfile';
 
 // Code-split: Heavy editor module loaded on demand
 const ProductEditor = React.lazy(() => import('../components/seller/ProductEditor'));
@@ -119,6 +120,7 @@ const NAV = [
     { id: 'billing', label: 'SaaS Subscription', icon: ShieldCheck },
     { id: 'payments', label: 'Payment Gateway', icon: CreditCard },
     { id: 'domain', label: 'Custom Domain', icon: Globe },
+    { id: 'profile', label: 'Store Settings', icon: Settings },
     { id: 'help', label: 'Builder Guide', icon: HelpCircle },
 ];
 
@@ -517,6 +519,9 @@ export default function SellerDashboard() {
 
                     {/* ── Custom Domain ── */}
                     {activeTab === 'domain' && <DomainSettings />}
+
+                    {/* ── Store Settings Profile ── */}
+                    {activeTab === 'profile' && <SellerProfile />}
 
                     {/* ── Help Guide ── */}
                     {activeTab === 'help' && (
