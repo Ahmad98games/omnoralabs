@@ -111,7 +111,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         try {
             // Add timeout to prevent hanging
-            const { data } = await client.get('/auth/me', { timeout: 3000 });
+            const { data } = await client.get('/auth/me', { 
+                timeout: 3000,
+                'axios-retry': { retries: 0 } 
+            });
             if (data.success && data.user) {
                 setUser(data.user);
                 setStatus('authenticated');
@@ -141,7 +144,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         const syncSession = async () => {
             try {
-                const { data: { session } } = await supabase.auth.getSession();
+                // 🛡️ Guard against hanging locks (GoTrue) in tabs
+                const timeoutPromise = new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error('Supabase session fetch timed out')), 2000)
+                );
+
+                const { data } = await Promise.race([
+                    supabase.auth.getSession(),
+                    timeoutPromise
+                ]) as any;
+
+                const session = data?.session;
+                
                 if (isMounted && session?.access_token) {
                     localStorage.setItem('token', session.access_token);
                     setAuthHeader(session.access_token);
