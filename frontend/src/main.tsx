@@ -43,16 +43,64 @@ window.onerror = (message, source, lineno, colno, error) => {
   */
 };
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
+class RootErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { crashed: boolean; error: string }
+> {
+  state = { crashed: false, error: '' }
+
+  static getDerivedStateFromError(error: Error) {
+    return { crashed: true, error: error.message }
+  }
+
+  componentDidCatch(error: Error, info: React.ErrorInfo) {
+    console.error('[RootCrash]', error.message, info.componentStack)
+  }
+
+  render() {
+    if (this.state.crashed) {
+      return (
+        <div style={{
+          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+          height: '100vh', fontFamily: 'system-ui, sans-serif', background: '#FAFAF9', gap: '16px', padding: '24px', textAlign: 'center',
+        }}>
+          <h2 style={{ fontSize: '18px', color: '#1A1916', margin: 0 }}>Something went wrong</h2>
+          <p style={{ fontSize: '14px', color: '#6B6863', margin: 0 }}>{this.state.error}</p>
+          <button
+            onClick={() => {
+              Object.keys(localStorage)
+                .filter(k => k.startsWith('omnora-'))
+                .forEach(k => localStorage.removeItem(k))
+              window.location.href = '/'
+            }}
+            style={{
+              padding: '10px 20px', background: '#FF6B35', color: 'white', border: 'none', borderRadius: '6px', fontSize: '14px', cursor: 'pointer',
+            }}
+          >
+            Clear cache and reload
+          </button>
+        </div>
+      )
+    }
+    return this.props.children
+  }
+}
+
+const rootElement = document.getElementById('root')
+if (!rootElement) throw new Error('Root element missing in index.html')
+
+ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
-    <BrowserRouter>
-      <MediaStoreProvider>
-        <BuilderProvider initialData={{}} isPreview={false}>
-          <ElementControlProvider>
-            <App />
-          </ElementControlProvider>
-        </BuilderProvider>
-      </MediaStoreProvider>
-    </BrowserRouter>
+    <RootErrorBoundary>
+      <BrowserRouter>
+        <MediaStoreProvider>
+          <BuilderProvider initialData={{}} isPreview={false}>
+            <ElementControlProvider>
+              <App />
+            </ElementControlProvider>
+          </BuilderProvider>
+        </MediaStoreProvider>
+      </BrowserRouter>
+    </RootErrorBoundary>
   </React.StrictMode>
 )
