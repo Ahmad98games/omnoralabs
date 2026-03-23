@@ -40,7 +40,14 @@ router.get('/', protect, seller, async (req, res) => {
         const analyticsConfig = pageData?.ast_manifest?.configuration?.analytics || { targetMonthlySales: 10000 };
 
         const { generateCommandSummary } = require('../services/aiContentService');
-        const summary = await generateCommandSummary(stats);
+        let summary = "AI summary is currently unavailable due to downstream model timeouts.";
+        try {
+            if (stats && Object.keys(stats).length > 0) {
+                summary = await generateCommandSummary(stats);
+            }
+        } catch (aiErr) {
+            console.error('[performance-hub][AI-Fail]', aiErr);
+        }
 
         res.json({
             success: true,
@@ -49,7 +56,8 @@ router.get('/', protect, seller, async (req, res) => {
             summary
         });
     } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
+        console.error('[performance-hub crash]', err);
+        res.status(500).json({ success: false, error: 'Internal server error', detail: err.message });
     }
 });
 
