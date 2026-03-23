@@ -13,50 +13,26 @@ exports.subscribeNewsletter = async (req, res) => {
       return res.status(400).json({ error: 'Email is required' });
     }
 
-    // Check if already subscribed
-    const existingSubscription = await Newsletter.findOne({ email });
-    if (existingSubscription) {
-      if (existingSubscription.isActive) {
-        return res.status(400).json({ error: 'Email is already subscribed' });
-      } else {
-        // Reactivate subscription
-        existingSubscription.isActive = true;
-        await existingSubscription.save();
+    const { Resend } = require('resend');
+    const { resend: resendConfig } = config.services;
 
-        return res.json({
-          success: true,
-          message: 'Subscription reactivated successfully'
-        });
-      }
-    }
-
-    // Create new subscription
-    const newSubscription = new Newsletter({ email });
-    await newSubscription.save();
-
-    // Send confirmation email
+    // Send confirmation email via Resend
     try {
-      const { nodemailer: mailConfig } = config.services;
-      if (mailConfig.service && mailConfig.user && mailConfig.pass) {
-        const transporter = nodemailer.createTransport({
-          service: mailConfig.service,
-          auth: {
-            user: mailConfig.user,
-            pass: mailConfig.pass
-          }
-        });
+      if (resendConfig.apiKey) {
+        const resend = new Resend(resendConfig.apiKey);
 
-        const mailOptions = {
-          from: mailConfig.user,
+        await resend.emails.send({
+          from: 'onboarding@resend.dev',
           to: email,
           subject: 'Newsletter Subscription Confirmation',
-          html: `<h2>Thank You for Subscribing!</h2><p>You have successfully subscribed to our newsletter.</p>`
-        };
-
-        await transporter.sendMail(mailOptions);
+          html: `
+            <h2>Thank You for Subscribing!</h2>
+            <p>You have successfully subscribed to our newsletter.</p>
+          `
+        });
       }
     } catch (emailError) {
-      console.error('Error sending confirmation email:', emailError);
+      console.error('Error sending confirmation email via Resend:', emailError);
     }
 
     res.status(201).json({

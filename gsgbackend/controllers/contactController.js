@@ -13,32 +13,30 @@ exports.submitContactForm = async (req, res) => {
       return res.status(400).json({ error: 'All fields are required' });
     }
 
-    const newContact = new Contact({ name, email, subject, message });
-    await newContact.save();
+    const { Resend } = require('resend');
+    const { resend: resendConfig } = config.services;
 
-    // Send email notification
+    const newContact = { name, email, subject, message, createdAt: new Date() };
+
+    // Send email notification via Resend
     try {
-      const { nodemailer: mailConfig } = config.services;
-      if (mailConfig.service && mailConfig.user && mailConfig.pass) {
-        const transporter = nodemailer.createTransport({
-          service: mailConfig.service,
-          auth: {
-            user: mailConfig.user,
-            pass: mailConfig.pass
-          }
-        });
+      if (resendConfig.apiKey) {
+        const resend = new Resend(resendConfig.apiKey);
 
-        const mailOptions = {
-          from: mailConfig.user,
-          to: mailConfig.user,
+        await resend.emails.send({
+          from: 'onboarding@resend.dev',
+          to: config.services.adminEmail || 'admin@omnora.com',
           subject: `New Contact Form: ${subject}`,
-          html: `<h3>New Contact Form Submission</h3><p><strong>Name:</strong> ${name}</p>`
-        };
-
-        await transporter.sendMail(mailOptions);
+          html: `
+            <h3>New Contact Form Submission</h3>
+            <p><strong>Name:</strong> ${name}</p>
+            <p><strong>Email:</strong> ${email}</p>
+            <p><strong>Message:</strong> ${message}</p>
+          `
+        });
       }
     } catch (emailError) {
-      console.error('Error sending email notification:', emailError);
+      console.error('Error sending email notification via Resend:', emailError);
     }
 
     res.status(201).json({

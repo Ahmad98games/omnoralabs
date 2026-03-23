@@ -61,6 +61,9 @@ const config = {
             apiKey: process.env.SENDGRID_API_KEY,
             fromEmail: process.env.SENDGRID_FROM_EMAIL || 'omnorainfo28@gmail.com'
         },
+        resend: {
+            apiKey: process.env.RESEND_API_KEY || 're_ZwfWRMtB_Q7hHqqhnRqhoTenxUVkp8Njy'
+        },
         mailbluster: {
             apiKey: process.env.MAILBLUSTER_API_KEY
         },
