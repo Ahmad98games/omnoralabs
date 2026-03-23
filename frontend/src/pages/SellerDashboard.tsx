@@ -245,7 +245,7 @@ const addPage = async (name: string, slugParam?: string, type: 'custom' | 'syste
 // ─── Main dashboard ───────────────────────────────────────────────────────────
 
 export default function SellerDashboard() {
-    const { user, handleLogoutCleanup, isInitialized, loading: authLoading } = useAuth();
+    const { user, profile, handleLogoutCleanup, isInitialized, loading: authLoading } = useAuth();
     const { showToast } = useToast();
     const [searchParams, setSearchParams] = useSearchParams();
     const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'overview');
@@ -367,7 +367,7 @@ export default function SellerDashboard() {
         );
     }
 
-    const storeName = user?.full_name || 'Imperial Store';
+    const storeName = profile?.store_name || user?.user_metadata?.store_name || user?.name || 'Your Store';
     const isBuilder = activeTab === 'builder';
 
     return (
