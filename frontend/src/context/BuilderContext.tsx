@@ -167,7 +167,7 @@ interface NodesContextType {
 }
 
 const UIContext = createContext<UIContextType | undefined>(undefined);
-const NodesContext = createContext<NodesContextType | undefined>(undefined);
+export const NodesContext = createContext<NodesContextType | undefined>(undefined);
 const BuilderContext = createContext<any>(undefined);
 
 export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData: any, isPreview: boolean, tenantId?: string, userName?: string }> = ({ children, initialData, isPreview, tenantId, userName }) => {
