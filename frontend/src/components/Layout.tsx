@@ -108,9 +108,45 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
     const isActive = (path: string) => location.pathname === path;
 
     return (
-        <div className="layout">
+        <div className="layout" style={isTerritoryOwner ? { paddingTop: '44px' } : {}}>
+            {isTerritoryOwner && (
+                <div style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: '44px',
+                    background: '#141414',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '0 24px',
+                    zIndex: 9999,
+                    borderBottom: '1px solid #222'
+                }}>
+                    <span style={{ color: '#9C9890', fontSize: '13px' }}>
+                        You are viewing your storefront
+                    </span>
+                    <button
+                        onClick={() => navigate('/seller?tab=builder')}
+                        style={{
+                            background: '#FF6B35',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '6px',
+                            padding: '6px 14px',
+                            fontSize: '12px',
+                            fontWeight: 500,
+                            cursor: 'pointer',
+                        }}
+                    >
+                        ← Back to Builder
+                    </button>
+                </div>
+            )}
+
             {/* Modern Header */}
-            <header className={`header ${scrolled ? 'scrolled' : ''}`}>
+            <header className={`header ${scrolled ? 'scrolled' : ''}`} style={isTerritoryOwner ? { top: '44px' } : {}}>
                 <div className="header-container">
                     {/* Brand Sovereignty */}
                     <Link to={getBaseUrl() || ROUTES.HOME} className="brand" onClick={closeMenu}>
