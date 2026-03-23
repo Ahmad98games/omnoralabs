@@ -15,6 +15,7 @@ import { useCartStore } from '../store/cartStore';
 import { useStoreHydration } from '../hooks/useStoreHydration';
 import { PwaInstallPrompt } from './pwa/PwaInstallPrompt';
 import { ROUTES } from '../routes';
+import { CartDrawer } from './storefront/CartDrawer';
 
 export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const isHydrated = useStoreHydration(useCartStore);
@@ -307,6 +308,9 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 
             {/* PWA Install Logic */}
             <PwaInstallPrompt />
+
+            {/* Cart Drawer */}
+            <CartDrawer />
         </div>
     );
 }

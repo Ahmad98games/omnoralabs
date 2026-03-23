@@ -59,6 +59,7 @@ export interface BuilderState {
     addPage: (title: string, slug: string, type?: 'system' | 'template' | 'custom') => string;
     setActivePageId: (id: string) => void;
     setSelectedNodeId: (id: string | null) => void;
+    resetPageNodes: (pageId: string) => void;
     
     setSaveStatus: (status: BuilderState['saveStatus']) => void;
     setHasUnsavedChanges: (has: boolean) => void;
@@ -179,43 +180,54 @@ export const useBuilderStore = create<BuilderState>()(persist(immer((set, get) =
     setPages: (pages) => set((state) => { state.pages = pages; }),
     
     addPage: (title, slug, type = 'custom') => {
-        const state = get() as any;
-        const safeSlug = slug.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^a-z0-9-/]/g, '');
-        
-        let finalSlug = safeSlug;
-        let counter = 1;
-        const existingSlugs = Object.values(state.pages).map((p: any) => p.slug);
-        
-        while (existingSlugs.includes(finalSlug)) {
-            counter++;
-            finalSlug = `${safeSlug}-${counter}`;
-        }
-
         const id = crypto.randomUUID();
-        const now = new Date().toISOString();
-        const newPage: PageMetadata = {
-            id,
-            title,
-            slug: finalSlug,
-            type,
-            isLocked: type === 'system',
-            status: 'draft',
-            lastUpdated: now,
-            seoMeta: { title: `${title} | Omnora`, description: '' },
-        };
-
-        const blankAST = NewPageInitializer.generateBlankAST();
-
-        set((draft: any) => {
-            draft.pages[id] = newPage;
+        
+        set((state: any) => {
+            // Step 2 — Generate safe slug
+            const existingSlugs = Object.values(state.pages).map((p: any) => p.slug);
+            let baseSlug = (slug || title)
+                .toLowerCase()
+                .trim()
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/^-+|-+$/g, '');
             
-            if (blankAST && blankAST.nodes) {
-                draft.nodes = { ...draft.nodes, ...blankAST.nodes };
+            if (!baseSlug) baseSlug = 'untitled';
+            
+            // Step 3 — Resolve slug collision
+            let counter = 2;
+            let finalSlug = baseSlug;
+            while (existingSlugs.includes(finalSlug)) {
+                finalSlug = `${baseSlug}-${counter}`;
+                counter++;
             }
             
-            draft.isHydrating = false;
-            draft.activePageId = id;
-            draft.hasUnsavedChanges = true;
+            // 3. Write nodes entry BEFORE switching activePageId
+            state.nodes[id] = [] as any;
+            
+            // 4. Write page metadata
+            state.pages[id] = {
+                id,
+                title: title.trim() || 'Untitled Page',
+                slug: finalSlug,
+                type,
+                isLocked: type === 'system',
+                status: 'draft',
+                lastUpdated: new Date().toISOString(),
+                createdAt: new Date().toISOString(),
+                seoMeta: { title: `${title.trim() || 'Untitled Page'} | Omnora`, description: '' }
+            };
+            
+            // 5. Persist last valid page for error boundary recovery
+            if (state.activePageId) {
+                state.lastValidPageId = state.activePageId;
+            }
+            
+            // 6. Clear hydrating flag
+            state.isHydrating = false;
+            
+            // 7. Switch active page LAST — nodes[id] already exists
+            state.activePageId = id;
+            state.hasUnsavedChanges = true;
         });
 
         return id;
@@ -223,6 +235,10 @@ export const useBuilderStore = create<BuilderState>()(persist(immer((set, get) =
 
     setActivePageId: (id) => set((state) => { state.activePageId = id; }),
     setSelectedNodeId: (id) => set((state) => { state.selectedNodeId = id; }),
+    resetPageNodes: (pageId) => set((state) => {
+        state.nodes[pageId] = [] as any;
+        state.isHydrating = false;
+    }),
     setSaveStatus: (status) => set((state) => { state.saveStatus = status; }),
     setHasUnsavedChanges: (has) => set((state) => { state.hasUnsavedChanges = has; }),
     setLastUpdatedRemote: (time) => set((state) => { state.lastUpdatedRemote = time; }),

@@ -11,21 +11,34 @@ import { OmnoraBootloader } from '../../platform/kernel/OmnoraBootloader';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // 🛡️ standard React ErrorBoundary for catching inner Canvas/Hydrating crashes
+interface ErrorBoundaryProps {
+    navigate: any; // NavigateFunction from react-router-dom
+    lastValidPageId: string | null;
+    children: React.ReactNode;
+}
+
 class BuilderLayoutErrorBoundary extends React.Component<
-    { children: React.ReactNode; onGoBack: () => void; onResetPage: () => void }, 
-    { hasError: boolean; error: any }
+    ErrorBoundaryProps, 
+    { hasError: boolean; errorMessage: string | null }
 > {
-    constructor(props: any) {
+    constructor(props: ErrorBoundaryProps) {
         super(props);
-        this.state = { hasError: false, error: null };
+        this.state = { hasError: false, errorMessage: null };
     }
 
-    static getDerivedStateFromError(error: any) {
-        return { hasError: true, error };
+    static getDerivedStateFromError(error: Error) {
+        return { hasError: true, errorMessage: error.message };
     }
 
-    componentDidCatch(error: any, errorInfo: any) {
-        console.error('[BuilderLayoutErrorBoundary] Crash caught:', error, errorInfo.componentStack);
+    componentDidCatch(error: Error, info: React.ErrorInfo) {
+        console.error('[BuilderCrash]', {
+            message: error.message,
+            componentStack: info.componentStack,
+            activePageId: useBuilderStore.getState().activePageId,
+        });
+        useBuilderStore.getState().setPublishError(
+            'A layout error occurred. Your work has been preserved.'
+        );
     }
 
     render() {
@@ -36,21 +49,35 @@ class BuilderLayoutErrorBoundary extends React.Component<
                     alignItems: 'center', justifyContent: 'center', 
                     background: '#09090b', color: '#fff', padding: 24, textAlign: 'center' 
                 }}>
-                    <div style={{ padding: '24px', background: '#121214', border: '1px solid #7f1d1d', borderRadius: '16px', maxWidth: '400px' }}>
+                    <div style={{ padding: '24px', background: 'var(--surface-raised, #121214)', border: '1px solid var(--border-subtle, #27272a)', borderRadius: '16px', maxWidth: '280px', margin: '0 auto' }}>
                         <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '0.5rem', color: '#ef4444' }}>⚠️ Layout Crashed</h2>
                         <p style={{ color: '#a1a1aa', fontSize: '13px', lineHeight: '1.5', marginBottom: '2rem' }}>
                             We encountered a fatal error rendering this page section. Choose an escape action to restore order.
                         </p>
                         <div style={{ display: 'flex', gap: '10px', flexDirection: 'column' }}>
                             <button 
-                                onClick={this.props.onGoBack} 
-                                style={{ width: '100%', padding: '12px', background: '#27272a', borderRadius: 10, fontSize: '12px', fontWeight: 600, color: '#fff', cursor: 'pointer', border: 'none' }}
+                                onClick={() => {
+                                    const { navigate, lastValidPageId } = this.props;
+                                    if (lastValidPageId) {
+                                        navigate(`/builder/${lastValidPageId}`, { replace: true });
+                                    } else {
+                                        navigate('/builder', { replace: true });
+                                    }
+                                    this.setState({ hasError: false, errorMessage: null });
+                                }} 
+                                style={{ width: '100%', padding: '12px', background: 'transparent', borderRadius: 10, fontSize: '12px', fontWeight: 600, color: 'var(--text-primary, #fff)', cursor: 'pointer', border: '1px solid var(--border-subtle, #333)' }}
                             >
                                 Go Back to Last Page
                             </button>
                             <button 
-                                onClick={this.props.onResetPage} 
-                                style={{ width: '100%', padding: '12px', background: '#7f1d1d', borderRadius: 10, fontSize: '12px', fontWeight: 800, color: '#fff', cursor: 'pointer', border: 'none' }}
+                                onClick={() => {
+                                    const store = useBuilderStore.getState() as any;
+                                    if (store.activePageId && store.resetPageNodes) {
+                                        store.resetPageNodes(store.activePageId);
+                                    }
+                                    this.setState({ hasError: false, errorMessage: null });
+                                }} 
+                                style={{ width: '100%', padding: '12px', background: 'var(--danger, #dc2626)', borderRadius: 10, fontSize: '12px', fontWeight: 800, color: '#fff', cursor: 'pointer', border: 'none' }}
                             >
                                 Clear Page & Start Fresh
                             </button>
@@ -270,28 +297,10 @@ const BuilderLayoutContent: React.FC = () => {
 
 export const BuilderLayout: React.FC = () => {
     const navigate = useNavigate();
-    const activePageId = useBuilderStore(state => state.activePageId) || 'home';
-
-    const handleGoBack = () => {
-        // Safe Navigate back to standard explicit path to avoid empty backstacks
-        navigate(`/builder/home`); // or exact string matching dashboard home templates
-    };
-
-    const handleResetPage = () => {
-        const state = useBuilderStore.getState();
-        const activeId = state.activePageId;
-        if (activeId) {
-             const blankAST = NewPageInitializer.generateBlankAST();
-             useBuilderStore.setState((s: any) => {
-                 s.nodes = { ...s.nodes, ...blankAST.nodes };
-             });
-             // Also notify layout buffers
-             window.location.reload(); // Quick reset atomic trigger 
-        }
-    };
+    const lastValidPageId = useBuilderStore(state => state.lastValidPageId) as string | null;
 
     return (
-        <BuilderLayoutErrorBoundary onGoBack={handleGoBack} onResetPage={handleResetPage}>
+        <BuilderLayoutErrorBoundary navigate={navigate} lastValidPageId={lastValidPageId}>
             <BuilderLayoutContent />
         </BuilderLayoutErrorBoundary>
     );

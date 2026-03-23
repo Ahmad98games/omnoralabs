@@ -60,10 +60,10 @@ export default function App() {
               <HostnameInterceptor>
                 <ToastProvider>
                   <AuthModal />
-                  <CartDrawer />
                   <RenderPipelineOverlay />
                     <Suspense fallback={<CinematicLoader />}>
                     <Routes>
+                        {/* 🛍️ Storefront Layout Scope */}
                         <Route element={<Layout children={<Outlet />} />}>
                           <Route path={ROUTES.HOME} element={<Home />} />
                           <Route path={ROUTES.COLLECTION} element={<Collection />} />
@@ -72,16 +72,20 @@ export default function App() {
                           <Route path={ROUTES.CHECKOUT} element={<Checkout />} />
                           <Route path={ROUTES.ABOUT} element={<About onBack={() => window.history.back()} />} />
                           <Route path={ROUTES.CONTACT} element={<OmnoraContact />} />
-                          <Route path={ROUTES.BUILDER_HELP} element={<ProtectedRoute><BuilderHelpPage /></ProtectedRoute>} />
-                          <Route path="/builder" element={<ProtectedRoute><Navigate to="/seller?tab=builder" replace /></ProtectedRoute>} />
-                          <Route path={ROUTES.LOGIN} element={<Login />} />
-                          <Route path={ROUTES.REGISTER} element={<Login />} /> 
-                          <Route path={ROUTES.PROFILE} element={<Profile />} />
-                          <Route path={ROUTES.ADMIN} element={<AdminDashboard />} />
-                          <Route path={ROUTES.SELLER} element={<ProtectedRoute><SellerDashboard /></ProtectedRoute>} />
                           <Route path={ROUTES.THANK_YOU} element={<ThankYouPage />} />
-                          <Route path="*" element={<Home />} />
+                          <Route path={ROUTES.PROFILE} element={<Profile />} />
+                          <Route path={ROUTES.BUILDER_HELP} element={<BuilderHelpPage />} />
                         </Route>
+
+                        {/* 🛠️ Dashboard & Auth (No Storefront Header Layout Wrap) */}
+                        <Route path={ROUTES.LOGIN} element={<Login />} />
+                        <Route path={ROUTES.REGISTER} element={<Login />} /> 
+                        <Route path={ROUTES.ADMIN} element={<AdminDashboard />} />
+                        <Route path={ROUTES.SELLER} element={<ProtectedRoute><SellerDashboard /></ProtectedRoute>} />
+                        <Route path="/builder" element={<ProtectedRoute><Navigate to="/seller?tab=builder" replace /></ProtectedRoute>} />
+                        
+                        {/* Fallback */}
+                        <Route path="*" element={<Home />} />
                     </Routes>
                   </Suspense>
                 </ToastProvider>
