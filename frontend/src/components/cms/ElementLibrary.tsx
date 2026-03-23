@@ -507,8 +507,6 @@ export const ElementLibrary: React.FC<Props> = ({ isOpen, onClose }) => {
 
     const [activeTab, setActiveTab] = useState<'elements' | 'layers'>('elements');
 
-    if (!isOpen) return null;
-
     return (
         <aside style={{
             width: 280, height: '100vh', background: 'var(--surface-overlay)',

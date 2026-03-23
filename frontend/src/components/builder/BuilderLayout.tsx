@@ -93,9 +93,15 @@ class BuilderLayoutErrorBoundary extends React.Component<
 const BuilderLayoutContent: React.FC = () => {
     const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
     const [isMobileSheet, setIsMobileSheet] = useState(window.innerWidth < 768);
+    const isSidebarOpenGlobal = useBuilderStore(state => state.isSidebarOpen);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [snapIndex, setSnapIndex] = useState(1); // 0=hidden, 1=40%, 2=90%
-    const [libraryOpen, setLibraryOpen] = useState(false);
+    
+    const libraryOpen = isSidebarOpenGlobal;
+    const setLibraryOpen = (val: boolean | ((prev: boolean) => boolean)) => {
+        const nextVal = typeof val === 'function' ? val(useBuilderStore.getState().isSidebarOpen) : val;
+        useBuilderStore.getState().setSidebarOpen(nextVal);
+    };
     const [continueAnyway, setContinueAnyway] = useState(false);
 
     const activePageId = useBuilderStore(state => state.activePageId);
@@ -164,7 +170,14 @@ const BuilderLayoutContent: React.FC = () => {
             <div style={{ display: 'flex', flex: 1, overflow: 'hidden', position: 'relative' }}>
                 
                 {/* Element Library (Z-INDEX 85) */}
-                <div style={{ zIndex: 85 }}>
+                <div style={{ 
+                    zIndex: 85,
+                    width: libraryOpen ? '280px' : '0px',
+                    overflow: 'hidden',
+                    transition: 'width 200ms cubic-bezier(0.4, 0, 0.2, 1)',
+                    flexShrink: 0,
+                    borderRight: libraryOpen ? '1px solid var(--border-subtle, #27272a)' : 'none'
+                }}>
                     <ElementLibrary isOpen={libraryOpen} onClose={() => setLibraryOpen(false)} />
                 </div>
 

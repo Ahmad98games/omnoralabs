@@ -49,6 +49,10 @@ export interface BuilderState {
     isHydrating: boolean;
     setIsHydrating: (val: boolean) => void;
 
+    // Sidebar states
+    isSidebarOpen: boolean;
+    setSidebarOpen: (val: boolean) => void;
+
     // Actions
     setNodes: (nodes: Record<string, BuilderNode>) => void;
     updateNode: (id: string, path: string, value: any) => void;
@@ -109,9 +113,11 @@ export const useBuilderStore = create<BuilderState>()(persist(immer((set, get) =
     historyIndex: -1,
     isHydrating: false,
     isDragging: false,
+    isSidebarOpen: true,
 
     setIsDragging: (val) => set((state) => { state.isDragging = val; }),
     setIsHydrating: (val) => set((state) => { state.isHydrating = val; }),
+    setSidebarOpen: (val) => set((state) => { state.isSidebarOpen = val; }),
 
     setNodes: (nodes) => set((state) => {
         state.nodes = nodes;

@@ -501,6 +501,21 @@ export const BuilderToolbar: React.FC<Props> = ({ onToggleLibrary, libraryOpen }
                             
                             <Divider />
                             <TopBarPageSelector />
+                            <Divider />
+                            
+                            {/* ➕ Elements Library Toggle */}
+                            <button 
+                                onClick={onToggleLibrary}
+                                style={{
+                                    height: 32, padding: '0 12px', background: libraryOpen ? 'var(--accent-subtle, rgba(124, 109, 250, 0.1))' : 'none',
+                                    border: `1px solid ${libraryOpen ? 'var(--accent-primary, #7c6dfa)' : 'var(--border-subtle, #3f3f46)'}`, 
+                                    borderRadius: 8, color: libraryOpen ? 'var(--accent-primary, #7c6dfa)' : '#d4d4d8', 
+                                    fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                                    display: 'flex', alignItems: 'center', gap: 6, transition: 'all 0.15s'
+                                }}
+                            >
+                                <Plus size={14} /> Elements
+                            </button>
                         </div>
 
                         {/* ─── CENTER ZONE ─── */}
