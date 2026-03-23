@@ -908,12 +908,9 @@ const CanvasOverlayInner: React.FC = () => {
                 e.stopPropagation();
                 if (isHydrating) return;
 
-                const type = e.dataTransfer.getData('text/plain');
-                if (!type) return;
-
-                // Validate Components
-                const { DEFAULT_PROPS } = await import('../../components/cms/ComponentRegistry');
-                if (!DEFAULT_PROPS[type]) {
+                const { DEFAULT_PROPS, resolveComponentType } = await import('../../components/cms/ComponentRegistry');
+                const realType = resolveComponentType(type);
+                if (!DEFAULT_PROPS[realType]) {
                     import('react-hot-toast').then(({ toast }) => toast.error(`Unknown Component: ${type}`));
                     setDropIndex(null); setDropLineY(null); setDragId(null);
                     return;
@@ -922,10 +919,10 @@ const CanvasOverlayInner: React.FC = () => {
                 setIsHydrating(true);
                 try {
                     const { OmnoraKernel } = await import('../../platform/kernel/OmnoraKernel');
-                    const hydrated = await OmnoraKernel.getInstance().hydrate({ blocks: [{ type, props: {} }] });
+                    const hydrated = await OmnoraKernel.getInstance().hydrate({ blocks: [{ type: realType, props: {} }] });
                     const props = hydrated?.blocks?.[0]?.props || {};
 
-                    const newId = addNode(type, props, null, dropIndex);
+                    const newId = addNode(realType, props, null, dropIndex);
                     // Trigger dropped animation
                     const { useBuilderStore } = await import('../../stores/useBuilderStore');
                     useBuilderStore.setState({ lastDroppedNodeId: newId });

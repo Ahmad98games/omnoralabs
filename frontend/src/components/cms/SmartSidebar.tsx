@@ -287,10 +287,13 @@ export const SmartSidebar: React.FC = () => {
                 ) : (
                     activeTab === 'settings' ? (
                         (() => {
-                            if (PROP_CONFIGS[selectedNode.type]) return <PropertyPanel nodeId={selectedNode.id} />;
-                            const ModuleEditor = MODULE_MAP[selectedNode.type];
+                            const { resolveComponentType } = require('./ComponentRegistry');
+                            const realType = resolveComponentType(selectedNode.type);
+                            
+                            if (PROP_CONFIGS[realType]) return <PropertyPanel nodeId={selectedNode.id} />;
+                            const ModuleEditor = MODULE_MAP[realType];
                             if (ModuleEditor) return <ModuleEditor nodeId={selectedNode.id} />;
-                            const entry = getRegistryEntry(selectedNode.type);
+                            const entry = getRegistryEntry(selectedNode.type); // entry can use original if it supports it, or realType. keeping is fine.
                             if (entry?.propSchema) return <GenericSchemaEditor nodeId={selectedNode.id} schema={entry.propSchema} />;
                             return (
                                 <div style={{ fontSize: '12px', color: 'var(--text-tertiary)', padding: '16px', textAlign: 'center', border: '1px dashed var(--border-subtle)', borderRadius: '8px' }}>

@@ -9,6 +9,7 @@ import type { DropPosition } from '../components/cms/ComponentWrapper';
 import { useSyncExternalStore } from 'react';
 import { NewPageInitializer } from '../platform/kernel/NewPageInitializer';
 import { useBuilderStore } from '../stores/useBuilderStore';
+import { getPreset } from '../components/cms/DevicePresetPanel';
 
 const MAX_HISTORY_DEPTH = 100;
 
@@ -185,9 +186,10 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
 
     const setDevicePreset = (preset: string) => {
         setDevicePresetRaw(preset);
-        if (preset.startsWith('phone_')) setViewport('mobile');
-        else if (preset.startsWith('tablet_')) setViewport('tablet');
-        else setViewport('desktop');
+        const p = getPreset(preset);
+        if (p?.category) {
+            setViewport(p.category);
+        }
     };
     const toggleDeviceFrame = () => setShowDeviceFrame(v => !v);
     const toggleSafeAreaOverlay = () => setShowSafeAreaOverlay(v => !v);

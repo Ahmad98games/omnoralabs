@@ -464,3 +464,35 @@ export const ComponentRegistry: Record<
     import('../blocks/PromoStrip').then(m => ({ default: m.PromoStrip }))
   ),
 };
+// ─── ALIAS BRIDGE MAPPINGS ──────────────────────────────────────────────────
+export const COMPONENT_ALIASES: Record<string, string> = {
+  "hero_split": "split_hero",
+  "header": "store_header",
+  "review_block": "customer_reviews",
+  "policy_block": "policy_strip",
+  "text_block": "text_section",
+  "feature_block": "features_grid",
+  "faq_block": "faq_accordion",
+  "footer": "site_footer",
+  "countdown_banner": "countdown_timer",
+  "promo_banner": "promo_strip"
+};
+
+/**
+ * 🛡️ RESOLVE TYPE: The Master Resolver
+ * Always use this to get the real component key before lookup.
+ */
+export const resolveComponentType = (type: string): string => {
+  return COMPONENT_ALIASES[type] || type;
+};
+
+// ─── UPDATED GETTERS ────────────────────────────────────────────────────────
+export const getComponentProps = (type: string) => {
+  const realType = resolveComponentType(type);
+  return DEFAULT_PROPS[realType] || null;
+};
+
+export const getComponentView = (type: string) => {
+  const realType = resolveComponentType(type);
+  return ComponentRegistry[realType] || null;
+};

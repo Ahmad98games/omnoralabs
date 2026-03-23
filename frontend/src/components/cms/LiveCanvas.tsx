@@ -395,27 +395,26 @@ export const LiveCanvas: React.FC = () => {
       {showSafeAreaOverlay && isEdit && (
         <SafeAreaOverlay safeTop={safeTop} safeBottom={safeBottom} />
       )}
+      {isEdit && isEmpty && (
+        <div style={{
+          position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column',
+          alignItems: 'center', justifyContent: 'center', color: '#555', gap: '12px',
+          zIndex: 5, pointerEvents: 'none'
+        }}>
+          <div style={{ fontSize: '24px' }}>🧱</div>
+          <p style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.05em' }}>
+            YOUR CANVAS IS EMPTY
+          </p>
+          <p style={{ fontSize: '9px', opacity: 0.6 }}>
+            Drag an element from the left sidebar to start building.
+          </p>
+        </div>
+      )}
       {(isPhone || isTablet) && isEdit && <FoldMarker h={canvasDisplayH} />}
     </div>
   );
-// Inside LiveCanvas before return
-const isEmpty = blocks.length === 0;
 
-// Inside CanvasCore after ShadowHost
-{isEdit && isEmpty && (
-  <div style={{
-    position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column',
-    alignItems: 'center', justifyContent: 'center', color: '#555', gap: '12px'
-  }}>
-    <div style={{ fontSize: '24px' }}>🧱</div>
-    <p style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.05em' }}>
-      YOUR CANVAS IS EMPTY
-    </p>
-    <p style={{ fontSize: '9px', opacity: 0.6 }}>
-      Drag an element from the left sidebar to start building.
-    </p>
-  </div>
-)}
+  const isEmpty = blocks.length === 0;
   return (
     <CanvasErrorBoundary>
       <div

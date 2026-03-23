@@ -2,7 +2,7 @@ import React, { useState, useEffect, Suspense, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useLocation } from 'react-router-dom';
 import { supabase } from '../../lib/supabaseClient';
-import { ComponentRegistry, DEFAULT_PROPS } from './ComponentRegistry';
+import { ComponentRegistry, DEFAULT_PROPS, resolveComponentType } from './ComponentRegistry';
 import { StoreTemporarilyPaused } from './StoreTemporarilyPaused';
 import { OmnoraKernel } from '../../platform/kernel/OmnoraKernel';
 import { useBuilderStore } from '../../stores/useBuilderStore';
@@ -274,12 +274,13 @@ export const SafeRenderer: React.FC<SafeRendererProps> = ({
                         const node = typeof blockId === 'string' ? nodes[blockId] : blockId;
                         if (!node || !node.type) return null;
 
-                        const registryItem = ComponentRegistry[node.type];
+                        const realType = resolveComponentType(node.type);
+                        const registryItem = ComponentRegistry[realType];
                         if (!registryItem) return null;
 
                         const Component = registryItem as React.FC<any>;
                         const finalProps = {
-                            ...(DEFAULT_PROPS[node.type]?.defaultProps || {}),
+                            ...(DEFAULT_PROPS[realType]?.defaultProps || {}),
                             ...(node.props || {}),
                             isBuilder: true,
                         };
@@ -393,12 +394,13 @@ export const SafeRenderer: React.FC<SafeRendererProps> = ({
         renderedBlocks = hydratedStorefrontBlocks.map((node: any, index: number) => {
             if (!node || !node.type) return null;
 
-            const registryItem = ComponentRegistry[node.type];
+            const realType = resolveComponentType(node.type);
+            const registryItem = ComponentRegistry[realType];
             if (!registryItem) return null;
 
             const Component = registryItem as React.FC<any>;
             const finalProps = {
-                ...(DEFAULT_PROPS[node.type]?.defaultProps || {}),
+                ...(DEFAULT_PROPS[realType]?.defaultProps || {}),
                 ...(node.props || {}),
                 isBuilder: false,
             };
