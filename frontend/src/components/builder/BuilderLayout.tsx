@@ -142,6 +142,25 @@ const BuilderLayoutContent: React.FC = () => {
             window.location.hash = `/builder/home`; // standard router-independent fallback replace
         }
     }, [activePageId]);
+    
+    // 🛡️ Auto-select first page if none selected
+    const pages = useBuilderStore(state => state.pages);
+    const setActivePageId = useBuilderStore(state => state.setActivePageId);
+
+    useEffect(() => {
+        const pageCount = Object.keys(pages || {}).length;
+        if (pageCount > 0 && !activePageId) {
+            const pageList = Object.values(pages);
+            const homePage = pageList.find(p => p.slug === 'home' || p.slug === 'index');
+            const firstPage = pageList[0];
+            const pageToSelect = homePage || firstPage;
+            
+            if (pageToSelect) {
+                console.log('[BuilderLayout] Auto-selecting active page:', pageToSelect.id);
+                setActivePageId(pageToSelect.id);
+            }
+        }
+    }, [pages, activePageId, setActivePageId]);
 
     useEffect(() => {
         const handleResize = () => setIsMobile(window.innerWidth < 1024);

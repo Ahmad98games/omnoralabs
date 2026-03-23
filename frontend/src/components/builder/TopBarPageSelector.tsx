@@ -24,6 +24,8 @@ export const TopBarPageSelector: React.FC = () => {
     } = useBuilder();
 
     const nodes = useBuilderStore(state => state.nodes);
+    const setStoreActivePageId = useBuilderStore(state => state.setActivePageId);
+    
     const pageLayouts = useSyncExternalStore(
         React.useCallback((onStoreChange: () => void) => nodeStore.subscribe(onStoreChange), []),
         () => nodeStore.getState().pageLayouts
@@ -52,7 +54,7 @@ export const TopBarPageSelector: React.FC = () => {
                     return (
                         <button
                             key={id}
-                            onClick={() => setActivePageId(id)}
+                            onClick={() => { setActivePageId(id); setStoreActivePageId(id); }}
                             style={{
                                 padding: '6px 14px', borderRadius: '20px', 
                                 background: isActive ? T.accentSub : 'rgba(0,0,0,0.03)',
@@ -156,7 +158,7 @@ export const TopBarPageSelector: React.FC = () => {
                                     return (
                                         <div key={id} style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 4 }}>
                                             <button
-                                                onClick={() => { setActivePageId(id); setIsOpen(false); }}
+                                                onClick={() => { setActivePageId(id); setStoreActivePageId(id); setIsOpen(false); }}
                                                 style={{
                                                     flex: 1, padding: '8px 10px',
                                                     background: isActive ? T.accentSub : 'none',

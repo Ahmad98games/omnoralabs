@@ -41,17 +41,14 @@ class ErrorBoundary extends React.Component<
     }
 }
 
-export const CanvasEmptyState: React.FC<{ message?: string }> = ({ message }) => {
+export const CanvasEmptyState: React.FC<{ message?: string; subMessage?: string }> = ({ message, subMessage }) => {
     return (
         <div style={S_Placeholder}>
-            <div style={{ fontSize: '32px', marginBottom: '12px' }}>🧩</div>
-            <h3 style={{ color: '#fff', fontSize: '16px', fontWeight: 600, marginBottom: '6px' }}>Empty Canvas</h3>
-            <p style={{ color: '#71717a', fontSize: '13px', maxWidth: '280px', margin: '0 auto 16px' }}>
-                {message || 'Drag a block here to start building your store.'}
+            <div style={{ fontSize: '28px', marginBottom: '12px', color: '#a1a1aa' }}>✦</div>
+            <h3 style={{ color: '#fff', fontSize: '15px', fontWeight: 600, marginBottom: '6px' }}>{message || 'Empty Canvas'}</h3>
+            <p style={{ color: '#71717a', fontSize: '13px', maxWidth: '320px', margin: '0 auto', lineHeight: '1.5' }}>
+                {subMessage || 'Drag a block here to start building your store.'}
             </p>
-            <div style={{ padding: '6px 12px', border: '1px dashed #333', borderRadius: '4px', fontSize: '11px', color: '#52525b' }}>
-                Canvas Ready
-            </div>
         </div>
     );
 };
@@ -207,11 +204,11 @@ export const SafeRenderer: React.FC<SafeRendererProps> = ({ blocks, loading, isB
     const safeBlocks = Array.isArray(activeBlocks) ? activeBlocks : [];
 
     if (!activePageId) {
-        return <CanvasEmptyState message="No page selected" />;
+        return <CanvasEmptyState message="No page selected" subMessage="Select a page from the toolbar above to start editing." />;
     }
 
     if (safeBlocks.length === 0 && !isHydrating) {
-        return <CanvasEmptyState message="Drag a block here to get started" />;
+        return <CanvasEmptyState message="This page is empty" subMessage="Open the Elements panel on the left and drag a block to get started." />;
     }
 
     let renderedBlocks: React.ReactNode[] = [];
