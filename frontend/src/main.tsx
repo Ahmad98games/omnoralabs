@@ -1,5 +1,9 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
+
+// @ts-ignore
+window.__OMNORA_BOOT__ = true;
+console.log('[Boot] main.tsx executing');
 import { BrowserRouter } from 'react-router-dom'
 import App from './App'
 // import { trackEvent } from './api/client'
@@ -89,6 +93,7 @@ class RootErrorBoundary extends React.Component<
 const rootElement = document.getElementById('root')
 if (!rootElement) throw new Error('Root element missing in index.html')
 
+console.log('[Boot] createRoot called');
 ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
     <RootErrorBoundary>

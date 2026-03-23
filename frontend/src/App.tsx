@@ -23,7 +23,7 @@ import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 import About from './pages/About';
 import Login from './pages/Login';
-import Profile from './pages/Profile';
+import Profile from './components/storefront/CustomerProfile';
 import AdminDashboard from './pages/AdminDashboard';
 import OmnoraContact from './pages/OmnoraContact';
 import { BuilderHelpPage } from './pages/builder/BuilderHelpPage';
@@ -50,6 +50,7 @@ const queryClient = new QueryClient({
 });
 
 export default function App() {
+  console.log('[Boot] App rendering');
   return (
     <GlobalErrorBoundary>
       <QueryClientProvider client={queryClient}>
