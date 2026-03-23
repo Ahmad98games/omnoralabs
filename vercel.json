@@ -2,34 +2,38 @@
   "buildCommand": "cd frontend && npm install && npm run build",
   "outputDirectory": "frontend/dist",
   "installCommand": "npm install && cd backend && npm install && cd ../gsgbackend && npm install",
-  "rewrites": [
+  "routes": [
     {
-      "source": "/manifest.webmanifest",
-      "destination": "/manifest.webmanifest"
+      "src": "/api/storefront/(.*)",
+      "dest": "/api/storefront.js"
     },
     {
-      "source": "/registerSW.js",
-      "destination": "/registerSW.js"
+      "src": "/api/(.*)",
+      "dest": "/api/index.js"
     },
     {
-      "source": "/sw.js",
-      "destination": "/sw.js"
+      "src": "/assets/(.*)",
+      "dest": "/assets/$1"
     },
     {
-      "source": "/assets/(.*)",
-      "destination": "/assets/$1"
+      "src": "/manifest.webmanifest",
+      "dest": "/manifest.webmanifest"
     },
     {
-      "source": "/api/storefront/(.*)",
-      "destination": "/api/storefront.js"
+      "src": "/sw.js",
+      "dest": "/sw.js"
     },
     {
-      "source": "/api/(.*)",
-      "destination": "/api/index.js"
+      "src": "/registerSW.js",
+      "dest": "/registerSW.js"
     },
     {
-      "source": "/(.*)",
-      "destination": "/index.html"
+      "src": "/favicon.ico",
+      "dest": "/favicon.ico"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
     }
   ],
   "headers": [
@@ -43,31 +47,16 @@
       ]
     },
     {
-      "source": "/manifest.webmanifest",
-      "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" },
-        { "key": "Access-Control-Allow-Origin", "value": "*" }
-      ]
-    },
-    {
       "source": "/assets/(.*)",
       "headers": [
         { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
       ]
     },
     {
-      "source": "/api/storefront/(.*)",
-      "headers": [
-        { "key": "Cache-Control", "value": "public, s-maxage=60, stale-while-revalidate=300" },
-        { "key": "CDN-Cache-Control", "value": "public, s-maxage=60, stale-while-revalidate=300" }
-      ]
-    },
-    {
       "source": "/(.*)",
       "headers": [
         { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
-        { "key": "X-XSS-Protection", "value": "1; mode=block" }
+        { "key": "X-Frame-Options", "value": "SAMEORIGIN" }
       ]
     }
   ],

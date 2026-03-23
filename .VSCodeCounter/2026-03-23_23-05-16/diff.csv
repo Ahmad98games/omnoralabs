@@ -1,0 +1,77 @@
+"filename", "language", "JSON", "TypeScript", "TypeScript JSX", "CSS", "JavaScript", "HTML", "comment", "blank", "total"
+"c:\omnora OS\backend\config\env.js", "JavaScript", 0, 0, 0, 0, 3, 0, 0, 0, 3
+"c:\omnora OS\backend\controllers\contactController.js", "JavaScript", 0, 0, 0, 0, -2, 0, 0, 0, -2
+"c:\omnora OS\backend\controllers\newsletterController.js", "JavaScript", 0, 0, 0, 0, -18, 0, -3, -3, -24
+"c:\omnora OS\backend\package-lock.json", "JSON", 73, 0, 0, 0, 0, 0, 0, 0, 73
+"c:\omnora OS\backend\package.json", "JSON", 1, 0, 0, 0, 0, 0, 0, 0, 1
+"c:\omnora OS\frontend\index.html", "HTML", 0, 0, 0, 0, 0, -9, 0, 1, -8
+"c:\omnora OS\frontend\package-lock.json", "JSON", 53, 0, 0, 0, 0, 0, 0, 0, 53
+"c:\omnora OS\frontend\package.json", "JSON", 4, 0, 0, 0, 0, 0, 0, 0, 4
+"c:\omnora OS\frontend\src\App.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 3, 2, 5
+"c:\omnora OS\frontend\src\api\client.ts", "TypeScript", 0, -1, 0, 0, 0, 0, 0, 0, -1
+"c:\omnora OS\frontend\src\components\Layout.tsx", "TypeScript JSX", 0, 0, 37, 0, 0, 0, 1, 2, 40
+"c:\omnora OS\frontend\src\components\auth\AuthModal.tsx", "TypeScript JSX", 0, 0, 16, 0, 0, 0, 1, 0, 17
+"c:\omnora OS\frontend\src\components\blocks\CountdownTimer.tsx", "TypeScript JSX", 0, 0, -2, 0, 0, 0, -3, -3, -8
+"c:\omnora OS\frontend\src\components\blocks\CustomerReviews.tsx", "TypeScript JSX", 0, 0, 24, 0, 0, 0, -1, 0, 23
+"c:\omnora OS\frontend\src\components\blocks\FAQAccordion.tsx", "TypeScript JSX", 0, 0, 20, 0, 0, 0, 0, 1, 21
+"c:\omnora OS\frontend\src\components\blocks\FeaturesGrid.tsx", "TypeScript JSX", 0, 0, 7, 0, 0, 0, -1, -1, 5
+"c:\omnora OS\frontend\src\components\blocks\HeroBanner.tsx", "TypeScript JSX", 0, 0, 18, 0, 0, 0, 0, 1, 19
+"c:\omnora OS\frontend\src\components\blocks\ImageBlock.tsx", "TypeScript JSX", 0, 0, 83, 0, 0, 0, 1, 9, 93
+"c:\omnora OS\frontend\src\components\blocks\PolicyStrip.tsx", "TypeScript JSX", 0, 0, 85, 0, 0, 0, 0, 7, 92
+"c:\omnora OS\frontend\src\components\blocks\PromoStrip.tsx", "TypeScript JSX", 0, 0, 78, 0, 0, 0, 0, 12, 90
+"c:\omnora OS\frontend\src\components\blocks\SiteFooter.tsx", "TypeScript JSX", 0, 0, 20, 0, 0, 0, 0, 0, 20
+"c:\omnora OS\frontend\src\components\blocks\SplitHero.tsx", "TypeScript JSX", 0, 0, 8, 0, 0, 0, 0, 1, 9
+"c:\omnora OS\frontend\src\components\blocks\TextSection.tsx", "TypeScript JSX", 0, 0, 117, 0, 0, 0, 0, 8, 125
+"c:\omnora OS\frontend\src\components\blocks\TrustBadges.tsx", "TypeScript JSX", 0, 0, 1, 0, 0, 0, 0, 2, 3
+"c:\omnora OS\frontend\src\components\blocks\UpsellWidget.tsx", "TypeScript JSX", 0, 0, 17, 0, 0, 0, 0, 1, 18
+"c:\omnora OS\frontend\src\components\blocks\WhatsAppFloating.tsx", "TypeScript JSX", 0, 0, 49, 0, 0, 0, 0, 5, 54
+"c:\omnora OS\frontend\src\components\builder\AddPageModal.tsx", "TypeScript JSX", 0, 0, 23, 0, 0, 0, 2, 3, 28
+"c:\omnora OS\frontend\src\components\builder\BuilderLayout.tsx", "TypeScript JSX", 0, 0, 297, 0, 0, 0, 16, 27, 340
+"c:\omnora OS\frontend\src\components\builder\TopBarPageSelector.tsx", "TypeScript JSX", 0, 0, 203, 0, 0, 0, 4, 16, 223
+"c:\omnora OS\frontend\src\components\cart\CartDrawer.tsx", "TypeScript JSX", 0, 0, 116, 0, 0, 0, 4, 7, 127
+"c:\omnora OS\frontend\src\components\cart\CheckoutBlock.tsx", "TypeScript JSX", 0, 0, 41, 0, 0, 0, 2, 4, 47
+"c:\omnora OS\frontend\src\components\cart\FeaturedProduct.tsx", "TypeScript JSX", 0, 0, 120, 0, 0, 0, 0, 14, 134
+"c:\omnora OS\frontend\src\components\cart\ProductCard.tsx", "TypeScript JSX", 0, 0, -32, 0, 0, 0, -4, -2, -38
+"c:\omnora OS\frontend\src\components\cart\ProductGrid.tsx", "TypeScript JSX", 0, 0, -146, 0, 0, 0, -13, -9, -168
+"c:\omnora OS\frontend\src\components\cart\RecentlyViewed.tsx", "TypeScript JSX", 0, 0, 65, 0, 0, 0, 0, 9, 74
+"c:\omnora OS\frontend\src\components\cms\BuilderToolbar.tsx", "TypeScript JSX", 0, 0, 119, 0, 0, 0, 15, 6, 140
+"c:\omnora OS\frontend\src\components\cms\BuilderWrapper.tsx", "TypeScript JSX", 0, 0, -594, 0, 0, 0, -33, -64, -691
+"c:\omnora OS\frontend\src\components\cms\CanvasOverlay.tsx", "TypeScript JSX", 0, 0, 88, 0, 0, 0, 4, 16, 108
+"c:\omnora OS\frontend\src\components\cms\ComponentRegistry.tsx", "TypeScript JSX", 0, 0, 299, 0, 0, 0, -1, -1, 297
+"c:\omnora OS\frontend\src\components\cms\ElementLibrary.tsx", "TypeScript JSX", 0, 0, 58, 0, 0, 0, 0, 5, 63
+"c:\omnora OS\frontend\src\components\cms\LiveCanvas.tsx", "TypeScript JSX", 0, 0, 14, 0, 0, 0, 2, 2, 18
+"c:\omnora OS\frontend\src\components\cms\NavigatorPanel.tsx", "TypeScript JSX", 0, 0, 8, 0, 0, 0, 0, -1, 7
+"c:\omnora OS\frontend\src\components\cms\OmnoraImage.tsx", "TypeScript JSX", 0, 0, -1, 0, 0, 0, 1, -3, -3
+"c:\omnora OS\frontend\src\components\cms\PageSettingsPanel.tsx", "TypeScript JSX", 0, 0, 22, 0, 0, 0, 1, 1, 24
+"c:\omnora OS\frontend\src\components\cms\SafeRenderer.tsx", "TypeScript JSX", 0, 0, 241, 0, 0, 0, 29, 31, 301
+"c:\omnora OS\frontend\src\components\cms\SmartSidebar.tsx", "TypeScript JSX", 0, 0, -34, 0, 0, 0, -6, -4, -44
+"c:\omnora OS\frontend\src\components\cms\StoreTemporarilyPaused.tsx", "TypeScript JSX", 0, 0, 17, 0, 0, 0, 0, 3, 20
+"c:\omnora OS\frontend\src\components\cms\StorefrontFallback.tsx", "TypeScript JSX", 0, 0, 21, 0, 0, 0, 0, 2, 23
+"c:\omnora OS\frontend\src\components\cms\StyleEditorPanel.tsx", "TypeScript JSX", 0, 0, 1, 0, 0, 0, 0, 0, 1
+"c:\omnora OS\frontend\src\components\cms\properties\propConfigurations.ts", "TypeScript", 0, 534, 0, 0, 0, 0, -2, 20, 552
+"c:\omnora OS\frontend\src\components\seller\AiInsights.tsx", "TypeScript JSX", 0, 0, 57, 0, 0, 0, 0, 7, 64
+"c:\omnora OS\frontend\src\components\storefront\CustomerProfile.tsx", "TypeScript JSX", 0, 0, 346, 0, 0, 0, 8, 35, 389
+"c:\omnora OS\frontend\src\context\AuthContext.tsx", "TypeScript JSX", 0, 0, 54, 0, 0, 0, 5, 7, 66
+"c:\omnora OS\frontend\src\context\BuilderContext.tsx", "TypeScript JSX", 0, 0, -9, 0, 0, 0, 0, 0, -9
+"c:\omnora OS\frontend\src\index.css", "CSS", 0, 0, 0, 15, 0, 0, 0, 4, 19
+"c:\omnora OS\frontend\src\main.tsx", "TypeScript JSX", 0, 0, 84, 0, 0, 0, 6, 5, 95
+"c:\omnora OS\frontend\src\pages\SellerDashboard.tsx", "TypeScript JSX", 0, 0, -45, 0, 0, 0, -23, -16, -84
+"c:\omnora OS\frontend\src\pages\admin\Billing.tsx", "TypeScript JSX", 0, 0, 8, 0, 0, 0, 0, 1, 9
+"c:\omnora OS\frontend\src\pages\seller\SellerProfile.tsx", "TypeScript JSX", 0, 0, 219, 0, 0, 0, 5, 19, 243
+"c:\omnora OS\frontend\src\platform\ai\DataCruncher.ts", "TypeScript", 0, 4, 0, 0, 0, 0, 0, 0, 4
+"c:\omnora OS\frontend\src\platform\core\DatabaseTypes.ts", "TypeScript", 0, 3, 0, 0, 0, 0, 0, 1, 4
+"c:\omnora OS\frontend\src\platform\kernel\NewPageInitializer.ts", "TypeScript", 0, 31, 0, 0, 0, 0, 0, 1, 32
+"c:\omnora OS\frontend\src\platform\kernel\OmnoraBootloader.ts", "TypeScript", 0, 67, 0, 0, 0, 0, 3, 11, 81
+"c:\omnora OS\frontend\src\platform\publish\CleanRenderer.tsx", "TypeScript JSX", 0, 0, 83, 0, 0, 0, 8, 12, 103
+"c:\omnora OS\frontend\src\platform\publish\Publisher.ts", "TypeScript", 0, 40, 0, 0, 0, 0, 3, 9, 52
+"c:\omnora OS\frontend\src\platform\publish\StorefrontApp.tsx", "TypeScript JSX", 0, 0, 38, 0, 0, 0, 1, 3, 42
+"c:\omnora OS\frontend\src\stores\useBuilderStore.ts", "TypeScript", 0, 106, 0, 0, 0, 0, 17, 27, 150
+"c:\omnora OS\frontend\vercel.json", "JSON", -4, 0, 0, 0, 0, 0, 0, 0, -4
+"c:\omnora OS\gsgbackend\config\env.js", "JavaScript", 0, 0, 0, 0, 3, 0, 0, 0, 3
+"c:\omnora OS\gsgbackend\controllers\contactController.js", "JavaScript", 0, 0, 0, 0, -2, 0, 0, 0, -2
+"c:\omnora OS\gsgbackend\controllers\newsletterController.js", "JavaScript", 0, 0, 0, 0, -18, 0, -3, -3, -24
+"c:\omnora OS\gsgbackend\package-lock.json", "JSON", 73, 0, 0, 0, 0, 0, 0, 0, 73
+"c:\omnora OS\gsgbackend\package.json", "JSON", 1, 0, 0, 0, 0, 0, 0, 0, 1
+"c:\omnora OS\gsgbackend\routes\performanceHubRoutes.js", "JavaScript", 0, 0, 0, 0, 8, 0, 0, 0, 8
+"c:\omnora OS\vercel.json", "JSON", -18, 0, 0, 0, 0, 0, 0, 0, -18
+"Total", "-", 183, 784, 2359, 15, -26, -9, 49, 250, 3605
