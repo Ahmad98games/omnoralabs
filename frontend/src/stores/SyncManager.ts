@@ -1,6 +1,16 @@
+/**
+ * 🛠️ OMNORA LABS | [SYNC MANAGER]
+ * ---------------------------------------------------------
+ * Principal Architect: Ahmad Mahboob (@ahmad-labs)
+ * Division: Universal Commerce OS / Kernel Core
+ * "Precision is the foundation of industrial scale."
+ * ---------------------------------------------------------
+ */
+
 import debounce from 'lodash/debounce';
 import { useBuilderStore } from './useBuilderStore';
-import { supabase } from '../lib/supabaseClient';
+import { Kernel } from '../lib/kernel/Kernel';
+import { OmnoraLogger } from '../lib/kernel/utils/logger';
 
 export class SyncManager {
     private static retryCount = 0;
@@ -36,11 +46,8 @@ export class SyncManager {
 
         try {
             // 1. Fetch Remote State Version (Conflict Check)
-            const { data: pageData, error: fetchError } = await supabase
-                .from('store_pages')
-                .select('updated_at, ast_manifest')
-                .eq('id', state.activePageId)
-                .single();
+            // This read operation is still necessary for conflict detection before committing.
+            const { data: pageData, error: fetchError } = await Kernel.readSystemState('STORE_PAGES', state.activePageId);
 
             if (fetchError && fetchError.code !== 'PGRST116') { // Ignore single row not found
                 throw fetchError;
@@ -64,26 +71,23 @@ export class SyncManager {
                  }
             }
 
-            // 2. Perform Atomic Upsert Transaction
-            const updatedAt = new Date().toISOString();
-            const { error: upsertError } = await supabase
-                .from('store_pages')
-                .update({
-                    ast_manifest: Object.values(state.nodes),
-                    updated_at: updatedAt
-                })
-                .eq('id', state.activePageId);
+            // 2. Perform Atomic Upsert Transaction via Kernel
+            const success = await Kernel.commitSystemState('STORE_PAGES', {
+                id: state.activePageId,
+                nodes: Object.values(state.nodes)
+            });
 
-            if (upsertError) throw upsertError;
+            if (!success) throw new Error("Kernel state committal failed.");
 
             // 3. Success Updates
             state.setSaveStatus('saved');
             state.setHasUnsavedChanges(false);
-            state.setLastUpdatedRemote(updatedAt);
+            // Re-fetch updatedAt from Kernel or use local approximation
+            state.setLastUpdatedRemote(new Date().toISOString());
             this.retryCount = 0; // Reset retries
 
         } catch (err) {
-            console.error('[SyncManager Error]', err);
+            OmnoraLogger.error('SYNC-MANAGER', `Sync Failure: ${err}`);
             this.retryCount++;
 
             if (this.retryCount >= this.maxRetries) {

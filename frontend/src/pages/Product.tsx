@@ -12,7 +12,7 @@ import '../styles/product.css';
 import { transformProduct, IGSGProduct as IProduct } from '../utils/productTransformer';
 import { ROUTES } from '../routes';
 
-const BRAND_PLACEHOLDER = '/images/placeholder_gsg.png';
+const BRAND_PLACEHOLDER = '/images/placeholder_omnora.png';
 
 interface Variant {
     label: string;
@@ -87,7 +87,7 @@ const ProductPage: React.FC = () => {
             image: product.image || BRAND_PLACEHOLDER
         }, selectedSize, quantity);
 
-        showToast(`${product.name} Added to Bag`, 'success');
+        showToast(`${product.name} Added to Queue`, 'success');
     };
 
     const handleWhatsAppOrder = async () => {
@@ -140,7 +140,7 @@ Please confirm availability and shipping timeline.`;
         <div className="product-detail-page">
             <div className="container" style={{ textAlign: 'center', padding: '10rem 0' }}>
                 <h2>Something went wrong</h2>
-                <p style={{ color: 'red', fontWeight: 'bold' }}>{errorState?.message || 'We could not find the piece you are looking for.'}</p>
+                <p style={{ color: 'red', fontWeight: 'bold' }}>{errorState?.message || 'We could not find the entity you are looking for.'}</p>
                 <button onClick={() => navigate('/collection')} className="btn-luxury-outline">Back to Collection</button>
             </div>
         </div>
@@ -159,7 +159,7 @@ Please confirm availability and shipping timeline.`;
             <div className="product-detail-page scroll-reveal">
                 <div className="container">
                     <Link to="/collection" className="back-link-lux">
-                        <ArrowLeft size={16} /> BACK TO COLLECTION
+                        <ArrowLeft size={16} /> BACK TO REGISTRY
                     </Link>
 
                     <div className="product-container">
@@ -173,9 +173,9 @@ Please confirm availability and shipping timeline.`;
 
                         {/* Info */}
                         <div className="product-info-stack">
-                            <span className="p-brand-lux">OMNORA ATELIER</span>
+                            <span className="p-brand-lux">OMNORA KERNEL</span>
                             <h1 className="p-name-lux serif">{product.name}</h1>
-                            <div className="p-price-lux">PKR {(product.price || 0).toLocaleString()}</div>
+                            <div className="p-price-lux">CREDITS {(product.price || 0).toLocaleString()}</div>
 
                             <p className="p-desc-lux">{product.description}</p>
 
@@ -201,7 +201,7 @@ Please confirm availability and shipping timeline.`;
                             {product.showLowStockWarning && availableStock > 0 && availableStock < 5 && (
                                 <div className="stock-pulse">
                                     <span className="pulse-dot"></span>
-                                    HURRY! ONLY {availableStock} LEFT IN STOCK
+                                    CRITICAL! ONLY {availableStock} NODES REMAINING
                                 </div>
                             )}
 
@@ -238,7 +238,7 @@ Please confirm availability and shipping timeline.`;
                                 {!isOutOfStock && (
                                     <>
                                         <button className="btn-luxury-action" onClick={handleAddToCart}>
-                                            <ShoppingBag size={18} /> ADD TO SHOPPING BAG
+                                            <ShoppingBag size={18} /> ADD TO DEPLOYMENT QUEUE
                                         </button>
                                         <button className="btn-luxury-outline" onClick={handleWhatsAppOrder}>
                                             <MessageCircle size={18} /> BUY NOW VIA WHATSAPP
@@ -251,11 +251,11 @@ Please confirm availability and shipping timeline.`;
                             <div className="trust-indicators">
                                 <div className="trust-card">
                                     <Truck size={20} />
-                                    <span>Fast Delivery (3-5 Days)</span>
+                                    <span>Global Edge Propagation</span>
                                 </div>
                                 <div className="trust-card">
                                     <ShieldCheck size={20} />
-                                    <span>Genuine Craftsmanship</span>
+                                    <span>Kernel Certified Security</span>
                                 </div>
                             </div>
                         </div>

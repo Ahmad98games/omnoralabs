@@ -1,3 +1,11 @@
+/**
+ * 🛠️ OMNORA LABS | [CHECKOUT ENGINE]
+ * ---------------------------------------------------------
+ * Principal Architect: Ahmad Mahboob (@ahmad-labs)
+ * Division: Universal Commerce OS / Logistics & Fulfillment
+ * "Precision is the foundation of industrial scale."
+ * ---------------------------------------------------------
+ */
 
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
@@ -5,6 +13,7 @@ import client, { trackEvent } from '../api/client'
 import './Checkout.css'
 import { useToast } from '../context/ToastContext'
 import { useScrollReveal } from '../hooks/useScrollReveal'
+import { OmnoraLogger } from '../lib/kernel/utils/logger'
 
 type CartItem = { id: string; name: string; price: number; image?: string; quantity: number }
 
@@ -132,20 +141,22 @@ export default function Checkout() {
                     country: form.country
                 },
                 paymentMethod: paymentMethod,
-                items: items.map(i => ({
-                    productId: i.id,
+                entities: items.map(i => ({
+                    entityId: i.id,
                     name: i.name,
                     price: i.price,
                     quantity: i.quantity
                 })),
-                totalAmount: total,
+                totalCredits: total,
                 notes: form.notes
             }
+
+            OmnoraLogger.info('CHECKOUT', `Initiating committal for ${items.length} entities. Total: ${total} Credits.`);
 
             // Create order in backend with INITIATED status
             const res = await client.post('/orders', payload);
 
-            if (res.data?.success && res.data?.order) {
+                OmnoraLogger.info('CHECKOUT', `Committal successful. Order ID: ${res.data.order.id || 'N/A'}`);
                 setIsSuccess(true); // Cinematic trigger
                 
                 // Clear cart immediately since order is created
@@ -153,7 +164,7 @@ export default function Checkout() {
                 window.dispatchEvent(new Event('cart-updated'));
 
                 setTimeout(() => {
-                    navigate(`/order-confirmation/${_id}`, {
+                    navigate(`/order-confirmation/${res.data.order.id}`, {
                         state: {
                             order: res.data.order,
                             source: 'checkout'
@@ -161,15 +172,16 @@ export default function Checkout() {
                     });
                 }, 2500);
 
-                showToast(`Order #${orderNumber} placed successfully!`, 'success');
+                showToast(`Order placed successfully!`, 'success');
             } else {
                 const msg = res.data?.error || 'Failed to create order';
+                OmnoraLogger.error('CHECKOUT', `Committal failed: ${msg}`);
                 setError(msg);
                 showToast(msg, 'error');
                 setIsProcessing(false); // Unlock on failure
             }
         } catch (e: any) {
-            console.error('Order error:', e);
+            OmnoraLogger.error('CHECKOUT', `Fatal Error during committal: ${e.message}`);
             const msg = e?.response?.data?.error || e?.message || 'Failed to create order. Please try again.';
             setError(msg);
             showToast(msg, 'error');
@@ -196,8 +208,8 @@ export default function Checkout() {
             <header className="checkout-hero-mini">
                 <div className="container">
                     <span className="eyebrow">FINAL STEP</span>
-                    <h1 className="h1 subtitle-serif">Secure Checkout</h1>
-                    <p className="text-muted italic">Complete your selection from the Gold She Atelier</p>
+                    <h1 className="h1 subtitle-serif">System Checkout</h1>
+                    <p className="text-muted italic">Finalize your entity propagation through the Omnora Kernel</p>
                 </div>
             </header>
 
@@ -208,7 +220,7 @@ export default function Checkout() {
                             <Link to="/" className="breadcrumbs-link">Home</Link>
                         </li>
                         <li className="breadcrumbs-item">
-                            <Link to="/cart" className="breadcrumbs-link">Shopping Bag</Link>
+                            <Link to="/cart" className="breadcrumbs-link">Deployment Queue</Link>
                         </li>
                         <li className="breadcrumbs-item">Checkout</li>
                     </ul>
@@ -465,10 +477,10 @@ export default function Checkout() {
                                 type="submit"
                                 disabled={isProcessing || submitting}
                                 className="place-order-btn"
-                                aria-label={`Place order for PKR ${(total || 0).toLocaleString()}`}
+                                aria-label={`Place order for ${(total || 0).toLocaleString()} Credits`}
                                 style={{ opacity: isProcessing ? 0.7 : 1, transition: 'opacity 0.2s' }}
                             >
-                                {isProcessing ? 'Processing Order...' : `Place Order · PKR ${(total || 0).toLocaleString()}`}
+                                {isProcessing ? 'Processing Order...' : `Commit Deployment · ${(total || 0).toLocaleString()} Credits`}
                             </button>
                         </form>
                     </div>
@@ -479,26 +491,26 @@ export default function Checkout() {
                             {items.map(i => (
                                 <div key={i.id} className="summary-item">
                                     <span>{i.name} ×{i.quantity}</span>
-                                    <span>PKR {((i.price || 0) * (i.quantity || 1)).toLocaleString()}</span>
+                                    <span>{((i.price || 0) * (i.quantity || 1)).toLocaleString()} Credits</span>
                                 </div>
                             ))}
                         </div>
                         <div className="summary-totals">
                             <div className="summary-row">
                                 <span>Subtotal</span>
-                                <span>PKR {(subtotal || 0).toLocaleString()}</span>
+                                <span>{(subtotal || 0).toLocaleString()} Credits</span>
                             </div>
                             <div className="summary-row">
                                 <span>Tax (5%)</span>
-                                <span>PKR {Number(tax || 0).toFixed(0).toLocaleString()}</span>
+                                <span>{Number(tax || 0).toFixed(0).toLocaleString()} Credits</span>
                             </div>
                             <div className="summary-row">
-                                <span>Shipping</span>
-                                <span>PKR {(shipping || 0).toLocaleString()}</span>
+                                <span>Propagaton Fee</span>
+                                <span>{(shipping || 0).toLocaleString()} Credits</span>
                             </div>
                             <div className="summary-total">
                                 <span>Total</span>
-                                <span>PKR {Number(total || 0).toFixed(0).toLocaleString()}</span>
+                                <span>{Number(total || 0).toFixed(0).toLocaleString()} Credits</span>
                             </div>
                         </div>
 

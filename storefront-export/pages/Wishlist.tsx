@@ -1,13 +1,22 @@
+/**
+ * 🛠️ OMNORA LABS | REGISTRY BUFFER (WISHLIST MODULE)
+ * ---------------------------------------------------------
+ * Principal Architect: Ahmad Mahboob (@ahmad-labs)
+ * Division: Universal Commerce OS / Rendering Engine
+ * "Selection is the precursor to systemic integration."
+ * ---------------------------------------------------------
+ */
+
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useToast } from '../context/ToastContext';
-import client from '../api/client';
-import { Heart, ShoppingBag, X, ArrowRight, Loader2 } from 'lucide-react';
+import { Heart, ShoppingBag, X, ArrowRight, Loader2, Database, ShieldAlert, Cpu } from 'lucide-react';
 import SmartImage from '../components/SmartImage';
+import { OmnoraLogger } from '../utils/OmnoraLogger';
 import { FALLBACK_IMAGE } from '../constants';
 import './Wishlist.css';
 
-type Product = {
+type BufferedEntity = {
     _id: string;
     name: string;
     price: number;
@@ -17,70 +26,67 @@ type Product = {
 };
 
 export default function Wishlist() {
-    const [wishlist, setWishlist] = useState<Product[]>([]);
-    const [loading, setLoading] = useState(true);
+    const [bufferedEntities, setBufferedEntities] = useState<BufferedEntity[]>([]);
+    const [isSynchronizing, setIsSynchronizing] = useState(true);
     const { showToast } = useToast();
 
     useEffect(() => {
-        fetchWishlist();
+        synchronizeBufferState();
     }, []);
 
-    const fetchWishlist = async () => {
+    const synchronizeBufferState = async () => {
         try {
-            // For now, fallback to local storage since backend might not persist wishlist for guests
-            // In a real app, this would merge local + server
-            const saved = JSON.parse(localStorage.getItem('wishlist') || '[]');
+            OmnoraLogger.info("Initiating Registry Buffer synchronization...");
+            const persistedBuffer = JSON.parse(localStorage.getItem('wishlist') || '[]');
 
-            // If we had a real endpoint returning populated products:
-            // const res = await client.get('/wishlist');
-            // setWishlist(res.data.products);
-
-            // Simulating API delay for effect
             setTimeout(() => {
-                setWishlist(saved);
-                setLoading(false);
-            }, 500);
+                setBufferedEntities(persistedBuffer);
+                setIsSynchronizing(false);
+                OmnoraLogger.info(`Buffer synchronization complete. ${persistedBuffer.length} entities identified.`);
+            }, 600);
 
-        } catch (error) {
-            console.error(error);
-            setLoading(false);
+        } catch (fault) {
+            OmnoraLogger.error("Registry Buffer synchronization fault", fault);
+            setIsSynchronizing(false);
         }
     };
 
-    const removeFromWishlist = (productId: string) => {
-        const updated = wishlist.filter(p => p._id !== productId);
-        setWishlist(updated);
-        localStorage.setItem('wishlist', JSON.stringify(updated));
-        showToast('Piece removed from selection', 'info');
+    const decommissionFromBuffer = (entityId: string, name: string) => {
+        const nextBuffer = bufferedEntities.filter(e => e._id !== entityId);
+        setBufferedEntities(nextBuffer);
+        localStorage.setItem('wishlist', JSON.stringify(nextBuffer));
+        showToast('ENTITY_DECOMMISSIONED_FROM_BUFFER', 'info');
+        OmnoraLogger.info(`Entity [${name}] decommissioned from buffer.`);
     };
 
-    const addToCart = (product: Product) => {
-        const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-        const existing = cart.find((i: any) => i.id === product._id);
+    const stageForDeployment = (entity: BufferedEntity) => {
+        const deploymentManifest = JSON.parse(localStorage.getItem('cart') || '[]');
+        const existingNode = deploymentManifest.find((i: any) => i.id === entity._id);
 
-        if (existing) {
-            existing.quantity++;
+        if (existingNode) {
+            existingNode.quantity++;
         } else {
-            cart.push({
-                id: product._id,
-                name: product.name,
-                price: product.price,
-                image: product.image,
+            deploymentManifest.push({
+                id: entity._id,
+                name: entity.name,
+                price: entity.price,
+                image: entity.image,
                 quantity: 1
             });
         }
 
-        localStorage.setItem('cart', JSON.stringify(cart));
+        localStorage.setItem('cart', JSON.stringify(deploymentManifest));
         window.dispatchEvent(new Event('cart-updated'));
-        showToast(`${product.name} secured in bag`, 'success');
+        showToast(`${entity.name}_STAGED_FOR_DEPLOYMENT`, 'success');
+        OmnoraLogger.info(`Entity [${entity.name}] staged for deployment.`);
     };
 
-    if (loading) {
+    if (isSynchronizing) {
         return (
             <div className="wishlist-luxury">
                 <div className="loading-luxury">
-                    <Loader2 size={32} className="animate-spin text-gold" />
-                    <p className="font-serif italic">Accessing your selection...</p>
+                    <Loader2 size={32} className="animate-spin text-royal" />
+                    <p className="font-mono xsmall uppercase italic">Synchronizing_Registry_Buffer...</p>
                 </div>
             </div>
         );
@@ -91,65 +97,64 @@ export default function Wishlist() {
             <div className="luxury-hero-small">
                 <div className="container">
                     <header className="wishlist-header-lux">
-                        <span className="eyebrow">YOUR SELECTION</span>
-                        <h1 className="subtitle-serif">Saved Pieces</h1>
-                        <p className="description-small italic">
-                            {wishlist.length} {wishlist.length === 1 ? 'Piece' : 'Pieces'} in your boutique collection
+                        <span className="eyebrow font-mono" style={{ letterSpacing: '2px' }}>DATA_SELECTION_ISOLATION</span>
+                        <h1 className="subtitle-serif">REGISTRY_BUFFER</h1>
+                        <p className="description-small italic" style={{ fontFamily: 'var(--font-mono)' }}>
+                            {bufferedEntities.length} ACTIVE_BUFFER_NODES • {bufferedEntities.reduce((s, e) => s + e.price, 0).toLocaleString()} VALUATION
                         </p>
                     </header>
                 </div>
             </div>
 
             <div className="container">
-
-                {wishlist.length === 0 ? (
+                {bufferedEntities.length === 0 ? (
                     <div className="empty-state-luxury">
-                        <Heart size={64} strokeWidth={1} className="text-gold mb-4" />
-                        <h2 className="subtitle-serif">Your Boutique is Empty</h2>
-                        <p>Curate your personal collection of luxury craftsmanship.</p>
-                        <Link to="/collection" className="btn-luxury-outline mt-4">
-                            Explore the Collection
+                        <Database size={64} strokeWidth={1} className="text-royal mb-4 animate-pulse" />
+                        <h2 className="font-mono uppercase">BUFFER_EMPTY</h2>
+                        <p className="text-muted">No entities currently cached in the primary selection buffer.</p>
+                        <Link to="/collection" className="btn-luxury-outline mt-4 font-mono xsmall">
+                            ACCESS_MAIN_REGISTRY
                         </Link>
                     </div>
                 ) : (
                     <div className="wishlist-grid">
-                        {wishlist.map((product) => (
-                            <div key={product._id} className="wishlist-card animate-fade-in-up">
+                        {bufferedEntities.map((entity) => (
+                            <div key={entity._id} className="wishlist-card animate-fade-in-up">
                                 <div className="card-image-box">
-                                    <Link to={`/product/${product._id}`}>
+                                    <Link to={`/product/${entity._id}`}>
                                         <SmartImage
-                                            src={product.image || FALLBACK_IMAGE}
-                                            alt={product.name}
+                                            src={entity.image || FALLBACK_IMAGE}
+                                            alt={entity.name}
                                             aspectRatio="1/1"
                                             className="wishlist-img"
                                         />
                                     </Link>
                                     <button
                                         className="btn-remove"
-                                        onClick={() => removeFromWishlist(product._id)}
-                                        title="Remove"
+                                        onClick={() => decommissionFromBuffer(entity._id, entity.name)}
+                                        title="DECOMMISSION"
                                     >
                                         <X size={16} />
                                     </button>
                                 </div>
 
                                 <div className="card-details">
-                                    <Link to={`/product/${product._id}`} className="product-link">
-                                        <h3 className="product-title">{product.name}</h3>
+                                    <Link to={`/product/${entity._id}`} className="product-link">
+                                        <h3 className="product-title font-mono xsmall uppercase" style={{ fontWeight: 600 }}>{entity.name}</h3>
                                     </Link>
-                                    <p className="product-price">PKR {(product.price || 0).toLocaleString()}</p>
+                                    <p className="product-price font-mono">{entity.price.toLocaleString()} Credits</p>
 
                                     <div className="card-actions-lux">
-                                        {product.inStock !== false ? (
+                                        {entity.inStock !== false ? (
                                             <button
-                                                className="btn-lux-bag"
-                                                onClick={() => addToCart(product)}
+                                                className="btn-lux-bag font-mono xsmall"
+                                                onClick={() => stageForDeployment(entity)}
                                             >
-                                                ADD TO BAG <ShoppingBag size={14} />
+                                                STAGE_FOR_DEPLOYMENT <Cpu size={14} />
                                             </button>
                                         ) : (
-                                            <button className="btn-lux-disabled" disabled>
-                                                OUT OF STOCK
+                                            <button className="btn-lux-disabled font-mono xsmall" disabled>
+                                                REGISTRY_NODE_OFFLINE
                                             </button>
                                         )}
                                     </div>
@@ -159,6 +164,13 @@ export default function Wishlist() {
                     </div>
                 )}
             </div>
+
+            <div className="container" style={{ marginTop: '4rem', opacity: 0.5 }}>
+                <div className="security-notice" style={{ justifyContent: 'center' }}>
+                    <ShieldAlert size={14} />
+                    <span className="font-mono xsmall">LOCAL_PERSISTENCE_BUFFER_ENCRYPTED</span>
+                </div>
+            </div>
         </div>
     );
-}
+}

@@ -1,5 +1,5 @@
 :root {
-    /* --- 1. Typography (Gold She Garments) --- */
+    /* --- 1. Typography (Omnora Labs) --- */
     --font-main: 'Inter', -apple-system, sans-serif;
     --font-serif: 'Playfair Display', serif;
 
@@ -11,6 +11,7 @@
     --text-2xl: clamp(1.75rem, 1.3rem + 1vw, 2.5rem);
     --text-3xl: clamp(2.5rem, 1.5rem + 3vw, 4rem);
     --text-4xl: clamp(3.5rem, 2rem + 4vw, 6rem);
+    --font-mono: 'Geist Mono', 'SFMono-Regular', Consolas, monospace;
 
     /* --- 2. Color Palette (Production Hardened) --- */
     --royal-blue: #1B365D;

@@ -1,5 +1,15 @@
+/**
+ * 🛠️ OMNORA LABS | [SETTINGS STORE]
+ * ---------------------------------------------------------
+ * Principal Architect: Ahmad Mahboob (@ahmad-labs)
+ * Division: Universal Commerce OS / Kernel Core
+ * "Precision is the foundation of industrial scale."
+ * ---------------------------------------------------------
+ */
+
 import { create } from 'zustand';
-import { supabase } from '../lib/supabaseClient';
+import { Kernel } from '../lib/kernel/Kernel';
+import { OmnoraLogger } from '../lib/kernel/utils/logger';
 
 export interface MerchantMetadata {
     store_name?: string;
@@ -41,11 +51,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     loadSettings: async (userId: string) => {
         set({ loading: true, error: null });
         try {
-            const { data, error } = await supabase
-                .from('merchants')
-                .select('id, display_name, custom_domain, metadata')
-                .eq('id', userId)
-                .single();
+            const { data, error } = await Kernel.readSystemState('MERCHANT_SETTINGS', userId);
 
             if (error) throw error;
             
@@ -56,7 +62,9 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
                 }, 
                 loading: false 
             });
+            OmnoraLogger.info("SETTINGS", "Merchant settings loaded successfully via Kernel.");
         } catch (err: any) {
+            OmnoraLogger.error("SETTINGS", `Failed to load settings: ${err.message}`);
             set({ error: err.message || 'Failed to load settings', loading: false });
         }
     },
@@ -78,19 +86,18 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
         set({ settings: newSettings, saving: true, error: null });
 
         try {
-            const { error } = await supabase
-                .from('merchants')
-                .update({
-                    display_name: newSettings.display_name,
-                    metadata: newSettings.metadata
-                })
-                .eq('id', userId);
+            const success = await Kernel.commitSystemState('MERCHANT_SETTINGS', {
+                id: userId,
+                display_name: newSettings.display_name,
+                metadata: newSettings.metadata
+            });
 
-            if (error) throw error;
+            if (!success) throw new Error("Kernel state committal failed.");
 
             set({ saving: false });
             return true;
         } catch (err: any) {
+            OmnoraLogger.error("SETTINGS", `Update failed: ${err.message}`);
             // Rollback on failure
             set({ settings: previousSettings, saving: false, error: err.message || 'Update failed' });
             return false;

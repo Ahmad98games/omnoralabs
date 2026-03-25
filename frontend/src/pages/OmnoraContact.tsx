@@ -6,8 +6,8 @@ import './OmnoraContact.css';
 const Footer = () => (
   <footer className="footer-luxury section-padding">
     <div className="container text-center">
-      <span className="footer-logo">GOLD SHE GARMENTS</span>
-      <p className="copyright">&copy; {new Date().getFullYear()} GSG Atelier. All rights reserved.</p>
+      <span className="footer-logo">OMNORA LABS</span>
+      <p className="copyright">&copy; {new Date().getFullYear()} Omnora Labs. All rights reserved.</p>
     </div>
   </footer>
 );
@@ -58,11 +58,11 @@ export default function Contact() {
         <div className="container hero-content">
           <span className="eyebrow">CONCIERGE</span>
           <h1 className="h1 editorial-title">
-            At Your <br />
-            <span className="font-serif italic text-gold">Service</span>
+            Dev <br />
+            <span className="font-serif italic text-gold">Support</span>
           </h1>
           <p className="description">
-            Whether you are inquiring about a custom piece, seeking style advice, or tracking an atelier shipment—our specialists are here to assist you.
+            Whether you are inquiring about commercial deployment, seeking technical support, or proposing a kernel modification—our architects are here to assist.
           </p>
         </div>
       </header>
@@ -74,7 +74,7 @@ export default function Contact() {
           {/* LEFT: INFO */}
           <div className="contact-details-col">
             <div className="detail-block">
-              <h3 className="subtitle-serif-small mb-4">The Atelier HQ</h3>
+              <h3 className="subtitle-serif-small mb-4">Omnora Labs HQ</h3>
               <div className="detail-item">
                 <MapPin size={18} className="text-gold" />
                 <span>New Shad Bagh, Lahore, Pakistan</span>
@@ -145,7 +145,7 @@ export default function Contact() {
                     value={form.message}
                     onChange={handleChange}
                     required
-                    placeholder="Tell us about your requirements..."
+                    placeholder="Describe your inquiry or technical requirement..."
                   />
                 </div>
 

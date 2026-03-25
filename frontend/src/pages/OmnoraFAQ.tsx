@@ -6,8 +6,8 @@ import './OmnoraFAQ.css';
 const Footer = () => (
   <footer className="footer-luxury section-padding">
     <div className="container text-center">
-      <span className="footer-logo">GOLD SHE GARMENTS</span>
-      <p className="copyright">&copy; {new Date().getFullYear()} GSG Atelier. All rights reserved.</p>
+      <span className="footer-logo">OMNORA LABS</span>
+      <p className="copyright">&copy; {new Date().getFullYear()} Omnora Labs. All rights reserved.</p>
     </div>
   </footer>
 );
@@ -21,29 +21,29 @@ export default function FAQ() {
 
   const faqs = [
     {
-      question: "Exchanges & Boutique Credit",
+      question: "System Scalability & Elasticity",
       answer: (
         <>
-          <p>We take pride in the quality of our garments. To initiate an exchange:</p>
+          <p>The Omnora Kernel is designed for global distribution. Our infrastructure ensures:</p>
           <ol>
-            <li>Contact our concierge team within 7 days of delivery.</li>
-            <li>Ensure the garment is in its original, unworn condition with all atelier tags attached.</li>
-            <li>Securely pack the piece in its original luxury packaging.</li>
-            <li>Ship back to our Lahore studio for assessment.</li>
+            <li>Zero-latency rendering via Edge-optimized pipelines.</li>
+            <li>Multi-tenant isolation for secure asset management.</li>
+            <li>Hyper-modular component injection for infinite modification.</li>
+            <li>Automated sync with the Supabase/Zustand state layer.</li>
           </ol>
           <p className="note-text-luxury">
-            Note: Boutique credit will be issued upon successful inspection of the returned piece.
+            Note: The current storefront is a live production benchmark and prototype.
           </p>
         </>
       )
     },
     {
-      question: "Shipping Responsibility",
-      answer: "While we ensure secure dispatch, return shipping costs for exchanges are the responsibility of the client. In the rare event of a craftsmanship defect, Gold She Garments will provide a complimentary pickup or internal reimbursement."
+      question: "Global Availability",
+      answer: "Omnora Labs is currently in 'Limited Access' for production environments. While the builder is available globally, the full commerce engine is being rolled out territory by territory to ensure system integrity."
     },
     {
-      question: "Atelier Refund Policy",
-      answer: "Refunds are processed as boutique credit or reverted to the original payment source within 7-14 business days of receipt at our studio. Bank processing times may apply depending on your financial institution."
+      question: "Modification Protocol",
+      answer: "Omnora is open for top-tier contributors. Any modification to the core kernel must follow our strict architectural protocols documented in the Contributor Guide."
     }
   ];
 
@@ -54,11 +54,11 @@ export default function FAQ() {
         <div className="container hero-content">
           <span className="eyebrow">ASSISTANCE</span>
           <h1 className="h1 editorial-title">
-            Atelier <br />
+            System <br />
             <span className="font-serif italic text-gold">Protocols</span>
           </h1>
           <p className="description">
-            Your guide to acquiring, caring for, and exchanging your Gold She fine garments.
+            Your technical guide to understanding, contributing to, and deploying the Omnora Kernel.
           </p>
         </div>
       </header>
@@ -72,20 +72,20 @@ export default function FAQ() {
             <div className="atelier-note-card">
               <h3 className="subtitle-serif-small mb-4">
                 <ShieldCheck size={20} className="text-gold mr-2" />
-                Craftsmanship Note
+                Kernel Integrity
               </h3>
 
               <p className="note-description">
-                Every piece in our collection is hand-finished by master artisans. As we scale our legacy, our concierge team handles every query personally.
+                Every line of code in the Omnora Kernel is optimized for speed and fidelity. We prioritize architectural purity over rapid bloat.
               </p>
 
               <p className="note-description mt-4">
-                We avoid automation to ensure that your luxury experience remains human and dedicated.
+                Our team monitors system performance 24/7 to ensure zero-downtime distribution.
               </p>
 
               <div className="atelier-cta mt-8">
                 <Link to="/contact" className="btn-atelier-link">
-                  Open Concierge Channel <ArrowRight size={16} />
+                  Open Dev Channel <ArrowRight size={16} />
                 </Link>
               </div>
             </div>

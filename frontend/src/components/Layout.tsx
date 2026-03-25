@@ -159,7 +159,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                             />
                         </div>
                         <span className="brand-name">
-                            {content?.configuration?.name || (isInsideTerritory ? storeSlug?.toUpperCase() : "GoldShe")}
+                            {content?.configuration?.name || (isInsideTerritory ? storeSlug?.toUpperCase() : "Omnora Labs")}
                         </span>
                     </Link>
 
@@ -183,8 +183,8 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                             // FIXED PLATFORM MENU
                             <>
                                 <Link to={ROUTES.HOME} className={`nav-link ${isActive(ROUTES.HOME) ? 'active' : ''}`}>Home</Link>
-                                <Link to={ROUTES.COLLECTION} className={`nav-link ${isActive(ROUTES.COLLECTION) ? 'active' : ''}`}>Shop All</Link>
-                                <Link to={ROUTES.ABOUT} className={`nav-link ${isActive(ROUTES.ABOUT) ? 'active' : ''}`}>About</Link>
+                                <Link to={ROUTES.COLLECTION} className={`nav-link ${isActive(ROUTES.COLLECTION) ? 'active' : ''}`}>Entities</Link>
+                                <Link to={ROUTES.ABOUT} className={`nav-link ${isActive(ROUTES.ABOUT) ? 'active' : ''}`}>Engine</Link>
                                 <Link to={ROUTES.CONTACT} className={`nav-link ${isActive(ROUTES.CONTACT) ? 'active' : ''}`}>Contact</Link>
                                 <Link to={ROUTES.BUILDER_HELP} className={`nav-link ${isActive(ROUTES.BUILDER_HELP) ? 'active' : ''}`}>How to Build</Link>
                             </>
@@ -277,11 +277,11 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                         <Link to={getBaseUrl() || "/"} onClick={closeMenu}>
                             {isInsideTerritory ? 'Home' : 'Platform Hub'}
                         </Link>
-                        <Link to={`${getBaseUrl()}/collection`} onClick={closeMenu}>Shop All</Link>
+                        <Link to={`${getBaseUrl()}/collection`} onClick={closeMenu}>Entities</Link>
                         {!isInsideTerritory && (
-                            <Link to="/collection?category=stitched" onClick={closeMenu}>Ready to Wear</Link>
+                            <Link to="/collection?category=digital" onClick={closeMenu}>Digital Assets</Link>
                         )}
-                        <Link to={`${getBaseUrl()}/about`} onClick={closeMenu}>About</Link>
+                        <Link to={`${getBaseUrl()}/about`} onClick={closeMenu}>Engine</Link>
                         <Link to={`${getBaseUrl()}/contact`} onClick={closeMenu}>Contact</Link>
                         <Link to="/builder/help" onClick={closeMenu}>How to Build</Link>
 

@@ -1,10 +1,20 @@
+/**
+ * 🛠️ OMNORA LABS | [SAFE RENDERER]
+ * ---------------------------------------------------------
+ * Principal Architect: Ahmad Mahboob (@ahmad-labs)
+ * Division: Universal Commerce OS / Rendering Engine
+ * "Precision is the foundation of industrial scale."
+ * ---------------------------------------------------------
+ */
+
 import React, { useState, useEffect, Suspense, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useLocation } from 'react-router-dom';
 import { supabase } from '../../lib/supabaseClient';
 import { ComponentRegistry, DEFAULT_PROPS, resolveComponentType } from './ComponentRegistry';
 import { StoreTemporarilyPaused } from './StoreTemporarilyPaused';
-import { OmnoraKernel } from '../../platform/kernel/OmnoraKernel';
+import { Kernel } from '../../lib/kernel/Kernel';
+import { OmnoraLogger } from '../../lib/kernel/utils/logger';
 import { useBuilderStore } from '../../stores/useBuilderStore';
 import { useAuth } from '../../context/AuthContext';
 import { StorefrontFallback } from './StorefrontFallback';
@@ -28,7 +38,7 @@ class ErrorBoundary extends React.Component<
     }
 
     componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-        console.error('[SafeRenderer Crash]', error, errorInfo);
+        OmnoraLogger.error('SAFE-RENDERER', `Component Crash: ${error} ${errorInfo}`);
     }
 
     render() {
@@ -162,7 +172,7 @@ export const SafeRenderer: React.FC<SafeRendererProps> = ({
                     }
                 }
             } catch (err) {
-                console.error('[SafeRenderer] Billing query failure:', err);
+                OmnoraLogger.error('SAFE-RENDERER', `Billing query failure: ${err}`);
             }
         };
 
@@ -176,7 +186,7 @@ export const SafeRenderer: React.FC<SafeRendererProps> = ({
             return;
         }
         const timer = setTimeout(() => {
-            console.warn('[SafeRenderer] Load threshold exceeded (>5s). Force-rendering.');
+            OmnoraLogger.warn('SAFE-RENDERER', 'Load threshold exceeded (>5s). Force-rendering.');
             setIsForceRender(true);
         }, 5000);
         return () => clearTimeout(timer);
@@ -198,7 +208,7 @@ export const SafeRenderer: React.FC<SafeRendererProps> = ({
     useEffect(() => {
         if (!isClient || !blocks || blocks.length === 0) return;
 
-        OmnoraKernel.getInstance().hydrate(blocks).then(ast => {
+        Kernel.hydrate(blocks).then(ast => {
             setHydratedStorefrontBlocks(ast.blocks || ast);
         });
 
@@ -209,7 +219,7 @@ export const SafeRenderer: React.FC<SafeRendererProps> = ({
                 performance.measure('ast-render-duration', 'safe-render-start', 'safe-render-end');
                 const measure = performance.getEntriesByName('ast-render-duration')[0];
                 if (measure && measure.duration > 100) {
-                    console.warn(`[SafeRenderer] Render exceeded 100ms: ${measure.duration.toFixed(2)}ms`);
+                    OmnoraLogger.warn('SAFE-RENDERER', `Render exceeded 100ms: ${measure.duration.toFixed(2)}ms`);
                 }
                 performance.clearMarks('safe-render-start');
                 performance.clearMarks('safe-render-end');
@@ -435,7 +445,7 @@ export const SafeRenderer: React.FC<SafeRendererProps> = ({
             );
         });
     } catch (err) {
-        console.error('[SafeRenderer] FATAL STOREFRONT MAP CRASH:', err);
+        OmnoraLogger.error('SAFE-RENDERER', `FATAL STOREFRONT MAP CRASH: ${err}`);
         return <StorefrontFallback />;
     }
 

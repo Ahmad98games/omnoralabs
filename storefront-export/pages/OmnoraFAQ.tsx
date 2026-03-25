@@ -1,49 +1,61 @@
+/**
+ * 🛠️ OMNORA LABS | SYSTEM KNOWLEDGE BASE (FAQ MODULE)
+ * ---------------------------------------------------------
+ * Principal Architect: Ahmad Mahboob (@ahmad-labs)
+ * Division: Universal Commerce OS / Rendering Engine
+ * "Knowledge is the fuel for systemic optimization."
+ * ---------------------------------------------------------
+ */
+
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Minus, ShieldCheck, Mail, ArrowRight } from 'lucide-react';
+import { Plus, Minus, ShieldCheck, Mail, ArrowRight, Terminal, Cpu, Database } from 'lucide-react';
+import { OmnoraLogger } from '../utils/OmnoraLogger';
 import './OmnoraFAQ.css';
 
-const Footer = () => (
-  <footer className="footer-luxury section-padding">
-    <div className="container text-center">
-      <span className="footer-logo">GOLD SHE GARMENTS</span>
-      <p className="copyright">&copy; {new Date().getFullYear()} GSG Atelier. All rights reserved.</p>
-    </div>
-  </footer>
-);
-
 export default function FAQ() {
-  const [activeIndex, setActiveIndex] = useState<number | null>(0);
+  const [activeProtocolIndex, setActiveProtocolIndex] = useState<number | null>(0);
 
-  const toggleFAQ = (index: number) => {
-    setActiveIndex(activeIndex === index ? null : index);
+  const toggleProtocol = (index: number) => {
+    setActiveProtocolIndex(activeProtocolIndex === index ? null : index);
+    OmnoraLogger.info(`Protocol access toggled: index ${index}`);
   };
 
-  const faqs = [
+  const systemProtocols = [
     {
-      question: "Exchanges & Boutique Credit",
+      question: "ENTITY_DECOMMISSIONING_PROTOCOL",
       answer: (
         <>
-          <p>We take pride in the quality of our garments. To initiate an exchange:</p>
-          <ol>
-            <li>Contact our concierge team within 7 days of delivery.</li>
-            <li>Ensure the garment is in its original, unworn condition with all atelier tags attached.</li>
-            <li>Securely pack the piece in its original luxury packaging.</li>
-            <li>Ship back to our Lahore studio for assessment.</li>
+          <p className="font-mono xsmall">We maintain absolute integrity of deployed nodes. To initiate a de-configuration:</p>
+          <ol className="font-mono xsmall">
+            <li>Contact the central registry within 168 hours of deployment.</li>
+            <li>Ensure the node is in its primary state with all industrial tags intact.</li>
+            <li>Securely encapsulate the entity in its original deployment container.</li>
+            <li>Ship back to the Lahore Core Registry for structural assessment.</li>
           </ol>
-          <p className="note-text-luxury">
-            Note: Boutique credit will be issued upon successful inspection of the returned piece.
+          <p className="note-text-luxury font-mono xsmall">
+            NOTE: SYSTEM_CREDITS_ISSUED_UPON_SUCCESSFUL_AUDIT.
           </p>
         </>
       )
     },
     {
-      question: "Shipping Responsibility",
-      answer: "While we ensure secure dispatch, return shipping costs for exchanges are the responsibility of the client. In the rare event of a craftsmanship defect, Gold She Garments will provide a complimentary pickup or internal reimbursement."
+      question: "PROPAGATION_LOGISTICS",
+      answer: (
+        <p className="font-mono xsmall">
+          While we ensure secure dispatch, return logistics for audits are the responsibility of the client node. 
+          In the event of a documented kernel defect, Omnora Labs will provide complimentary extraction or internal credit reimbursement.
+        </p>
+      )
     },
     {
-      question: "Atelier Refund Policy",
-      answer: "Refunds are processed as boutique credit or reverted to the original payment source within 7-14 business days of receipt at our studio. Bank processing times may apply depending on your financial institution."
+      question: "KERNEL_REFUND_STREAM",
+      answer: (
+        <p className="font-mono xsmall">
+          Refunds are processed as SYSTEM_CREDITS or reverted to the primary payment gateway within 240-336 hours of receipt. 
+          Financial institution processing latencies may apply.
+        </p>
+      )
     }
   ];
 
@@ -52,13 +64,13 @@ export default function FAQ() {
       {/* HERO */}
       <header className="faq-hero-section">
         <div className="container hero-content">
-          <span className="eyebrow">ASSISTANCE</span>
-          <h1 className="h1 editorial-title">
-            Atelier <br />
-            <span className="font-serif italic text-gold">Protocols</span>
+          <span className="eyebrow font-mono" style={{ letterSpacing: '4px' }}>SYSTEM_PROTOCOLS</span>
+          <h1 className="h1 editorial-title font-mono uppercase">
+            Kernel <br />
+            <span className="font-serif italic text-royal">Operations</span>
           </h1>
-          <p className="description">
-            Your guide to acquiring, caring for, and exchanging your Gold She fine garments.
+          <p className="description font-mono xsmall">
+            Official documentation for acquiring, configuring, and auditing Omnora system entities.
           </p>
         </div>
       </header>
@@ -70,49 +82,49 @@ export default function FAQ() {
           {/* SIDEBAR */}
           <aside className="faq-sidebar-luxury">
             <div className="atelier-note-card">
-              <h3 className="subtitle-serif-small mb-4">
-                <ShieldCheck size={20} className="text-gold mr-2" />
-                Craftsmanship Note
+              <h3 className="subtitle-serif-small mb-4 font-mono uppercase xsmall">
+                <ShieldCheck size={20} className="text-royal mr-2" />
+                CORE_INTEGRITY_MANIFEST
               </h3>
 
-              <p className="note-description">
-                Every piece in our collection is hand-finished by master artisans. As we scale our legacy, our concierge team handles every query personally.
+              <p className="note-description font-mono xsmall">
+                Every entity in our registry is hand-finished by master engineers. As we scale our legacy, our support team handles every query personally.
               </p>
 
-              <p className="note-description mt-4">
-                We avoid automation to ensure that your luxury experience remains human and dedicated.
+              <p className="note-description mt-4 font-mono xsmall">
+                We avoid automation to ensure that your industrial experience remains human and dedicated.
               </p>
 
               <div className="atelier-cta mt-8">
-                <Link to="/contact" className="btn-atelier-link">
-                  Open Concierge Channel <ArrowRight size={16} />
+                <Link to="/contact" className="btn-atelier-link font-mono xsmall uppercase">
+                  OPEN_UPLINK_CHANNEL <ArrowRight size={16} />
                 </Link>
               </div>
             </div>
 
-            <div className="breadcrumbs-luxury mt-8">
-              <Link to="/" className="breadcrumb-link-luxury">Home</Link>
+            <div className="breadcrumbs-luxury mt-8 font-mono xsmall">
+              <Link to="/" className="breadcrumb-link-luxury">KERNEL</Link>
               <span className="sep-gold">/</span>
-              <span>Protocols</span>
+              <span>KNOWLEDGE_BASE</span>
             </div>
           </aside>
 
           {/* MAIN ACCORDION */}
           <main className="faq-main-content">
-            <h2 className="subtitle-serif mb-8">Service Standards</h2>
+            <h2 className="subtitle-serif mb-8 font-mono uppercase">OPERATIONAL_STANDARDS</h2>
 
             <div className="faq-list-luxury">
-              {faqs.map((faq, index) => (
-                <div key={index} className={`faq-item-luxury ${activeIndex === index ? 'active' : ''}`}>
-                  <button className="faq-trigger-luxury" onClick={() => toggleFAQ(index)}>
-                    <span className="faq-q-text-luxury">{faq.question}</span>
+              {systemProtocols.map((protocol, index) => (
+                <div key={index} className={`faq-item-luxury ${activeProtocolIndex === index ? 'active' : ''}`}>
+                  <button className="faq-trigger-luxury" onClick={() => toggleProtocol(index)}>
+                    <span className="faq-q-text-luxury font-mono xsmall uppercase" style={{ fontWeight: 600 }}>{protocol.question}</span>
                     <div className="faq-icon-box-luxury">
-                      {activeIndex === index ? <Minus size={18} /> : <Plus size={18} />}
+                      {activeProtocolIndex === index ? <Minus size={18} /> : <Plus size={18} />}
                     </div>
                   </button>
-                  <div className={`faq-content-luxury ${activeIndex === index ? 'expanded' : ''}`}>
+                  <div className={`faq-content-luxury ${activeProtocolIndex === index ? 'expanded' : ''}`}>
                     <div className="faq-inner-luxury">
-                      {faq.answer}
+                      {protocol.answer}
                     </div>
                   </div>
                 </div>
@@ -121,18 +133,18 @@ export default function FAQ() {
 
             {/* CONTACT BLOCK */}
             <div className="contact-prompt-luxury mt-16">
-              <h3 className="subtitle-serif-small mb-4">Unresolved Inquiry?</h3>
-              <p className="text-muted mb-8">
-                If your specific requirement is not addressed, please establish a direct link with our studio.
+              <h3 className="subtitle-serif-small mb-4 font-mono uppercase">UNRESOLVED_INQUIRY?</h3>
+              <p className="text-muted mb-8 font-mono xsmall">
+                If your specific system requirement is not addressed, establish a direct link with the central registry.
               </p>
 
-              <a href="mailto:omnorainfo28@gmail.com" className="btn-luxury-outline">
-                <Mail size={16} /> Contact Support
+              <a href="mailto:omnorainfo28@gmail.com" className="btn-luxury-outline font-mono xsmall uppercase">
+                <Terminal size={16} style={{ marginRight: '8px' }} /> INITIATE_REGISTRY_UPLINK
               </a>
 
-              <div className="concierge-meta mt-8">
-                Studio Line: +92 3334355475 <br />
-                (Mon-Sat, 11:00 AM - 9:00 PM PKT)
+              <div className="concierge-meta mt-8 font-mono xsmall">
+                CENTRAL_LINE: +92 3334355475 <br />
+                (MON-SAT, 1100 - 2100 PKT)
               </div>
             </div>
           </main>

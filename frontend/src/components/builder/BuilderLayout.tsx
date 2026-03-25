@@ -6,8 +6,8 @@ import { ElementLibrary } from '../cms/ElementLibrary';
 import { BuilderToolbar } from '../cms/BuilderToolbar';
 import { useBuilderStore } from '../../stores/useBuilderStore';
 import { useNavigate } from 'react-router-dom';
-import { NewPageInitializer } from '../../platform/kernel/NewPageInitializer';
-import { OmnoraBootloader } from '../../platform/kernel/OmnoraBootloader';
+import { NewPageInitializer } from '../../lib/kernel/utils/NewPageInitializer';
+import { Kernel } from '../../lib/kernel/Kernel';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // 🛡️ standard React ErrorBoundary for catching inner Canvas/Hydrating crashes
@@ -133,7 +133,7 @@ const BuilderLayoutContent: React.FC = () => {
             if (activePageId && activePageId !== lastValidPageId) {
                 // Safely commit new page to tracked valid fallback history 
                 setLastValidPageId(activePageId);
-                OmnoraBootloader.saveLastValidPageId(activePageId);
+                Kernel.saveLastValidPageId(activePageId);
             }
         } catch (e) {
             console.error('[BuilderLayout] Page Switch Failure caught:', e);

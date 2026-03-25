@@ -8,69 +8,69 @@ export default function SizeGuide() {
             <div className="container">
                 <div className="legal-header-lux">
                     <span className="eyebrow">MEASUREMENT PROTOCOLS</span>
-                    <h1 className="subtitle-serif">Size Guide</h1>
-                    <p className="description-small italic">Find your perfect artisanal fit</p>
+                    <h1 className="subtitle-serif">Entity Standards</h1>
+                    <p className="description-small italic">System specifications for modular assets</p>
                 </div>
 
                 <div className="legal-content-lux">
                     <section className="legal-section-lux">
                         <p className="legal-text-lux">
-                            At Gold She Garments, each piece is handcrafted to ensure the highest standards of elegance. Please use the guide below to determine your ideal size within our atelier.
+                            Within the Omnora Kernel, each entity follows strict volumetric protocols to ensure seamless integration across multi-tenant environments.
                         </p>
 
                         <div className="luxury-table-container">
                             <table className="luxury-table">
                                 <thead>
                                     <tr>
-                                        <th>SIZE</th>
-                                        <th>BUST (INCHES)</th>
-                                        <th>WAIST (INCHES)</th>
-                                        <th>HIP (INCHES)</th>
+                                        <th>NODE LEVEL</th>
+                                        <th>WIDTH (UNITS)</th>
+                                        <th>CAPACITY (FLOPS)</th>
+                                        <th>LATENCY (MS)</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td>XS</td>
+                                        <td>ALPHA</td>
                                         <td>32.5</td>
                                         <td>25.5</td>
-                                        <td>35.5</td>
+                                        <td>0.5</td>
                                     </tr>
                                     <tr>
-                                        <td>S</td>
+                                        <td>BETA</td>
                                         <td>34.5</td>
                                         <td>27.5</td>
-                                        <td>37.5</td>
+                                        <td>0.8</td>
                                     </tr>
                                     <tr>
-                                        <td>M</td>
+                                        <td>GAMMA</td>
                                         <td>36.5</td>
                                         <td>29.5</td>
-                                        <td>39.5</td>
+                                        <td>1.2</td>
                                     </tr>
                                     <tr>
-                                        <td>L</td>
+                                        <td>DELTA</td>
                                         <td>39.0</td>
                                         <td>32.0</td>
-                                        <td>42.0</td>
+                                        <td>1.5</td>
                                     </tr>
                                     <tr>
-                                        <td>XL</td>
+                                        <td>OMEGA</td>
                                         <td>42.0</td>
                                         <td>35.0</td>
-                                        <td>45.0</td>
+                                        <td>2.0</td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
 
                         <div className="legal-section-lux mt-12">
-                            <h2 className="section-title-serif">Exchanges & Fitting</h2>
+                            <h2 className="section-title-serif">System Synchronization</h2>
                             <p className="legal-text-lux">
-                                If your selection does not meet your fitting expectations, our concierge is available to assist with exchanges. We strive to ensure every client feels perfected in their GSG attire.
+                                If your entity configuration does not synchronize with the kernel, our engineering team is available for audit. We strive for zero-latency integration.
                             </p>
                             <div className="mt-12">
                                 <Link to="/collection" className="btn-luxury-outline">
-                                    Continue Shopping
+                                    Explore Catalog
                                 </Link>
                             </div>
                         </div>

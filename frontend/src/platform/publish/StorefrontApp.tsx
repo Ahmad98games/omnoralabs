@@ -77,8 +77,8 @@ export const StorefrontApp: React.FC<StorefrontAppProps> = ({ initialPath, store
         const next = panicClicks + 1;
         setPanicClicks(next);
         if (next >= 5) {
-            import('../../platform/kernel/OmnoraBootloader').then(({ OmnoraBootloader }) => {
-                OmnoraBootloader.executeHardReset();
+            import('../../lib/kernel/Kernel').then(({ Kernel }) => {
+                Kernel.executeHardReset();
             });
         }
     };
@@ -148,8 +148,8 @@ export const StorefrontApp: React.FC<StorefrontAppProps> = ({ initialPath, store
     // ── Zombie-Tab Watcher ────────────────────────────────────────────────
     useEffect(() => {
         let cleanup = () => {};
-        import('../../platform/kernel/OmnoraBootloader').then(({ OmnoraBootloader }) => {
-            cleanup = OmnoraBootloader.watchZombieTab(
+        import('../../lib/kernel/Kernel').then(({ Kernel }) => {
+            cleanup = Kernel.watchZombieTab(
                 loading,
                 setLoading,
                 async () => {

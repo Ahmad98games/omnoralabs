@@ -32,7 +32,7 @@ const CUSTOMER_REVIEWS = [
         name: "Sarah Ahmed",
         role: "Verified Buyer",
         rating: 5,
-        comment: "Absolutely in love with the unstitched collection. The fabric quality is incredibly premium, and it arrived beautifully packaged. Will definitely be shopping here again!",
+        comment: "Absolutely in love with the modular injection. The kernel stability is incredibly premium, and it deployed beautifully. Will definitely be using Omnora again!",
         date: "March 2026"
     },
     {
@@ -40,7 +40,7 @@ const CUSTOMER_REVIEWS = [
         name: "Ayesha Khan",
         role: "Regular Customer",
         rating: 5,
-        comment: "The ready-to-wear dresses are perfectly tailored. I bought a formal piece for a wedding and received so many compliments. Exceptional service as well.",
+        comment: "The ready-to-deploy entities are perfectly architected. I integrated a formal node for a benchmark and received so many compliments. Exceptional service as well.",
         date: "February 2026"
     },
     {
@@ -190,7 +190,7 @@ export default function Home() {
             <div className="relative z-10 container mx-auto px-6 md:px-12 flex flex-col items-center text-center mt-20">
                 <div className="inline-flex items-center gap-3 px-4 py-1.5 rounded-full border border-white/10 bg-white/5 backdrop-blur-md mb-8 animate-fade-in-up">
                     <span className="w-2 h-2 rounded-full bg-[#D4AF37] animate-pulse" />
-                    <span className="text-xs uppercase tracking-[0.2em] text-gray-300 font-medium pt-0.5">{siteContent?.pages?.home?.eyebrow || "The Summer '26 Collection"}</span>
+                    <span className="text-xs uppercase tracking-[0.2em] text-gray-300 font-medium pt-0.5">{siteContent?.pages?.home?.eyebrow || "Omnora Kernel Release '26"}</span>
                 </div>
 
                 <h1 className="text-6xl md:text-8xl lg:text-9xl font-serif font-black text-white mb-6 leading-[0.9] tracking-tighter drop-shadow-2xl animate-fade-in-up" style={{ animationDelay: '100ms' }}>
@@ -204,7 +204,7 @@ export default function Home() {
                 </h1>
                 
                 <p className="text-lg md:text-xl text-gray-400 max-w-2xl mb-12 font-light leading-relaxed animate-fade-in-up" style={{ animationDelay: '200ms' }}>
-                    {siteContent?.pages?.home?.subtext || "Artisan-crafted Pakistani formal wear, ready-to-wear, and premium unstitched fabrics tailored for the modern sovereign."}
+                    {siteContent?.pages?.home?.subtext || "High-performance modular commerce OS. Universal entities, distributed state, and premium architecture for the modern web."}
                 </p>
                 
                 <div className="flex flex-col sm:flex-row gap-6 animate-fade-in-up" style={{ animationDelay: '300ms' }}>
@@ -213,7 +213,7 @@ export default function Home() {
                         className="group relative px-10 py-5 bg-[#D4AF37] text-black font-extrabold tracking-[0.15em] uppercase text-sm overflow-hidden transition-all hover:scale-105"
                     >
                         <span className="relative z-10 flex items-center gap-3">
-                            {siteContent?.pages?.home?.ctaText || "Discover Now"} <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                            {siteContent?.pages?.home?.ctaText || "Explore Kernel"} <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
                         </span>
                     </button>
                     
@@ -224,7 +224,7 @@ export default function Home() {
                         <div className="w-8 h-8 rounded-full border border-white/30 flex items-center justify-center group-hover:border-[#D4AF37] transition-colors">
                             <Play size={12} className="text-white group-hover:text-[#D4AF37] ml-0.5" />
                         </div>
-                        Our Story
+                        Our Labs
                     </button>
                 </div>
             </div>
@@ -237,7 +237,7 @@ export default function Home() {
                     <div className="max-w-xl">
                         <span className="text-[#D4AF37] text-xs font-bold tracking-[0.2em] uppercase mb-4 block">The Lookbook</span>
                         <h2 className="text-5xl md:text-6xl font-serif font-black text-white leading-tight">
-                            Curated <br/> <span className="italic font-light text-gray-400">Selections.</span>
+                            Live <br/> <span className="italic font-light text-gray-400">Benchmarks.</span>
                         </h2>
                     </div>
                 </div>
@@ -255,9 +255,9 @@ export default function Home() {
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent opacity-90" />
                         <div className="absolute bottom-0 left-0 p-10 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
-                            <span className="text-white/60 text-xs tracking-[0.2em] uppercase mb-3 block">01 — Category</span>
-                            <h3 className="text-4xl md:text-5xl font-serif text-white mb-4">Formal Wear</h3>
-                            <p className="text-gray-300 font-light max-w-sm mt-2 opacity-0 group-hover:opacity-100 transition-opacity">Elegant handcrafted pieces for unforgettable evenings.</p>
+                            <span className="text-white/60 text-xs tracking-[0.2em] uppercase mb-3 block">01 — Engine</span>
+                            <h3 className="text-4xl md:text-5xl font-serif text-white mb-4">Core Assets</h3>
+                            <p className="text-gray-300 font-light max-w-sm mt-2 opacity-0 group-hover:opacity-100 transition-opacity">High-performance primitives for modular commercial entities.</p>
                         </div>
                     </div>
 
@@ -274,9 +274,9 @@ export default function Home() {
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/90 to-transparent" />
                             <div className="absolute bottom-0 left-0 p-8 w-full">
-                                <span className="text-white/60 text-[10px] tracking-[0.2em] uppercase mb-2 block">02 — Premium</span>
+                                <span className="text-white/60 text-[10px] tracking-[0.2em] uppercase mb-2 block">02 — Distributed</span>
                                 <h3 className="text-2xl font-serif text-white flex justify-between items-end">
-                                    Unstitched
+                                    Logic Nodes
                                     <ArrowRight size={18} className="text-[#D4AF37] opacity-0 group-hover:opacity-100 -translate-x-4 group-hover:translate-x-0 transition-all duration-500" />
                                 </h3>
                             </div>
@@ -294,9 +294,9 @@ export default function Home() {
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/90 to-transparent" />
                             <div className="absolute bottom-0 left-0 p-8 w-full">
-                                <span className="text-white/60 text-[10px] tracking-[0.2em] uppercase mb-2 block">03 — Tailored</span>
+                                <span className="text-white/60 text-[10px] tracking-[0.2em] uppercase mb-2 block">03 — Modular</span>
                                 <h3 className="text-2xl font-serif text-white flex justify-between items-end">
-                                    Ready to Wear
+                                    Active Kernel
                                     <ArrowRight size={18} className="text-[#D4AF37] opacity-0 group-hover:opacity-100 -translate-x-4 group-hover:translate-x-0 transition-all duration-500" />
                                 </h3>
                             </div>
@@ -311,8 +311,8 @@ export default function Home() {
           <section className="py-24 bg-[#020202] container mx-auto px-6 md:px-12 reveal" ref={addToRefs}>
             <div className="flex justify-between items-end mb-16">
               <div>
-                <h2 className="text-4xl font-serif text-white">New Arrivals</h2>
-                <p className="text-gray-400 italic">The latest additions to our atelier</p>
+                <h2 className="text-4xl font-serif text-white">Latest Nodes</h2>
+                <p className="text-gray-400 italic">The latest additions to the Omnora registry</p>
               </div>
               <Link to="collection" className="text-[#D4AF37] tracking-[0.2em] uppercase text-xs font-bold hover:text-white transition-colors pb-1 border-b border-[#D4AF37]/30">
                 View All Catalog
@@ -359,7 +359,7 @@ export default function Home() {
                             onClick={() => setActiveTab('features')}
                             className={`relative z-10 px-8 py-3 rounded-full text-sm font-bold tracking-wider uppercase transition-all duration-300 ${activeTab === 'features' ? 'text-black' : 'text-gray-400 hover:text-white'}`}
                         >
-                            The Standard
+                            The Protocols
                         </button>
                         
                         <div 
@@ -401,8 +401,8 @@ export default function Home() {
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
                             <div className="p-12 text-center flex flex-col items-center bg-gradient-to-b from-white/5 to-transparent rounded-2xl border border-white/5">
                                 <div className="w-20 h-20 rounded-2xl bg-[#D4AF37]/10 flex items-center justify-center mb-8 rotate-3 border border-[#D4AF37]/20"><ShieldCheck size={36} className="text-[#D4AF37] -rotate-3" /></div>
-                                <h3 className="text-2xl font-serif text-white mb-4">Premium Quality</h3>
-                                <p className="text-gray-400 font-light">Sourced from the finest mills and crafted by master artisans.</p>
+                                <h3 className="text-2xl font-serif text-white mb-4">Kernel Integrity</h3>
+                                <p className="text-gray-400 font-light">Engineered for zero-latency and high-fidelity distribution.</p>
                             </div>
                             <div className="p-12 text-center flex flex-col items-center bg-gradient-to-b from-white/5 to-transparent rounded-2xl border border-white/5">
                                 <div className="w-20 h-20 rounded-2xl bg-[#D4AF37]/10 flex items-center justify-center mb-8 rotate-3 border border-[#D4AF37]/20"><Truck size={36} className="text-[#D4AF37] -rotate-3" /></div>

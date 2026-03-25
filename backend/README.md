@@ -1,6 +1,6 @@
-# Luxury E-commerce Backend
+# Omnora Kernel Backend
 
-This is the backend server for the luxury women's clothing e-commerce website. It provides API endpoints for products, orders, user authentication, contact form submissions, and newsletter subscriptions.
+This is the backend server for the Omnora Universal Commerce OS. It provides high-performance API endpoints for entity management, order synchronization, and multi-tenant authentication.
 
 ## Features
 

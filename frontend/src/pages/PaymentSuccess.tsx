@@ -27,8 +27,8 @@ export default function PaymentSuccess() {
 
                 <h1 className="subtitle-serif">Order Confirmed</h1>
                 <p className="success-message italic">
-                    Your luxury pieces are being prepared. <br />
-                    Thank you for choosing the GSG Atelier.
+                    Your system nodes are being provisioned. <br />
+                    Omnora Kernel: Deployment Successful.
                 </p>
 
                 {/* Ticket / Order Info */}
@@ -40,7 +40,7 @@ export default function PaymentSuccess() {
                     <div className="ticket-divider-lux"></div>
                     <div className="ticket-row-lux">
                         <span className="ticket-label-lux">STATUS</span>
-                        <span className="status-pill-success">AWAITING CRAFTSMANSHIP</span>
+                        <span className="status-pill-success">PROVISIONING</span>
                     </div>
                 </div>
 

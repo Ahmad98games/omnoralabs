@@ -15,6 +15,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
     Palette, Type, Square, Sun, RotateCcw,
     ChevronDown, ChevronRight, Code2, Sparkles, Megaphone,
+    Shield, Cpu, Settings
 } from 'lucide-react';
 import {
     useGlobalThemeStore,
@@ -316,20 +317,40 @@ export const GlobalSettingsPanel: React.FC = () => {
                 />
             </Section>
 
-            {/* ── AdSense Configuration ── */}
-            <Section title="Google AdSense" icon={<Megaphone size={13} className="text-emerald-400" />} defaultOpen={false}>
-                <p className="text-[10px] text-gray-600 leading-relaxed mb-2">
-                    Enter your Google AdSense Publisher ID (e.g., ca-pub-xxxxxxxxxxxxxxxx) to enable ads.
-                </p>
-                <div className="space-y-1.5">
-                    <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-500">Publisher ID</label>
-                    <input
-                        type="text"
-                        value={adSensePublisherId || ''}
-                        onChange={(e) => setAdSensePublisherId(e.target.value)}
-                        placeholder="ca-pub-1234567890123456"
-                        className="w-full bg-[#050505] border border-white/10 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500/50 transition-all"
-                    />
+            {/* ── System Integrity ── */}
+            <Section title="System Integrity" icon={<Shield size={13} className="text-red-400" />} defaultOpen={false}>
+                <div className="space-y-4">
+                    <div className="flex items-center justify-between p-3 rounded-xl bg-red-500/5 border border-red-500/20">
+                        <div>
+                            <p className="text-[10px] font-bold text-white uppercase tracking-widest">Developer Mode</p>
+                            <p className="text-[9px] text-gray-500 mt-0.5">Direct Kernel Modification</p>
+                        </div>
+                        <div className="w-8 h-4 bg-red-500 rounded-full relative">
+                            <div className="absolute right-0.5 top-0.5 w-3 h-3 bg-white rounded-full shadow-sm" />
+                        </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                        <button className="w-full flex items-center justify-between px-3 py-2 rounded-lg bg-white/5 border border-white/5 hover:border-white/20 transition-all text-left group">
+                            <div className="flex items-center gap-2">
+                                <Cpu size={12} className="text-gray-400 group-hover:text-white" />
+                                <span className="text-[10px] text-gray-400 group-hover:text-white uppercase tracking-widest">Modified Kernel Boot</span>
+                            </div>
+                            <ChevronRight size={12} className="text-gray-600" />
+                        </button>
+                        <button className="w-full flex items-center justify-between px-3 py-2 rounded-lg bg-white/5 border border-white/5 hover:border-white/20 transition-all text-left group">
+                            <div className="flex items-center gap-2">
+                                <Settings size={12} className="text-gray-400 group-hover:text-white" />
+                                <span className="text-[10px] text-gray-400 group-hover:text-white uppercase tracking-widest">AST Pipeline Override</span>
+                            </div>
+                            <ChevronRight size={12} className="text-gray-600" />
+                        </button>
+                    </div>
+                    
+                    <p className="text-[9px] text-gray-600 italic leading-relaxed text-center px-2">
+                        CAUTION: Kernel level changes may destabilize multi-tenant isolation. 
+                        Proceed only with architectural authorization.
+                    </p>
                 </div>
             </Section>
         </div>

@@ -34,28 +34,28 @@ VALUES (
     true
 ) ON CONFLICT (tenant_id, slug, is_published) DO NOTHING;
 
--- 3. SEED PRODUCTS (Default Collection)
+-- 3. SEED ENTITIES (Default Collection)
 INSERT INTO products (id, merchant_id, title, handle, description, base_price, product_type, status, featured_image)
 VALUES 
 (
     gen_random_uuid(),
     '00000000-0000-0000-0000-000000000000',
-    'Imperial Silk Tunic',
-    'imperial-silk-tunic',
-    'Hand-woven silk tunic with gold embroidery.',
-    45000,
-    'formal',
+    'Neural Compute Node',
+    'neural-compute-node',
+    'High-performance processing unit for edge-based commercial logic.',
+    125000,
+    'digital',
     'active',
     '/images/home/formal.png'
 ),
 (
     gen_random_uuid(),
     '00000000-0000-0000-0000-000000000000',
-    'Atelier Signature Wrap',
-    'atelier-signature-wrap',
-    'Premium pashmina wrap with heritage motifs.',
-    28000,
-    'accessory',
+    'Omnora Kernel Alpha',
+    'omnora-kernel-alpha',
+    'The foundation level of the commerce OS. Fully modular and secure.',
+    45000,
+    'modular',
     'active',
     '/images/home/about_2.png'
 ) ON CONFLICT (id) DO NOTHING;
@@ -78,9 +78,9 @@ VALUES
     '00000000-0000-0000-0000-000000000000',
     'contact',
     '{
-        "title": "Contact Us",
+        "title": "Contact Engineering",
         "nodes": [
-            { "type": "Text", "content": "Reach out to the Atelier at contact@omnora.com" }
+            { "type": "Text", "content": "Reach out to the Omnora Architects at support@omnora.com" }
         ]
     }',
     true

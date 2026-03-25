@@ -1,356 +1,239 @@
-import { useEffect, useState, useMemo } from 'react'
+/**
+ * 🛠️ OMNORA LABS | DEPLOYMENT MANIFEST (CART MODULE)
+ * ---------------------------------------------------------
+ * Principal Architect: Ahmad Mahboob (@ahmad-labs)
+ * Division: Universal Commerce OS / Rendering Engine
+ * "Staging is the final gate before systemic committal."
+ * ---------------------------------------------------------
+ */
 
-import { Link, useNavigate } from 'react-router-dom'
+import { useEffect, useState, useMemo } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Trash2, Plus, Minus, ArrowLeft, ShieldCheck, Cpu } from 'lucide-react';
+import { useScrollReveal } from '../hooks/useScrollReveal';
+import { useToast } from '../context/ToastContext';
+import { OmnoraLogger } from '../utils/OmnoraLogger';
+import { FALLBACK_IMAGE } from '../constants';
+import './Cart.css';
 
-import './Cart.css'
-
-import { useScrollReveal } from '../hooks/useScrollReveal'
-
-import { useToast } from '../context/ToastContext'
-
-import { FALLBACK_IMAGE } from '../constants'
-
-
-
-type CartItem = { id: string; name: string; price: number; image?: string; quantity: number }
-
-
+/**
+ * MANIFEST_ENTITY: A staged unit awaiting committal.
+ */
+type ManifestEntity = { 
+    id: string; 
+    name: string; 
+    price: number; 
+    image?: string; 
+    quantity: number;
+    config?: string;
+};
 
 export default function Cart() {
+    const [entities, setEntities] = useState<ManifestEntity[]>([]);
+    const navigate = useNavigate();
+    const { showToast } = useToast();
+    const contentRef = useScrollReveal();
 
-  const [items, setItems] = useState<CartItem[]>([])
+    /**
+     * synchronizeManifest: Aligns the local state with the persistence layer.
+     */
+    useEffect(() => {
+        const storedManifest = JSON.parse(localStorage.getItem('cart') || '[]') as ManifestEntity[];
+        setEntities(storedManifest);
+        OmnoraLogger.info(`Manifest synchronized: ${storedManifest.length} entities identified.`);
+    }, []);
 
-  const navigate = useNavigate()
+    const updateManifestRegistry = (updatedEntities: ManifestEntity[]) => {
+        setEntities(updatedEntities);
+        localStorage.setItem('cart', JSON.stringify(updatedEntities));
+        window.dispatchEvent(new Event('cart-updated'));
+        OmnoraLogger.info("Manifest registry updated.");
+    };
 
-  const { showToast } = useToast()
+    const decommissionEntity = (id: string, name: string) => {
+        if (confirm(`DECOMMISSION ["${name}"] FROM MANIFEST?`)) {
+            const nextEntities = entities.filter(e => e.id !== id);
+            updateManifestRegistry(nextEntities);
+            showToast('ENTITY_DECOMMISSIONED', 'info');
+        }
+    };
 
-  const contentRef = useScrollReveal()
+    const adjustActivationCount = (id: string, delta: number) => {
+        const updatedEntities = entities.map(e => {
+            if (e.id === id) {
+                const nextCount = Math.max(1, e.quantity + delta);
+                return { ...e, quantity: nextCount };
+            }
+            return e;
+        });
+        updateManifestRegistry(updatedEntities);
+    };
 
+    const purgeManifest = () => {
+        if (confirm('EXECUTE COMPLETE MANIFEST PURGE? THIS ACTION IS IRREVERSIBLE.')) {
+            updateManifestRegistry([]);
+            OmnoraLogger.info("Manifest purged successfully.");
+            showToast('MANIFEST_PURGED', 'info');
+        }
+    };
 
+    const aggregateValuation = useMemo(() => 
+        entities.reduce((total, e) => total + e.price * e.quantity, 0), [entities]
+    );
 
-  useEffect(() => {
+    const totalActivationNodes = useMemo(() => 
+        entities.reduce((sum, e) => sum + e.quantity, 0), [entities]
+    );
 
-    const data = JSON.parse(localStorage.getItem('cart') || '[]') as CartItem[]
+    const handleRegistryImageFault = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+        e.currentTarget.src = FALLBACK_IMAGE;
+        e.currentTarget.onerror = null;
+    };
 
-    setItems(data)
-
-  }, [])
-
-
-
-  const updateCart = (newItems: CartItem[]) => {
-
-    setItems(newItems)
-
-    localStorage.setItem('cart', JSON.stringify(newItems))
-
-    window.dispatchEvent(new Event('cart-updated'))
-
-  }
-
-
-
-  const removeItem = (id: string, name: string) => {
-
-    if (confirm(`Remove "${name}" from your bag?`)) {
-
-      updateCart(items.filter(i => i.id !== id))
-
-      showToast('Item removed from bag', 'info')
-
+    if (entities.length === 0) {
+        return (
+            <div className="cart-page empty-cart animate-fade-in">
+                <div className="empty-cart-content">
+                    <Cpu size={48} className="text-royal mb-4 animate-pulse" />
+                    <h2 className="font-mono uppercase">MANIFEST_VACANT</h2>
+                    <p className="text-muted italic">Registry index contains no active entities for deployment.</p>
+                    <Link to="/collection" className="luxury-button hover-lift" style={{ fontFamily: 'var(--font-mono)' }}>
+                        RETURN_TO_REGISTRY
+                    </Link>
+                </div>
+            </div>
+        );
     }
-
-  }
-
-
-
-  const updateQty = (id: string, delta: number) => {
-
-    const updatedItems = items.map(i => {
-
-      if (i.id === id) {
-
-        const newQty = Math.max(1, i.quantity + delta)
-
-        return { ...i, quantity: newQty }
-
-      }
-
-      return i
-
-    })
-
-    updateCart(updatedItems)
-
-  }
-
-
-
-  const clearCart = () => {
-
-    if (confirm('Are you sure you want to empty your bag? This action cannot be undone.')) {
-
-      updateCart([])
-
-      showToast('Shopping bag cleared', 'info')
-
-    }
-
-  }
-
-
-
-  const subtotal = useMemo(() => items.reduce((s, i) => s + i.price * i.quantity, 0), [items])
-
-  const totalItems = useMemo(() => items.reduce((sum, i) => sum + i.quantity, 0), [items])
-
-
-
-  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-
-    e.currentTarget.src = FALLBACK_IMAGE
-
-    e.currentTarget.onerror = null // Prevent infinite loop
-
-  }
-
-
-
-  if (items.length === 0) {
 
     return (
-
-      <div className="cart-page empty-cart animate-fade-in">
-
-        <div className="empty-cart-content">
-
-          <h2>Your Bag Is Empty</h2>
-
-          <p>Discover our curated collection of premium products.</p>
-
-          <Link to="/collection" className="luxury-button hover-lift">
-
-            Explore Collection
-
-          </Link>
-
-        </div>
-
-      </div>
-
-    )
-
-  }
-
-
-
-  return (
-
-    <div className="cart-luxury">
-      <header className="cart-hero-mini">
-        <div className="container">
-          <span className="eyebrow">YOUR SELECTION</span>
-          <h1 className="h1 subtitle-serif">Shopping Bag</h1>
-          <p className="text-muted italic">
-            {totalItems} {totalItems === 1 ? 'Piece' : 'Pieces'} • PKR {(subtotal || 0).toLocaleString()}
-          </p>
-        </div>
-      </header>
-
-
-
-      <div className="cart-container" ref={contentRef}>
-
-        <div className="cart-content">
-
-          <div className="cart-items">
-
-            <div className="cart-header">
-
-              <span>Product</span>
-
-              <span>Quantity</span>
-
-              <span>Total</span>
-
-            </div>
-
-            {items.map((item, index) => (
-
-              <div
-
-                key={item.id}
-
-                className="cart-item animate-slide-in-right"
-
-                style={{ animationDelay: `${index * 0.1}s` }}
-
-              >
-
-                <div className="item-info">
-
-                  <div className="item-image-placeholder">
-
-                    <img
-
-                      src={item.image || FALLBACK_IMAGE}
-
-                      alt={item.name}
-
-                      onError={handleImageError}
-
-                      loading="lazy"
-
-                    />
-
-                  </div>
-
-                  <div>
-
-                    <h3>{item.name}</h3>
-                    <p>PKR {(item.price || 0).toLocaleString()}</p>
-
-                    <button
-
-                      onClick={() => removeItem(item.id, item.name)}
-
-                      className="remove-btn"
-
-                      aria-label={`Remove ${item.name} from cart`}
-
-                    >
-
-                      Remove
-
-                    </button>
-
-                  </div>
-
+        <div className="cart-luxury">
+            <header className="cart-hero-mini">
+                <div className="container">
+                    <span className="eyebrow" style={{ fontFamily: 'var(--font-mono)' }}>STAGING_AREA</span>
+                    <h1 className="h1 subtitle-serif">DEPLOYMENT_MANIFEST</h1>
+                    <p className="text-muted italic" style={{ fontFamily: 'var(--font-mono)' }}>
+                        {totalActivationNodes} ACTIVE_NODES • {aggregateValuation.toLocaleString()} CREDITS
+                    </p>
                 </div>
+            </header>
 
-                <div className="item-quantity">
+            <div className="cart-container" ref={contentRef}>
+                <div className="cart-content">
+                    <div className="cart-items">
+                        <div className="cart-header" style={{ fontFamily: 'var(--font-mono)' }}>
+                            <span>ENTITY_HANDLE</span>
+                            <span>ACTIVATION_COUNT</span>
+                            <span>VALUATION</span>
+                        </div>
 
-                  <button
+                        {entities.map((entity, index) => (
+                            <div
+                                key={entity.id}
+                                className="cart-item animate-slide-in-right"
+                                style={{ animationDelay: `${index * 0.1}s` }}
+                            >
+                                <div className="item-info">
+                                    <div className="item-image-placeholder">
+                                        <img
+                                            src={entity.image || FALLBACK_IMAGE}
+                                            alt={entity.name}
+                                            onError={handleRegistryImageFault}
+                                            loading="lazy"
+                                        />
+                                    </div>
+                                    <div>
+                                        <h3 className="font-mono xsmall uppercase" style={{ fontWeight: 600 }}>{entity.name}</h3>
+                                        <p className="text-muted" style={{ fontFamily: 'var(--font-mono)' }}>
+                                            {entity.price.toLocaleString()} Credits
+                                        </p>
+                                        <button
+                                            onClick={() => decommissionEntity(entity.id, entity.name)}
+                                            className="remove-btn"
+                                            style={{ fontFamily: 'var(--font-mono)' }}
+                                        >
+                                            DECOMMISSION
+                                        </button>
+                                    </div>
+                                </div>
 
-                    onClick={() => updateQty(item.id, -1)}
+                                <div className="item-quantity">
+                                    <button
+                                        onClick={() => adjustActivationCount(entity.id, -1)}
+                                        disabled={entity.quantity <= 1}
+                                    >
+                                        <Minus size={14} />
+                                    </button>
+                                    <span className="font-mono">{entity.quantity}</span>
+                                    <button onClick={() => adjustActivationCount(entity.id, 1)}>
+                                        <Plus size={14} />
+                                    </button>
+                                </div>
 
-                    aria-label="Decrease quantity"
+                                <div className="item-total font-mono" style={{ fontWeight: 600 }}>
+                                    {(entity.price * entity.quantity).toLocaleString()}
+                                </div>
+                            </div>
+                        ))}
 
-                    disabled={item.quantity <= 1}
+                        <button
+                            onClick={purgeManifest}
+                            className="clear-cart-btn hover-scale"
+                            style={{ fontFamily: 'var(--font-mono)' }}
+                        >
+                            PURGE_MANIFEST
+                        </button>
+                    </div>
 
-                  >
+                    <div className="order-summary animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+                        <h2 className="font-mono uppercase xsmall" style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem', marginBottom: '1.5rem' }}>
+                            Committal Summary
+                        </h2>
 
-                    −
+                        <div className="summary-row" style={{ fontFamily: 'var(--font-mono)' }}>
+                            <span>Active Nodes ({totalActivationNodes})</span>
+                            <span>{aggregateValuation.toLocaleString()} CR</span>
+                        </div>
 
-                  </button>
+                        <div className="summary-row" style={{ fontFamily: 'var(--font-mono)' }}>
+                            <span>Sub-Aggregate</span>
+                            <span>{aggregateValuation.toLocaleString()} CR</span>
+                        </div>
 
-                  <span aria-label={`Quantity: ${item.quantity}`}>
+                        <p className="shipping-note italic">
+                            System propagation, settlement overheads, and protocol overrides applied at committal.
+                        </p>
 
-                    {item.quantity}
+                        <div className="summary-total" style={{ fontFamily: 'var(--font-mono)', borderTop: '2px solid var(--royal-blue)' }}>
+                            <span>TOTAL_VALUATION</span>
+                            <span>{aggregateValuation.toLocaleString()} Credits</span>
+                        </div>
 
-                  </span>
+                        <button
+                            onClick={() => navigate('/checkout')}
+                            className="luxury-button checkout-btn hover-lift"
+                            style={{ fontFamily: 'var(--font-mono)' }}
+                        >
+                            INITIATE_COMMITTAL
+                        </button>
 
-                  <button
-
-                    onClick={() => updateQty(item.id, 1)}
-
-                    aria-label="Increase quantity"
-
-                  >
-
-                    +
-
-                  </button>
-
+                        <div className="continue-shopping">
+                            <Link to="/collection" className="continue-link" style={{ fontFamily: 'var(--font-mono)' }}>
+                                ← RETURN_TO_REGISTRY
+                            </Link>
+                        </div>
+                    </div>
                 </div>
+            </div>
 
-                <div className="item-total">
-                  PKR {((item.price || 0) * (item.quantity || 1)).toLocaleString()}
+            <div className="container" style={{ marginTop: '2rem' }}>
+                <div className="security-notice" style={{ justifyContent: 'center', opacity: 0.6 }}>
+                    <ShieldCheck size={16} />
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px' }}>ENCRYPTED_MANIFEST_BUFFER_ACTIVE</span>
                 </div>
-
-              </div>
-
-            ))}
-
-            <button
-
-              onClick={clearCart}
-
-              className="clear-cart-btn hover-scale"
-
-              aria-label="Clear entire shopping bag"
-
-            >
-
-              Clear Bag
-
-            </button>
-
-          </div>
-
-
-
-          <div className="order-summary animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-
-            <h2>Order Summary</h2>
-
-            <div className="summary-row">
-
-              <span>Items ({totalItems})</span>
-              <span>PKR {(subtotal || 0).toLocaleString()}</span>
             </div>
-
-            <div className="summary-row">
-
-              <span>Subtotal</span>
-              <span>PKR {(subtotal || 0).toLocaleString()}</span>
-            </div>
-
-            <p className="shipping-note">
-
-              Shipping, taxes, and discount codes calculated at checkout
-
-            </p>
-
-            <div className="summary-total">
-
-              <span>Total</span>
-              <span>PKR {(subtotal || 0).toLocaleString()}</span>
-            </div>
-
-            <button
-
-              onClick={() => navigate('/checkout')}
-
-              className="luxury-button checkout-btn hover-lift"
-
-              aria-label={`Proceed to checkout with ${totalItems} items totaling PKR ${subtotal.toLocaleString()}`}
-
-            >
-
-              Proceed to Checkout
-
-            </button>
-
-
-
-            <div className="continue-shopping">
-              <Link
-                to="/collection"
-                className="continue-link"
-              >
-                ← Continue Shopping
-              </Link>
-            </div>
-
-          </div>
-
         </div>
-
-      </div>
-
-    </div>
-
-  )
+    );
+}
+)
 
 }

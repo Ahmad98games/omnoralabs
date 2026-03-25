@@ -16,22 +16,22 @@ import { ROUTES } from '../routes';
 // Hardened Data Contract
 // Hardened Data Contract moved to productTransformer
 
-const BRAND_PLACEHOLDER = '/images/placeholder_gsg.png';
+const BRAND_PLACEHOLDER = '/images/placeholder_omnora.png';
 
 const CATEGORIES = [
-    { id: 'all', name: 'All Collection' },
-    { id: 'unstitched', name: 'Unstitched' },
-    { id: 'ready-to-wear', name: 'Ready-to-Wear' },
-    { id: 'formal', name: 'Formal Wear' },
-    { id: 'seasonal', name: 'Seasonal' },
+    { id: 'all', name: 'Universal Registry' },
+    { id: 'digital', name: 'Digital Nodes' },
+    { id: 'modular', name: 'Modular Components' },
+    { id: 'hardware', name: 'Industrial Hardware' },
+    { id: 'protocol', name: 'System Protocols' },
 ];
 
 const PRICE_RANGES = [
     { id: 'all', name: 'All Prices' },
-    { id: 'under-2500', name: 'Under PKR 2,500' },
-    { id: '2500-5000', name: 'PKR 2,500 - 5,000' },
-    { id: '5000-10000', name: 'PKR 5,000 - 10,000' },
-    { id: 'over-10000', name: 'Over PKR 10,000' },
+    { id: 'under-100', name: 'Under 100 Credits' },
+    { id: '100-500', name: '100 - 500 Credits' },
+    { id: '500-1000', name: '500 - 1,000 Credits' },
+    { id: 'over-1000', name: 'Over 1,000 Credits' },
 ];
 
 export default function Collection() {
@@ -100,10 +100,10 @@ export default function Collection() {
         // Filter by price
         if (activePriceRange !== 'all') {
             result = result.filter(p => {
-                if (activePriceRange === 'under-2500') return p.price < 2500;
-                if (activePriceRange === '2500-5000') return p.price >= 2500 && p.price <= 5000;
-                if (activePriceRange === '5000-10000') return p.price >= 5000 && p.price <= 10000;
-                if (activePriceRange === 'over-10000') return p.price > 10000;
+                if (activePriceRange === 'under-100') return p.price < 100;
+                if (activePriceRange === '100-500') return p.price >= 100 && p.price <= 500;
+                if (activePriceRange === '500-1000') return p.price >= 500 && p.price <= 1000;
+                if (activePriceRange === 'over-1000') return p.price > 1000;
                 return true;
             });
         }
@@ -133,7 +133,7 @@ export default function Collection() {
 
         localStorage.setItem('cart', JSON.stringify(cart));
         window.dispatchEvent(new Event('cart-updated'));
-        showToast(`${product.name} added to bag`, 'success');
+        showToast(`${product.name} added to queue`, 'success');
     };
 
     const isPreview = window.location.search.includes('preview=true');
@@ -147,8 +147,8 @@ export default function Collection() {
                         alt="GSG Collection"
                     />
                     <div className="collection-hero-overlay">
-                        <span className="eyebrow text-white">{siteContent?.pages?.collection?.eyebrow || 'THE CURATED SELECTION'}</span>
-                        <h1 className="subtitle-serif text-white">{siteContent?.pages?.collection?.headlineText || 'Elegant Catalogue'}</h1>
+                        <span className="eyebrow text-white">{siteContent?.pages?.collection?.eyebrow || 'THE KERNEL REGISTRY'}</span>
+                        <h1 className="subtitle-serif text-white">{siteContent?.pages?.collection?.headlineText || 'Active Catalogue'}</h1>
                     </div>
                 </header>
 
@@ -157,7 +157,7 @@ export default function Collection() {
                         {/* Desktop Sidebar */}
                         <aside className="shop-sidebar">
                             <div className="filter-group">
-                                <h3 className="filter-title">Categories</h3>
+                                <h3 className="filter-title">Registry Groups</h3>
                                 <ul className="filter-list">
                                     {CATEGORIES.map(cat => (
                                         <li key={cat.id} className="filter-item">
@@ -193,7 +193,7 @@ export default function Collection() {
                         <main className="shop-main">
                             <div className="collection-toolbar-lux">
                                 <div className="count-label-lux font-serif italic">
-                                    {filteredProducts.length} {filteredProducts.length === 1 ? 'Piece' : 'Pieces'} Found
+                                    {filteredProducts.length} {filteredProducts.length === 1 ? 'Node' : 'Nodes'} Registered
                                 </div>
                                 <div className="sort-box">
                                     <select
@@ -201,9 +201,9 @@ export default function Collection() {
                                         onChange={(e) => updateFilter('sort', e.target.value)}
                                         className="sort-select"
                                     >
-                                        <option value="newest">Newest Arrivals</option>
-                                        <option value="price-low">Price: Low to High</option>
-                                        <option value="price-high">Price: High to Low</option>
+                                        <option value="newest">Latest Releases</option>
+                                        <option value="price-low">Credits: Low to High</option>
+                                        <option value="price-high">Credits: High to Low</option>
                                     </select>
                                 </div>
                             </div>
@@ -220,14 +220,14 @@ export default function Collection() {
                                     <h2>Connection Issue</h2>
                                     <p style={{ color: 'red', fontWeight: 'bold' }}>{errorState.message}</p>
                                     <p style={{ fontSize: '0.8rem', color: '#999' }}>Diagnostic Code: {errorState.code}</p>
-                                    <button onClick={() => window.location.reload()} className="btn-primary-gsg" style={{ marginTop: '1rem' }}>RETRY</button>
+                                    <button onClick={() => window.location.reload()} className="btn-primary-gsg" style={{ marginTop: '1rem' }}>RE-SYNC</button>
                                 </div>
                             ) : filteredProducts.length === 0 ? (
                                 <div className="empty-state container" style={{ textAlign: 'center', padding: '4rem 0' }}>
                                     <PackageOpen size={48} style={{ color: 'var(--text-secondary)', marginBottom: '1rem' }} />
-                                    <h2>No pieces found</h2>
-                                    <p>Try adjusting your search or filters to find what you're looking for.</p>
-                                    <button onClick={() => setSearchParams({})} className="btn-primary-gsg" style={{ marginTop: '1rem' }}>RESET ALL FILTERS</button>
+                                    <h2>No nodes found</h2>
+                                    <p>Try adjusting your search or filters to locate the entity.</p>
+                                    <button onClick={() => setSearchParams({})} className="btn-primary-gsg" style={{ marginTop: '1rem' }}>RESET REGISTRY FILTERS</button>
                                 </div>
                             ) : (
                                 <div className="product-grid">
@@ -236,7 +236,7 @@ export default function Collection() {
                                             <div className="card-img-wrapper">
                                                 <img
                                                     src={product.image || BRAND_PLACEHOLDER}
-                                                    alt={product.name || 'Fashion Piece'}
+                                                    alt={product.name || 'Omnora Node'}
                                                     onError={(e) => { (e.target as HTMLImageElement).src = BRAND_PLACEHOLDER; }}
                                                 />
                                                 <button
@@ -248,10 +248,10 @@ export default function Collection() {
                                                 </button>
                                             </div>
                                             <div className="card-info-lux">
-                                                <div className="card-category-lux">{product.category || 'Collection'}</div>
-                                                <h3 className="card-name-lux font-serif">{product.name || 'Unlabeled Piece'}</h3>
+                                                <div className="card-category-lux">{product.category || 'Entity'}</div>
+                                                <h3 className="card-name-lux font-serif">{product.name || 'Unknown Entity'}</h3>
                                                 <div className="card-price-lux">
-                                                    {product.price ? `PKR ${product.price.toLocaleString()}` : 'Price on Request'}
+                                                    {product.price ? `${product.price.toLocaleString()} Credits` : 'Quote Required'}
                                                 </div>
                                             </div>
                                         </Link>

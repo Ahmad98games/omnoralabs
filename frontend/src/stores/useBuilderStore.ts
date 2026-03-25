@@ -1,14 +1,24 @@
+/**
+ * 🛠️ OMNORA LABS | [BUILDER STORE]
+ * ---------------------------------------------------------
+ * Principal Architect: Ahmad Mahboob (@ahmad-labs)
+ * Division: Universal Commerce OS / Kernel Core
+ * "Precision is the foundation of industrial scale."
+ * ---------------------------------------------------------
+ */
+
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { persist } from 'zustand/middleware';
 import { produceWithPatches, applyPatches, enablePatches, Patch } from 'immer';
 import type { BuilderNode, PageMetadata } from '../context/BuilderContext';
 import { SyncManager } from './SyncManager';
-import { NewPageInitializer } from '../platform/kernel/NewPageInitializer';
-import { OmnoraBootloader } from '../platform/kernel/OmnoraBootloader';
+import { OmnoraLogger } from '../lib/kernel/utils/logger';
+import { NewPageInitializer } from '../lib/kernel/utils/NewPageInitializer';
 
 // Enable Immer Patches for Undo/Redo
 enablePatches();
+
 
 export interface Command {
     undo: Patch[];
@@ -311,13 +321,13 @@ export const useBuilderStore = create<BuilderState>()(persist(immer((set, get) =
 
         return (state, error) => {
             if (error || !state || !state.nodes || Object.keys(state.nodes).length === 0) {
-                console.error('[useBuilderStore] Boot-Guard Triggered: Storage payload is null, empty, or corrupted. Wiping persist.', error);
+                OmnoraLogger.error('BUILDER-STORE', `Boot-Guard Triggered: Storage payload is null, empty, or corrupted. Wiping persist. ${error}`);
                 
                 if (state) {
                     // Reset to initial state logic
                     state.nodes = {};
                     state.pages = {}; 
-                    state.activePageId = OmnoraBootloader.getLastValidPageId();
+                    state.activePageId = Kernel.getLastValidPageId();
                 }
             }
             // Set isHydrating to false after rehydration finishes (or fails)

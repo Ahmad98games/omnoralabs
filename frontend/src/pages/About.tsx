@@ -54,14 +54,14 @@ const AboutComponent: React.FC<AboutComponentProps> = ({ onBack }) => {
       {/* --- HERO --- */}
       <section className="about-hero-section">
         <div className="container hero-content reveal" ref={addToRefs}>
-          <span className="eyebrow">OUR STORY</span>
+          <span className="eyebrow">OUR VISION</span>
           <h1 className="h1 editorial-title">
-            The Art of <br />
-            <span className="font-serif italic text-gold">Pakistani Elegance</span>
+            The Omnora <br />
+            <span className="font-serif italic text-gold">Universal Kernel</span>
           </h1>
           <p className="description">
-            Born from a legacy of fine craftsmanship, Gold She Garments is more than a fashion house.
-            It is a celebration of the modern woman—confident, timeless, and gracefully rooted in heritage.
+            Engineered for high-fidelity commerce and global scale, Omnora Labs is the division behind the world's most modular commerce OS.
+            We don't just build stores; we build the infrastructure for the next generation of digital distribution.
           </p>
         </div>
       </section>
@@ -74,15 +74,15 @@ const AboutComponent: React.FC<AboutComponentProps> = ({ onBack }) => {
             <div className="img-overlay-gold" />
           </div>
           <div className="vision-text">
-            <h2 className="h2 subtitle-serif">The Atelier Vision</h2>
+            <h2 className="h2 subtitle-serif">The Architectural Vision</h2>
             <div className="accent-bar" />
             <p className="text-muted">
-              Founded with the goal of redefining Pakistani ready-to-wear, we merge traditional artisanal techniques
-              with contemporary silhouettes. Every thread is chosen for its quality, every stitch placed with intention.
+              Founded on the principle of hyper-modularity, we merge high-performance rendering with
+              distributed state management. Every node is optimized for speed, every micro-animation designed for engagement.
             </p>
             <p className="text-muted mt-4">
-              From the bustling looms of Faisalabad to the intricate embroidery of Multan, we bring you the finest
-              fabrics that Pakistan has to offer, tailored for the global stage.
+              From our Shadow DOM-based Live Canvas to the AST Render Pipeline, we provide a sovereign
+              environment for merchants who demand absolute control over their commercial territory.
             </p>
           </div>
         </div>
@@ -98,10 +98,10 @@ const AboutComponent: React.FC<AboutComponentProps> = ({ onBack }) => {
 
           <div className="values-grid">
             {[
-              { icon: Heart, title: 'Passion for Craft', desc: 'Hand-dyed fabrics and hand-finished embroidery that tells a story.' },
-              { icon: Feather, title: 'Uncompromised Comfort', desc: 'Lightweight, breathable premium cottons and chiffons designed for seasonal ease.' },
-              { icon: Clock, title: 'Timeless Design', desc: 'Aesthetic pieces that transcend trends and celebrate longevity.' },
-              { icon: ShieldCheck, title: 'Ethical Production', desc: 'Fair wages and safe environments for our master artisans.' }
+              { icon: Heart, title: 'Architectural Purity', desc: 'No-library bloat policy for zero-latency user experiences.' },
+              { icon: Feather, title: 'Hyper-Modularity', desc: 'Plug-and-play components that scale from retail to industrial use-cases.' },
+              { icon: Clock, title: 'Future-Proof Tech', desc: 'Next.js 14 and Supabase-powered infrastructure that never goes obsolete.' },
+              { icon: ShieldCheck, title: 'System Security', desc: 'Multi-tenant isolation and enterprise-grade RLS protection.' }
             ].map((item, idx) => (
               <div key={idx} className="value-card reveal-up" ref={addToRefs}>
                 <item.icon className="text-gold mb-4" size={32} strokeWidth={1} />
@@ -121,8 +121,8 @@ const AboutComponent: React.FC<AboutComponentProps> = ({ onBack }) => {
             <h2 className="h2 subtitle-serif">Ahmad Mahboob</h2>
             <span className="role-tag">Founder & Creative Director</span>
             <p className="text-muted mt-6">
-              "I believe that fashion is the most intimate form of self-expression. With Gold She Garments,
-              I wanted to create a space where luxury is accessible, and tradition is celebrated through a modern lens."
+              "Logic is the ultimate form of art. With Omnora Labs,
+              I wanted to create an engine where speed is a standard, and modularity is the soul of commerce."
             </p>
           </div>
           <div className="founder-image">
@@ -134,13 +134,13 @@ const AboutComponent: React.FC<AboutComponentProps> = ({ onBack }) => {
       {/* --- FOOTER CTA --- */}
       <section className="section-padding text-center border-t">
         <div className="container reveal" ref={addToRefs}>
-          <h3 className="h3 subtitle-serif mb-8">Join the Gold She Circle</h3>
+          <h3 className="h3 subtitle-serif mb-8">Deploy Your Infrastructure</h3>
           <p className="text-muted mb-12 max-w-md mx-auto small">
-            Stay updated with our latest seasonal collections and exclusive atelier previews.
+            Join the elite circle of merchants and developers scaling the Omnora Kernel.
           </p>
           <div className="cta-actions">
             <a href="mailto:omnorainfo28@gmail.com" className="btn btn-luxury inline-flex items-center">
-              Inquire Now <ArrowRight size={16} className="ml-2" />
+              Partner with Labs <ArrowRight size={16} className="ml-2" />
             </a>
           </div>
         </div>
@@ -148,8 +148,8 @@ const AboutComponent: React.FC<AboutComponentProps> = ({ onBack }) => {
 
       <footer className="footer-luxury section-padding">
         <div className="container text-center">
-          <span className="footer-logo">GOLD SHE GARMENTS</span>
-          <p className="copyright">&copy; 2025 GSG Atelier. All Rights Reserved.</p>
+          <span className="footer-logo">OMNORA LABS</span>
+          <p className="copyright">&copy; {new Date().getFullYear()} Omnora Labs. All Rights Reserved.</p>
         </div>
       </footer>
     </div>

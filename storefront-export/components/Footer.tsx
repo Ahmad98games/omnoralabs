@@ -1,145 +1,147 @@
+/**
+ * 🛠️ OMNORA LABS | SYSTEM TERMINATION (FOOTER MODULE)
+ * ---------------------------------------------------------
+ * Principal Architect: Ahmad Mahboob (@ahmad-labs)
+ * Division: Universal Commerce OS / Rendering Engine
+ * "The end is merely the foundation for the next iteration."
+ * ---------------------------------------------------------
+ */
+
 import { Link } from 'react-router-dom';
-import { Instagram, Twitter, Facebook, ArrowRight, Loader2, ShieldCheck } from 'lucide-react';
+import { Instagram, Twitter, Facebook, ArrowRight, Loader2, ShieldCheck, Terminal, Cpu, Database } from 'lucide-react';
 import { useState } from 'react';
-// import client from '../api/client'; // Uncomment this when API is ready
-import './Footer.css'; // Don't forget this!
+import { OmnoraLogger } from '../utils/OmnoraLogger';
+import './Footer.css';
 
 export default function Footer() {
-    const [email, setEmail] = useState('');
-    const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
-    const [message, setMessage] = useState('');
+    const [protocolEmail, setProtocolEmail] = useState('');
+    const [streamStatus, setStreamStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+    const [faultMessage, setFaultMessage] = useState('');
 
-    const handleSubscribe = async (e: React.FormEvent) => {
+    const executeSubscriptionProtocol = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!email) return;
+        if (!protocolEmail) return;
 
-        setStatus('loading');
+        setStreamStatus('loading');
+        OmnoraLogger.info(`Initiating subscription protocol for node: ${protocolEmail}`);
 
-        // Simulating API call for now (Replace with your actual client call)
+        // Simulated asynchronous stream committal
         setTimeout(() => {
-            // Success Logic
-            setStatus('success');
+            setStreamStatus('success');
+            OmnoraLogger.info("Subscription protocol committed successfully.");
             setTimeout(() => {
-                setStatus('idle');
-                setEmail('');
-                setMessage('');
+                setStreamStatus('idle');
+                setProtocolEmail('');
+                setFaultMessage('');
             }, 3000);
         }, 1500);
-
-        /* try {
-            await client.post('/newsletter', { email });
-            setStatus('success');
-            // ... reset logic
-        } catch (error) {
-            setStatus('error');
-            setMessage('Transmission Failed');
-        }
-        */
     };
 
     return (
         <footer className="footer-enhanced">
-            {/* Top Border Glow */}
             <div className="footer-glow-line"></div>
 
             <div className="footer-container footer-grid-enhanced">
-
-                {/* 1. BRAND COLUMN */}
+                {/* 1. KERNEL_IDENTITY */}
                 <div className="footer-brand-col">
                     <Link to="/" className="footer-logo">
                         <div className="logo-icon-box">
-                            <span style={{
-                                fontFamily: 'var(--font-serif)',
+                            <span className="font-mono" style={{
                                 fontSize: '1.25rem',
-                                fontWeight: '700',
+                                fontWeight: '800',
                                 color: 'var(--royal-blue)',
-                                textTransform: 'uppercase'
+                                textTransform: 'uppercase',
+                                letterSpacing: '4px'
                             }}>
-                                Gold She
+                                OMNORA
                             </span>
                         </div>
                     </Link>
                     <p className="footer-desc">
-                        Premium Pakistani fashion for the modern woman.
-                        Blending traditional craftsmanship with contemporary elegance.
+                        The Universal Commerce OS. High-performance, multi-tenant storefront engine for global asset distribution.
+                        Built for speed, scale, and infinite modification.
                         <br />
-                        <span style={{ opacity: 0.5, fontSize: '0.85rem' }}>MADE WITH PRIDE IN PAKISTAN</span>
+                        <span className="font-mono xsmall" style={{ opacity: 0.5 }}>KERNEL_BUILD: v1.4.0-STABLE</span>
                     </p>
 
                     <div className="subsidiary-badge">
-                        <span className="badge-label">BRAND BY</span>
-                        <span className="badge-value">GOLD SHE GARMENTS</span>
+                        <Cpu size={12} />
+                        <span className="badge-value font-mono">OMNORA_LABS_DIVISION</span>
                     </div>
                 </div>
 
-                {/* 2. EXPLORE COLUMN */}
+                {/* 2. REGISTRY_ARCHIVES */}
                 <div className="footer-links-col">
-                    <h4>Collections</h4>
+                    <h4 className="font-mono xsmall uppercase">REGISTRY_ARCHIVES</h4>
                     <nav>
-                        <Link to="/collection" className="footer-link">New Arrivals</Link>
-                        <Link to="/collection?category=unstitched" className="footer-link">Unstitched</Link>
-                        <Link to="/collection?category=stitched" className="footer-link">Ready-to-Wear</Link>
-                        <Link to="/collection?category=formal" className="footer-link">Formal Wear</Link>
-                        <Link to="/about" className="footer-link">Our Story</Link>
+                        <Link to="/collection" className="footer-link font-mono xsmall">ASSET_CATALOG</Link>
+                        <Link to="/collection?category=digital" className="footer-link font-mono xsmall">DIGITAL_NODES</Link>
+                        <Link to="/collection?category=physical" className="footer-link font-mono xsmall">PHYSICAL_UNITS</Link>
+                        <Link to="/collection?category=modular" className="footer-link font-mono xsmall">MODULAR_UNITS</Link>
+                        <Link to="/about" className="footer-link font-mono xsmall">ARCHITECTURAL_SPECS</Link>
                     </nav>
                 </div>
 
-                {/* 3. LEGAL COLUMN */}
+                {/* 3. UPLINK_SUPPORT */}
                 <div className="footer-links-col">
-                    <h4>Customer Care</h4>
+                    <h4 className="font-mono xsmall uppercase">UPLINK_SUPPORT</h4>
                     <nav>
-                        <Link to="/contact" className="footer-link">Contact Us</Link>
-                        <Link to="/shipping" className="footer-link">Shipping Information</Link>
-                        <Link to="/size-guide" className="footer-link">Size Guide</Link>
-                        <Link to="/returns" className="footer-link">Returns & Exchange</Link>
-                        <Link to="/builder/help" className="footer-link">Builder Guide</Link>
-                        <Link to="/privacy" className="footer-link">Privacy Policy</Link>
+                        <Link to="/contact" className="footer-link font-mono xsmall">INITIATE_UPLINK</Link>
+                        <Link to="/shipping" className="footer-link font-mono xsmall">LOGISTICS_PROTOCOL</Link>
+                        <Link to="/returns" className="footer-link font-mono xsmall">DECOMMISSION_FLOW</Link>
+                        <Link to="/builder/help" className="footer-link font-mono xsmall">BOOT_GUIDE</Link>
+                        <Link to="/privacy" className="footer-link font-mono xsmall">PRIVACY_ENCRYPTION</Link>
+                        <Link to="/terms" className="footer-link font-mono xsmall">SERVICE_COMMITTAL</Link>
                     </nav>
                 </div>
 
-                {/* 4. NEWSLETTER & CONNECT */}
+                {/* 4. KERNEL_SUBSCRIPTION */}
                 <div className="footer-newsletter-col">
-                    <h4>Join the Community</h4>
-                    <p className="newsletter-text">Subscribe for exclusive collection launches and style updates.</p>
+                    <h4 className="font-mono xsmall uppercase">KERNEL_SUBSCRIPTION</h4>
+                    <p className="newsletter-text">Subscribe to the primary data stream for architectural updates and registry expansions.</p>
 
-                    <form onSubmit={handleSubscribe} className="footer-subscribe-form">
-                        <div className={`input-group ${status}`}>
+                    <form onSubmit={executeSubscriptionProtocol} className="footer-subscribe-form">
+                        <div className={`input-group ${streamStatus}`}>
                             <input
                                 type="email"
-                                placeholder="Email Address"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                disabled={status === 'loading' || status === 'success'}
+                                placeholder="NODE_ADDRESS@STORAGE.SYS"
+                                className="font-mono"
+                                value={protocolEmail}
+                                onChange={(e) => setProtocolEmail(e.target.value)}
+                                disabled={streamStatus === 'loading' || streamStatus === 'success'}
                             />
-                            <button type="submit" disabled={status === 'loading' || status === 'success'}>
-                                {status === 'loading' ? <Loader2 className="animate-spin" size={18} /> :
-                                    status === 'success' ? <span style={{ color: 'var(--success)' }}>✓</span> :
+                            <button type="submit" disabled={streamStatus === 'loading' || streamStatus === 'success'}>
+                                {streamStatus === 'loading' ? <Loader2 className="animate-spin" size={18} /> :
+                                    streamStatus === 'success' ? <span style={{ color: 'var(--success)' }}>✓</span> :
                                         <ArrowRight size={18} />}
                             </button>
                         </div>
-                        {status === 'error' && <span className="status-msg error">{message}</span>}
-                        {status === 'success' && <span className="status-msg success">Welcome to Gold She Garments!</span>}
+                        {streamStatus === 'error' && <span className="status-msg error font-mono">{faultMessage}</span>}
+                        {streamStatus === 'success' && <span className="status-msg success font-mono uppercase xsmall">PROTOCOL_ESTABLISHED</span>}
                     </form>
 
                     <div className="social-links">
                         <a href="https://instagram.com" className="social-icon" aria-label="Instagram"><Instagram size={18} /></a>
                         <a href="https://twitter.com" className="social-icon" aria-label="Twitter"><Twitter size={18} /></a>
-                        <a href="https://facebook.com" className="social-icon" aria-label="Facebook"><Facebook size={18} /></a>
+                        <a href="https://github.com/ahmad-labs" className="social-icon" aria-label="GitHub"><Terminal size={18} /></a>
                     </div>
                 </div>
             </div>
 
-            {/* BOTTOM BAR */}
+            {/* TERMINATION_BAR */}
             <div className="footer-bottom-bar">
                 <div className="footer-container bottom-flex">
-                    <div className="copyright">
-                        © {new Date().getFullYear()} GOLD SHE GARMENTS. ALL RIGHTS RESERVED.
+                    <div className="copyright font-mono xsmall">
+                        © {new Date().getFullYear()} OMNORA_LABS_KERNEL. ALL SYSTEM_RIGHTS_RESERVED.
                     </div>
-                    <div className="credits">
-                        POWERED BY <span className="dev-name">GSG DIGITAL</span>
+                    <div className="credits font-mono xsmall">
+                        <Database size={12} style={{ display: 'inline', marginRight: '4px' }} />
+                        EXECUTED_ON <span className="dev-name">OMNORA.OS.V1</span>
                     </div>
                 </div>
             </div>
         </footer>
     );
+}
+
 }

@@ -3,7 +3,7 @@
  * Future-proofs the UI against backend schema changes.
  */
 
-export interface IGSGProduct {
+export interface IOmnoraEntity {
     id: string;
     name: string;
     title: string;
@@ -22,7 +22,7 @@ export interface IGSGProduct {
     metadata?: any;
 }
 
-export const transformProduct = (raw: any): IGSGProduct => {
+export const transformProduct = (raw: any): IOmnoraEntity => {
     // Handle Supabase -> UI mapping
     const stock = Number(raw.inventory_count || raw.stock_quantity || raw.stock || 0);
     const price = Number(raw.base_price || raw.price || 0);
@@ -49,7 +49,7 @@ export const transformProduct = (raw: any): IGSGProduct => {
     };
 };
 
-export const transformProductList = (list: any[]): IGSGProduct[] => {
+export const transformProductList = (list: any[]): IOmnoraEntity[] => {
     if (!Array.isArray(list)) return [];
     return list.map(transformProduct);
 };

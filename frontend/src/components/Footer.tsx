@@ -56,32 +56,32 @@ export default function Footer() {
                                 color: 'var(--royal-blue)',
                                 textTransform: 'uppercase'
                             }}>
-                                Gold She
+                                Omnora
                             </span>
                         </div>
                     </Link>
                     <p className="footer-desc">
-                        Premium Pakistani fashion for the modern woman.
-                        Blending traditional craftsmanship with contemporary elegance.
+                        The Universal Commerce OS. High-performance, multi-tenant storefront engine for global asset distribution.
+                        Built for speed, scale, and infinite modification.
                         <br />
-                        <span style={{ opacity: 0.5, fontSize: '0.85rem' }}>MADE WITH PRIDE IN PAKISTAN</span>
+                        <span style={{ opacity: 0.5, fontSize: '0.85rem' }}>DEVELOPED BY OMNORA LABS</span>
                     </p>
 
                     <div className="subsidiary-badge">
-                        <span className="badge-label">BRAND BY</span>
-                        <span className="badge-value">GOLD SHE GARMENTS</span>
+                        <span className="badge-label">ENGINEERED BY</span>
+                        <span className="badge-value">OMNORA LABS</span>
                     </div>
                 </div>
 
                 {/* 2. EXPLORE COLUMN */}
                 <div className="footer-links-col">
-                    <h4>Collections</h4>
+                    <h4>Entities</h4>
                     <nav>
-                        <Link to={ROUTES.COLLECTION} className="footer-link">New Arrivals</Link>
-                        <Link to={`${ROUTES.COLLECTION}?category=unstitched`} className="footer-link">Unstitched</Link>
-                        <Link to={`${ROUTES.COLLECTION}?category=stitched`} className="footer-link">Ready-to-Wear</Link>
-                        <Link to={`${ROUTES.COLLECTION}?category=formal`} className="footer-link">Formal Wear</Link>
-                        <Link to={ROUTES.ABOUT} className="footer-link">Our Story</Link>
+                        <Link to={ROUTES.COLLECTION} className="footer-link">Asset Catalog</Link>
+                        <Link to={`${ROUTES.COLLECTION}?category=digital`} className="footer-link">Digital Nodes</Link>
+                        <Link to={`${ROUTES.COLLECTION}?category=physical`} className="footer-link">Physical Units</Link>
+                        <Link to={`${ROUTES.COLLECTION}?category=modular`} className="footer-link">Modular Units</Link>
+                        <Link to={ROUTES.ABOUT} className="footer-link">Documentation</Link>
                     </nav>
                 </div>
 
@@ -119,7 +119,7 @@ export default function Footer() {
                             </button>
                         </div>
                         {status === 'error' && <span className="status-msg error">{message}</span>}
-                        {status === 'success' && <span className="status-msg success">Welcome to Gold She Garments!</span>}
+                        {status === 'success' && <span className="status-msg success">System Access Granted. Welcome.</span>}
                     </form>
 
                     <div className="social-links">
@@ -134,10 +134,10 @@ export default function Footer() {
             <div className="footer-bottom-bar">
                 <div className="footer-container bottom-flex">
                     <div className="copyright">
-                        © {new Date().getFullYear()} GOLD SHE GARMENTS. ALL RIGHTS RESERVED.
+                        © {new Date().getFullYear()} OMNORA LABS. ALL RIGHTS RESERVED.
                     </div>
                     <div className="credits">
-                        POWERED BY <span className="dev-name">GSG DIGITAL</span>
+                        POWERED BY <span className="dev-name">OMNORA KERNEL</span>
                     </div>
                 </div>
             </div>

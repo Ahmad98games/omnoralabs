@@ -104,10 +104,10 @@ export default function OrderConfirmation() {
                             <CheckCircle size={40} strokeWidth={1} />
                         </div>
                     </div>
-                    <h1 className="subtitle-serif">Placed Under Craftsmanship</h1>
+                    <h1 className="subtitle-serif">Allocated for Deployment</h1>
                     <p className="success-sub-lux italic">
-                        Thank you for choosing GSG. <br />
-                        Your boutique pieces are now being prepared.
+                        System deployment initiated via Omnora Kernel. <br />
+                        Your modular nodes are now being provisioned.
                     </p>
                 </div>
 
@@ -123,7 +123,7 @@ export default function OrderConfirmation() {
                     <div className="detail-row-lux">
                         <span className="detail-label-lux">TOTAL AMOUNT</span>
                         <span className="detail-value-lux text-gold">
-                            PKR {displayTotal.toLocaleString()}
+                            {displayTotal.toLocaleString()} Credits
                         </span>
                     </div>
                 </div>
@@ -131,16 +131,16 @@ export default function OrderConfirmation() {
                 {/* WHATSAPP ACTION */}
                 <div className="whatsapp-section-luxury">
                     <div className="wa-header-lux">
-                        <h3 className="font-serif">Finalize Your Order</h3>
+                        <h3 className="font-serif">Finalize Propagation</h3>
                         <span className="badge-luxury">RECOMMENDED</span>
                     </div>
                     <p className="wa-desc-lux">
-                        To prioritize your order craftsmanship and receive instant updates, connect with our concierge on WhatsApp.
+                        To prioritize system propagation and receive real-time kernel logs, connect with the registry concierge.
                     </p>
 
                     <button onClick={handleWhatsAppClick} className="btn-luxury-wa">
                         <MessageCircle size={18} />
-                        <span>CONFIRM ON WHATSAPP</span>
+                        <span>VERIFY PROPAGATION</span>
                     </button>
                 </div>
 

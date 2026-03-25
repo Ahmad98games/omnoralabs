@@ -30,7 +30,7 @@ export const LandingPage: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-6">
                     <button onClick={() => navigate('/store/demo')} className="text-sm font-medium text-gray-400 hover:text-white transition-colors">
-                        View Demo Store
+                        Kernel Showcase
                     </button>
                     <button 
                         onClick={() => setAuthModalOpen(true)}
@@ -63,12 +63,12 @@ export const LandingPage: React.FC = () => {
                     </div>
 
                     <h1 className="text-6xl md:text-8xl font-black text-white mb-6 leading-[1.1] tracking-tighter drop-shadow-2xl animate-fade-in-up" style={{ animationDelay: '100ms' }}>
-                        Build Your Next-Gen <br />
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-violet-400">Store with AI.</span>
+                        The Universal <br />
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-violet-400">Commerce OS.</span>
                     </h1>
                     
                     <p className="text-lg md:text-xl text-gray-400 max-w-2xl mb-12 font-light leading-relaxed animate-fade-in-up" style={{ animationDelay: '200ms' }}>
-                        The ultimate intelligent commerce platform. Launch a lightning-fast, high-converting storefront in minutes with an integrated AI builder. No coding required.
+                        High-performance storefront builder for global distribution. Launch a lightning-fast, industrialized commerce entity in minutes with our Shadow DOM engine.
                     </p>
                     
                     <div className="flex flex-col sm:flex-row gap-6 animate-fade-in-up" style={{ animationDelay: '300ms' }}>
@@ -86,7 +86,7 @@ export const LandingPage: React.FC = () => {
                             className="group flex items-center justify-center gap-3 px-10 py-4 rounded-full border border-white/20 text-white font-bold tracking-wide transition-all hover:bg-white/5 hover:border-white/40"
                         >
                             <Store size={18} className="text-gray-400 group-hover:text-white transition-colors" />
-                            Explore Demo Store
+                            Live Kernel Benchmark
                         </button>
                     </div>
 
@@ -97,8 +97,8 @@ export const LandingPage: React.FC = () => {
                             <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400 mb-6 border border-blue-500/20">
                                 01
                             </div>
-                            <h3 className="text-xl font-bold text-white mb-2">Sign up as Seller</h3>
-                            <p className="text-sm text-gray-400 leading-relaxed">Create your Omnora merchant account instantly to provision your isolated store territory.</p>
+                            <h3 className="text-xl font-bold text-white mb-2">Provision Tenant</h3>
+                            <p className="text-sm text-gray-400 leading-relaxed">Instantly instantiate your isolated commerce territory on the Omnora Kernel.</p>
                         </div>
                         <div className="bg-white/5 border border-white/10 p-8 rounded-2xl backdrop-blur-sm relative overflow-hidden group">
                             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity"><Target size={64} /></div>
@@ -113,8 +113,8 @@ export const LandingPage: React.FC = () => {
                             <div className="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 mb-6 border border-indigo-500/20">
                                 03
                             </div>
-                            <h3 className="text-xl font-bold text-white mb-2">Start Selling</h3>
-                            <p className="text-sm text-gray-400 leading-relaxed">Connect your payment gateway, add products in the admin, and deploy your sovereign web app.</p>
+                            <h3 className="text-xl font-bold text-white mb-2">Global Injection</h3>
+                            <p className="text-sm text-gray-400 leading-relaxed">Connect your assets, synchronize with Supabase, and deploy your sovereign commerce engine to the edge.</p>
                         </div>
                     </div>
                 </div>

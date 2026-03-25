@@ -1,280 +1,284 @@
+/**
+ * 🛠️ OMNORA LABS | KERNEL INTERFACE (GLOBAL LAYOUT)
+ * ---------------------------------------------------------
+ * Principal Architect: Ahmad Mahboob (@ahmad-labs)
+ * Division: Universal Commerce OS / Rendering Engine
+ * "The interface is the bridge between logic and reality."
+ * ---------------------------------------------------------
+ */
+
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import {
     ShoppingCart, User, LogOut, Menu, X, Search,
-    LayoutDashboard, Heart
+    LayoutDashboard, Heart, Terminal, Database, Activity
 } from 'lucide-react';
-import './Layout.css';
+import { OmnoraLogger } from '../utils/OmnoraLogger';
 import Footer from './Footer';
 import GlobalErrorBoundary from './GlobalErrorBoundary';
 import { useStorefront } from '../hooks/useStorefront';
 import { OmnoraBanner } from './storefront/OmnoraBanner';
+import './Layout.css';
 
-interface CartItem {
+interface ManifestNode {
     quantity: number;
 }
 
 export default function Layout() {
-    const [cartCount, setCartCount] = useState(0);
-    const [menuOpen, setMenuOpen] = useState(false);
-    const [scrolled, setScrolled] = useState(false);
-    const [searchQuery, setSearchQuery] = useState('');
-    const [searchFocused, setSearchFocused] = useState(false);
+    const [manifestSize, setManifestSize] = useState(0);
+    const [isProtocolMenuOpen, setIsProtocolMenuOpen] = useState(false);
+    const [isSystemScrolled, setIsSystemScrolled] = useState(false);
+    const [searchProtocolQuery, setSearchProtocolQuery] = useState('');
+    const [isRegistrySearchFocused, setIsRegistrySearchFocused] = useState(false);
 
     const { user, logout, isAdmin } = useAuth();
     const { storeSlug, content } = useStorefront();
     const navigate = useNavigate();
     const location = useLocation();
 
-    // Territory-Aware Routing Logic
-    const getBaseUrl = () => storeSlug ? `/store/${storeSlug}` : '';
-    const isInsideTerritory = !!storeSlug;
-    const isTerritoryOwner = user && content && user.id === content.seller;
+    // Territory-Aware Routing Protocol
+    const getTerritoryRoot = () => storeSlug ? `/store/${storeSlug}` : '';
+    const isWithinBoundary = !!storeSlug;
+    const isKernelOwner = user && content && user.id === content.seller;
 
-    // Scroll handler for header effect
+    // System Scroll Monitoring
     useEffect(() => {
-        const handleScroll = () => {
-            setScrolled(window.scrollY > 20);
+        const handleSystemScroll = () => {
+            setIsSystemScrolled(window.scrollY > 20);
         };
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
+        window.addEventListener('scroll', handleSystemScroll);
+        return () => window.removeEventListener('scroll', handleSystemScroll);
     }, []);
 
-    // Global keyboard shortcuts
+    // Global Protocol Escape Sequences
     useEffect(() => {
-        const handleKeyPress = (e: KeyboardEvent) => {
+        const handleProtocolEscape = (e: KeyboardEvent) => {
             if (e.key === 'Escape') {
-                setMenuOpen(false);
-                setSearchFocused(false);
+                setIsProtocolMenuOpen(false);
+                setIsRegistrySearchFocused(false);
             }
         };
-        window.addEventListener('keydown', handleKeyPress);
-        return () => window.removeEventListener('keydown', handleKeyPress);
+        window.addEventListener('keydown', handleProtocolEscape);
+        return () => window.removeEventListener('keydown', handleProtocolEscape);
     }, []);
 
-    // Sovereign Engine: CSS Variable Injection & Weighted Luxury
+    // Sovereign Engine: Variable Injection
     useEffect(() => {
-        const root = document.documentElement;
-        const theme = content?.globalStyles || {};
+        const rootNode = document.documentElement;
+        const themeRegistry = content?.globalStyles || {};
 
-        // Forced Obsidian Aesthetic
-        root.style.setProperty('--bg-surface', '#030304');
-        root.style.setProperty('--p-color', theme.primaryColor || '#D4AF37'); // Gold/Royal default
-        root.style.setProperty('--s-color', theme.accentColor || '#FFFFFF');
-        root.style.setProperty('--glass-blur', theme.surfaceBlur || '20px');
-        root.style.setProperty('--glass-opacity', String(theme.glassOpacity || 0.1));
+        // Forced Industrial Aesthetic (Obsidian Base)
+        rootNode.style.setProperty('--bg-surface', '#030304');
+        rootNode.style.setProperty('--p-color', themeRegistry.primaryColor || '#D4AF37');
+        rootNode.style.setProperty('--s-color', themeRegistry.accentColor || '#FFFFFF');
+        rootNode.style.setProperty('--glass-blur', themeRegistry.surfaceBlur || '24px');
+        rootNode.style.setProperty('--glass-opacity', String(themeRegistry.glassOpacity || 0.08));
 
-        // Weighted Luxury Transition Timing
-        root.style.setProperty('--transition-weighted', 'cubic-bezier(0.4, 0, 0.2, 1)');
+        // System Transition Weight
+        rootNode.style.setProperty('--transition-weighted', 'cubic-bezier(0.2, 0, 0, 1)');
 
         return () => {
-            // Cleanup or reset if needed
+            OmnoraLogger.info("Kernel Interface theme cycle completed.");
         };
     }, [content]);
 
-    // Prevent scroll when menu is open
+    // System Lock: Prevent background propagation when overlay is active
     useEffect(() => {
-        document.body.style.overflow = menuOpen ? 'hidden' : 'unset';
+        document.body.style.overflow = isProtocolMenuOpen ? 'hidden' : 'unset';
         return () => {
             document.body.style.overflow = 'unset';
         };
-    }, [menuOpen]);
+    }, [isProtocolMenuOpen]);
 
-    // Cart synchronization
-    const updateCartCount = useCallback(() => {
+    // Manifest Synchronization
+    const synchronizeManifestState = useCallback(() => {
         try {
-            const cart: CartItem[] = JSON.parse(localStorage.getItem('cart') || '[]');
-            const total = cart.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0);
-            setCartCount(total);
-        } catch {
-            setCartCount(0);
+            const manifest: ManifestNode[] = JSON.parse(localStorage.getItem('cart') || '[]');
+            const totalActivationNodes = manifest.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0);
+            setManifestSize(totalActivationNodes);
+        } catch (fault) {
+            OmnoraLogger.error("Manifest synchronization fault", fault);
+            setManifestSize(0);
         }
     }, []);
 
     useEffect(() => {
-        updateCartCount();
-        window.addEventListener('cart-updated', updateCartCount);
-        return () => window.removeEventListener('cart-updated', updateCartCount);
-    }, [updateCartCount]);
+        synchronizeManifestState();
+        window.addEventListener('cart-updated', synchronizeManifestState);
+        return () => window.removeEventListener('cart-updated', synchronizeManifestState);
+    }, [synchronizeManifestState]);
 
-    // Navigation handlers
-    const closeMenu = () => {
-        setMenuOpen(false);
-        setSearchFocused(false);
+    const closeProtocolOverlays = () => {
+        setIsProtocolMenuOpen(false);
+        setIsRegistrySearchFocused(false);
     };
 
-    const handleSearch = (e: React.KeyboardEvent) => {
-        if (e.key === 'Enter' && searchQuery.trim()) {
-            navigate(`${getBaseUrl()}/collection?q=${encodeURIComponent(searchQuery.trim())}`);
-            setSearchQuery('');
-            closeMenu();
+    const executeRegistrySearch = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' && searchProtocolQuery.trim()) {
+            OmnoraLogger.info(`Executing registry search protocol for: ${searchProtocolQuery}`);
+            navigate(`${getTerritoryRoot()}/collection?q=${encodeURIComponent(searchProtocolQuery.trim())}`);
+            setSearchProtocolQuery('');
+            closeProtocolOverlays();
         }
     };
 
-    const handleLogout = async () => {
+    const executeSystemLogout = async () => {
+        OmnoraLogger.info("Initiating system-wide logout protocol...");
         await logout();
-        closeMenu();
+        closeProtocolOverlays();
         navigate('/');
     };
 
-    const isActive = (path: string) => location.pathname === path;
+    const checkActiveProtocol = (path: string) => location.pathname === path;
 
     return (
         <div className="layout">
-            {/* Modern Header */}
-            <header className={`header ${scrolled ? 'scrolled' : ''}`}>
+            <header className={`header ${isSystemScrolled ? 'scrolled' : ''}`}>
                 <div className="header-container">
-                    {/* Brand Sovereignty */}
-                    <Link to={getBaseUrl() || '/'} className="brand" onClick={closeMenu}>
+                    {/* SYSTEM_IDENTITY */}
+                    <Link to={getTerritoryRoot() || '/'} className="brand" onClick={closeProtocolOverlays}>
                         <div className="brand-logo">
                             <img
                                 src={content?.configuration?.assets?.logo || "/images/omnora.jpg"}
                                 alt={content?.configuration?.name || "Omnora"}
                                 width={24}
                                 height={24}
+                                style={{ borderRadius: '2px' }}
                             />
                         </div>
-                        <span className="brand-name">
-                            {content?.configuration?.name || (isInsideTerritory ? storeSlug?.toUpperCase() : "GoldShe")}
+                        <span className="brand-name font-mono uppercase" style={{ letterSpacing: '2px', fontWeight: 700 }}>
+                            {content?.configuration?.name || (isWithinBoundary ? storeSlug?.toUpperCase() : "OMNORA_LABS")}
                         </span>
                     </Link>
 
-                    {/* Desktop Navigation (Sovereign Aware) */}
+                    {/* PROTOCOL_NAVIGATION */}
                     <nav className="nav-desktop">
-                        {isInsideTerritory ? (
-                            // DYNAMIC TERRITORY MENU
+                        {isWithinBoundary ? (
                             Object.entries(content?.pages || {}).map(([slug, page]: [string, any]) => (
                                 <Link
                                     key={slug}
-                                    to={`${getBaseUrl()}/${slug === 'home' ? '' : slug}`}
-                                    className={`nav-link ${isActive(`${getBaseUrl()}/${slug === 'home' ? '' : slug}`) ? 'active' : ''}`}
+                                    to={`${getTerritoryRoot()}/${slug === 'home' ? '' : slug}`}
+                                    className={`nav-link font-mono xsmall ${checkActiveProtocol(`${getTerritoryRoot()}/${slug === 'home' ? '' : slug}`) ? 'active' : ''}`}
                                 >
-                                    {typeof page?.heroHeadline === 'string' ? page.heroHeadline.split(' ')[0] : (page?.title || "Page")}
-
+                                    {slug.toUpperCase()}
                                 </Link>
                             ))
                         ) : (
-                            // FIXED PLATFORM MENU
                             <>
-                                <Link to="/" className={`nav-link ${isActive('/') ? 'active' : ''}`}>Home</Link>
-                                <Link to="/collection" className={`nav-link ${isActive('/collection') ? 'active' : ''}`}>Shop All</Link>
-                                <Link to="/about" className={`nav-link ${isActive('/about') ? 'active' : ''}`}>About</Link>
-                                <Link to="/contact" className={`nav-link ${isActive('/contact') ? 'active' : ''}`}>Contact</Link>
-                                <Link to="/builder/help" className={`nav-link ${isActive('/builder/help') ? 'active' : ''}`}>How to Build</Link>
+                                <Link to="/" className={`nav-link font-mono xsmall ${checkActiveProtocol('/') ? 'active' : ''}`}>ROOT</Link>
+                                <Link to="/collection" className={`nav-link font-mono xsmall ${checkActiveProtocol('/collection') ? 'active' : ''}`}>REGISTRY</Link>
+                                <Link to="/about" className={`nav-link font-mono xsmall ${checkActiveProtocol('/about') ? 'active' : ''}`}>KERNEL_SPECS</Link>
+                                <Link to="/contact" className={`nav-link font-mono xsmall ${checkActiveProtocol('/contact') ? 'active' : ''}`}>UPLINK</Link>
+                                <Link to="/builder/help" className={`nav-link font-mono xsmall ${checkActiveProtocol('/builder/help') ? 'active' : ''}`}>DOCUMENTATION</Link>
                             </>
                         )}
 
-                        {/* Sovereign Exit: Return to Command Center if owner */}
-                        {isTerritoryOwner && (
-                            <Link to="/seller/dashboard" className="nav-link highlight-exit">
-                                <LayoutDashboard size={14} /> Command Center
+                        {isKernelOwner && (
+                            <Link to="/seller/dashboard" className="nav-link highlight-exit font-mono xsmall">
+                                <Activity size={14} /> SYSTEM_CONTROL
                             </Link>
                         )}
                     </nav>
 
-                    {/* Action Bar */}
+                    {/* SYSTEM_ACTIONS */}
                     <div className="header-actions">
-                        {/* Search */}
-                        <div className={`search-box ${searchFocused ? 'focused' : ''}`}>
+                        <div className={`search-box ${isRegistrySearchFocused ? 'focused' : ''}`}>
                             <Search size={18} />
                             <input
                                 type="text"
-                                placeholder="Search..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                onKeyDown={handleSearch}
-                                onFocus={() => setSearchFocused(true)}
-                                onBlur={() => setSearchFocused(false)}
+                                placeholder="REGISTRY_SEARCH..."
+                                style={{ fontFamily: 'var(--font-mono)' }}
+                                value={searchProtocolQuery}
+                                onChange={(e) => setSearchProtocolQuery(e.target.value)}
+                                onKeyDown={executeRegistrySearch}
+                                onFocus={() => setIsRegistrySearchFocused(true)}
+                                onBlur={() => setIsRegistrySearchFocused(false)}
                             />
                         </div>
 
-                        {/* User Menu */}
                         <div className="action-group">
                             {user ? (
                                 <>
                                     {isAdmin && (
-                                        <Link to="/admin" className="icon-btn" title="Admin Dashboard">
-                                            <LayoutDashboard size={20} />
+                                        <Link to="/admin" className="icon-btn" title="ADMIN_PANEL">
+                                            <Database size={20} />
                                         </Link>
                                     )}
-                                    <Link to="/profile" className="icon-btn" title="Profile">
+                                    <Link to="/profile" className="icon-btn" title="USER_NODE">
                                         <User size={20} />
                                     </Link>
-                                    <button onClick={handleLogout} className="icon-btn" title="Logout">
+                                    <button onClick={executeSystemLogout} className="icon-btn" title="SYSTEM_DISCONNECT">
                                         <LogOut size={20} />
                                     </button>
                                 </>
                             ) : (
-                                <Link to="/login" className="icon-btn" title="Sign In">
+                                <Link to="/login" className="icon-btn" title="PROTOCOL_AUTH">
                                     <User size={20} />
                                 </Link>
                             )}
 
-                            {/* Cart */}
-                            <Link to="/cart" className="icon-btn cart-icon" title="Shopping Cart">
+                            <Link to="/cart" className="icon-btn cart-icon" title="DEPLOYMENT_MANIFEST">
                                 <ShoppingCart size={20} />
-                                {cartCount > 0 && (
-                                    <span className="cart-count">{cartCount}</span>
+                                {manifestSize > 0 && (
+                                    <span className="cart-count font-mono">{manifestSize}</span>
                                 )}
                             </Link>
 
-                            {/* Mobile Menu Toggle */}
                             <button
                                 className="menu-toggle"
-                                onClick={() => setMenuOpen(!menuOpen)}
-                                aria-label="Toggle menu"
+                                onClick={() => setIsProtocolMenuOpen(!isProtocolMenuOpen)}
+                                aria-label="TOGGLE_SYSTEM_MENU"
                             >
-                                {menuOpen ? <X size={24} /> : <Menu size={24} />}
+                                {isProtocolMenuOpen ? <X size={24} /> : <Menu size={24} />}
                             </button>
                         </div>
                     </div>
                 </div>
             </header>
 
-            {/* Mobile Menu */}
-            <div className={`mobile-menu ${menuOpen ? 'open' : ''}`}>
+            {/* PROTOCOL_OVERLAY (MOBILE) */}
+            <div className={`mobile-menu ${isProtocolMenuOpen ? 'open' : ''}`}>
                 <div className="mobile-menu-content">
-                    {/* Mobile Search */}
                     <div className="mobile-search">
                         <Search size={18} />
                         <input
                             type="text"
-                            placeholder="Search products..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            onKeyDown={handleSearch}
+                            placeholder="SEARCH_REGISTRY..."
+                            style={{ fontFamily: 'var(--font-mono)' }}
+                            value={searchProtocolQuery}
+                            onChange={(e) => setSearchProtocolQuery(e.target.value)}
+                            onKeyDown={executeRegistrySearch}
                         />
                     </div>
 
-                    {/* Mobile Navigation Links */}
-                    <nav className="mobile-nav">
-                        <Link to={getBaseUrl() || "/"} onClick={closeMenu}>Home</Link>
-                        <Link to={`${getBaseUrl()}/collection`} onClick={closeMenu}>Shop All</Link>
-                        {!isInsideTerritory && (
-                            <Link to="/collection?category=stitched" onClick={closeMenu}>Ready to Wear</Link>
+                    <nav className="mobile-nav font-mono uppercase">
+                        <Link to={getTerritoryRoot() || "/"} onClick={closeProtocolOverlays}>ROOT</Link>
+                        <Link to={`${getTerritoryRoot()}/collection`} onClick={closeProtocolOverlays}>REGISTRY</Link>
+                        {!isWithinBoundary && (
+                            <Link to="/collection?category=digital" onClick={closeProtocolOverlays}>DATA_ASSETS</Link>
                         )}
-                        <Link to={`${getBaseUrl()}/about`} onClick={closeMenu}>About</Link>
-                        <Link to={`${getBaseUrl()}/contact`} onClick={closeMenu}>Contact</Link>
-                        <Link to="/builder/help" onClick={closeMenu}>How to Build</Link>
+                        <Link to={`${getTerritoryRoot()}/about`} onClick={closeProtocolOverlays}>KERNEL_SPECS</Link>
+                        <Link to={`${getTerritoryRoot()}/contact`} onClick={closeProtocolOverlays}>UPLINK</Link>
+                        <Link to="/builder/help" onClick={closeProtocolOverlays}>DOCUMENTATION</Link>
 
                         {user && (
                             <>
                                 <div className="mobile-divider"></div>
-                                {isTerritoryOwner && (
-                                    <Link to="/seller/dashboard" onClick={closeMenu} className="mobile-highlight-exit">
-                                        Command Center
+                                {isKernelOwner && (
+                                    <Link to="/seller/dashboard" onClick={closeProtocolOverlays} className="mobile-highlight-exit">
+                                        SYSTEM_CONTROL
                                     </Link>
                                 )}
-                                {isAdmin && !isInsideTerritory && (
-                                    <Link to="/admin" onClick={closeMenu}>Admin Dashboard</Link>
+                                {isAdmin && !isWithinBoundary && (
+                                    <Link to="/admin" onClick={closeProtocolOverlays}>ADMIN_REGISTRY</Link>
                                 )}
-                                <Link to="/profile" onClick={closeMenu}>My Profile</Link>
-                                <Link to="/cart" onClick={closeMenu}>
-                                    Cart {cartCount > 0 && `(${cartCount})`}
+                                <Link to="/profile" onClick={closeProtocolOverlays}>USER_NODE</Link>
+                                <Link to="/cart" onClick={closeProtocolOverlays}>
+                                    MANIFEST {manifestSize > 0 && `(${manifestSize})`}
                                 </Link>
-                                <button onClick={handleLogout} className="mobile-logout">
-                                    Logout
+                                <button onClick={executeSystemLogout} className="mobile-logout font-mono uppercase" style={{ textAlign: 'left' }}>
+                                    SYSTEM_DISCONNECT
                                 </button>
                             </>
                         )}
@@ -282,17 +286,13 @@ export default function Layout() {
                 </div>
             </div>
 
-            {/* Main Content */}
             <main className="main-content">
                 <GlobalErrorBoundary>
                     <Outlet />
                 </GlobalErrorBoundary>
             </main>
 
-            {/* Acquisition Banner for Storefronts */}
-            <OmnoraBanner isStorefront={isInsideTerritory} />
-
-            {/* Footer */}
+            <OmnoraBanner isStorefront={isWithinBoundary} />
             <Footer />
         </div>
     );

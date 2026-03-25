@@ -1,7 +1,7 @@
 {
-  "name": "luxury-ecommerce-backend",
+  "name": "omnora-kernel-backend",
   "version": "1.0.0",
-  "description": "Backend server for luxury women's clothing e-commerce website",
+  "description": "The high-performance core for the Omnora Universal Commerce OS.",
   "main": "server.js",
   "scripts": {
     "cleanup": "node scripts/cleanup-port.js",

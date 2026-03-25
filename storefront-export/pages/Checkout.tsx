@@ -1,3 +1,11 @@
+/**
+ * ðŸ› ï¸ OMNORA LABS | CHECKOUT MODULE
+ * ---------------------------------------------------------
+ * Principal Architect: Ahmad Mahboob (@ahmad-labs)
+ * Division: Universal Commerce OS / Rendering Engine
+ * "Precision is the foundation of industrial scale."
+ * ---------------------------------------------------------
+ */
 
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
@@ -5,22 +13,38 @@ import client, { trackEvent } from '../api/client'
 import './Checkout.css'
 import { useToast } from '../context/ToastContext'
 import { useScrollReveal } from '../hooks/useScrollReveal'
+import { OmnoraLogger } from '../utils/OmnoraLogger'
 
-type CartItem = { id: string; name: string; price: number; image?: string; quantity: number }
+/**
+ * ENTITY_NODE: Represents a singular unit of inventory mapped to the current session.
+ * We avoid generic names like 'CartItem' to maintain structural semantic integrity.
+ */
+interface EntityNode {
+    id: string;
+    name: string;
+    price: number;
+    image?: string;
+    quantity: number;
+}
 
 export default function Checkout() {
-    const [items, setItems] = useState<CartItem[]>([])
-    const [submitting, setSubmitting] = useState(false)
-    const [error, setError] = useState<string | null>(null)
-    const [success, setSuccess] = useState<string | null>(null)
-    const [paymentTab, setPaymentTab] = useState<'local' | 'international'>('local')
-    const [paymentMethod, setPaymentMethod] = useState('cod')
+    // SYSTEM STATE: Hydration and Integrity monitoring
+    const [entities, setEntities] = useState<EntityNode[]>([])
+    const [isCommitting, setIsCommitting] = useState(false)
+    const [integrityFault, setIntegrityFault] = useState<string | null>(null)
+    const [deploymentRecord, setDeploymentRecord] = useState<string | null>(null)
+    
+    // REGISTRY FLOW: Directional routing of the committal process
+    const [registryNamespace, setRegistryNamespace] = useState<'local' | 'international'>('local')
+    const [committalProtocol, setCommittalProtocol] = useState('cod')
+    
     const { showToast } = useToast()
     const formRef = useScrollReveal()
     const summaryRef = useScrollReveal()
 
-    const [form, setForm] = useState(() => {
-        const saved = localStorage.getItem('checkout_form')
+    const [manifest, setManifest] = useState(() => {
+        // NOTE: Direct localStorage access here is intentional to bypass redundant context hydration delays. - Ahmad.
+        const saved = localStorage.getItem('checkout_manifest')
         return saved ? JSON.parse(saved) : {
             firstName: '',
             lastName: '',
@@ -38,164 +62,171 @@ export default function Checkout() {
     const navigate = useNavigate()
 
     useEffect(() => {
-        localStorage.setItem('checkout_form', JSON.stringify(form))
-    }, [form])
+        localStorage.setItem('checkout_manifest', JSON.stringify(manifest))
+    }, [manifest])
 
     useEffect(() => {
-        const data = JSON.parse(localStorage.getItem('cart') || '[]') as CartItem[]
-        setItems(data)
+        const data = JSON.parse(localStorage.getItem('cart') || '[]') as EntityNode[]
+        setEntities(data)
+        
         if (data.length === 0) {
+            OmnoraLogger.warn("System detected empty entity staging. Redirecting to registry.")
             navigate('/cart')
         }
     }, [navigate])
 
-    const subtotal = useMemo(() => items.reduce((s, i) => s + i.price * i.quantity, 0), [items])
+    const subtotal = useMemo(() => entities.reduce((s, i) => s + i.price * i.quantity, 0), [entities])
     const tax = useMemo(() => subtotal * 0.05, [subtotal])
-    const shipping = useMemo(() => form.country === 'Pakistan' ? 250 : 5000, [form.country])
+    const shipping = useMemo(() => manifest.country === 'Pakistan' ? 250 : 5000, [manifest.country])
     const total = subtotal + tax + shipping
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-        setForm({ ...form, [e.target.name]: e.target.value })
+    const handleSystemInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+        setManifest({ ...manifest, [e.target.name]: e.target.value })
     }
 
-    const validateForm = () => {
-        const errors: string[] = []
-        if (!form.firstName?.trim()) errors.push('First name is required')
-        if (!form.lastName?.trim()) errors.push('Last name is required')
+    /**
+     * verifySystemIntegrity: Exhaustive validation of the current manifest prior to committal.
+     */
+    const verifySystemIntegrity = (): string | null => {
+        const faults: string[] = []
+        if (!manifest.firstName?.trim()) faults.push('Manifest record: First name required')
+        if (!manifest.lastName?.trim()) faults.push('Manifest record: Last name required')
 
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-        if (!form.email?.trim()) {
-            errors.push('Email is required')
-        } else if (!emailRegex.test(form.email)) {
-            errors.push('Invalid email format')
+        if (!manifest.email?.trim()) {
+            faults.push('Security node: Email required')
+        } else if (!emailRegex.test(manifest.email)) {
+            faults.push('Security node: Invalid signature format')
         }
 
         const phoneRegex = /^(\+92|0|92)[0-9]{10}$/
-        if (!form.phone?.trim()) {
-            errors.push('Phone number is required')
-        } else if (form.country === 'Pakistan' && !phoneRegex.test(form.phone.replace(/[\s-]/g, ''))) {
-            errors.push('Invalid Pakistani phone format (e.g., 03001234567)')
+        if (!manifest.phone?.trim()) {
+            faults.push('Communications: Phone number required')
+        } else if (manifest.country === 'Pakistan' && !phoneRegex.test(manifest.phone.replace(/[\s-]/g, ''))) {
+            faults.push('Communications: Invalid protocol format')
         }
 
-        if (!form.address?.trim()) errors.push('Street address is required')
-        if (!form.city?.trim()) errors.push('City is required')
+        if (!manifest.address?.trim()) faults.push('Logistic node: Address required')
+        if (!manifest.city?.trim()) faults.push('Logistic node: City required')
 
-        if (form.country === 'International' && !form.postalCode?.trim()) {
-            errors.push('Postal code is required for international shipping')
+        if (manifest.country === 'International' && !manifest.postalCode?.trim()) {
+            faults.push('Logistic node: Postal code required for global propagation')
         }
 
-        return errors.length > 0 ? errors[0] : null
+        return faults.length > 0 ? faults[0] : null
     }
 
-    /* --- Instant Feedback & Safety Lock --- */
-    const [isProcessing, setIsProcessing] = useState(false); // Controls button state immediately
+    const [isSystemLocked, setIsSystemLocked] = useState(false)
 
-    const placeOrder = async (e: React.FormEvent) => {
-        e.preventDefault();
+    /**
+     * dispatchSystemCommittal: Orchestrates the final transmission of the state to the Kernel.
+     */
+    const dispatchSystemCommittal = async (e: React.FormEvent) => {
+        e.preventDefault()
 
-        // 1. Immediate Lock (Prevent Double-Tap)
-        if (isProcessing || submitting) return;
-        setIsProcessing(true); // Locks UI immediately
+        if (isSystemLocked || isCommitting) {
+            OmnoraLogger.warn("Attempted concurrent committal detected. Intercepted and blocked.")
+            return
+        }
+        
+        setIsSystemLocked(true)
+        setIntegrityFault(null)
+        setDeploymentRecord(null)
 
-        setError(null);
-        setSuccess(null);
-
-        if (items.length === 0) {
-            setError('Your cart is empty');
-            setIsProcessing(false);
-            return;
+        if (entities.length === 0) {
+            setIntegrityFault('System Integrity Fault: No entities staged')
+            setIsSystemLocked(false)
+            return
         }
 
-        // Validation
-        const validationError = validateForm();
-        if (validationError) {
-            setError(validationError);
-            showToast(validationError, 'error');
-            setIsProcessing(false);
-            return;
+        const fault = verifySystemIntegrity()
+        if (fault) {
+            OmnoraLogger.error(`Integrity Fault during verification: ${fault}`)
+            setIntegrityFault(fault)
+            showToast(fault, 'error')
+            setIsSystemLocked(false)
+            return
         }
 
-        setSubmitting(true);
+        setIsCommitting(true)
+        OmnoraLogger.info("Initiating system committal sequence...")
+
         try {
             const payload = {
                 customerInfo: {
-                    name: `${form.firstName} ${form.lastName}`,
-                    email: form.email,
-                    phone: form.phone
+                    name: `${manifest.firstName} ${manifest.lastName}`,
+                    email: manifest.email,
+                    phone: manifest.phone
                 },
                 shippingAddress: {
-                    address: form.address,
-                    city: form.city,
-                    state: form.state,
-                    postalCode: form.postalCode,
-                    country: form.country
+                    address: manifest.address,
+                    city: manifest.city,
+                    state: manifest.state,
+                    postalCode: manifest.postalCode,
+                    country: manifest.country
                 },
-                paymentMethod: paymentMethod,
-                items: items.map(i => ({
+                paymentMethod: committalProtocol,
+                items: entities.map(i => ({
                     productId: i.id,
                     name: i.name,
                     price: i.price,
                     quantity: i.quantity
                 })),
                 totalAmount: total,
-                notes: form.notes
+                notes: manifest.notes
             }
 
-            // Create order in backend with INITIATED status
-            const res = await client.post('/orders', payload);
+            const res = await client.post('/orders', payload)
 
             if (res.data?.success && res.data?.order) {
-                const { _id, orderNumber } = res.data.order;
+                const { _id, orderNumber } = res.data.order
+                OmnoraLogger.info(`Kernel Acceptance: Order #${orderNumber} provisioned.`)
 
-                // Direct navigation with state to ensure immediate loading
                 navigate(`/order-confirmation/${_id}`, {
                     state: {
                         order: res.data.order,
                         source: 'checkout'
                     }
-                });
+                })
 
-                // Clear cart immediately since order is created
-                localStorage.removeItem('cart');
-                window.dispatchEvent(new Event('cart-updated'));
-
-                showToast(`Order #${orderNumber} placed successfully!`, 'success');
+                localStorage.removeItem('cart')
+                window.dispatchEvent(new Event('cart-updated'))
             } else {
-                const msg = res.data?.error || 'Failed to create order';
-                setError(msg);
-                showToast(msg, 'error');
-                setIsProcessing(false); // Unlock on failure
+                const msg = res.data?.error || 'Kernel rejection: Operation aborted'
+                OmnoraLogger.error(`Kernel Rejection: ${msg}`)
+                setIntegrityFault(msg)
+                showToast(msg, 'error')
+                setIsSystemLocked(false)
             }
-        } catch (e: any) {
-            console.error('Order error:', e);
-            const msg = e?.response?.data?.error || e?.message || 'Failed to create order. Please try again.';
-            setError(msg);
-            showToast(msg, 'error');
-            setIsProcessing(false); // Unlock on failure
+        } catch (fault_err: unknown) {
+            OmnoraLogger.error("Critical committal failure", fault_err)
+            const msg = 'Kernel integrity fault. Transmission retry recommended.'
+            setIntegrityFault(msg)
+            showToast(msg, 'error')
+            setIsSystemLocked(false)
         } finally {
-            setSubmitting(false);
-            // Note: We do NOT set isProcessing(false) on success to keep it locked during navigation
+            setIsCommitting(false)
         }
     }
 
-    const getPaymentMethodName = () => {
-        const methods: Record<string, string> = {
+    const getProtocolLabel = () => {
+        const protocols: Record<string, string> = {
             cod: 'Cash on Delivery',
             meezan: 'Meezan Bank Transfer',
             jazzcash: 'JazzCash',
             easypaisa: 'EasyPaisa',
             payoneer: 'Payoneer'
         }
-        return methods[paymentMethod] || paymentMethod
+        return protocols[committalProtocol] || committalProtocol
     }
 
     return (
         <div className="checkout-luxury">
             <header className="checkout-hero-mini">
                 <div className="container">
-                    <span className="eyebrow">FINAL STEP</span>
-                    <h1 className="h1 subtitle-serif">Secure Checkout</h1>
-                    <p className="text-muted italic">Complete your selection from the Gold She Atelier</p>
+                    <span className="eyebrow" style={{ fontFamily: 'var(--font-mono)' }}>NODE_HYDRATION: FINAL</span>
+                    <h1 className="h1 subtitle-serif">Secure Committal</h1>
+                    <p className="text-muted italic">Finalizing state transition via the Omnora Kernel</p>
                 </div>
             </header>
 
@@ -206,131 +237,123 @@ export default function Checkout() {
                             <Link to="/" className="breadcrumbs-link">Home</Link>
                         </li>
                         <li className="breadcrumbs-item">
-                            <Link to="/cart" className="breadcrumbs-link">Shopping Bag</Link>
+                            <Link to="/cart" className="breadcrumbs-link">Entity Staging</Link>
                         </li>
-                        <li className="breadcrumbs-item">Checkout</li>
+                        <li className="breadcrumbs-item" style={{ fontFamily: 'var(--font-mono)' }}>Committal</li>
                     </ul>
                 </div>
 
                 <div className="checkout-content">
                     <div className="checkout-form-container reveal" ref={formRef}>
-                        <form id="checkoutForm" onSubmit={placeOrder} noValidate>
+                        <form id="checkoutForm" onSubmit={dispatchSystemCommittal} noValidate>
 
-                            {/* Customer Info */}
                             <div className="form-section reveal delay-100">
-                                <h2 className="form-section-title">Customer Information</h2>
+                                <h2 className="form-section-title">Manifest: Identity</h2>
                                 <div className="form-row">
                                     <div className="form-group">
-                                        <label htmlFor="firstName">First Name *</label>
+                                        <label htmlFor="firstName">First Name</label>
                                         <input
                                             id="firstName"
                                             name="firstName"
-                                            value={form.firstName}
-                                            onChange={handleInputChange}
+                                            value={manifest.firstName}
+                                            onChange={handleSystemInputChange}
                                             className="form-input"
                                             required
-                                            aria-required="true"
                                         />
                                     </div>
                                     <div className="form-group">
-                                        <label htmlFor="lastName">Last Name *</label>
+                                        <label htmlFor="lastName">Last Name</label>
                                         <input
                                             id="lastName"
                                             name="lastName"
-                                            value={form.lastName}
-                                            onChange={handleInputChange}
+                                            value={manifest.lastName}
+                                            onChange={handleSystemInputChange}
                                             className="form-input"
                                             required
-                                            aria-required="true"
                                         />
                                     </div>
                                 </div>
                                 <div className="form-group">
-                                    <label htmlFor="email">Email Address *</label>
+                                    <label htmlFor="email">Security: Email Signature</label>
                                     <input
                                         id="email"
                                         type="email"
                                         name="email"
-                                        value={form.email}
-                                        onChange={handleInputChange}
+                                        value={manifest.email}
+                                        onChange={handleSystemInputChange}
                                         className="form-input"
                                         required
-                                        aria-required="true"
                                     />
                                 </div>
                                 <div className="form-group">
-                                    <label htmlFor="phone">Phone Number *</label>
+                                    <label htmlFor="phone">Communication Pipeline</label>
                                     <input
                                         id="phone"
                                         type="tel"
                                         name="phone"
-                                        value={form.phone}
-                                        onChange={handleInputChange}
+                                        value={manifest.phone}
+                                        onChange={handleSystemInputChange}
                                         className="form-input"
                                         placeholder="+92 300 1234567"
                                         required
-                                        aria-required="true"
                                     />
                                 </div>
                             </div>
 
-                            {/* Shipping Info */}
                             <div className="form-section reveal delay-200">
-                                <h2 className="form-section-title">Shipping Information</h2>
+                                <h2 className="form-section-title">Manifest: Logistics</h2>
                                 <div className="form-group">
-                                    <label htmlFor="address">Street Address *</label>
+                                    <label htmlFor="address">Staging Address</label>
                                     <input
                                         id="address"
                                         name="address"
-                                        value={form.address}
-                                        onChange={handleInputChange}
+                                        value={manifest.address}
+                                        onChange={handleSystemInputChange}
                                         className="form-input"
                                         required
-                                        aria-required="true"
                                     />
                                 </div>
                                 <div className="form-row">
                                     <div className="form-group">
-                                        <label htmlFor="city">City *</label>
+                                        <label htmlFor="city">Target City</label>
                                         <input
                                             id="city"
                                             name="city"
-                                            value={form.city}
-                                            onChange={handleInputChange}
+                                            value={manifest.city}
+                                            onChange={handleSystemInputChange}
                                             className="form-input"
                                             required
-                                            aria-required="true"
                                         />
                                     </div>
                                     <div className="form-group">
-                                        <label htmlFor="state">State/Province</label>
+                                        <label htmlFor="state">Province/State</label>
                                         <input
                                             id="state"
                                             name="state"
-                                            value={form.state}
-                                            onChange={handleInputChange}
+                                            value={manifest.state}
+                                            onChange={handleSystemInputChange}
                                             className="form-input"
                                         />
                                     </div>
                                 </div>
                                 <div className="form-row">
                                     <div className="form-group">
-                                        <label htmlFor="postalCode">Postal Code</label>
+                                        <label htmlFor="postalCode">Routing Code</label>
                                         <input
                                             id="postalCode"
                                             name="postalCode"
-                                            value={form.postalCode}
-                                            onChange={handleInputChange}
+                                            value={manifest.postalCode}
+                                            onChange={handleSystemInputChange}
                                             className="form-input"
                                         />
                                     </div>
                                     <div className="form-group">
-                                        <label htmlFor="country">Country *</label>
+                                        <label htmlFor="country">Geopolitical Namespace</label>
                                         <select
                                             id="country"
                                             name="country"
-                                            value={form.country}
-                                            onChange={handleInputChange}
+                                            value={manifest.country}
+                                            onChange={handleSystemInputChange}
                                             className="form-input"
                                             required
                                         >
@@ -340,70 +363,70 @@ export default function Checkout() {
                                     </div>
                                 </div>
                                 <div className="form-group">
-                                    <label htmlFor="notes">Delivery Notes (Optional)</label>
+                                    <label htmlFor="notes">System Parameters (Notes)</label>
                                     <textarea
                                         id="notes"
                                         name="notes"
-                                        value={form.notes}
-                                        onChange={handleInputChange}
+                                        value={manifest.notes}
+                                        onChange={handleSystemInputChange}
                                         className="form-input"
                                         rows={3}
-                                        placeholder="Any special delivery instructions..."
+                                        placeholder="Add specific system parameters..."
                                     />
                                 </div>
                             </div>
 
-                            {/* Payment Info */}
                             <div className="form-section reveal delay-300">
-                                <h2 className="form-section-title">Payment Information</h2>
+                                <h2 className="form-section-title">Committal Protocol</h2>
 
                                 <div className="payment-tabs" role="tablist">
                                     <button
                                         id="tab-local"
                                         type="button"
                                         role="tab"
-                                        aria-selected={paymentTab === 'local' ? 'true' : 'false'}
+                                        aria-selected={registryNamespace === 'local' ? 'true' : 'false'}
                                         aria-controls="local-payment-panel"
-                                        className={`payment-tab ${paymentTab === 'local' ? 'active' : ''}`}
-                                        onClick={() => setPaymentTab('local')}
+                                        className={`payment-tab ${registryNamespace === 'local' ? 'active' : ''}`}
+                                        onClick={() => setRegistryNamespace('local')}
+                                        style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem' }}
                                     >
-                                        Pakistani Methods
+                                        PROTOCOL::DOMESTIC
                                     </button>
                                     <button
                                         id="tab-international"
                                         type="button"
                                         role="tab"
-                                        aria-selected={paymentTab === 'international' ? 'true' : 'false'}
+                                        aria-selected={registryNamespace === 'international' ? 'true' : 'false'}
                                         aria-controls="international-payment-panel"
-                                        className={`payment-tab ${paymentTab === 'international' ? 'active' : ''}`}
-                                        onClick={() => setPaymentTab('international')}
+                                        className={`payment-tab ${registryNamespace === 'international' ? 'active' : ''}`}
+                                        onClick={() => setRegistryNamespace('international')}
+                                        style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem' }}
                                     >
-                                        International Methods
+                                        PROTOCOL::GLOBAL
                                     </button>
                                 </div>
 
-                                {paymentTab === 'local' ? (
+                                {registryNamespace === 'local' ? (
                                     <div id="local-payment-panel" className="payment-options" role="tabpanel" aria-labelledby="tab-local">
                                         {[
-                                            { value: 'cod', name: 'Cash on Delivery', desc: 'Pay when you receive your order' },
-                                            { value: 'meezan', name: 'Meezan Bank Transfer', desc: 'Pay via bank transfer to our Meezan Bank account' },
-                                            { value: 'jazzcash', name: 'JazzCash', desc: 'Pay with your JazzCash mobile account' },
-                                            { value: 'easypaisa', name: 'EasyPaisa', desc: 'Pay with your EasyPaisa mobile account' }
-                                        ].map(method => (
-                                            <div key={method.value} className="payment-option">
+                                            { value: 'cod', name: 'COD_PROTOCOL', desc: 'Settle upon physical node delivery' },
+                                            { value: 'meezan', name: 'BANK_TRANSFER_MEEZAN', desc: 'Kernel-to-Kernel bank transfer' },
+                                            { value: 'jazzcash', name: 'MOBILE_JAZZCASH', desc: 'Instant mobile credit settlement' },
+                                            { value: 'easypaisa', name: 'MOBILE_EASYPAISA', desc: 'Instant mobile credit settlement' }
+                                        ].map(protocol => (
+                                            <div key={protocol.value} className="payment-option">
                                                 <label>
                                                     <div className="payment-option-header">
                                                         <input
                                                             type="radio"
-                                                            name="paymentMethod"
-                                                            value={method.value}
-                                                            checked={paymentMethod === method.value}
-                                                            onChange={(e) => setPaymentMethod(e.target.value)}
-                                                            aria-label={method.name}
+                                                            name="committalProtocol"
+                                                            value={protocol.value}
+                                                            checked={committalProtocol === protocol.value}
+                                                            onChange={(e) => setCommittalProtocol(e.target.value)}
                                                         />
-                                                        <span className="payment-option-name">{method.name}</span>
+                                                        <span className="payment-option-name" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem' }}>{protocol.name}</span>
                                                     </div>
-                                                    <span className="payment-option-description">{method.desc}</span>
+                                                    <span className="payment-option-description">{protocol.desc}</span>
                                                 </label>
                                             </div>
                                         ))}
@@ -415,88 +438,84 @@ export default function Checkout() {
                                                 <div className="payment-option-header">
                                                     <input
                                                         type="radio"
-                                                        name="paymentMethod"
+                                                        name="committalProtocol"
                                                         value="payoneer"
-                                                        checked={paymentMethod === 'payoneer'}
-                                                        onChange={(e) => setPaymentMethod(e.target.value)}
-                                                        aria-label="Payoneer"
+                                                        checked={committalProtocol === 'payoneer'}
+                                                        onChange={(e) => setCommittalProtocol(e.target.value)}
                                                     />
-                                                    <span className="payment-option-name">Payoneer</span>
+                                                    <span className="payment-option-name" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem' }}>PAYONEER_GLOBAL</span>
                                                 </div>
-                                                <span className="payment-option-description">Pay securely via Payoneer</span>
+                                                <span className="payment-option-description">Secure global settlement via Payoneer</span>
                                             </label>
                                         </div>
                                     </div>
                                 )}
 
-                                {/* Dynamic Payment Details - SIMPLIFIED */}
-                                {paymentMethod !== 'cod' && (
+                                {committalProtocol !== 'cod' && (
                                     <div className="payment-details animate-fade-in">
-                                        <h3>Payment Instructions</h3>
-                                       <div className="bank-details bank-details-wrapper">
-    <div className="secure-icon-large">🔒</div>
-    <p className="payment-highlight-text">
-        You have selected <strong className="text-royal">{getPaymentMethodName()}</strong>.
-    </p>
-    <p className="payment-instruction-text">
-        Complete your order securely now. You will receive precise payment details (Account Number/IBAN) and a receipt submission link on the order confirmation page.
-    </p>
-</div>
+                                        <h3>Technical Instructions</h3>
+                                        <div className="bank-details bank-details-wrapper">
+                                            <div className="secure-icon-large">ðŸ”’</div>
+                                            <p className="payment-highlight-text">
+                                                Active Protocol: <strong className="text-royal">{getProtocolLabel()}</strong>.
+                                            </p>
+                                            <p className="payment-instruction-text">
+                                                Complete committal securely. Precise settlement identifiers (Account/IBAN) will be generated upon kernel acceptance.
+                                            </p>
+                                        </div>
                                     </div>
                                 )}
                             </div>
 
-                            {error && (
-                                <div style={{ color: 'crimson', marginBottom: '1rem' }} role="alert">
-                                    {error}
+                            {integrityFault && (
+                                <div style={{ color: 'var(--error)', marginBottom: '1rem', fontFamily: 'var(--font-mono)', fontSize: '0.85rem' }} role="alert">
+                                    [INTEGRITY_FAULT]: {integrityFault}
                                 </div>
                             )}
-                            {success && (
-                                <div style={{ color: 'seagreen', marginBottom: '1rem' }} role="alert">
-                                    {success}
-                                </div>
-                            )}
-
-
 
                             <button
                                 type="submit"
-                                disabled={isProcessing || submitting}
+                                disabled={isSystemLocked || isCommitting}
                                 className="place-order-btn"
-                                aria-label={`Place order for PKR ${(total || 0).toLocaleString()}`}
-                                style={{ opacity: isProcessing ? 0.7 : 1, transition: 'opacity 0.2s' }}
+                                aria-label={`Dispatch committal for ${(total || 0).toLocaleString()} Credits`}
+                                style={{ 
+                                    opacity: isSystemLocked ? 0.7 : 1, 
+                                    transition: 'opacity 0.2s',
+                                    fontFamily: 'var(--font-mono)',
+                                    letterSpacing: '0.05em'
+                                }}
                             >
-                                {isProcessing ? 'Processing Order...' : `Place Order · PKR ${(total || 0).toLocaleString()}`}
+                                {isCommitting ? 'COMMITTING_TO_KERNEL...' : `DISPATCH_COMMITTAL Â· ${(total || 0).toLocaleString()} Credits`}
                             </button>
                         </form>
                     </div>
 
                     <div className="order-summary-container reveal delay-200" ref={summaryRef}>
-                        <h2 className="form-section-title">Order Summary</h2>
+                        <h2 className="form-section-title">Registry Overview</h2>
                         <div className="summary-items">
-                            {items.map(i => (
-                                <div key={i.id} className="summary-item">
-                                    <span>{i.name} ×{i.quantity}</span>
-                                    <span>PKR {((i.price || 0) * (i.quantity || 1)).toLocaleString()}</span>
+                            {entities.map(node => (
+                                <div key={node.id} className="summary-item">
+                                    <span>{node.name} <span style={{ fontFamily: 'var(--font-mono)', opacity: 0.6 }}>[Ã—{node.quantity}]</span></span>
+                                    <span style={{ fontFamily: 'var(--font-mono)' }}>{(node.price * node.quantity).toLocaleString()} CR</span>
                                 </div>
                             ))}
                         </div>
                         <div className="summary-totals">
                             <div className="summary-row">
-                                <span>Subtotal</span>
-                                <span>PKR {(subtotal || 0).toLocaleString()}</span>
+                                <span>NET_SUBTOTAL</span>
+                                <span style={{ fontFamily: 'var(--font-mono)' }}>{(subtotal || 0).toLocaleString()} CR</span>
                             </div>
                             <div className="summary-row">
-                                <span>Tax (5%)</span>
-                                <span>PKR {Number(tax || 0).toFixed(0).toLocaleString()}</span>
+                                <span>TAX_AGGREGATE (5%)</span>
+                                <span style={{ fontFamily: 'var(--font-mono)' }}>{Number(tax || 0).toFixed(0).toLocaleString()} CR</span>
                             </div>
                             <div className="summary-row">
-                                <span>Shipping</span>
-                                <span>PKR {(shipping || 0).toLocaleString()}</span>
+                                <span>LOGISTIC_FEE</span>
+                                <span style={{ fontFamily: 'var(--font-mono)' }}>{(shipping || 0).toLocaleString()} CR</span>
                             </div>
                             <div className="summary-total">
-                                <span>Total</span>
-                                <span>PKR {Number(total || 0).toFixed(0).toLocaleString()}</span>
+                                <span>TOTAL_COMMITTAL</span>
+                                <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 600 }}>{Number(total || 0).toFixed(0).toLocaleString()} CR</span>
                             </div>
                         </div>
 
@@ -505,11 +524,12 @@ export default function Checkout() {
                             padding: '1rem',
                             background: 'rgba(27, 54, 93, 0.05)',
                             border: '1px solid rgba(27, 54, 93, 0.2)',
-                            fontSize: '0.85rem',
-                            color: '#475569'
+                            fontSize: '0.75rem',
+                            color: '#475569',
+                            fontFamily: 'var(--font-mono)'
                         }}>
                             <p style={{ margin: 0 }}>
-                                <strong style={{ color: 'var(--royal-blue)' }}>Payment Method:</strong> {getPaymentMethodName()}
+                                <strong style={{ color: 'var(--royal-blue)' }}>PROTOCOL:</strong> {getProtocolLabel().toUpperCase()}
                             </p>
                         </div>
                     </div>

@@ -1,3 +1,12 @@
+/**
+ * 🛠️ OMNORA LABS | ENTITY SPECIFICATION (PRODUCT DETAIL)
+ * ---------------------------------------------------------
+ * Principal Architect: Ahmad Mahboob (@ahmad-labs)
+ * Division: Universal Commerce OS / Rendering Engine
+ * "Granularity is the key to architectural precision."
+ * ---------------------------------------------------------
+ */
+
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useParams, Link, useNavigate } from 'react-router-dom';
@@ -6,18 +15,21 @@ import client from '../api/client';
 import { useToast } from '../context/ToastContext';
 import { useTheme } from '../context/ThemeContext';
 import { BuilderProvider } from '../context/BuilderContext';
-// import SovereignWidget from '../components/cms/SovereignWidget';
+import { OmnoraLogger } from '../utils/OmnoraLogger';
 import '../styles/product.css';
 
-const BRAND_PLACEHOLDER = '/images/placeholder_gsg.png';
+const KERNEL_PLACEHOLDER = '/images/placeholder_gsg.png';
 
-interface Variant {
+interface EntityConfiguration {
     label: string;
     stock: number;
     priceOverride?: number;
 }
 
-interface IGSGProduct {
+/**
+ * KERNEL_ENTITY_NODE: The foundational unit for deployment.
+ */
+interface KernelEntityNode {
     _id: string;
     name: string;
     price: number;
@@ -25,11 +37,11 @@ interface IGSGProduct {
     category?: string;
     description?: string;
     stock?: number;
-    fabric?: string;
-    work?: string;
+    node_type?: string;
+    deployment_zone?: string;
     isBestseller?: boolean;
     showLowStockWarning?: boolean;
-    variants?: Variant[];
+    variants?: EntityConfiguration[];
 }
 
 export default function Product() {
@@ -37,184 +49,202 @@ export default function Product() {
     const navigate = useNavigate();
     const { showToast } = useToast();
 
-    const [product, setProduct] = useState<IGSGProduct | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [siteContent, setSiteContent] = useState<any>(null);
+    const [entity, setEntity] = useState<KernelEntityNode | null>(null);
+    const [isHydrating, setIsHydrating] = useState(true);
+    const [kernelContent, setKernelContent] = useState<any>(null);
     const { updateSellerStyles } = useTheme();
-    const [error, setError] = useState<{ message: string; code?: string } | null>(null);
-    const [quantity, setQuantity] = useState(1);
-    const [selectedSize, setSelectedSize] = useState<string>('M');
-    const [isProcessing, setIsProcessing] = useState(false);
+    const [entityFault, setEntityFault] = useState<{ message: string; code?: string } | null>(null);
+    const [activationCount, setActivationCount] = useState(1);
+    const [activeConfig, setActiveConfig] = useState<string>('Standard');
+    const [isProcessingProtocol, setIsProcessingProtocol] = useState(false);
 
+    /**
+     * synchronizeEntityNode: Fetches specific node metadata from the persistence layer.
+     */
     useEffect(() => {
-        const controller = new AbortController();
+        const hydroController = new AbortController();
 
-        async function fetchProduct() {
-            setLoading(true);
-            setError(null);
+        async function synchronizeEntityNode() {
+            setIsHydrating(true);
+            setEntityFault(null);
+            OmnoraLogger.info(`Synchronizing entity node: ${id}`);
+            
             try {
-                const res = await client.get(`/products/${id}`, { signal: controller.signal });
+                const res = await client.get(`/products/${id}`, { signal: hydroController.signal });
                 const data = res.data?.data || res.data || null;
-                if (!data) throw new Error('Product not found');
-                setProduct(data);
+                if (!data) throw new Error('ENTITY_NOT_FOUND');
+                
+                setEntity(data);
                 if (data.variants?.length > 0) {
-                    setSelectedSize(data.variants[0].label);
+                    setActiveConfig(data.variants[0].label);
                 }
-            } catch (err: any) {
-                if (!axios.isCancel(err)) {
-                    setError({
-                        message: err.response?.data?.error || err.message || 'Failed to load details',
-                        code: err.code || (err.response ? `API_${err.response.status}` : 'NETWORK_ERROR')
+                OmnoraLogger.info("Entity node synchronized successfully.");
+            } catch (fault: any) {
+                if (!axios.isCancel(fault)) {
+                    setEntityFault({
+                        message: fault.response?.data?.error || fault.message || 'Entity synchronization failed',
+                        code: fault.code || (fault.response ? `OS_API_FAULT_${fault.response.status}` : 'KERNEL_NETWORK_ERROR')
                     });
+                    OmnoraLogger.error("Entity Sync Fault", fault);
                 }
             } finally {
-                setLoading(false);
+                setIsHydrating(false);
             }
         }
 
-        fetchProduct();
+        synchronizeEntityNode();
 
-        async function fetchCMS() {
+        async function synchronizeKernelCMS() {
             try {
                 const { data } = await client.get('/cms/content');
                 if (data.success && data.content) {
-                    setSiteContent(data.content);
+                    setKernelContent(data.content);
                     if (data.content.globalStyles) updateSellerStyles(data.content.globalStyles);
                 }
             } catch (err) {
-                console.error('CMS Fetch failed', err);
+                OmnoraLogger.error("Kernel CMS synchronization failed", err);
             }
         }
-        fetchCMS();
+        synchronizeKernelCMS();
 
-        return () => controller.abort();
+        return () => hydroController.abort();
     }, [id, updateSellerStyles]);
 
-    const handleAddToCart = () => {
-        if (!product) return;
+    const stageForDeployment = () => {
+        if (!entity) return;
 
-        const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-        const existing = cart.find((i: any) => i.id === product._id && i.size === selectedSize);
+        const manifest = JSON.parse(localStorage.getItem('cart') || '[]');
+        const existingNode = manifest.find((i: any) => i.id === entity._id && i.config === activeConfig);
 
-        if (existing) {
-            existing.quantity += quantity;
+        if (existingNode) {
+            existingNode.quantity += activationCount;
         } else {
-            cart.push({
-                id: product._id,
-                name: product.name,
-                price: product.price,
-                image: product.image,
-                quantity: quantity,
-                size: selectedSize
+            manifest.push({
+                id: entity._id,
+                name: entity.name,
+                price: entity.price,
+                image: entity.image,
+                quantity: activationCount,
+                config: activeConfig
             });
         }
 
-        localStorage.setItem('cart', JSON.stringify(cart));
+        localStorage.setItem('cart', JSON.stringify(manifest));
         window.dispatchEvent(new Event('cart-updated'));
-        showToast(`${product.name} Added to Bag`, 'success');
+        
+        OmnoraLogger.info(`Entity [${entity._id}] staged for deployment via manifest.`);
+        showToast(`${entity.name}::STAGED_FOR_DEPLOYMENT`, 'success');
     };
 
-    const handleWhatsAppOrder = async () => {
-        if (!product || isProcessing) return;
+    const dispatchManualVerification = async () => {
+        if (!entity || isProcessingProtocol) return;
 
-        setIsProcessing(true);
+        setIsProcessingProtocol(true);
+        OmnoraLogger.info("Dispatching manual verification protocol...");
+        
         try {
-            // Save order as PENDING_CONFIRMATION before redirect
-            const payload = {
+            const committalPayload = {
                 items: [{
-                    productId: product._id,
-                    name: product.name,
-                    price: product.price,
-                    quantity: quantity,
-                    size: selectedSize,
-                    image: product.image
+                    productId: entity._id,
+                    name: entity.name,
+                    price: entity.price,
+                    quantity: activationCount,
+                    config: activeConfig,
+                    image: entity.image
                 }],
-                totalAmount: product.price * quantity,
-                status: 'PENDING_CONFIRMATION'
+                totalAmount: entity.price * activationCount,
+                status: 'AWAITING_VERIFICATION'
             };
 
-            const res = await client.post('/orders', payload);
-            const orderId = res.data?.order?.orderNumber || res.data?.order?._id || 'INQUIRY';
+            const res = await client.post('/orders', committalPayload);
+            const registryIndex = res.data?.order?.orderNumber || res.data?.order?._id || 'INQUIRY';
 
-            const message = `🚀 *NEW ORDER REQUEST* (#${orderId})
+            const protocolMessage = `🚀 *KERNEL_DISPATCH_REQUEST* (#${registryIndex})
         
-Order from: ${window.location.origin}
+Source: ${window.location.origin}
 --------------------------------
-*Product:* ${product.name}
-*Selection:* ${selectedSize}
-*Price:* PKR ${(product.price || 0).toLocaleString()}
-*Quantity:* ${quantity}
+*Entity:* ${entity.name}
+*Configuration:* ${activeConfig}
+*Valuation:* ${(entity.price || 0).toLocaleString()} Credits
+*Activation Count:* ${activationCount}
 --------------------------------
-*Product Link:* ${window.location.href}
+*Registry Link:* ${window.location.href}
 
-Please confirm availability and shipping timeline.`;
+Execute manual verification for this committal intent.`;
 
-            window.open(`https://wa.me/923097613611?text=${encodeURIComponent(message.trim())}`, '_blank');
-        } catch (err: any) {
-            console.error('WhatsApp Persistence Failed', err);
-            showToast('Unable to initiate secure order. Please try again.', 'error');
+            window.open(`https://wa.me/923097613611?text=${encodeURIComponent(protocolMessage.trim())}`, '_blank');
+        } catch (fault: any) {
+            OmnoraLogger.error("Manual Verification Protocol Fault", fault);
+            showToast('PROTOCOL_EXECUTION_FAULT', 'error');
         } finally {
-            setIsProcessing(false);
+            setIsProcessingProtocol(false);
         }
     };
 
-    if (loading) return <div className="p-loading-lux">Refining Details...</div>;
+    if (isHydrating) return <div className="p-loading-lux" style={{ fontFamily: 'var(--font-mono)' }}>HYDRATING_ENTITY_METADATA...</div>;
 
-    if (error || !product) return (
+    if (entityFault || !entity) return (
         <div className="product-detail-page">
             <div className="container" style={{ textAlign: 'center', padding: '10rem 0' }}>
-                <h2>Something went wrong</h2>
-                <p style={{ color: 'red', fontWeight: 'bold' }}>{error?.message || 'We could not find the piece you are looking for.'}</p>
-                <button onClick={() => navigate('/collection')} className="btn-luxury-outline">Back to Collection</button>
+                <h2 className="font-mono uppercase">System Fault Detected</h2>
+                <p style={{ color: 'var(--royal-blue)', fontWeight: 'bold', fontFamily: 'var(--font-mono)' }}>
+                    {entityFault?.message || 'ENTITY_RESOLUTION_FAIL'}
+                </p>
+                <button onClick={() => navigate('/collection')} className="btn-luxury-outline" style={{ fontFamily: 'var(--font-mono)' }}>
+                    RETURN_TO_REGISTRY
+                </button>
             </div>
         </div>
     );
 
-    const isOutOfStock = (product.variants?.length ?? 0) > 0
-        ? (product.variants?.find(v => v.label === selectedSize)?.stock ?? 0) === 0
-        : (product.stock ?? 0) === 0;
+    const isNodeOffline = (entity.variants?.length ?? 0) > 0
+        ? (entity.variants?.find(v => v.label === activeConfig)?.stock ?? 0) === 0
+        : (entity.stock ?? 0) === 0;
 
-    const availableStock = (product.variants?.length ?? 0) > 0
-        ? (product.variants?.find(v => v.label === selectedSize)?.stock ?? 0)
-        : (product.stock ?? 0);
+    const currentLatency = (entity.variants?.length ?? 0) > 0
+        ? (entity.variants?.find(v => v.label === activeConfig)?.stock ?? 0)
+        : (entity.stock ?? 0);
 
     const isPreview = window.location.search.includes('preview=true');
 
     return (
-        <BuilderProvider initialData={siteContent || {}} isPreview={isPreview}>
+        <BuilderProvider initialData={kernelContent || {}} isPreview={isPreview}>
             <div className="product-detail-page scroll-reveal">
                 <div className="container">
-                    <Link to="/collection" className="back-link-lux">
-                        <ArrowLeft size={16} /> BACK TO COLLECTION
+                    <Link to="/collection" className="back-link-lux" style={{ fontFamily: 'var(--font-mono)' }}>
+                        <ArrowLeft size={16} /> RETURN_TO_REGISTRY
                     </Link>
 
                     <div className="product-container">
-                        {/* Gallery */}
+                        {/* Technical Visualization (Gallery) */}
                         <div className="product-gallery">
                             <div className="main-image-box">
-                                <img src={product.image || BRAND_PLACEHOLDER} alt={product.name} />
-                                {product.isBestseller && <div className="bestseller-badge">BESTSELLER</div>}
+                                <img src={entity.image || KERNEL_PLACEHOLDER} alt={entity.name} />
+                                {entity.isBestseller && <div className="bestseller-badge" style={{ fontFamily: 'var(--font-mono)' }}>TOP_TIER</div>}
                             </div>
                         </div>
 
-                        {/* Info */}
+                        {/* Node Metadata (Info) */}
                         <div className="product-info-stack">
-                            <span className="p-brand-lux">OMNORA ATELIER</span>
-                            <h1 className="p-name-lux serif">{product.name}</h1>
-                            <div className="p-price-lux">PKR {(product.price || 0).toLocaleString()}</div>
+                            <span className="p-brand-lux" style={{ fontFamily: 'var(--font-mono)' }}>OMNORA_LABS::FOUNDRY</span>
+                            <h1 className="p-name-lux serif">{entity.name}</h1>
+                            <div className="p-price-lux" style={{ fontFamily: 'var(--font-mono)' }}>
+                                {(entity.price || 0).toLocaleString()} Credits
+                            </div>
 
-                            <p className="p-desc-lux">{product.description}</p>
+                            <p className="p-desc-lux">{entity.description}</p>
 
-                            {/* Variants Selection */}
-                            {(product.variants?.length ?? 0) > 0 && (
+                            {/* Configuration Matrix */}
+                            {(entity.variants?.length ?? 0) > 0 && (
                                 <div className="selection-group">
-                                    <span className="group-label">SELECT VARIANT</span>
+                                    <span className="group-label" style={{ fontFamily: 'var(--font-mono)' }}>SELECT_NODE_VARIANT</span>
                                     <div className="size-grid">
-                                        {product.variants?.map(v => (
+                                        {entity.variants?.map(v => (
                                             <button
                                                 key={v.label}
-                                                className={`size-option ${selectedSize === v.label ? 'active' : ''}`}
-                                                onClick={() => setSelectedSize(v.label)}
+                                                className={`size-option ${activeConfig === v.label ? 'active' : ''}`}
+                                                onClick={() => setActiveConfig(v.label)}
+                                                style={{ fontFamily: 'var(--font-mono)' }}
                                             >
                                                 {v.label}
                                             </button>
@@ -223,65 +253,63 @@ Please confirm availability and shipping timeline.`;
                                 </div>
                             )}
 
-                            {/* Stock Indicator */}
-                            {product.showLowStockWarning && availableStock > 0 && availableStock < 5 && (
-                                <div className="stock-pulse">
+                            {/* Integrity Alerts */}
+                            {entity.showLowStockWarning && currentLatency > 0 && currentLatency < 5 && (
+                                <div className="stock-pulse" style={{ fontFamily: 'var(--font-mono)' }}>
                                     <span className="pulse-dot"></span>
-                                    HURRY! ONLY {availableStock} LEFT IN STOCK
+                                    SYSTEM_ALERT: CRITICAL_LATENCY_{currentLatency}_REMAINING
                                 </div>
                             )}
 
-                            {isOutOfStock && (
-                                <div className="sold-out-notice">SOLD OUT</div>
+                            {isNodeOffline && (
+                                <div className="sold-out-notice" style={{ fontFamily: 'var(--font-mono)' }}>NODE_OFFLINE</div>
                             )}
 
-                            {/* Quantity */}
-                            {!isOutOfStock && (
+                            {/* Activation Parameters */}
+                            {!isNodeOffline && (
                              <div className="selection-group" style={{ marginTop: '2rem' }}>
-    <span className="group-label">QUANTITY</span>
-    <div className="qty-control">
-        <button 
-            aria-label="Decrease quantity"
-            title="Decrease"
-            onClick={() => setQuantity(Math.max(1, quantity - 1))}
-        >
-            <Minus size={14} aria-hidden="true" />
-        </button>
-        <span>{quantity}</span>
-        <button 
-            aria-label="Increase quantity"
-            title="Increase"
-            onClick={() => setQuantity(quantity + 1)}
-        >
-            <Plus size={14} aria-hidden="true" />
-        </button>
-    </div>
-</div>
+                                <span className="group-label" style={{ fontFamily: 'var(--font-mono)' }}>ACTIVATION_COUNT</span>
+                                <div className="qty-control" style={{ fontFamily: 'var(--font-mono)' }}>
+                                    <button 
+                                        aria-label="Decrease activation count"
+                                        onClick={() => setActivationCount(Math.max(1, activationCount - 1))}
+                                    >
+                                        <Minus size={14} />
+                                    </button>
+                                    <span>{activationCount}</span>
+                                    <button 
+                                        aria-label="Increase activation count"
+                                        onClick={() => setActivationCount(activationCount + 1)}
+                                    >
+                                        <Plus size={14} />
+                                    </button>
+                                </div>
+                            </div>
                             )}
 
-                            {/* Actions */}
+                            {/* Protocol Actions */}
                             <div className="p-actions-lux">
-                                {!isOutOfStock && (
+                                {!isNodeOffline && (
                                     <>
-                                        <button className="btn-luxury-action" onClick={handleAddToCart}>
-                                            <ShoppingBag size={18} /> ADD TO SHOPPING BAG
+                                        <button className="btn-luxury-action" onClick={stageForDeployment} style={{ fontFamily: 'var(--font-mono)' }}>
+                                            <ShoppingBag size={18} /> STAGE_FOR_DEPLOYMENT
                                         </button>
-                                        <button className="btn-luxury-outline" onClick={handleWhatsAppOrder}>
-                                            <MessageCircle size={18} /> BUY NOW VIA WHATSAPP
+                                        <button className="btn-luxury-outline" onClick={dispatchManualVerification} style={{ fontFamily: 'var(--font-mono)' }}>
+                                            <MessageCircle size={18} /> DISPATCH_VERIFICATION
                                         </button>
                                     </>
                                 )}
                             </div>
 
-                            {/* Trust */}
+                            {/* Integrity Indicators */}
                             <div className="trust-indicators">
                                 <div className="trust-card">
                                     <Truck size={20} />
-                                    <span>Fast Delivery (3-5 Days)</span>
+                                    <span style={{ fontFamily: 'var(--font-mono)' }}>Global_Propagation::3-5_Cycles</span>
                                 </div>
                                 <div className="trust-card">
                                     <ShieldCheck size={20} />
-                                    <span>Genuine Craftsmanship</span>
+                                    <span style={{ fontFamily: 'var(--font-mono)' }}>Kernel_Integrity::Verified</span>
                                 </div>
                             </div>
                         </div>

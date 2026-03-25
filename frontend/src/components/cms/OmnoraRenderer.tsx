@@ -1,3 +1,12 @@
+/**
+ * 🛠️ OMNORA LABS | [OMNORA RENDERER]
+ * ---------------------------------------------------------
+ * Principal Architect: Ahmad Mahboob (@ahmad-labs)
+ * Division: Universal Commerce OS / Rendering Engine
+ * "Precision is the foundation of industrial scale."
+ * ---------------------------------------------------------
+ */
+
 import React, { useMemo, useContext, createContext } from 'react';
 import { getRegistry } from './BuilderRegistry';
 import { ComponentWrapper } from './ComponentWrapper';
