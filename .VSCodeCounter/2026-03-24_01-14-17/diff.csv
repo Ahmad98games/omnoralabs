@@ -1,0 +1,23 @@
+"filename", "language", "JavaScript", "JSON", "TypeScript JSX", "TypeScript", "HTML", "comment", "blank", "total"
+"c:\omnora OS\backend\controllers\mediaController.js", "JavaScript", -13, 0, 0, 0, 0, -1, -2, -16
+"c:\omnora OS\backend\server.js", "JavaScript", 1, 0, 0, 0, 0, 0, 0, 1
+"c:\omnora OS\backend\test_buckets.cjs", "JavaScript", 22, 0, 0, 0, 0, 0, 6, 28
+"c:\omnora OS\backend\test_merchants.cjs", "JavaScript", 25, 0, 0, 0, 0, 0, 6, 31
+"c:\omnora OS\frontend\index.html", "HTML", 0, 0, 0, 0, 11, 0, 0, 11
+"c:\omnora OS\frontend\package-lock.json", "JSON", 0, 674, 0, 0, 0, 0, 0, 674
+"c:\omnora OS\frontend\package.json", "JSON", 0, 1, 0, 0, 0, 0, 0, 1
+"c:\omnora OS\frontend\src\components\cms\CanvasOverlay.tsx", "TypeScript JSX", 0, 0, -1, 0, 0, -1, -1, -3
+"c:\omnora OS\frontend\src\components\cms\ComponentRegistry.tsx", "TypeScript JSX", 0, 0, 95, 0, 0, 9, 29, 133
+"c:\omnora OS\frontend\src\components\cms\LiveCanvas.tsx", "TypeScript JSX", 0, 0, -50, 0, 0, -4, -10, -64
+"c:\omnora OS\frontend\src\components\cms\SafeRenderer.tsx", "TypeScript JSX", 0, 0, 2, 0, 0, 0, 0, 2
+"c:\omnora OS\frontend\src\components\cms\SmartSidebar.tsx", "TypeScript JSX", 0, 0, 2, 0, 0, 0, 1, 3
+"c:\omnora OS\frontend\src\components\cms\properties\propConfigurations.ts", "TypeScript", 0, 0, 0, 409, 0, 1, 2, 412
+"c:\omnora OS\frontend\src\components\seller\DomainSettings.tsx", "TypeScript JSX", 0, 0, 14, 0, 0, 0, 0, 14
+"c:\omnora OS\frontend\src\components\ui\RadixSelect.tsx", "TypeScript JSX", 0, 0, 71, 0, 0, 0, 5, 76
+"c:\omnora OS\frontend\src\context\AuthContext.tsx", "TypeScript JSX", 0, 0, 10, 0, 0, 1, 3, 14
+"c:\omnora OS\frontend\src\context\BuilderContext.tsx", "TypeScript JSX", 0, 0, 2, 0, 0, 0, 0, 2
+"c:\omnora OS\frontend\src\pages\seller\SellerProfile.tsx", "TypeScript JSX", 0, 0, 90, 0, 0, 7, 14, 111
+"c:\omnora OS\frontend\src\stores\useSettingsStore.ts", "TypeScript", 0, 0, 0, 83, 0, 2, 15, 100
+"c:\omnora OS\frontend\tmp\inspect_merchants.js", "JavaScript", 27, 0, 0, 0, 0, 1, 7, 35
+"c:\omnora OS\vercel.json", "JSON", 0, -11, 0, 0, 0, 0, -1, -12
+"Total", "-", 62, 664, 235, 492, 11, 15, 74, 1553

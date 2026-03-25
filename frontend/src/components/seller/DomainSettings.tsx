@@ -64,7 +64,7 @@ export const DomainSettings: React.FC = () => {
     // Polling logic for pending domains
     useEffect(() => {
         if (currentDomain && domainStatus?.status === 'pending') {
-            const interval = setInterval(() => checkStatus(currentDomain), 10000);
+            const interval = setInterval(() => checkStatus(currentDomain), 30000);
             return () => clearInterval(interval);
         }
     }, [currentDomain, domainStatus, checkStatus]);
@@ -203,9 +203,23 @@ export const DomainSettings: React.FC = () => {
 
                     <div className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <DnsCard type="CNAME" host="www" value="shops.omnora.com" />
-                            <DnsCard type="A" host="@" value="76.76.21.21" />
-                            <DnsCard type="TXT" host="_vercel" value="vc-active..." />
+                            <DnsCard 
+                                type="CNAME" 
+                                host="www" 
+                                value={domainStatus?.config?.cname || (import.meta as any).env.VITE_CNAME_TARGET || 'shops.omnora.com'} 
+                            />
+                            <DnsCard 
+                                type="A" 
+                                host="@" 
+                                value={domainStatus?.config?.a || (import.meta as any).env.VITE_A_RECORD || '76.76.21.21'} 
+                            />
+                            {domainStatus?.config?.cname && (
+                                <DnsCard 
+                                    type="TXT" 
+                                    host="_vercel" 
+                                    value="verified" 
+                                />
+                            )}
                         </div>
                     </div>
                     

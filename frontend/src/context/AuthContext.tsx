@@ -118,8 +118,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             if (data.success && data.user) {
                 setUser(data.user);
                 setStatus('authenticated');
-                // Load profile from Supabase concurrently
-                loadProfile(data.user.id);
+                // Load profile from Supabase concurrently with hydration wait
+                await loadProfile(data.user.id);
             } else {
                 setStatus('unauthenticated');
                 if (window.location.pathname !== '/login' && !window.location.pathname.startsWith('/store')) {

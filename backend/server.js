@@ -21,6 +21,7 @@ try {
     app.use('/api/products', require('../gsgbackend/routes/productRoutes'));
     app.use('/api/orders', require('../gsgbackend/routes/orderRoutes'));
     app.use('/api/users', require('../gsgbackend/routes/userRoutes'));
+    app.use('/api/media', require('./routes/mediaRoutes'));
     console.log('✅ Omni-Route Gateway: Online');
 } catch (err) {
     console.error('❌ Failed to load Core Routes:', err.message);

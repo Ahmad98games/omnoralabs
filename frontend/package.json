@@ -12,6 +12,7 @@
   "dependencies": {
     "@emotion/is-prop-valid": "^1.4.0",
     "@mlc-ai/web-llm": "^0.2.81",
+    "@radix-ui/react-select": "^2.2.6",
     "@stripe/react-stripe-js": "^5.4.0",
     "@stripe/stripe-js": "^8.5.2",
     "@supabase/supabase-js": "^2.98.0",

@@ -14,30 +14,14 @@ const mediaController = {
             const { originalname, filename, size, mimetype } = req.file;
             const targetTenant = req.tenantId || 'default_tenant';
 
-            // Create Asset Record
-            const asset = new ImageAsset({
-                originalName: originalname,
-                fileName: filename,
-                storageKey: filename, // UUID-based filename is our key
-                url: `/uploads/${filename}`,
-                originalUrl: `/uploads/${filename}`, // Temporary backfill for schema compatibility
-                size,
-                mimeType: mimetype,
-                tenant_id: targetTenant,
-                seller: req.user._id,
-                uploadedAt: new Date()
-            });
-
-            await asset.save();
-
             res.status(201).json({
                 success: true,
                 message: 'Image asset registered',
                 asset: {
-                    id: asset._id,
-                    url: asset.url,
-                    originalName: asset.originalName,
-                    size: asset.size
+                    id: filename,
+                    url: `/uploads/${filename}`,
+                    originalName: originalname,
+                    size: size
                 }
             });
         } catch (error) {

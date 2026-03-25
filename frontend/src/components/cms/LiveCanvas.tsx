@@ -333,12 +333,13 @@ export const LiveCanvas: React.FC = () => {
   // 🛡️ Resolve blocks from Zustand nodes — this is the live builder state.
   // nodes[activePageId] is an array of block IDs or block objects depending
   // on how addNode() stores them. SafeRenderer handles both formats.
-  const blocks = useMemo(() => {
+  const blocks = React.useMemo(() => {
     if (!activePageId || !nodes) return [];
     const pageBlocks = nodes[activePageId];
     return Array.isArray(pageBlocks) ? pageBlocks : [];
   }, [nodes, activePageId]);
 
+  const isEmpty = blocks.length === 0;
   const isEdit = mode === 'edit';
   const isPhone = preset.category === 'phone';
   const isTablet = preset.category === 'tablet';
@@ -414,7 +415,6 @@ export const LiveCanvas: React.FC = () => {
     </div>
   );
 
-  const isEmpty = blocks.length === 0;
   return (
     <CanvasErrorBoundary>
       <div
