@@ -156,6 +156,7 @@ export default function Checkout() {
             // Create order in backend with INITIATED status
             const res = await client.post('/orders', payload);
 
+            if (res.data.success) {
                 OmnoraLogger.info('CHECKOUT', `Committal successful. Order ID: ${res.data.order.id || 'N/A'}`);
                 setIsSuccess(true); // Cinematic trigger
                 
