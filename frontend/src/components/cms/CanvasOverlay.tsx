@@ -908,6 +908,14 @@ const CanvasOverlayInner: React.FC = () => {
                 e.stopPropagation();
                 if (isHydrating) return;
 
+                // ── CRITICAL: Extract the component type from drag data ──
+                const type = e.dataTransfer.getData('text/plain')?.trim();
+                if (!type) {
+                    import('react-hot-toast').then(({ toast }) => toast.error('Drop failed: No component type detected.'));
+                    setDropIndex(null); setDropLineY(null); setDragId(null);
+                    return;
+                }
+
                 const { DEFAULT_PROPS, resolveComponentType } = await import('../../components/cms/ComponentRegistry');
                 const realType = resolveComponentType(type);
                 if (!DEFAULT_PROPS[realType]) {
@@ -928,8 +936,9 @@ const CanvasOverlayInner: React.FC = () => {
                     useBuilderStore.setState({ lastDroppedNodeId: newId });
                     setTimeout(() => useBuilderStore.setState({ lastDroppedNodeId: null }), 1000);
                     
-                    import('react-hot-toast').then(({ toast }) => toast.success(`Added ${type.replace(/_/g, ' ')}`));
+                    import('react-hot-toast').then(({ toast }) => toast.success(`Added ${realType.replace(/_/g, ' ')}`));
                 } catch (err) {
+                    console.error('[Omnora DnD] Hydration error:', err);
                     import('react-hot-toast').then(({ toast }) => toast.error("Hydration Failed"));
                 } finally {
                     setIsHydrating(false);
