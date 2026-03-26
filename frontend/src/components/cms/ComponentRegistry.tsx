@@ -380,6 +380,20 @@ export const DEFAULT_PROPS: Record<string, ComponentSchema> = {
       animationType: 'slide',
     },
   },
+
+  'newsletter_signup': {
+    version: '1.0.0',
+    defaultProps: {
+      headline: 'Stay in the Loop',
+      subheadline: 'Subscribe for exclusive deals, new arrivals, and insider access.',
+      buttonText: 'Subscribe',
+      buttonColor: '#7c6dfa',
+      bgColor: '#13131a',
+      layout: 'stacked',
+      showNameField: false,
+      successMessage: '✅ You\'re in! Check your inbox for a welcome gift.',
+    },
+  },
 };
 
 // ─── Component Registry ───────────────────────────────────────────────────────
@@ -463,6 +477,9 @@ export const ComponentRegistry: Record<
   'promo_strip': React.lazy(() =>
     import('../blocks/PromoStrip').then(m => ({ default: m.PromoStrip }))
   ),
+  'newsletter_signup': React.lazy(() =>
+    import('../blocks/NewsletterSignup').then(m => ({ default: m.NewsletterSignup }))
+  ),
 };
 // ─── ALIAS BRIDGE MAPPINGS ──────────────────────────────────────────────────
 export const COMPONENT_ALIASES: Record<string, string> = {
@@ -475,7 +492,8 @@ export const COMPONENT_ALIASES: Record<string, string> = {
   "faq_block": "faq_accordion",
   "footer": "site_footer",
   "countdown_banner": "countdown_timer",
-  "promo_banner": "promo_strip"
+  "promo_banner": "promo_strip",
+  "newsletter": "newsletter_signup"
 };
 
 /**

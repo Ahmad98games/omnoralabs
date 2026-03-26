@@ -3,6 +3,7 @@ import client from '../api/client';
 import { nodeStore } from '../platform/core/NodeStore';
 import { dispatcher } from '../platform/core/Dispatcher';
 import { SECTION_TYPES, getRegistryEntry, SectionType } from '../components/cms/BuilderRegistry';
+import { resolveComponentType } from '../components/cms/ComponentRegistry';
 import { deepMergeProps, reportRegistryError, safeDeepUpdate, verifyInvariants } from '../utils/builderUtils';
 import { OmnoraContext, OmnoraMode } from './OmnoraContext';
 import type { DropPosition } from '../components/cms/ComponentWrapper';
@@ -591,10 +592,16 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
     const addNode = useCallback((type: string, props: any = {}, parentId: string | null = null, index: number | null = null) => {
         if (mode === 'preview' || !canInteract(InteractionPriority.DRAGGING)) return '';
 
-        const entry = getRegistryEntry(type as SectionType);
+        // ── Resolve aliases before registry lookup ──
+        // ElementLibrary uses BLOCK_TYPES (e.g. 'hero', 'hero_split', 'header')
+        // but BuilderRegistry registers canonical names ('hero_banner', 'split_hero', 'store_header').
+        // resolveComponentType bridges the gap.
+        const resolvedType = resolveComponentType(type);
+
+        const entry = getRegistryEntry(resolvedType as SectionType);
         if (!entry) {
             reportRegistryError({
-                type,
+                type: resolvedType,
                 context: 'Attempted node insertion',
                 pageId: activePageId,
                 viewport
@@ -602,12 +609,12 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
             return '';
         }
 
-        const id = `${type}_${Date.now()}`;
-        const hydratedProps = deepMergeProps(type, entry.defaultProps || {}, props);
+        const id = `${resolvedType}_${Date.now()}`;
+        const hydratedProps = deepMergeProps(resolvedType, entry.defaultProps || {}, props);
 
         const newNode: BuilderNode = {
             id,
-            type,
+            type: resolvedType,
             parentId,
             children: [],
             props: hydratedProps,
