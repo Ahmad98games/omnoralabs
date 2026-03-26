@@ -7,7 +7,7 @@ import { deepMergeProps, reportRegistryError, safeDeepUpdate, verifyInvariants }
 import { OmnoraContext, OmnoraMode } from './OmnoraContext';
 import type { DropPosition } from '../components/cms/ComponentWrapper';
 import { useSyncExternalStore } from 'react';
-import { NewPageInitializer } from '../platform/kernel/NewPageInitializer';
+import { NewPageInitializer } from '../lib/kernel/utils/NewPageInitializer';
 import { useBuilderStore } from '../stores/useBuilderStore';
 import { getPreset } from '../components/cms/DevicePresetPanel';
 
