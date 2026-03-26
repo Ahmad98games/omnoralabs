@@ -918,7 +918,7 @@ const CanvasOverlayInner: React.FC = () => {
 
                 setIsHydrating(true);
                 try {
-                    const { OmnoraKernel } = await import('../../platform/kernel/OmnoraKernel');
+                    const { OmnoraKernel } = await import('../../lib/kernel/Kernel');
                     const hydrated = await OmnoraKernel.getInstance().hydrate({ blocks: [{ type: realType, props: {} }] });
                     const props = hydrated?.blocks?.[0]?.props || {};
 
