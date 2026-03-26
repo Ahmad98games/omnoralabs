@@ -124,16 +124,31 @@ export const AdminOverview = () => {
         const fetchAnalytics = async () => {
             if (!user) return;
             setIsLoading(true);
+
+            // Timeout guard — never hang on loading state
+            const timeout = setTimeout(() => {
+                setIsLoading(false);
+                setAnalytics({ totalRevenue: 0, orderCount: 0, views: 0, conversionRate: 0, dailyStats: [], recentOrders: [] } as any);
+                setCommandSummary('Unable to fetch store metrics. Check your connection.');
+            }, 10000);
+
             try {
                 const data = await databaseClient.getStoreAnalytics(user.id);
+                clearTimeout(timeout);
                 setAnalytics(data);
 
-                // Fetch AI Summary
-                const sumRes = await axios.post('/api/cms/performance-hub/summary', { stats: data });
-                if (sumRes.data?.summary) setCommandSummary(sumRes.data.summary);
-
+                // Fetch AI Summary (non-blocking)
+                try {
+                    const sumRes = await axios.post('/api/cms/performance-hub/summary', { stats: data });
+                    if (sumRes.data?.summary) setCommandSummary(sumRes.data.summary);
+                } catch {
+                    setCommandSummary('AI summary unavailable.');
+                }
             } catch (error: any) {
+                clearTimeout(timeout);
                 showToast(error.message || 'Failed to fetch analytics', 'error');
+                setAnalytics({ totalRevenue: 0, orderCount: 0, views: 0, conversionRate: 0, dailyStats: [], recentOrders: [] } as any);
+                setCommandSummary('Metrics load failed. Displaying empty state.');
             } finally {
                 setIsLoading(false);
             }

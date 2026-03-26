@@ -50,10 +50,22 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
 
     loadSettings: async (userId: string) => {
         set({ loading: true, error: null });
+
+        // Timeout guard — never hang forever
+        const timeout = new Promise<never>((_, reject) =>
+            setTimeout(() => reject(new Error('Settings load timed out (8s)')), 8000)
+        );
+
         try {
-            const { data, error } = await Kernel.readSystemState('MERCHANT_SETTINGS', userId);
+            const result = await Promise.race([
+                Kernel.readSystemState('MERCHANT_SETTINGS', userId),
+                timeout
+            ]);
+
+            const { data, error } = result as { data: any; error: any };
 
             if (error) throw error;
+            if (!data) throw new Error('No merchant record found');
             
             set({ 
                 settings: {
@@ -65,7 +77,17 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
             OmnoraLogger.info("SETTINGS", "Merchant settings loaded successfully via Kernel.");
         } catch (err: any) {
             OmnoraLogger.error("SETTINGS", `Failed to load settings: ${err.message}`);
-            set({ error: err.message || 'Failed to load settings', loading: false });
+            // Force-clear loading so the page renders with empty defaults instead of hanging
+            set({ 
+                settings: {
+                    id: userId,
+                    display_name: '',
+                    custom_domain: null,
+                    metadata: {}
+                },
+                error: err.message || 'Failed to load settings', 
+                loading: false 
+            });
         }
     },
 

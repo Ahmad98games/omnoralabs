@@ -166,11 +166,19 @@ export default function SellerDashboard() {
     }, [searchParams]);
 
     const fetchContent = async () => {
+        // Timeout guard — never block the dashboard forever
+        const timeout = setTimeout(() => {
+            setLoading(false);
+            setLocalContent({ pages: { home: { title: 'Home', layout: [] } } });
+        }, 10000);
+
         try {
             const [statsRes, cmsRes] = await Promise.all([
-                client.get('/cms/performance-hub'),
-                cmsApi.get('/cms/dashboard'),
+                client.get('/cms/performance-hub').catch(() => ({ data: { success: false } })),
+                cmsApi.get('/cms/dashboard').catch(() => ({ data: { success: false } })),
             ]);
+
+            clearTimeout(timeout);
 
             if (statsRes.data.success) setStats(statsRes.data.stats);
 
@@ -187,6 +195,7 @@ export default function SellerDashboard() {
                 });
             }
         } catch (err) {
+            clearTimeout(timeout);
             console.error('Failed to fetch dashboard content:', err);
         } finally {
             setLoading(false);
