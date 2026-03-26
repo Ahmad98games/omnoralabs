@@ -11,7 +11,7 @@ import { toast } from 'react-hot-toast';
 
 import { supabase } from '../supabaseClient';
 import { DEFAULT_PROPS } from '../../components/cms/ComponentRegistry';
-import { runMigrations } from '../../platform/kernel/MigrationScript';
+import { runMigrations } from './utils/MigrationScript';
 import { OmnoraLogger } from './utils/logger';
 
 export const CURRENT_KERNEL_VERSION = '2.1.0';
