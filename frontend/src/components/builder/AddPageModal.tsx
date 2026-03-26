@@ -3,7 +3,7 @@ import { useBuilder } from '../../context/BuilderContext';
 import { slugify, validateSlug } from '../../utils/slugify';
 import { cloneNodeTree } from '../../utils/nodeCloner';
 import { toast } from 'react-hot-toast';
-import { NewPageInitializer } from '../../platform/kernel/NewPageInitializer';
+import { NewPageInitializer } from '../../lib/kernel/utils/NewPageInitializer';
 
 interface AddPageModalProps {
     isOpen?: boolean;
