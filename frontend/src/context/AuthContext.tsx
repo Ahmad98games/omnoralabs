@@ -9,6 +9,7 @@ export interface User {
     id: string;
     email: string;
     name: string;
+    full_name?: string; // 🛡️ Added for Google metadata compatibility
     role: 'customer' | 'seller' | 'admin' | 'super-admin';
     plan?: 'free' | 'pro';
     photoURL?: string;
@@ -151,8 +152,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const syncGoogleProfile = async (supabaseUser: any) => {
         const role = localStorage.getItem('omnora_selected_role') || 'customer';
+        console.log(`[Google Sync] Synchronizing for role: ${role}`, supabaseUser.id);
+        
         try {
-            // 🛡️ Atomic Sync: Ensure backend profile for Google users
+            // 🛡️ 1. Update Supabase User Metadata for role persistence
+            // This is critical for backends that read role from Supabase metadata
+            await supabase.auth.updateUser({
+                data: { role: role }
+            });
+
+            // 🛡️ 2. Atomic Sync: Ensure backend profile for Google users
             if (role === 'seller' || role === 'admin') {
                 const { error: profileError } = await supabase
                     .from('merchants')
@@ -162,10 +171,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                         email: supabaseUser.email,
                         store_name: `${supabaseUser.user_metadata?.full_name || 'My'}'s Store`,
                         created_at: new Date().toISOString(),
-                    });
+                    }, { onConflict: 'id' });
+                
                 if (profileError) console.error('[Google Profile Sync Fail]', profileError);
             }
-            localStorage.removeItem('omnora_selected_role');
+            
+            // Note: role is still in localStorage so we can use it for final redirect
         } catch (e) {
             console.error('[Google Sync Error]', e);
         }
@@ -210,13 +221,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 setAuthHeader(session.access_token);
                 
                 if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+                    // 🛡️ 1. Extract Role BEFORE sync (Google specific)
+                    const { data: { user: sbUser } } = await supabase.auth.getUser();
+                    
+                    // 🛡️ 2. Load basic Supabase profile
                     await loadProfile(session.user.id);
-                    // 🛡️ After Google redirect, we FORCE a sync check
+                    
+                    // 🛡️ 3. Sync role and backend state
                     await initAuth(true);
                     
-                    // If we are at the callback route, move to dashboard
+                    // 🛡️ 4. Final Path Resolution for Callback
                     if (window.location.pathname === '/auth/callback') {
-                        window.location.href = '/seller/dashboard';
+                        // Priority: 1. Supabase Meta 2. LocalStorage 3. Default
+                        const metaRole = sbUser?.user_metadata?.role;
+                        const savedRole = metaRole || localStorage.getItem('omnora_selected_role') || 'customer';
+                        
+                        const target = (savedRole === 'seller' || savedRole === 'admin') 
+                            ? '/seller/dashboard?tab=builder' 
+                            : '/profile';
+                            
+                        console.log(`[Google Auth Callback] Resolved Role: ${savedRole} -> Target: ${target}`);
+                        localStorage.removeItem('omnora_selected_role');
+                        window.location.href = target;
                     }
                 }
             } else if (event === 'SIGNED_OUT') {
