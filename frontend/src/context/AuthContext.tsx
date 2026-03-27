@@ -93,10 +93,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     // 1. INITIAL SESSION CHECK
-    const initAuth = useCallback(async () => {
+    const initAuth = useCallback(async (forceSync = false) => {
         setAuthError(false);
         setLoading(true);
         const token = localStorage.getItem('token');
+        const currentPath = window.location.pathname;
+
+        // 🛡️ Imperial Guard: Never trigger a reload-loop if already at Login/Register
+        const isAuthPath = currentPath === '/login' || currentPath === '/register' || currentPath === '/auth/callback';
 
         if (!token || token === 'null' || token === 'undefined') {
             setLoading(false);
@@ -115,29 +119,57 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 timeout: 3000,
                 'axios-retry': { retries: 0 } 
             });
+
             if (data.success && data.user) {
                 setUser(data.user);
                 setStatus('authenticated');
-                // Load profile from Supabase concurrently with hydration wait
                 await loadProfile(data.user.id);
-            } else {
+            } else if (!isAuthPath && !currentPath.startsWith('/store')) {
                 setStatus('unauthenticated');
-                if (window.location.pathname !== '/login' && !window.location.pathname.startsWith('/store')) {
-                    window.location.href = '/login';
-                }
-            }
-            setLoading(false);
-            setIsInitialized(true);
-        } catch (error) {
-            console.warn('Session re-hydration failure:', error);
-            setStatus('unauthenticated');
-            setLoading(false);
-            setIsInitialized(true);
-            if (window.location.pathname !== '/login' && !window.location.pathname.startsWith('/store')) {
                 window.location.href = '/login';
             }
+        } catch (error: any) {
+            console.warn('Session re-hydration failure:', error);
+            
+            // 🛡️ Post-Google Sync: If user is logged into Supabase but missing in DB, try auto-sync
+            const { data: { user: sbUser } } = await supabase.auth.getUser();
+            if (sbUser && forceSync) {
+                await syncGoogleProfile(sbUser);
+                // retry once after sync
+                return initAuth(false);
+            }
+
+            setStatus('unauthenticated');
+            if (!isAuthPath && !currentPath.startsWith('/store')) {
+                window.location.href = '/login';
+            }
+        } finally {
+            setLoading(false);
+            setIsInitialized(true);
         }
-    }, []);
+    }, [loadProfile]);
+
+    const syncGoogleProfile = async (supabaseUser: any) => {
+        const role = localStorage.getItem('omnora_selected_role') || 'customer';
+        try {
+            // 🛡️ Atomic Sync: Ensure backend profile for Google users
+            if (role === 'seller' || role === 'admin') {
+                const { error: profileError } = await supabase
+                    .from('merchants')
+                    .upsert({
+                        id: supabaseUser.id,
+                        display_name: supabaseUser.user_metadata?.full_name || supabaseUser.email,
+                        email: supabaseUser.email,
+                        store_name: `${supabaseUser.user_metadata?.full_name || 'My'}'s Store`,
+                        created_at: new Date().toISOString(),
+                    });
+                if (profileError) console.error('[Google Profile Sync Fail]', profileError);
+            }
+            localStorage.removeItem('omnora_selected_role');
+        } catch (e) {
+            console.error('[Google Sync Error]', e);
+        }
+    };
 
     useEffect(() => {
         let isMounted = true;
@@ -179,8 +211,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 
                 if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
                     await loadProfile(session.user.id);
-                    // Re-run initAuth to set React user state from the backend
-                    await initAuth();
+                    // 🛡️ After Google redirect, we FORCE a sync check
+                    await initAuth(true);
+                    
+                    // If we are at the callback route, move to dashboard
+                    if (window.location.pathname === '/auth/callback') {
+                        window.location.href = '/seller/dashboard';
+                    }
                 }
             } else if (event === 'SIGNED_OUT') {
                 handleLogoutCleanup();

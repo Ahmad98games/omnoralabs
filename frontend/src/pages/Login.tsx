@@ -129,6 +129,9 @@ const handleSubmit = async (e: React.FormEvent) => {
         setError('');
         setLoadingState(true);
         try {
+            // 🛡️ Imperial Logic: Save selection before Google redirect for post-auth sync
+            localStorage.setItem('omnora_selected_role', selectedRole);
+            
             await loginWithGoogle();
             // Supabase will redirect to Google — no further code runs here
         } catch (err: any) {
