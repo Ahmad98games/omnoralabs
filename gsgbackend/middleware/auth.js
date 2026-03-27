@@ -54,14 +54,18 @@ const protect = async (req, res, next) => {
       return res.status(401).json({ error: 'Not authorized. Token missing.' });
     }
 
-    const decoded = jwt.verify(token, JWT_SECRET);
-    // logger.info(`AUTH_DEBUG: Token decoded`, { id: decoded.id }); // Too noisy for prod, useful for debug
+    const { data: { user: sbUser }, error: sbError } = await supabase.auth.getUser(token);
+    
+    if (sbError || !sbUser) {
+      logger.warn('AUTH_FAIL: Supabase token validation failed', { error: sbError?.message });
+      return res.status(401).json({ error: 'Not authorized. Invalid Supabase token.' });
+    }
 
-    const user = await attachUser(decoded);
+    const user = await attachUser({ id: sbUser.id });
 
     if (!user) {
-      logger.warn('AUTH_FAIL: Token valid but User not found', { userId: decoded.id });
-      return res.status(401).json({ error: 'User associated with this token no longer exists.' });
+      logger.warn('AUTH_FAIL: Token valid but User profile not found in DB', { userId: sbUser.id });
+      return res.status(401).json({ error: 'User profile not found.' });
     }
 
     req.user = user;

@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
-// const { protect } = require('../middleware/auth'); // Isse abhi comment rakhein jab tak login test na ho jaye
+const { protect } = require('../middleware/auth'); 
 
 // 🟢 PUBLIC ROUTES (No Gatekeeper for now to avoid 500 errors)
 router.post('/register', authController.register);
@@ -11,7 +11,7 @@ router.post('/reset-password/:token', authController.resetPassword);
 
 // 🔵 PROTECTED ROUTES
 // Note: 'protect' middleware ko tab on karein jab apka naya Manual JWT logic stable ho
-router.get('/me', authController.getMe); 
+router.get('/me', protect, authController.getMe); 
 router.post('/refresh', authController.refreshToken);
 router.post('/logout', authController.logout);
 
