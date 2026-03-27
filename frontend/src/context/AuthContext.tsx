@@ -101,24 +101,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         setAuthError(false);
         setLoading(true);
-        const token = localStorage.getItem('token');
         const currentPath = window.location.pathname;
 
         // 🛡️ Imperial Guard: Never trigger a reload-loop if already at Login/Register
         const isAuthPath = currentPath === '/login' || currentPath === '/register' || currentPath === '/auth/callback';
 
-        if (!token || token === 'null' || token === 'undefined') {
-            setLoading(false);
-            setIsInitialized(true);
-            setStatus('unauthenticated');
-            return;
-        }
-
-        // Global Headers set IMMEDIATELY before fetch
-        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-        client.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-
         try {
+            // Check session directly from Supabase source of truth
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                setLoading(false);
+                setIsInitialized(true);
+                setStatus('unauthenticated');
+                return;
+            }
+
             // Add timeout to prevent hanging - reduced to 7s for faster loop exit
             const { data } = await client.get('/auth/me', { 
                 timeout: 7000,

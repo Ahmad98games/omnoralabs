@@ -1,5 +1,6 @@
 import axios, { AxiosError } from 'axios';
 import axiosRetry from 'axios-retry';
+import { supabase } from '../lib/supabaseClient';
 
 const client = axios.create({
   baseURL: import.meta.env.VITE_API_URL || '/api',
@@ -15,29 +16,27 @@ axiosRetry(client, {
   retries: 3,
   retryDelay: axiosRetry.exponentialDelay,
   retryCondition: (error) => {
-    return axiosRetry.isNetworkOrIdempotentRequestError(error);
+    return axiosRetry.isNetworkOrIdempotentRequestError(error) || error.code === 'ECONNABORTED';
   }
 });
 
-// Request Interceptor: Auth & Multi-Tenant Scoping
+// Request Interceptor: Unified Auth & Tenant Scoping
 client.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token');
+  async (config) => {
+    // 🛡️ Imperial Guard: Automatically fetch current Supabase session
+    // This ensures we always have the freshest token before the request leaves
+    const { data: { session } } = await supabase.auth.getSession();
+    const token = session?.access_token || localStorage.getItem('token');
     const tenantId = localStorage.getItem('tenantId');
 
-    // 1. Auth Guard: Block requests without token unless public
     if (token && token !== 'undefined' && token !== 'null') {
       config.headers.Authorization = `Bearer ${token}`;
     }
     
-    // 2. UUID Validation: Critical Fix for "Invalid input syntax for type uuid"
+    // 2. UUID Validation
     const isValidUUID = (id: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
-    
     if (tenantId && isValidUUID(tenantId)) {
       config.headers['x-tenant-id'] = tenantId;
-    } else {
-      // DELETE header if it's "default_tenant" or invalid to prevent 500 error
-      delete config.headers['x-tenant-id'];
     }
 
     return config;
@@ -45,19 +44,27 @@ client.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response Interceptor: Global Error Handling
+// Response Interceptor: 401 Loop Buster
 client.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
-    // 🛡️ Verbose error logger: Full URL tracking for 404/500 diagnostics
-    console.error(`[Axios Failed] ${error.config?.method?.toUpperCase()} ${error.config?.baseURL || ''}${error.config?.url} | Status: ${error.response?.status || 'Network'} | Msg: ${error.message}`);
+    console.error(`[Axios Failed] ${error.config?.method?.toUpperCase()} ${error.config?.url} | Status: ${error.response?.status || 'Network'} | Msg: ${error.message}`);
 
     if (error.response?.status === 401) {
-      console.warn('[Axios Interceptor] 401 Unauthorized. Letting AuthContext manage session reset nodes.');
-      // window.location.href = '/login'; // 🛡️ Disabled to prevent infinite page reloads triggers node!
+      console.warn('[Axios Interceptor] 401 Unauthorized. Clearing session and redirecting.');
+      
+      // Atomic logout to break infinite loops
+      await supabase.auth.signOut();
+      localStorage.removeItem('token');
+      
+      if (typeof window !== 'undefined' && 
+          window.location.pathname !== '/login' && 
+          !window.location.pathname.startsWith('/store')) {
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }
 );
 
-export default client;
+export default client;
