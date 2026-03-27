@@ -88,6 +88,7 @@ const handleSubmit = async (e: React.FormEvent) => {
             } else {
                 navigate('/profile');
             }
+        } else {
             // 2. Login Flow
             const loggedUser = await login(formData.email, formData.password);
 
@@ -101,6 +102,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                     navigate('/profile');
                 }
             }
+        }
     } catch (err: any) {
         console.error("Auth Error:", err);
         let message = 'Access Denied. Please verify credentials.';
