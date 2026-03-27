@@ -83,11 +83,33 @@ const protect = async (req, res, next) => {
       return res.status(401).json({ error: 'Not authorized. Invalid Supabase token.' });
     }
 
-    const user = await attachUser({ id: sbUser.id });
+    let user = await attachUser({ id: sbUser.id });
 
+    // 🛡️ Self-Healing: If token is valid but user missing in DB (Sync Failure)
+    // We recreate the user profile immediately from Supabase metadata
     if (!user) {
-      logger.warn('AUTH_FAIL: Token valid but User profile not found in DB', { userId: sbUser.id });
-      return res.status(401).json({ error: 'User profile not found.' });
+      logger.info('AUTH_RECOVERY: Hydrating missing user profile from Supabase', { userId: sbUser.id });
+      
+      const role = sbUser.user_metadata?.role || 'customer';
+      const name = sbUser.user_metadata?.full_name || sbUser.user_metadata?.name || sbUser.email.split('@')[0];
+      
+      const { data: newUser, error: syncError } = await supabase
+        .from('users')
+        .upsert({
+          id: sbUser.id,
+          email: sbUser.email,
+          name: name,
+          role: role,
+          created_at: new Date().toISOString()
+        })
+        .select()
+        .single();
+
+      if (syncError) {
+        logger.error('AUTH_RECOVERY_FAIL: Could not hydrate user', { error: syncError.message });
+        return res.status(401).json({ error: 'User profile not found and auto-sync failed.' });
+      }
+      user = newUser;
     }
 
     req.user = user;
