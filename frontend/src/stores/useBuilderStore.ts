@@ -313,21 +313,16 @@ export const useBuilderStore = create<BuilderState>()(persist(immer((set, get) =
 })), {
     name: 'omnora-builder-storage',
     skipHydration: true, // 🛡️ Spec 4: skip automatic hydration
-    onRehydrateStorage: () => (state) => {
-        // Set isHydrating to true before rehydration starts
-        if (state) {
-            state.setIsHydrating(true);
-        }
-
+    onRehydrateStorage: () => {
         return (state, error) => {
             if (error || !state || !state.nodes || Object.keys(state.nodes).length === 0) {
                 OmnoraLogger.error('BUILDER-STORE', `Boot-Guard Triggered: Storage payload is null, empty, or corrupted. Wiping persist. ${error}`);
                 
                 if (state) {
-                    // Reset to initial state logic
                     state.nodes = {};
                     state.pages = {}; 
-                    state.activePageId = Kernel.getLastValidPageId();
+                    // Use localStorage fallback instead of non-existent Kernel method
+                    state.activePageId = localStorage.getItem('omnora_last_valid_page') || '';
                 }
             }
             // Set isHydrating to false after rehydration finishes (or fails)

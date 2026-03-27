@@ -85,6 +85,13 @@ export default function App() {
                         <Route path={ROUTES.SELLER} element={<ProtectedRoute><SellerDashboard /></ProtectedRoute>} />
                         <Route path="/builder" element={<ProtectedRoute><Navigate to="/seller?tab=builder" replace /></ProtectedRoute>} />
                         
+                        {/* Google OAuth Callback — Supabase processes tokens via onAuthStateChange */}
+                        <Route path="/auth/callback" element={
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#050505', color: '#F1D592', fontFamily: 'serif', fontSize: '18px' }}>
+                                Authenticating...
+                            </div>
+                        } />
+
                         {/* Fallback */}
                         <Route path="*" element={<Home />} />
                     </Routes>

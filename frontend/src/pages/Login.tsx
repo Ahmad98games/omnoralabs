@@ -126,31 +126,16 @@ const handleSubmit = async (e: React.FormEvent) => {
 };
 
     const handleGoogleSignIn = async () => {
-
-        setError('Google Sign-In is not supported in Local Mode');
-        return;
-
-        /* 
-        // Disabled for Local Mode
         setError('');
-
         setLoadingState(true);
-
         try {
-
             await loginWithGoogle();
-
+            // Supabase will redirect to Google — no further code runs here
         } catch (err: any) {
-
             setError(err.message || 'Google sign‑in failed');
-
         } finally {
-
             setLoadingState(false);
-
         }
-        */
-
     };
 
 

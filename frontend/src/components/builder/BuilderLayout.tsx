@@ -6,8 +6,6 @@ import { ElementLibrary } from '../cms/ElementLibrary';
 import { BuilderToolbar } from '../cms/BuilderToolbar';
 import { useBuilderStore } from '../../stores/useBuilderStore';
 import { useNavigate } from 'react-router-dom';
-import { NewPageInitializer } from '../../lib/kernel/utils/NewPageInitializer';
-import { Kernel } from '../../lib/kernel/Kernel';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // 🛡️ standard React ErrorBoundary for catching inner Canvas/Hydrating crashes
@@ -131,15 +129,13 @@ const BuilderLayoutContent: React.FC = () => {
     useEffect(() => {
         try {
             if (activePageId && activePageId !== lastValidPageId) {
-                // Safely commit new page to tracked valid fallback history 
                 setLastValidPageId(activePageId);
-                Kernel.saveLastValidPageId(activePageId);
+                // Persist to localStorage as a safe fallback
+                try { localStorage.setItem('omnora_last_valid_page', activePageId); } catch {}
             }
         } catch (e) {
             console.error('[BuilderLayout] Page Switch Failure caught:', e);
-            // Fallback: Reset state atomically and route back to explicit home builder path
             useBuilderStore.getState().setIsHydrating(false);
-            window.location.hash = `/builder/home`; // standard router-independent fallback replace
         }
     }, [activePageId]);
     
@@ -166,9 +162,11 @@ const BuilderLayoutContent: React.FC = () => {
         const handleResize = () => setIsMobile(window.innerWidth < 1024);
         window.addEventListener('resize', handleResize);
         
-        // 🛡️ Spec 4: Manually trigger rehydration inside safe React loop
+        // 🛡️ Safe rehydration — only if persist middleware is configured
         try {
-            useBuilderStore.persist.rehydrate();
+            if (useBuilderStore.persist?.rehydrate) {
+                useBuilderStore.persist.rehydrate();
+            }
         } catch (e) {
             console.error('[BuilderLayout] Hydration error caught:', e);
         }
@@ -329,7 +327,9 @@ const BuilderLayoutContent: React.FC = () => {
 
 export const BuilderLayout: React.FC = () => {
     const navigate = useNavigate();
-    const lastValidPageId = useBuilderStore(state => state.lastValidPageId) as string | null;
+    const lastValidPageId = (useBuilderStore.getState() as any).lastValidPageId 
+        || localStorage.getItem('omnora_last_valid_page') 
+        || null;
 
     return (
         <BuilderLayoutErrorBoundary navigate={navigate} lastValidPageId={lastValidPageId}>

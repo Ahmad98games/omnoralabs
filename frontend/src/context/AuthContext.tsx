@@ -177,8 +177,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 localStorage.setItem('token', session.access_token);
                 setAuthHeader(session.access_token);
                 
-                if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
+                if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
                     await loadProfile(session.user.id);
+                    // Re-run initAuth to set React user state from the backend
+                    await initAuth();
                 }
             } else if (event === 'SIGNED_OUT') {
                 handleLogoutCleanup();
@@ -294,9 +296,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
     };
 
-    // 5. GOOGLE LOGIN (Stub)
+    // 5. GOOGLE LOGIN (Supabase OAuth)
     const loginWithGoogle = async () => {
-        throw new Error('Google Login is momentarily unavailable via API. Please use email.');
+        const { error } = await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+                redirectTo: `${window.location.origin}/auth/callback`,
+            }
+        });
+        if (error) throw new Error(error.message);
+        // After redirect, Supabase sets the session automatically.
+        // The onAuthStateChange listener will pick it up.
     };
 
     // 6. PASSWORD RESET
