@@ -22,7 +22,7 @@ CREATE POLICY "Merchants can manage their own categories" ON categories
 -- If table doesn't exist, create it. If it does, we add the columns.
 DO $$ 
 BEGIN
-    IF NOT EXISTS (SELECT 1 FROM pg_tables WHERE tablename = 'products') THEN
+    IF NOT EXISTS (SELECT 1 FROM pg_tables WHERE tablename = 'products') THENl;
         CREATE TABLE products (
             id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
             merchant_id UUID REFERENCES merchants(id) ON DELETE CASCADE,

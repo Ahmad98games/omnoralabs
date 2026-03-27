@@ -46,7 +46,13 @@ export const HostnameInterceptor: React.FC<{ children: React.ReactNode }> = ({ c
         const siteMatch = pathname.match(/^\/_sites\/([^\/]+)/);
         const resolvedHost = siteMatch ? siteMatch[1] : hostname;
 
-        if (isPlatformDomain(hostname) && !siteMatch) {
+        const isPlatformPath = pathname.startsWith('/auth') || 
+                               pathname.startsWith('/login') || 
+                               pathname.startsWith('/register') || 
+                               pathname.startsWith('/admin') || 
+                               pathname.startsWith('/seller');
+
+        if (isPlatformPath || (isPlatformDomain(hostname) && !siteMatch)) {
             setIsCustomDomain(false);
             setLoading(false);
             return;
