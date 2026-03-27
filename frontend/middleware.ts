@@ -59,8 +59,16 @@ export default async function middleware(req: NextRequest) {
   const path = url.pathname;
 
   // 1. Skip standard exclusion paths & Public Paths
-  const isPublicPath = path.startsWith('/login') || path.startsWith('/auth/callback') || path.endsWith('.webmanifest');
-  if (path.startsWith('/api') || path.startsWith('/assets') || isPublicPath) {
+  // [SURGICAL] Exclude assets and the callback route from session refresh logic
+  const isAsset = path.startsWith('/assets') || path.startsWith('/_next') || path.endsWith('.webmanifest') || path.includes('/static/');
+  const isAuthCallback = path.startsWith('/auth/callback') || path.startsWith('/api/auth/callback');
+  const isPublicPage = path === '/login' || path === '/register';
+
+  if (path.startsWith('/api') && !isAuthCallback) {
+    return response;
+  }
+
+  if (isAsset || isAuthCallback || isPublicPage) {
     return response;
   }
 
