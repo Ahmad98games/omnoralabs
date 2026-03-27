@@ -117,8 +117,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         try {
             // Add timeout to prevent hanging
             const { data } = await client.get('/auth/me', { 
-                timeout: 3000,
-                'axios-retry': { retries: 0 } 
+                timeout: 10000,
+                'axios-retry': { retries: 2 } 
             });
 
             if (data.success && data.user) {
@@ -189,7 +189,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             try {
                 // 🛡️ Guard against hanging locks (GoTrue) in tabs
                 const timeoutPromise = new Promise((_, reject) => 
-                    setTimeout(() => reject(new Error('Supabase session fetch timed out')), 2000)
+                    setTimeout(() => reject(new Error('Supabase session fetch timed out')), 5000)
                 );
 
                 const { data } = await Promise.race([

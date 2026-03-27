@@ -19,7 +19,7 @@ export const config = {
      * - _next, static (Next.js internals & sets)
      * - favicon.ico, sitemap.xml, robots.txt
      */
-    '/((?!api|_next|_vercel|static|favicon.ico|sitemap.xml|robots.txt).*)',
+    '/((?!api|_next|_vercel|static|favicon.ico|sitemap.xml|robots.txt|manifest.webmanifest).*)',
   ],
 };
 
@@ -29,14 +29,14 @@ export default async function middleware(req: any) {
   const path = url.pathname;
 
   // 1. Skip standard exclusion paths
-  if (path.startsWith('/api') || path.startsWith('/assets')) {
+  if (path.startsWith('/api') || path.startsWith('/assets') || path.endsWith('.webmanifest')) {
     return NextResponse.next();
   }
 
-  // 2. Identify Platform Domain
+  // 2. Identify Platform Domain (Platform root or *.vercel.app)
   const isPlatform = PLATFORM_DOMAINS.some(
-    (domain) => hostname === domain || hostname.startsWith(`${domain}`)
-  );
+    (domain) => hostname === domain || hostname.endsWith(`.${domain}`)
+  ) || hostname.endsWith('.vercel.app');
 
   // Parse Subdomain layout
   let subdomain = '';
