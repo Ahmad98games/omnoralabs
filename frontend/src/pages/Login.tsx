@@ -88,17 +88,11 @@ const handleSubmit = async (e: React.FormEvent) => {
             } else {
                 navigate('/profile');
             }
-        } else {
             // 2. Login Flow
-            await login(formData.email, formData.password);
+            const loggedUser = await login(formData.email, formData.password);
 
-            // Imperial Logic: Immediate Role Verification for Vercel
-            // We fetch directly from client to bypass local state delay
-            const response = await client.get('/auth/me');
-            const currentUser = response.data?.user;
-
-            if (currentUser) {
-                const role = currentUser.role;
+            if (loggedUser) {
+                const role = loggedUser.role || 'customer';
                 if (role === 'admin' || role === 'super-admin') {
                     navigate('/admin/dashboard');
                 } else if (role === 'seller') {
@@ -106,11 +100,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                 } else {
                     navigate('/profile');
                 }
-            } else {
-                // Fallback for safety
-                navigate('/profile');
             }
-        }
     } catch (err: any) {
         console.error("Auth Error:", err);
         let message = 'Access Denied. Please verify credentials.';

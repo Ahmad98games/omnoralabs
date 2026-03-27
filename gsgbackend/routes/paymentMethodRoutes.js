@@ -70,7 +70,7 @@ router.put('/', authenticate, async (req, res) => {
     }
 });
 
-// â”€â”€ GET /api/payment-methods/pending â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â”€â”€ GET /api/payment-methods/pending 
 // Orders pending manual payment verification
 router.get('/pending', authenticate, async (req, res) => {
     try {

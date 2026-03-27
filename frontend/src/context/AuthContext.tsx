@@ -161,7 +161,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 data: { role: role }
             });
 
-            // 🛡️ 2. Atomic Sync: Ensure backend profile for Google users
+            // 🛡️ 2. Double-Sync: Ensure both users AND merchants tables are hydrated
+            // First: Core user record (required for backend middleware)
+            const { error: userSyncError } = await supabase
+                .from('users')
+                .upsert({
+                    id: supabaseUser.id,
+                    email: supabaseUser.email,
+                    name: supabaseUser.user_metadata?.full_name || supabaseUser.email.split('@')[0],
+                    role: role,
+                    store_slug: (supabaseUser.user_metadata?.full_name || 'store').toLowerCase().replace(/[^a-z0-9]/g, '') + '-' + supabaseUser.id.substring(0, 4),
+                    created_at: new Date().toISOString()
+                }, { onConflict: 'id' });
+
+            if (userSyncError) console.error('[Google User Sync Fail]', userSyncError);
+
+            // Second: Merchant profile if seller
             if (role === 'seller' || role === 'admin') {
                 const { error: profileError } = await supabase
                     .from('merchants')
@@ -173,7 +188,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                         created_at: new Date().toISOString(),
                     }, { onConflict: 'id' });
                 
-                if (profileError) console.error('[Google Profile Sync Fail]', profileError);
+                if (profileError) console.error('[Google Merchant Sync Fail]', profileError);
             }
             
             // Note: role is still in localStorage so we can use it for final redirect
@@ -259,30 +274,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // 2. LOGIN
     const login = async (email: string, password: string) => {
         try {
-            const { data } = await client.post('/auth/login', { email, password });
+            // 🛡️ Imperial Logic: Use Supabase directly for unified JWT consistency
+            const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+                email,
+                password
+            });
 
-            if (data.success && data.token) {
-                localStorage.setItem('token', data.token);
-                localStorage.setItem('role', data.user?.role || 'customer');
-                setAuthHeader(data.token); // Sync Immediately
-                setUser(data.user);
+            if (authError) throw authError;
+
+            if (authData.session) {
+                const token = authData.session.access_token;
+                localStorage.setItem('token', token);
+                setAuthHeader(token);
                 
-                // Load full details concurrently after login
-                if (data.user?.id) {
-                    loadProfile(data.user.id);
-                }
+                // Trigger backend profile load/sync
+                await initAuth(true); 
                 
-                return data.user;
+                return authData.user;
             } else {
-                throw new Error(data.message || 'Login failed');
+                throw new Error('Login failed: Session missing');
             }
         } catch (error: any) {
-            if (isAxiosError(error)) {
-                const errorData = error.response?.data;
-                const errorMsg = errorData?.error || errorData?.message || 'Server connection failed';
-                
-                throw new Error(typeof errorMsg === 'object' ? JSON.stringify(errorMsg) : errorMsg);
-            }
+            console.error('[Login Error]', error);
             throw error;
         }
     };
@@ -307,7 +320,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             if (authError) throw authError;
 
             if (authData.user) {
-                // 2. Write to merchants table for Sellers
+                // 🛡️ 2. Double-Sync: Hydrate both users AND merchants tables
+                // First: users table (required for backend middleware)
+                const { error: userSyncError } = await supabase
+                    .from('users')
+                    .upsert({
+                        id: authData.user.id,
+                        email: email,
+                        name: name,
+                        role: role,
+                        store_slug: name.toLowerCase().replace(/[^a-z0-9]/g, '') + '-' + authData.user.id.substring(0, 4),
+                        created_at: new Date().toISOString()
+                    }, { onConflict: 'id' });
+
+                if (userSyncError) console.error('[User Sync Fail]', userSyncError);
+
+                // Second: merchants table for Sellers
                 if (role === 'seller' || role === 'admin') {
                     const { error: profileError } = await supabase
                         .from('merchants')
@@ -317,9 +345,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                             display_name: name,
                             email: email,
                             created_at: new Date().toISOString(),
-                        });
+                        }, { onConflict: 'id' });
                     
-                    if (profileError) console.error('[Profile Insert Fail]', profileError);
+                    if (profileError) console.error('[Merchant Sync Fail]', profileError);
                 }
 
                 // 3. Sync State
