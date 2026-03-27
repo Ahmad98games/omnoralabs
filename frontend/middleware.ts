@@ -34,14 +34,18 @@ export default async function middleware(req: NextRequest) {
           return req.cookies.get(name)?.value;
         },
         set(name: string, value: string, options: CookieOptions) {
+          // [SURGICAL] Set on request so the backend sees it immediately
           req.cookies.set({ name, value, ...options });
+          // [SURGICAL] Set on response so the browser saves it
           response = NextResponse.next({
             request: { headers: req.headers },
           });
           response.cookies.set({ name, value, ...options });
         },
         remove(name: string, options: CookieOptions) {
+          // [SURGICAL] Remove from request
           req.cookies.set({ name, value: '', ...options });
+          // [SURGICAL] Remove from response
           response = NextResponse.next({
             request: { headers: req.headers },
           });
@@ -51,7 +55,8 @@ export default async function middleware(req: NextRequest) {
     }
   );
 
-  // 🛡️ CORRECT: Logic for Session Refreshing
+  // 🛡️ REFRESH: Manually trigger session re-validation
+  // This ensures the cookies are updated if the session has expired
   await supabase.auth.getUser();
 
   const url = new URL(req.url);

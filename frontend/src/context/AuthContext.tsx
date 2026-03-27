@@ -200,77 +200,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     useEffect(() => {
-        let isMounted = true;
+        let initialized = false;
 
-        const syncSession = async () => {
-            try {
-                // 🛡️ Guard against hanging locks (GoTrue) in tabs
-                const timeoutPromise = new Promise((_, reject) => 
-                    setTimeout(() => reject(new Error('Supabase session fetch timed out')), 5000)
-                );
-
-                const { data } = await Promise.race([
-                    supabase.auth.getSession(),
-                    timeoutPromise
-                ]) as any;
-
-                const session = data?.session;
-                
-                if (isMounted && session?.access_token) {
-                    localStorage.setItem('token', session.access_token);
-                    setAuthHeader(session.access_token);
-                }
-            } catch (err) {
-                console.warn('[Supabase Sync Auth Failure]', err);
-            } finally {
-                if (isMounted) {
-                    // 🛡️ Trigger initAuth exactly after session is hydrated!
-                    initAuth();
-                }
-            }
-        };
-
-        syncSession();
-
+        // [SURGICAL] Listen for the FIRST reliable session event from Supabase
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-            if (session?.access_token) {
-                localStorage.setItem('token', session.access_token);
-                setAuthHeader(session.access_token);
-                
-                if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-                    // 🛡️ 1. Extract Role BEFORE sync (Google specific)
-                    const { data: { user: sbUser } } = await supabase.auth.getUser();
-                    
-                    // 🛡️ 2. Load basic Supabase profile
-                    await loadProfile(session.user.id);
-                    
-                    // 🛡️ 3. Sync role and backend state
-                    await initAuth(true);
-                    
-                    // 🛡️ 4. Final Path Resolution for Callback
-                    if (window.location.pathname === '/auth/callback') {
-                        // Priority: 1. Supabase Meta 2. LocalStorage 3. Default
-                        const metaRole = sbUser?.user_metadata?.role;
-                        const savedRole = metaRole || localStorage.getItem('omnora_selected_role') || 'customer';
-                        
-                        const target = (savedRole === 'seller' || savedRole === 'admin') 
-                            ? '/seller/dashboard?tab=builder' 
-                            : '/profile';
-                            
-                        console.log(`[Google Auth Callback] Resolved Role: ${savedRole} -> Target: ${target}`);
-                        localStorage.removeItem('omnora_selected_role');
-                        window.location.href = target;
-                    }
+            console.log(`[Auth Context Sync] Event: ${event} | Session: ${!!session}`);
+            
+            if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN') {
+                if (session && !initialized) {
+                    initialized = true;
+                    // Only hit the backend AFTER we have a valid Supabase session
+                    await initAuth(false);
+                } else if (!session) {
+                    setStatus('unauthenticated');
+                    setLoading(false);
+                    setIsInitialized(true);
                 }
             } else if (event === 'SIGNED_OUT') {
                 handleLogoutCleanup();
             }
         });
 
-        return () => {
-            isMounted = false;
-            subscription.unsubscribe();
-        };
+        return () => subscription.unsubscribe();
     }, [initAuth]);
 
     // 2. LOGIN
