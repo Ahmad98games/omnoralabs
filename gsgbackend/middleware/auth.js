@@ -16,8 +16,22 @@ const extractToken = (req) => {
   if (authHeader && authHeader.startsWith('Bearer ')) {
     return authHeader.split(' ')[1];
   }
-  if (req.cookies && req.cookies.token) {
-    return req.cookies.token;
+
+  // 🛡️ SSR Support: Extract from cookies
+  if (req.cookies) {
+    if (req.cookies.token) return req.cookies.token;
+    
+    // Look for Supabase Auth Cookies (Next.js 14 / SSR style)
+    const sbCookieKey = Object.keys(req.cookies).find(key => key.includes('-auth-token'));
+    if (sbCookieKey) {
+      const val = req.cookies[sbCookieKey];
+      try {
+        const parsed = JSON.parse(val);
+        return parsed.access_token || parsed[0];
+      } catch (e) {
+        return val;
+      }
+    }
   }
   return null;
 };

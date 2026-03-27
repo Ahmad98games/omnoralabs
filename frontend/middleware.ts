@@ -1,7 +1,8 @@
-import { NextResponse } from 'next/server';
+import { createServerClient, type CookieOptions } from '@supabase/ssr';
+import { NextResponse, type NextRequest } from 'next/server';
 
-const SUPABASE_URL = 'https://cuywxaeancehgibiibne.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_fSTvAeJdvOl4WkUIPVz65Q_xTTScsF-';
+const SUPABASE_URL = process.env.VITE_SUPABASE_URL || 'https://cuywxaeancehgibiibne.supabase.co';
+const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY || 'sb_publishable_fSTvAeJdvOl4WkUIPVz65Q_xTTScsF-';
 
 const PLATFORM_DOMAINS = [
   'localhost:3000',
@@ -13,82 +14,90 @@ const PLATFORM_DOMAINS = [
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for:
-     * - api (API routes)
-     * - _next, static (Next.js internals & sets)
-     * - favicon.ico, sitemap.xml, robots.txt
-     */
     '/((?!api|_next|_vercel|static|favicon.ico|sitemap.xml|robots.txt|manifest.webmanifest).*)',
   ],
 };
 
-export default async function middleware(req: any) {
+export default async function middleware(req: NextRequest) {
+  let response = NextResponse.next({
+    request: {
+      headers: req.headers,
+    },
+  });
+
+  const supabase = createServerClient(
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY,
+    {
+      cookies: {
+        get(name: string) {
+          return req.cookies.get(name)?.value;
+        },
+        set(name: string, value: string, options: CookieOptions) {
+          req.cookies.set({ name, value, ...options });
+          response = NextResponse.next({
+            request: { headers: req.headers },
+          });
+          response.cookies.set({ name, value, ...options });
+        },
+        remove(name: string, options: CookieOptions) {
+          req.cookies.set({ name, value: '', ...options });
+          response = NextResponse.next({
+            request: { headers: req.headers },
+          });
+          response.cookies.set({ name, value: '', ...options });
+        },
+      },
+    }
+  );
+
+  // 🛡️ CORRECT: Logic for Session Refreshing
+  await supabase.auth.getUser();
+
   const url = new URL(req.url);
   const hostname = req.headers.get('host') || '';
   const path = url.pathname;
 
-  // 1. Skip standard exclusion paths
-  if (path.startsWith('/api') || path.startsWith('/assets') || path.endsWith('.webmanifest')) {
-    return NextResponse.next();
+  // 1. Skip standard exclusion paths & Public Paths
+  const isPublicPath = path.startsWith('/login') || path.startsWith('/auth/callback') || path.endsWith('.webmanifest');
+  if (path.startsWith('/api') || path.startsWith('/assets') || isPublicPath) {
+    return response;
   }
 
-  // 2. Identify Platform Domain (Platform root or *.vercel.app)
+  // 2. Identify Platform Domain
   const isPlatform = PLATFORM_DOMAINS.some(
     (domain) => hostname === domain || hostname.endsWith(`.${domain}`)
   ) || hostname.endsWith('.vercel.app');
 
-  // Parse Subdomain layout
-  let subdomain = '';
-  if (hostname.endsWith('.omnora.com')) {
-    subdomain = hostname.replace('.omnora.com', '');
+  if (isPlatform) {
+    return response;
   }
 
-  // If www or platform domain root without subdomain, continue standard layout
-  if (isPlatform || subdomain === 'www') {
-    return NextResponse.next();
-  }
-
+  // 3. Multi-Tenant Rewriting
   let merchantSlug = '';
-
   try {
-    if (subdomain) {
-      // Lookup merchant by Subdomain (Slug)
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/merchants?slug=eq.${subdomain}&select=slug`, {
-        headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` }
-      });
-      const data = await res.json().catch(() => []);
-      if (data && data.length > 0) {
-        merchantSlug = data[0].slug;
-      }
-    } else {
-      // Custom Domain Lookup
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/merchants?custom_domain=eq.${hostname}&select=slug`, {
-        headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` }
-      });
-      const data = await res.json().catch(() => []);
-      if (data && data.length > 0) {
-        merchantSlug = data[0].slug;
-      }
+    // Lookup by custom domain or subdomain
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/merchants?or=(custom_domain.eq.${hostname},slug.eq.${hostname.split('.')[0]})&select=slug`, {
+      headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` }
+    });
+    const data = await res.json().catch(() => []);
+    if (data && data.length > 0) {
+      merchantSlug = data[0].slug;
     }
   } catch (err) {
     console.error('[Middleware Edge Lookup Error]', err);
   }
 
   if (merchantSlug) {
-    // Prevent infinite loop rewriting
     if (path.startsWith(`/store/${merchantSlug}`)) {
-      return NextResponse.next();
+      return response;
     }
-
-    // Standard redirect: Root URL loads '/home'
     const targetPath = path === '/' ? '/home' : path;
     const rewriteUrl = new URL(`/store/${merchantSlug}${targetPath}`, req.url);
-
-    const response = NextResponse.rewrite(rewriteUrl);
-    response.headers.set('X-Omnora-Tenant', merchantSlug);
-    return response;
+    const rewriteResponse = NextResponse.rewrite(rewriteUrl);
+    rewriteResponse.headers.set('X-Omnora-Tenant', merchantSlug);
+    return rewriteResponse;
   }
 
-  return NextResponse.next();
+  return response;
 }
