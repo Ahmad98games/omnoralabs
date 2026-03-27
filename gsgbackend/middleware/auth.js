@@ -54,7 +54,15 @@ const protect = async (req, res, next) => {
       return res.status(401).json({ error: 'Not authorized. Token missing.' });
     }
 
-    const { data: { user: sbUser }, error: sbError } = await supabase.auth.getUser(token);
+    // 🛡️ Added 5s timeout to prevent hanging on Supabase network latency
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Supabase getUser timeout')), 5000)
+    );
+
+    const { data: { user: sbUser }, error: sbError } = await Promise.race([
+      supabase.auth.getUser(token),
+      timeoutPromise
+    ]);
     
     if (sbError || !sbUser) {
       logger.warn('AUTH_FAIL: Supabase token validation failed', { error: sbError?.message });

@@ -67,6 +67,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setIsAuthModalOpen(open);
     };
 
+    const isAuthenticating = React.useRef(false);
     const [authError, setAuthError] = useState(false);
     
     const loadProfile = useCallback(async (userId: string) => {
@@ -95,6 +96,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // 1. INITIAL SESSION CHECK
     const initAuth = useCallback(async (forceSync = false) => {
+        if (isAuthenticating.current) return;
+        isAuthenticating.current = true;
+        
         setAuthError(false);
         setLoading(true);
         const token = localStorage.getItem('token');
@@ -115,9 +119,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         client.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
         try {
-            // Add timeout to prevent hanging
+            // Add timeout to prevent hanging - reduced to 7s for faster loop exit
             const { data } = await client.get('/auth/me', { 
-                timeout: 10000,
+                timeout: 7000,
                 'axios-retry': { retries: 2 } 
             });
 
@@ -147,6 +151,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } finally {
             setLoading(false);
             setIsInitialized(true);
+            isAuthenticating.current = false;
         }
     }, [loadProfile]);
 
@@ -436,7 +441,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setAuthModalOpen
     };
 
-    if (loading || !isInitialized) {
+    // 🛡️ Imperial Gate: Only block if not yet initialized
+    // Once initialized, we allow children to render while background refreshes happen
+    if (!isInitialized && loading) {
         return <CinematicLoader />;
     }
 
