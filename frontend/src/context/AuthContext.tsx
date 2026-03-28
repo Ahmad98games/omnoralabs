@@ -2,18 +2,27 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { supabase } from '../lib/supabaseClient';
 import { CinematicLoader } from '../components/ui/CinematicLoader';
 
+export interface CustomerProfile {
+    id: string;
+    email: string;
+    full_name: string;
+    avatar_url?: string;
+    role: 'customer';
+    created_at: string;
+}
+
 export interface MerchantProfile {
     id: string;
     email: string;
     store_name: string;
     theme_settings?: any;
-    role: 'customer' | 'seller' | 'admin' | 'super-admin';
+    role: 'seller' | 'admin' | 'super-admin';
     created_at: string;
 }
 
 interface AuthContextValue {
     user: any | null;
-    profile: MerchantProfile | null;
+    profile: MerchantProfile | CustomerProfile | null;
     isInitializing: boolean;
     loading: boolean;
     isAuthenticated: boolean;
@@ -33,7 +42,7 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<any | null>(null);
-    const [profile, setProfile] = useState<MerchantProfile | null>(null);
+    const [profile, setProfile] = useState<MerchantProfile | CustomerProfile | null>(null);
     const [isInitializing, setIsInitializing] = useState(true);
 
     const resetAuth = useCallback(async () => {
@@ -44,43 +53,62 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         window.location.href = '/login';
     }, []);
 
-    const ensureMerchantProfile = useCallback(async (sbUser: any, name?: string, role: any = 'customer', storeName?: string) => {
+    const ensureProfile = useCallback(async (sbUser: any, name?: string, role: any = null, storeName?: string) => {
         try {
-            const { data: existing, error: fetchError } = await supabase
-                .from('merchants')
-                .select('*')
-                .eq('id', sbUser.id)
-                .single();
+            // 🛡️ RECOVERY: Read role from localStorage if it was saved during Login.tsx handleGoogleSignIn
+            const savedRole = localStorage.getItem('omnora_selected_role');
+            const targetRole = role || sbUser.user_metadata?.role || savedRole || 'customer';
+            
+            console.log(`[AuthShield] Syncing ID: ${sbUser.id} as ${targetRole}`);
 
-            if (fetchError && fetchError.code !== 'PGRST116') throw fetchError;
-
-            if (!existing) {
-                // 🛡️ RECOVERY: Read role from localStorage if it was saved during Login.tsx handleGoogleSignIn
-                const savedRole = localStorage.getItem('omnora_selected_role');
-                const finalRole = role || sbUser.user_metadata?.role || savedRole || 'customer';
-                const finalStoreName = storeName || sbUser.user_metadata?.store_name || (finalRole === 'seller' ? `${sbUser.email?.split('@')[0]}'s Store` : 'My Store');
-
-                const { data: newProfile, error: insertError } = await supabase
-                    .from('merchants')
-                    .insert({
-                        id: sbUser.id,
-                        email: sbUser.email,
-                        store_name: finalStoreName,
-                        role: finalRole as any,
-                        created_at: new Date().toISOString(),
-                    })
-                    .select()
-                    .single();
-
-                if (insertError) throw insertError;
-                setProfile(newProfile as any);
-                return newProfile;
+            // 1. Try fetching from Merchants first if seller
+            if (targetRole === 'seller' || targetRole === 'admin' || targetRole === 'super-admin') {
+                const { data: merchant } = await supabase.from('merchants').select('*').eq('id', sbUser.id).single();
+                if (merchant) {
+                    setProfile(merchant as any);
+                    return merchant;
+                }
             } else {
-                setProfile(existing as any);
-                return existing;
+                // 2. Try fetching from Customers
+                const { data: customer } = await supabase.from('customers').select('*').eq('id', sbUser.id).single();
+                if (customer) {
+                    setProfile({ ...customer, role: 'customer' } as any);
+                    return customer;
+                }
+            }
+
+            // 3. If not found in primary table, check the OTHER table just in case (Account Crossover Protection)
+            const { data: altMerchant } = await supabase.from('merchants').select('*').eq('id', sbUser.id).single();
+            if (altMerchant) { setProfile(altMerchant as any); return altMerchant; }
+            
+            const { data: altCustomer } = await supabase.from('customers').select('*').eq('id', sbUser.id).single();
+            if (altCustomer) { setProfile({ ...altCustomer, role: 'customer' } as any); return altCustomer; }
+
+            // 4. Initialization Phase (Record creation)
+            if (targetRole === 'seller') {
+                const finalStoreName = storeName || sbUser.user_metadata?.store_name || `${sbUser.email?.split('@')[0]}'s Store`;
+                const { data: newMerchant, error } = await supabase.from('merchants').insert({
+                    id: sbUser.id,
+                    email: sbUser.email,
+                    store_name: finalStoreName,
+                    role: 'seller',
+                }).select().single();
+                if (error) throw error;
+                setProfile(newMerchant as any);
+                return newMerchant;
+            } else {
+                const { data: newCustomer, error } = await supabase.from('customers').insert({
+                    id: sbUser.id,
+                    email: sbUser.email,
+                    full_name: name || sbUser.user_metadata?.full_name || sbUser.email?.split('@')[0],
+                }).select().single();
+                if (error) throw error;
+                const fullCustomer = { ...newCustomer, role: 'customer' };
+                setProfile(fullCustomer as any);
+                return fullCustomer;
             }
         } catch (err) {
-            console.error('[Auth Shield] Profile Sync Failed:', err);
+            console.error('[Auth Shield] Profile Convergence Failed:', err);
             return null;
         }
     }, []);
@@ -93,33 +121,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 setProfile(null);
             } else {
                 setUser(sbUser);
-                await ensureMerchantProfile(sbUser);
+                await ensureProfile(sbUser);
             }
         } finally {
             setIsInitializing(false);
         }
-    }, [ensureMerchantProfile]);
+    }, [ensureProfile]);
 
     useEffect(() => {
         verify();
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
             if (event === 'SIGNED_IN' && session?.user) {
                 setUser(session.user);
-                await ensureMerchantProfile(session.user);
+                await ensureProfile(session.user);
             } else if (event === 'SIGNED_OUT') {
                 setUser(null);
                 setProfile(null);
             }
         });
         return () => subscription.unsubscribe();
-    }, [verify, ensureMerchantProfile]);
+    }, [verify, ensureProfile]);
 
     const login = async (email, password) => {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         if (data.user) {
             setUser(data.user);
-            const prof = await ensureMerchantProfile(data.user);
+            const prof = await ensureProfile(data.user);
             return { ...data.user, ...prof };
         }
         return data.user;
@@ -140,7 +168,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (error) throw error;
         if (data.user) {
             setUser(data.user);
-            const prof = await ensureMerchantProfile(data.user, name, role, storeName);
+            const prof = await ensureProfile(data.user, name, role, storeName);
             return { ...data.user, ...prof };
         }
         return data.user;

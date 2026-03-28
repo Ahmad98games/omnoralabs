@@ -21,35 +21,32 @@ const AuthCallback: React.FC = () => {
             }
 
             if (data.session) {
-                console.log('[AuthCallback] Session established, syncing profile...');
+                console.log('[AuthCallback] Session established, executing redirection matrix...');
                 
-                // 🔄 STRATEGY: Retry up to 3 times to account for the background AuthContext sync
-                let profile = null;
-                for (let attempt = 0; attempt < 3; attempt++) {
-                    const { data: p } = await supabase
-                        .from('merchants')
-                        .select('role')
-                        .eq('id', data.session.user.id)
-                        .single();
-                    
-                    if (p) {
-                        profile = p;
-                        break;
+                // 🔄 STRATEGY: Check both tables to ensure zero-flicker routing
+                const { data: merchant } = await supabase.from('merchants').select('role').eq('id', data.session.user.id).single();
+                const { data: customer } = await supabase.from('customers').select('id').eq('id', data.session.user.id).single();
+                
+                if (merchant) {
+                    console.log('[AuthCallback] Identified as MERCHANT/ADMIN');
+                    if (merchant.role === 'admin' || merchant.role === 'super-admin') {
+                        navigate('/admin/dashboard');
+                    } else {
+                        navigate('/seller/dashboard?tab=builder');
                     }
-                    console.log(`[AuthCallback] Profile not found, retrying... (${attempt + 1}/3)`);
-                    await new Promise(resolve => setTimeout(resolve, 1500));
-                }
-                
-                const role = profile?.role || 'customer';
-                console.log('[AuthCallback] Final resolved role:', role);
-                
-                if (role === 'admin' || role === 'super-admin') {
-                    navigate('/admin/dashboard');
-                } else if (role === 'seller') {
-                    navigate('/seller/dashboard?tab=builder');
-                } else {
-                    // 🛍️ Redirect customers to the storefront home page
+                } else if (customer) {
+                    console.log('[AuthCallback] Identified as CUSTOMER');
                     navigate('/');
+                } else {
+                    // 🛡️ RECOVERY: Fallback to user_metadata role if profile sync is still in progress
+                    const role = data.session.user.user_metadata?.role || 'customer';
+                    console.log(`[AuthCallback] No profile found, falling back to metadata role: ${role}`);
+                    
+                    if (role === 'seller') {
+                        navigate('/seller/dashboard?tab=builder');
+                    } else {
+                        navigate('/');
+                    }
                 }
             } else {
                 console.warn('[AuthCallback] No session found');

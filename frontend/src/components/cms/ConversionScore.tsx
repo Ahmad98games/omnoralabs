@@ -48,50 +48,53 @@ export const ConversionScore: React.FC = () => {
     }, [nodes]);
 
     const getScoreColor = (score: number) => {
-        if (score > 80) return 'text-green-500';
-        if (score > 50) return 'text-orange-500';
-        return 'text-red-500';
+        if (score > 80) return 'text-white';
+        if (score > 50) return 'text-white/70';
+        return 'text-white/40';
     };
 
     return (
-        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 shadow-xl">
-            <div className="flex items-center justify-between mb-4">
+        <div className="bg-[#000000] border border-white/10 rounded-sm p-6 shadow-2xl">
+            <div className="flex items-center justify-between mb-6">
                 <div className="flex flex-col">
-                    <span className="text-[10px] uppercase tracking-widest font-bold text-zinc-500">Conversion Score</span>
-                    <span className={`text-2xl font-black ${getScoreColor(audit.score)}`}>
+                    <span className="text-[9px] uppercase tracking-[0.3em] font-black text-white/30">Registry Integrity</span>
+                    <span className={`text-3xl font-black tabular-nums tracking-tighter ${getScoreColor(audit.score)}`}>
                         {audit.score}%
                     </span>
                 </div>
                 
-                {/* Circular Progress (Minimal) */}
-                <div className="relative w-12 h-12 flex items-center justify-center">
+                {/* Circular Progress (Industrial) */}
+                <div className="relative w-14 h-14 flex items-center justify-center">
                     <svg className="w-full h-full transform -rotate-90">
-                        <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="4" fill="transparent" className="text-zinc-800" />
-                        <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="4" fill="transparent" 
-                            strokeDasharray={126} 
-                            strokeDashoffset={126 - (126 * audit.score) / 100}
+                        <circle cx="28" cy="28" r="24" stroke="currentColor" strokeWidth="2" fill="transparent" className="text-white/5" />
+                        <circle cx="28" cy="28" r="24" stroke="currentColor" strokeWidth="2" fill="transparent" 
+                            strokeDasharray={151} 
+                            strokeDashoffset={151 - (151 * audit.score) / 100}
                             className={`${getScoreColor(audit.score)} transition-all duration-1000`} 
                         />
                     </svg>
+                    <div className="absolute inset-0 flex items-center justify-center overflow-hidden opacity-10 pointer-events-none">
+                        <div className="w-full border-t border-white" />
+                    </div>
                 </div>
             </div>
 
-            <div className="space-y-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
+            <div className="space-y-3 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
                 {audit.results.map(res => (
-                    <div key={res.id} className="flex items-center justify-between py-1 group">
-                        <div className="flex items-center gap-2">
+                    <div key={res.id} className="flex items-center justify-between py-1.5 border-b border-white/5 group last:border-0">
+                        <div className="flex items-center gap-3">
                             {res.isPresent ? (
-                                <CheckCircle2 size={14} className="text-green-500" />
+                                <CheckCircle2 size={12} className="text-white" />
                             ) : (
-                                <Circle size={14} className="text-zinc-700" />
+                                <Circle size={12} className="text-white/10" />
                             )}
-                            <span className={`text-xs ${res.isPresent ? 'text-zinc-300' : 'text-zinc-600'}`}>
+                            <span className={`text-[10px] font-black uppercase tracking-widest ${res.isPresent ? 'text-white' : 'text-white/20'}`}>
                                 {res.label}
                             </span>
                         </div>
                         
                         {!res.isPresent && (
-                            <button className="p-1 rounded bg-orange-500/10 text-orange-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button className="p-1 text-white/40 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity">
                                 <Plus size={12} />
                             </button>
                         )}
@@ -100,10 +103,10 @@ export const ConversionScore: React.FC = () => {
             </div>
 
             {audit.score < 100 && (
-                <div className="mt-4 p-2 bg-orange-500/5 border border-orange-500/20 rounded-lg flex items-start gap-2">
-                    <AlertCircle size={14} className="text-orange-500 mt-0.5 shrink-0" />
-                    <p className="text-[10px] text-orange-400 leading-tight">
-                        Missing components identified. Add {audit.results.find(r => !r.isPresent)?.label} to boost conversion potential.
+                <div className="mt-6 p-4 bg-white/5 border border-white/10 rounded-sm flex items-start gap-3">
+                    <AlertCircle size={14} className="text-white mt-0.5 shrink-0" />
+                    <p className="text-[10px] text-white/60 leading-relaxed font-medium uppercase tracking-tight">
+                        Node verification failed. Registry missing: {audit.results.find(r => !r.isPresent)?.label}.
                     </p>
                 </div>
             )}

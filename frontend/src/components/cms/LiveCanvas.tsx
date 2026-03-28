@@ -9,8 +9,13 @@ import { Loader2, PlusSquare } from 'lucide-react';
  * 🎨 ATOMIC CANVAS (Task 3.1)
  * Pure dynamic renderer with Zero Wasted Renders.
  */
+import { EmptyState } from '../ui/EmptyState';
+
+/**
+ * 🎨 ATOMIC CANVAS (Task 3.1)
+ * Pure dynamic renderer with Zero Wasted Renders.
+ */
 export const LiveCanvas: React.FC = React.memo(() => {
-    // 🛡️ High-Performance Selection (Industrial Rule)
     const { blocks, isHydrating, activePageId } = useBuilderStore(
         useShallow(s => ({
             blocks: s.nodes[s.activePageId] ?? [],
@@ -22,17 +27,23 @@ export const LiveCanvas: React.FC = React.memo(() => {
     if (isHydrating) return <CanvasSkeleton />;
     
     if (!activePageId) return (
-        <CanvasEmptyState 
-            message="No Page Selected" 
-            sub="Select or create a page from the top toolbar to begin building." 
-        />
+        <div className="w-full h-[80vh] flex items-center justify-center p-12">
+            <EmptyState 
+                icon={PlusSquare}
+                title="No Page Selected" 
+                description="Select or initialize a registry node from the supervisor console to begin composition." 
+            />
+        </div>
     );
 
     if (blocks.length === 0) return (
-        <CanvasEmptyState 
-            message="This Page is Empty" 
-            sub="Open the Elements panel and drag a block here to start." 
-        />
+        <div className="w-full h-[80vh] flex items-center justify-center p-12">
+            <EmptyState 
+                icon={PlusSquare}
+                title="Page Registry Empty" 
+                description="The current registry contains zero active elements. Drag-and-drop units from the elements bay to initialize." 
+            />
+        </div>
     );
 
     return (
@@ -49,17 +60,9 @@ export const LiveCanvas: React.FC = React.memo(() => {
 });
 
 const CanvasSkeleton = () => (
-    <div className="w-full h-full flex items-center justify-center bg-black/50 backdrop-blur-sm">
-        <Loader2 className="animate-spin text-orange-500" size={48} />
-    </div>
-);
-
-const CanvasEmptyState = ({ message, sub }: { message: string; sub: string }) => (
-    <div className="w-full h-[80vh] flex flex-col items-center justify-center text-center p-12">
-        <div className="w-20 h-20 bg-zinc-900 border border-zinc-800 rounded-3xl flex items-center justify-center mb-6 text-orange-500">
-            <PlusSquare size={32} />
-        </div>
-        <h2 className="text-2xl font-bold text-white mb-2">{message}</h2>
-        <p className="text-zinc-500 max-w-sm leading-relaxed">{sub}</p>
+    <div className="w-full h-full flex items-center justify-center bg-[#000000] backdrop-blur-sm relative overflow-hidden">
+        {/* Industrial Pulse */}
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,_transparent,_rgba(255,255,255,0.03),_transparent)] animate-[pulse_2s_infinite]" />
+        <Loader2 className="animate-spin text-white/20" size={32} strokeWidth={1} />
     </div>
 );
