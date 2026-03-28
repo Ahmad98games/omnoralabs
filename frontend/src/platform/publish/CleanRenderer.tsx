@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * CleanRenderer: Zero-Overhead Recursive Render Engine
  *
@@ -217,6 +219,13 @@ const CleanNode: React.FC<CleanNodeProps> = React.memo(({ id, index = 0 }) => {
     // Animation support
     const hasAnim = node.animations && node.animations.type && node.animations.type !== 'none';
 
+    // 🖼️ INDUSTRIAL MEDIA OPTIMIZATION (Task 7.3)
+    const optimizedProps = useMemo(() => {
+        if (!node.props?.src) return node.props;
+        const proxyUrl = `/api/image-proxy?url=${encodeURIComponent(node.props.src)}&w=${viewport === 'mobile' ? '400' : '1200'}`;
+        return { ...node.props, src: proxyUrl };
+    }, [node.props, viewport]);
+
     return (
         <CleanAnimatedDiv
             nodeId={id}
@@ -225,7 +234,7 @@ const CleanNode: React.FC<CleanNodeProps> = React.memo(({ id, index = 0 }) => {
             animations={hasAnim ? node.animations : undefined}
             index={index}
         >
-            <Component {...node.props} nodeId={id}>
+            <Component {...optimizedProps} nodeId={id}>
                 {children}
             </Component>
         </CleanAnimatedDiv>

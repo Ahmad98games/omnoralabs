@@ -93,6 +93,28 @@ export const DEFAULT_PROPS: Record<string, ComponentSchema> = {
     },
   },
 
+  'dynamic_product_grid': {
+    version: '2.0.0',
+    defaultProps: {
+      columns: 3,
+      gap: 20,
+      imageAspectRatio: 'portrait',
+      cardStyle: 'minimal',
+      productSource: 'auto',
+      collectionId: '',
+      productIds: '',
+      limit: 8,
+      showPrice: true,
+      showComparePrice: false,
+      showBadge: true,
+      showAddToCart: true,
+      showQuickView: false,
+      accentColor: '#FF6B35',
+      cardBackground: '#ffffff',
+      textColor: '#FFFFFF',
+    },
+  },
+
   'featured_product': {
     version: '1.0.0',
     defaultProps: {
@@ -416,6 +438,9 @@ export const ComponentRegistry: Record<
   ),
   'product_grid': React.lazy(() =>
     import('../cart/ProductGrid').then(m => ({ default: m.ProductGrid }))
+  ),
+  'dynamic_product_grid': React.lazy(() =>
+    import('../blocks/DynamicProductGrid').then(m => ({ default: m.DynamicProductGrid }))
   ),
   'featured_product': React.lazy(() =>
     import('../cart/FeaturedProduct').then(m => ({ default: m.FeaturedProduct }))

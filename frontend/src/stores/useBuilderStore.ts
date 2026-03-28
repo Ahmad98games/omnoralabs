@@ -1,334 +1,446 @@
-/**
- * 🛠️ OMNORA LABS | [BUILDER STORE]
- * ---------------------------------------------------------
- * Principal Architect: Ahmad Mahboob (@ahmad-labs)
- * Division: Universal Commerce OS / Kernel Core
- * "Precision is the foundation of industrial scale."
- * ---------------------------------------------------------
- */
-
 import { create } from 'zustand';
-import { immer } from 'zustand/middleware/immer';
 import { persist } from 'zustand/middleware';
-import { produceWithPatches, applyPatches, enablePatches, Patch } from 'immer';
-import type { BuilderNode, PageMetadata } from '../context/BuilderContext';
-import { SyncManager } from './SyncManager';
-import { OmnoraLogger } from '../lib/kernel/utils/logger';
-import { NewPageInitializer } from '../lib/kernel/utils/NewPageInitializer';
+import { produce, enablePatches, applyPatches, Patch } from 'immer';
 
-// Enable Immer Patches for Undo/Redo
 enablePatches();
 
+// --- Types ---
 
-export interface Command {
+export interface BuilderNode {
+    id: string;
+    type: string;
+    props: Record<string, any>;
+    parentId: string | null;
+    children: string[];
+    styles: Record<string, any>;
+    schemaVersion: number;
+    createdAt: string;
+}
+
+export interface PageMetadata {
+    id: string;
+    title: string;
+    slug: string;
+    status: 'draft' | 'live';
+    type: 'system' | 'template' | 'custom';
+    lastUpdated: string;
+    createdAt: string;
+    seoMeta: { title: string; description: string };
+}
+
+export interface ThemeSettings {
+    colors: {
+        primary: string;
+        secondary: string;
+        background: string;
+        surface: string;
+        text: string;
+        textMuted: string;
+        border: string;
+    };
+    typography: {
+        headingFont: string;
+        bodyFont: string;
+        baseSize: number;
+        bodyFontWeight?: number;
+    };
+    layout: {
+        maxWidth: number;
+        borderRadius: number;
+        buttonRadius: number;
+    };
+}
+
+interface Command {
     undo: Patch[];
     redo: Patch[];
 }
 
 export interface BuilderState {
-    // Data
-    nodes: Record<string, BuilderNode>;
+    // 🧱 KERNEL STATE
+    nodes: Record<string, BuilderNode[]>;
     pages: Record<string, PageMetadata>;
+    nodePageIndex: Record<string, string>; // O(1) Reverse Lookup: nodeId -> pageId
+    
     activePageId: string;
+    lastValidPageId: string | null;
     selectedNodeId: string | null;
     lastDroppedNodeId: string | null;
-
-    // Status
-    saveStatus: 'idle' | 'saving' | 'saved' | 'error' | 'offline';
+    
+    // 🚥 STATUS
+    isDragging: boolean;
+    isHydrating: boolean;
+    isSidebarOpen: boolean;
+    saveStatus: 'idle' | 'saving' | 'saved' | 'error';
     hasUnsavedChanges: boolean;
-    lastUpdatedRemote: string | null;
-
-    // 🚀 Publish Hardening State
     publishStatus: 'idle' | 'publishing' | 'success' | 'error';
     publishError: string | null;
     lastPublishedAt: string | null;
-
-    // 👁️ Live Preview State
     isPreviewMode: boolean;
     previewDevice: 'desktop' | 'tablet' | 'mobile';
 
-    // History (Max 50)
+    // 🎨 THEME
+    themeSettings: ThemeSettings;
+
+    // 🕒 HISTORY
     historyStack: Command[];
     historyIndex: number;
 
-    // Drag Tracking
-    isDragging: boolean;
-    setIsDragging: (val: boolean) => void;
-
-    // Hydration stability
-    isHydrating: boolean;
-    setIsHydrating: (val: boolean) => void;
-
-    // Sidebar states
-    isSidebarOpen: boolean;
-    setSidebarOpen: (val: boolean) => void;
-
-    // Actions
-    setNodes: (nodes: Record<string, BuilderNode>) => void;
-    updateNode: (id: string, path: string, value: any) => void;
-    addNode: (node: BuilderNode) => void;
-    deleteNode: (id: string) => void;
-    
-    setPages: (pages: Record<string, PageMetadata>) => void;
-    addPage: (title: string, slug: string, type?: 'system' | 'template' | 'custom') => string;
+    // ⚡ ACTIONS
+    // Page Management
+    addPage: (title: string, type?: PageMetadata['type']) => void;
+    deletePage: (pageId: string) => void;
+    duplicatePage: (pageId: string) => void;
+    reorderPages: (fromIndex: number, toIndex: number) => void;
     setActivePageId: (id: string) => void;
-    setSelectedNodeId: (id: string | null) => void;
-    resetPageNodes: (pageId: string) => void;
+
+    // Node Management
+    addNode: (node: BuilderNode) => void;
+    deleteNode: (nodeId: string) => void;
+    duplicateNode: (nodeId: string) => void;
+    moveNode: (nodeId: string, direction: 'up' | 'down') => void;
+    reorderNodes: (fromIndex: number, toIndex: number) => void;
+    updateNodeProperty: (nodeId: string, path: string, value: any) => void;
     
-    setSaveStatus: (status: BuilderState['saveStatus']) => void;
-    setHasUnsavedChanges: (has: boolean) => void;
-    setLastUpdatedRemote: (time: string) => void;
-
-    // 🚀 Publish Setters
-    setPublishStatus: (status: BuilderState['publishStatus']) => void;
-    setPublishError: (err: string | null) => void;
-    setLastPublishedAt: (time: string | null) => void;
-
-    // 👁️ Preview Setters
+    // UI & Status
+    setSelectedNodeId: (id: string | null) => void;
     setIsPreviewMode: (val: boolean) => void;
     setPreviewDevice: (device: BuilderState['previewDevice']) => void;
-
-    // History Actions
-    executeCommand: (action: (draft: Record<string, BuilderNode>) => void) => void;
+    setSidebarOpen: (val: boolean) => void;
+    setIsHydrating: (val: boolean) => void;
+    
+    // Theme & History
+    updateTheme: (path: string, value: any) => void;
     undo: () => void;
     redo: () => void;
-    loadHistorySession: () => void;
+    resetPageNodes: (pageId: string) => void;
 }
 
-const saveHistoryToSession = (stack: Command[], index: number) => {
-    try {
-        sessionStorage.setItem('omnora-builder-history', JSON.stringify({ stack, index }));
-    } catch (e) { /* ignore quota exceed */ }
+const DEFAULT_THEME: ThemeSettings = {
+    colors: {
+        primary: '#FF6B35',
+        secondary: '#C5A059',
+        background: '#050505',
+        surface: '#121212',
+        text: '#FFFFFF',
+        textMuted: '#A1A1AA',
+        border: '#27272A',
+    },
+    typography: {
+        headingFont: 'Outfit',
+        bodyFont: 'Inter',
+        baseSize: 16,
+    },
+    layout: {
+        maxWidth: 1280,
+        borderRadius: 8,
+        buttonRadius: 6,
+    },
 };
 
-export const useBuilderStore = create<BuilderState>()(persist(immer((set, get) => ({
-    nodes: {},
-    pages: {},
-    activePageId: '',
-    selectedNodeId: null,
-    lastDroppedNodeId: null,
-
-    saveStatus: 'idle',
-    hasUnsavedChanges: false,
-    lastUpdatedRemote: null,
-
-    publishStatus: 'idle',
-    publishError: null,
-    lastPublishedAt: null,
-
-    isPreviewMode: false,
-    previewDevice: 'desktop',
-
-    historyStack: [],
-    historyIndex: -1,
-    isHydrating: false,
-    isDragging: false,
-    isSidebarOpen: true,
-
-    setIsDragging: (val) => set((state) => { state.isDragging = val; }),
-    setIsHydrating: (val) => set((state) => { state.isHydrating = val; }),
-    setSidebarOpen: (val) => set((state) => { state.isSidebarOpen = val; }),
-
-    setNodes: (nodes) => set((state) => {
-        state.nodes = nodes;
-        state.hasUnsavedChanges = true;
-    }),
-
-    /**
-     * executeCommand: Wrapper that records changes as an atomic Immer-patch Command
-     */
-    executeCommand: (action) => {
-        const state = get();
-        
-        // 1. Run the action through produceWithPatches
-        const [nextNodes, redoPatches, undoPatches] = produceWithPatches(state.nodes, action);
-
-        if (redoPatches.length === 0) return; // No change
-
-        set((draft) => {
-            draft.nodes = nextNodes;
-            draft.hasUnsavedChanges = true;
-
-            // 2. Truncate any "Redo" history if we made a new action
-            const newStack = draft.historyStack.slice(0, draft.historyIndex + 1);
-            newStack.push({ redo: redoPatches, undo: undoPatches });
-
-            // 3. Cap limit at 50
-            if (newStack.length > 50) newStack.shift();
-
-            draft.historyStack = newStack;
-            draft.historyIndex = newStack.length - 1;
-
-            saveHistoryToSession(draft.historyStack, draft.historyIndex);
-        });
-    },
-
-    updateNode: (id, path, value) => {
-        get().executeCommand((draft) => {
-            if (!draft[id]) return;
-            const keys = path.split('.');
-            let current = draft[id] as any;
-            for (let i = 0; i < keys.length - 1; i++) {
-                if (!current[keys[i]]) current[keys[i]] = {};
-                current = current[keys[i]];
-            }
-            current[keys[keys.length - 1]] = value;
-        });
-    },
-
-    addNode: (node) => {
-        get().executeCommand((draft) => {
-            draft[node.id] = node;
-        });
-    },
-
-    deleteNode: (id) => {
-        get().executeCommand((draft) => {
-            delete draft[id];
-        });
-        set((state) => {
-            if (state.selectedNodeId === id) {
-                state.selectedNodeId = null;
-            }
-        });
-    },
-
-    setPages: (pages) => set((state) => { state.pages = pages; }),
+const generateSlug = (title: string, existingSlugs: string[]) => {
+    let slug = title.toLowerCase().trim()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
     
-    addPage: (title, slug, type = 'custom') => {
-        const id = crypto.randomUUID();
-        
-        set((state: any) => {
-            // Step 2 — Generate safe slug
-            const existingSlugs = Object.values(state.pages).map((p: any) => p.slug);
-            let baseSlug = (slug || title)
-                .toLowerCase()
-                .trim()
-                .replace(/[^a-z0-9]+/g, '-')
-                .replace(/^-+|-+$/g, '');
-            
-            if (!baseSlug) baseSlug = 'untitled';
-            
-            // Step 3 — Resolve slug collision
-            let counter = 2;
-            let finalSlug = baseSlug;
-            while (existingSlugs.includes(finalSlug)) {
-                finalSlug = `${baseSlug}-${counter}`;
-                counter++;
-            }
-            
-            // 3. Write nodes entry BEFORE switching activePageId
-            state.nodes[id] = [] as any;
-            
-            // 4. Write page metadata
-            state.pages[id] = {
-                id,
-                title: title.trim() || 'Untitled Page',
-                slug: finalSlug,
-                type,
-                isLocked: type === 'system',
-                status: 'draft',
-                lastUpdated: new Date().toISOString(),
-                createdAt: new Date().toISOString(),
-                seoMeta: { title: `${title.trim() || 'Untitled Page'} | Omnora`, description: '' }
-            };
-            
-            // 5. Persist last valid page for error boundary recovery
-            if (state.activePageId) {
-                state.lastValidPageId = state.activePageId;
-            }
-            
-            // 6. Clear hydrating flag
-            state.isHydrating = false;
-            
-            // 7. Switch active page LAST — nodes[id] already exists
-            state.activePageId = id;
-            state.hasUnsavedChanges = true;
-        });
+    if (!slug) slug = 'untitled';
+    
+    let finalSlug = slug;
+    let counter = 2;
+    while (existingSlugs.includes(finalSlug)) {
+        finalSlug = `${slug}-${counter}`;
+        counter++;
+    }
+    return finalSlug;
+};
 
-        return id;
-    },
+export const useBuilderStore = create<BuilderState>()(
+    persist(
+        (set, get) => ({
+            nodes: {},
+            pages: {},
+            nodePageIndex: {},
+            activePageId: '',
+            lastValidPageId: null,
+            selectedNodeId: null,
+            lastDroppedNodeId: null,
+            isDragging: false,
+            isHydrating: true,
+            isSidebarOpen: true,
+            saveStatus: 'idle',
+            hasUnsavedChanges: false,
+            publishStatus: 'idle',
+            publishError: null,
+            lastPublishedAt: null,
+            isPreviewMode: false,
+            previewDevice: 'desktop',
+            themeSettings: DEFAULT_THEME,
+            historyStack: [],
+            historyIndex: -1,
 
-    setActivePageId: (id) => set((state) => { state.activePageId = id; }),
-    setSelectedNodeId: (id) => set((state) => { state.selectedNodeId = id; }),
-    resetPageNodes: (pageId) => set((state) => {
-        state.nodes[pageId] = [] as any;
-        state.isHydrating = false;
-    }),
-    setSaveStatus: (status) => set((state) => { state.saveStatus = status; }),
-    setHasUnsavedChanges: (has) => set((state) => { state.hasUnsavedChanges = has; }),
-    setLastUpdatedRemote: (time) => set((state) => { state.lastUpdatedRemote = time; }),
-
-    setPublishStatus: (status) => set((state) => { state.publishStatus = status; }),
-    setPublishError: (err) => set((state) => { state.publishError = err; }),
-    setLastPublishedAt: (time) => set((state) => { state.lastPublishedAt = time; }),
-
-    setIsPreviewMode: (val) => set((state) => { state.isPreviewMode = val; }),
-    setPreviewDevice: (device) => set((state) => { state.previewDevice = device; }),
-
-    undo: () => {
-        const { historyIndex, historyStack, nodes } = get();
-        if (historyIndex < 0) return;
-
-        SyncManager.pause(500); // Spec 4: pause sync updates on undo
-
-        const command = historyStack[historyIndex];
-        const prevNodes = applyPatches(nodes, command.undo);
-
-        set((state) => {
-            state.nodes = prevNodes;
-            state.historyIndex -= 1;
-            saveHistoryToSession(state.historyStack, state.historyIndex);
-        });
-    },
-
-    redo: () => {
-        const { historyIndex, historyStack, nodes } = get();
-        if (historyIndex >= historyStack.length - 1) return;
-
-        SyncManager.pause(500);
-
-        const command = historyStack[historyIndex + 1];
-        const nextNodes = applyPatches(nodes, command.redo);
-
-        set((state) => {
-            state.nodes = nextNodes;
-            state.historyIndex += 1;
-            saveHistoryToSession(state.historyStack, state.historyIndex);
-        });
-    },
-
-    loadHistorySession: () => {
-        try {
-            const saved = sessionStorage.getItem('omnora-builder-history');
-            if (saved) {
-                const { stack, index } = JSON.parse(saved);
-                set((state) => {
-                    state.historyStack = stack || [];
-                    state.historyIndex = index !== undefined ? index : -1;
+            // --- HELPER: Execute Command with History ---
+            _execute: (fn: (draft: BuilderState) => void) => {
+                const state = get();
+                const next = produce(state, (draft) => {
+                    fn(draft);
+                    draft.hasUnsavedChanges = true;
+                }, (patches, inversePatches) => {
+                    // History Tracking
+                    const newStack = state.historyStack.slice(0, state.historyIndex + 1);
+                    newStack.push({ undo: inversePatches, redo: patches });
+                    if (newStack.length > 50) newStack.shift();
+                    
+                    set({ 
+                        historyStack: newStack, 
+                        historyIndex: newStack.length - 1 
+                    });
                 });
-            }
-        } catch (e) { /* ignore restore failures */ }
-    }
-})), {
-    name: 'omnora-builder-storage',
-    skipHydration: true, // 🛡️ Spec 4: skip automatic hydration
-    onRehydrateStorage: () => {
-        return (state, error) => {
-            if (error || !state || !state.nodes || Object.keys(state.nodes).length === 0) {
-                OmnoraLogger.error('BUILDER-STORE', `Boot-Guard Triggered: Storage payload is null, empty, or corrupted. Wiping persist. ${error}`);
-                
-                if (state) {
-                    state.nodes = {};
-                    state.pages = {}; 
-                    // Use localStorage fallback instead of non-existent Kernel method
-                    state.activePageId = localStorage.getItem('omnora_last_valid_page') || '';
+                set(next);
+            },
+
+            // --- PAGE ACTIONS ---
+            addPage: (title, type = 'custom') => {
+                const id = crypto.randomUUID();
+                const existingSlugs = Object.values(get().pages).map(p => p.slug);
+                const slug = generateSlug(title, existingSlugs);
+
+                set(produce((draft: BuilderState) => {
+                    draft.nodes[id] = [];
+                    draft.pages[id] = {
+                        id, title, slug, type,
+                        status: 'draft',
+                        createdAt: new Date().toISOString(),
+                        lastUpdated: new Date().toISOString(),
+                        seoMeta: { title: '', description: '' },
+                    };
+                    draft.lastValidPageId = draft.activePageId;
+                    draft.isHydrating = false;
+                    draft.activePageId = id;
+                    draft.hasUnsavedChanges = true;
+                }));
+            },
+
+            deletePage: (pageId) => {
+                const state = get();
+                const pageCount = Object.keys(state.pages).length;
+                const page = state.pages[pageId];
+
+                if (pageCount <= 1) return;
+                if (page?.type === 'system') return;
+
+                set(produce((draft: BuilderState) => {
+                    delete draft.nodes[pageId];
+                    delete draft.pages[pageId];
+                    
+                    // Cleanup index
+                    Object.keys(draft.nodePageIndex).forEach(nodeId => {
+                        if (draft.nodePageIndex[nodeId] === pageId) delete draft.nodePageIndex[nodeId];
+                    });
+
+                    if (draft.activePageId === pageId) {
+                        draft.activePageId = draft.lastValidPageId || Object.keys(draft.pages)[0];
+                    }
+                    draft.hasUnsavedChanges = true;
+                }));
+            },
+
+            duplicatePage: (pageId) => {
+                const state = get();
+                const originalPage = state.pages[pageId];
+                const originalNodes = state.nodes[pageId] || [];
+                if (!originalPage) return;
+
+                const newId = crypto.randomUUID();
+                const existingSlugs = Object.values(state.pages).map(p => p.slug);
+                const newSlug = generateSlug(`${originalPage.title} (Copy)`, existingSlugs);
+
+                set(produce((draft: BuilderState) => {
+                    draft.pages[newId] = {
+                        ...originalPage,
+                        id: newId,
+                        title: `${originalPage.title} (Copy)`,
+                        slug: newSlug,
+                        createdAt: new Date().toISOString()
+                    };
+                    
+                    const newNodes = originalNodes.map(node => {
+                        const newNodeId = crypto.randomUUID();
+                        draft.nodePageIndex[newNodeId] = newId;
+                        return { ...node, id: newNodeId };
+                    });
+                    
+                    draft.nodes[newId] = newNodes;
+                    draft.hasUnsavedChanges = true;
+                    // Note: Task says NOT to set as active page
+                }));
+            },
+
+            reorderPages: (from, to) => {
+                // Reordering keys in a JS object is not strictly preserved, 
+                // but we can manage a 'pageOrder' array if needed.
+                // For now, we'll assume the list is derived and we just mark change.
+                set({ hasUnsavedChanges: true }); 
+            },
+
+            setActivePageId: (id) => set({ activePageId: id, selectedNodeId: null }),
+
+            // --- NODE ACTIONS ---
+            addNode: (node) => {
+                const activeId = get().activePageId;
+                if (!activeId) return;
+
+                set(produce((draft: BuilderState) => {
+                    draft.nodes[activeId].push(node);
+                    draft.nodePageIndex[node.id] = activeId;
+                    draft.lastDroppedNodeId = node.id;
+                    draft.hasUnsavedChanges = true;
+                }));
+
+                setTimeout(() => {
+                    set({ lastDroppedNodeId: null });
+                }, 400);
+            },
+
+            deleteNode: (nodeId) => {
+                const state = get();
+                const pageId = state.nodePageIndex[nodeId];
+                if (!pageId) return;
+
+                set(produce((draft: BuilderState) => {
+                    draft.nodes[pageId] = draft.nodes[pageId].filter(n => n.id !== nodeId);
+                    delete draft.nodePageIndex[nodeId];
+                    if (draft.selectedNodeId === nodeId) draft.selectedNodeId = null;
+                    draft.hasUnsavedChanges = true;
+                }));
+            },
+
+            duplicateNode: (nodeId) => {
+                const state = get();
+                const pageId = state.nodePageIndex[nodeId];
+                const nodes = state.nodes[pageId];
+                const idx = nodes?.findIndex(n => n.id === nodeId);
+                if (idx === -1 || idx === undefined) return;
+
+                const newNode = { 
+                    ...nodes[idx], 
+                    id: crypto.randomUUID(), 
+                    createdAt: new Date().toISOString() 
+                };
+
+                set(produce((draft: BuilderState) => {
+                    draft.nodes[pageId].splice(idx + 1, 0, newNode);
+                    draft.nodePageIndex[newNode.id] = pageId;
+                    draft.hasUnsavedChanges = true;
+                }));
+            },
+
+            moveNode: (nodeId, direction) => {
+                const state = get();
+                const pageId = state.nodePageIndex[nodeId];
+                const nodes = [...(state.nodes[pageId] || [])];
+                const idx = nodes.findIndex(n => n.id === nodeId);
+
+                if (idx === -1) return;
+                if (direction === 'up' && idx === 0) return;
+                if (direction === 'down' && idx === nodes.length - 1) return;
+
+                const targetIdx = direction === 'up' ? idx - 1 : idx + 1;
+                [nodes[idx], nodes[targetIdx]] = [nodes[targetIdx], nodes[idx]];
+
+                set(produce((draft: BuilderState) => {
+                    draft.nodes[pageId] = nodes;
+                    draft.hasUnsavedChanges = true;
+                }));
+            },
+
+            reorderNodes: (from, to) => {
+                const activeId = get().activePageId;
+                set(produce((draft: BuilderState) => {
+                    const pageNodes = draft.nodes[activeId];
+                    const [moved] = pageNodes.splice(from, 1);
+                    pageNodes.splice(to, 0, moved);
+                    draft.hasUnsavedChanges = true;
+                }));
+            },
+
+            updateNodeProperty: (nodeId, path, value) => {
+                const state = get();
+                const pageId = state.nodePageIndex[nodeId];
+                if (!pageId) return;
+
+                set(produce((draft: BuilderState) => {
+                    const nodes = draft.nodes[pageId];
+                    const node = nodes.find(n => n.id === nodeId);
+                    if (!node) return;
+
+                    const keys = path.split('.');
+                    let current: any = node.props;
+                    const actualKeys = keys[0] === 'props' ? keys.slice(1) : keys;
+                    
+                    for (let i = 0; i < actualKeys.length - 1; i++) {
+                        if (current[actualKeys[i]] === undefined) current[actualKeys[i]] = {};
+                        current = current[actualKeys[i]];
+                    }
+                    current[actualKeys[actualKeys.length - 1]] = value;
+                    draft.hasUnsavedChanges = true;
+                }));
+            },
+
+            // --- UI & THEME ---
+            setSelectedNodeId: (id) => set({ selectedNodeId: id }),
+            setIsPreviewMode: (val) => set({ isPreviewMode: val }),
+            setPreviewDevice: (device) => set({ previewDevice: device }),
+            setSidebarOpen: (val) => set({ isSidebarOpen: val }),
+            setIsHydrating: (val) => set({ isHydrating: val }),
+
+            updateTheme: (path, value) => set(produce((draft: BuilderState) => {
+                const keys = path.split('.');
+                let current: any = draft.themeSettings;
+                for (let i = 0; i < keys.length - 1; i++) {
+                    current = current[keys[i]];
                 }
+                current[keys[keys.length - 1]] = value;
+                draft.hasUnsavedChanges = true;
+            })),
+
+            undo: () => {
+                const { historyIndex, historyStack } = get();
+                if (historyIndex < 0) return;
+
+                set(produce((draft: BuilderState) => {
+                    applyPatches(draft, historyStack[historyIndex].undo);
+                    draft.historyIndex -= 1;
+                }));
+            },
+
+            redo: () => {
+                const { historyIndex, historyStack } = get();
+                if (historyIndex >= historyStack.length - 1) return;
+
+                set(produce((draft: BuilderState) => {
+                    applyPatches(draft, historyStack[historyIndex + 1].redo);
+                    draft.historyIndex += 1;
+                }));
+            },
+
+            resetPageNodes: (pageId) => set(produce((draft: BuilderState) => {
+                draft.nodes[pageId] = [];
+                // Cleanup index for nodes that were in this page
+                Object.keys(draft.nodePageIndex).forEach(nid => {
+                    if (draft.nodePageIndex[nid] === pageId) delete draft.nodePageIndex[nid];
+                });
+            })),
+        }),
+        {
+            name: 'omnora-builder-storage',
+            skipHydration: true,
+            onRehydrateStorage: () => (state, error) => {
+                if (error) {
+                    state?.resetPageNodes(state.activePageId); // Fallback: try to clear active
+                    return;
+                }
+                state?.setIsHydrating(false);
             }
-            // Set isHydrating to false after rehydration finishes (or fails)
-            if (state) {
-                state.setIsHydrating(false);
-            }
-        };
-    }
-}));
+        }
+    )
+);

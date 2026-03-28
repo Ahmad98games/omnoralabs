@@ -1,402 +1,165 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import client from '../api/client';
-import axios, { isAxiosError } from 'axios';
 import { supabase } from '../lib/supabaseClient';
+import client from '../api/client';
 import { CinematicLoader } from '../components/ui/CinematicLoader';
 
-// Define the User Shape clearly
-export interface User {
+export interface MerchantProfile {
     id: string;
     email: string;
-    name: string;
-    full_name?: string; // 🛡️ Added for Google metadata compatibility
-    role: 'customer' | 'seller' | 'admin' | 'super-admin';
-    plan?: 'free' | 'pro';
-    photoURL?: string;
-    brandProfile?: {
-        companyName: string;
-        logoURL: string;
-        businessBio: string;
-    };
+    store_name: string;
+    theme_settings?: any;
+    created_at: string;
 }
 
-interface AuthContextType {
-    user: User | null;
-    profile: any | null;
-    status: 'initializing' | 'authenticated' | 'unauthenticated';
-    loading: boolean;
-    isInitialized: boolean;
-    login: (email: string, password: string) => Promise<User>;
-    loginWithGoogle: () => Promise<void>;
-    register: (name: string, email: string, password: string, role?: string, storeName?: string) => Promise<User>;
-    logout: () => Promise<void>;
-    resetPassword: (email: string) => Promise<void>;
+interface AuthContextValue {
+    user: any | null;
+    profile: MerchantProfile | null;
+    isInitializing: boolean;
     isAuthenticated: boolean;
-    isAdmin: boolean;
-    isSeller: boolean;
-    isSuperAdmin: boolean;
-    isAuthModalOpen: boolean;
-    authModalMode: 'login' | 'signup';
-    setAuthModalOpen: (open: boolean, mode?: 'login' | 'signup') => void;
+    signIn: (email, password) => Promise<void>;
+    signUp: (email, password, storeName) => Promise<void>;
+    signOut: () => Promise<void>;
+    updateProfile: (data: Partial<MerchantProfile>) => Promise<void>;
+    resetAuth: () => void;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-// Helper to set Axios Header dynamically
-const setAuthHeader = (token: string | null) => {
-    if (token) {
-        client.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    } else {
-        delete client.defaults.headers.common['Authorization'];
-        delete axios.defaults.headers.common['Authorization'];
-    }
-};
+const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [user, setUser] = useState<User | null>(null);
-    const [profile, setProfile] = useState<any>(null);
-    const [status, setStatus] = useState<'initializing' | 'authenticated' | 'unauthenticated'>('initializing');
-    const [loading, setLoading] = useState(true);
-    const [isInitialized, setIsInitialized] = useState(false);
-    const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-    const [authModalMode, setAuthModalMode] = useState<'login' | 'signup'>('login');
+    const [user, setUser] = useState<any | null>(null);
+    const [profile, setProfile] = useState<MerchantProfile | null>(null);
+    const [isInitializing, setIsInitializing] = useState(true);
 
-    const setAuthModalOpen = (open: boolean, mode: 'login' | 'signup' = 'login') => {
-        setAuthModalMode(mode);
-        setIsAuthModalOpen(open);
-    };
+    const resetAuth = useCallback(async () => {
+        await supabase.auth.signOut();
+        // Remove all localStorage keys starting with 'omnora-'
+        Object.keys(localStorage).forEach(key => {
+            if (key.startsWith('omnora-')) localStorage.removeItem(key);
+        });
+        // Clear Supabase auth cookies implicitly via signOut(), but we can do a hard reset
+        window.location.href = '/login';
+    }, []);
 
-    const isAuthenticating = React.useRef(false);
-    const [authError, setAuthError] = useState(false);
-    
-    const loadProfile = useCallback(async (userId: string) => {
+    const ensureMerchantProfile = useCallback(async (sbUser: any) => {
         try {
-            const { data, error } = await supabase
+            const { data: existing, error: fetchError } = await supabase
                 .from('merchants')
                 .select('*')
-                .eq('id', userId)
+                .eq('id', sbUser.id)
                 .single();
-            if (data) {
-                setProfile(data);
+
+            if (fetchError && fetchError.code !== 'PGRST116') throw fetchError;
+
+            if (!existing) {
+                const storeName = sbUser.user_metadata?.store_name 
+                    || sbUser.email?.split('@')[0] 
+                    || 'My Store';
+
+                const { data: newProfile, error: insertError } = await supabase
+                    .from('merchants')
+                    .insert({
+                        id: sbUser.id,
+                        email: sbUser.email,
+                        store_name: storeName,
+                        created_at: new Date().toISOString(),
+                    })
+                    .select()
+                    .single();
+
+                if (insertError) throw insertError;
+                setProfile(newProfile);
+            } else {
+                setProfile(existing);
             }
         } catch (err) {
-            console.warn('[loadProfile Fail]', err);
+            console.error('[Auth Shield] Profile Sync Failed:', err);
         }
     }, []);
 
-    // Helper function to clean up local state
-    const handleLogoutCleanup = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('role');
-        setAuthHeader(null); // Clear axios header
-        setUser(null);
-        setProfile(null);
-    };
-
-    // 1. INITIAL SESSION CHECK
-    const initAuth = useCallback(async (forceSync = false) => {
-        if (isAuthenticating.current) return;
-        isAuthenticating.current = true;
-        
-        setAuthError(false);
-        setLoading(true);
-        const currentPath = window.location.pathname;
-
-        // 🛡️ Imperial Guard: Never trigger a reload-loop if already at Login/Register
-        const isAuthPath = currentPath === '/login' || currentPath === '/register' || currentPath === '/auth/callback';
-
+    const verify = useCallback(async () => {
         try {
-            // Check session directly from Supabase source of truth
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session) {
-                setLoading(false);
-                setIsInitialized(true);
-                setStatus('unauthenticated');
-                return;
-            }
-
-            // Add timeout to prevent hanging - reduced to 7s for faster loop exit
-            const { data } = await client.get('/auth/me', { 
-                timeout: 7000,
-                'axios-retry': { retries: 2 } 
-            });
-
-            if (data.success && data.user) {
-                setUser(data.user);
-                setStatus('authenticated');
-                await loadProfile(data.user.id);
-            } else if (!isAuthPath && !currentPath.startsWith('/store')) {
-                setStatus('unauthenticated');
-                window.location.href = '/login';
-            }
-        } catch (error: any) {
-            console.warn('Session re-hydration failure:', error);
+            // 🛡️ LAW 2: Always use getUser() for verification, not getSession()
+            const { data: { user: sbUser }, error } = await supabase.auth.getUser();
             
-            // 🛡️ Post-Google Sync: If user is logged into Supabase but missing in DB, try auto-sync
-            const { data: { user: sbUser } } = await supabase.auth.getUser();
-            if (sbUser && forceSync) {
-                await syncGoogleProfile(sbUser);
-                // retry once after sync
-                return initAuth(false);
-            }
-
-            setStatus('unauthenticated');
-            if (!isAuthPath && !currentPath.startsWith('/store')) {
-                window.location.href = '/login';
+            if (error || !sbUser) {
+                setUser(null);
+                setProfile(null);
+            } else {
+                setUser(sbUser);
+                await ensureMerchantProfile(sbUser);
             }
         } finally {
-            setLoading(false);
-            setIsInitialized(true);
-            isAuthenticating.current = false;
+            setIsInitializing(false);
         }
-    }, [loadProfile]);
-
-    const syncGoogleProfile = async (supabaseUser: any) => {
-        const role = localStorage.getItem('omnora_selected_role') || 'customer';
-        console.log(`[Google Sync] Synchronizing for role: ${role}`, supabaseUser.id);
-        
-        try {
-            // 🛡️ 1. Update Supabase User Metadata for role persistence
-            // This is critical for backends that read role from Supabase metadata
-            await supabase.auth.updateUser({
-                data: { role: role }
-            });
-
-            // 🛡️ 2. Double-Sync: Ensure both users AND merchants tables are hydrated
-            // First: Core user record (required for backend middleware)
-            const { error: userSyncError } = await supabase
-                .from('users')
-                .upsert({
-                    id: supabaseUser.id,
-                    email: supabaseUser.email,
-                    name: supabaseUser.user_metadata?.full_name || supabaseUser.email.split('@')[0],
-                    role: role,
-                    store_slug: (supabaseUser.user_metadata?.full_name || 'store').toLowerCase().replace(/[^a-z0-9]/g, '') + '-' + supabaseUser.id.substring(0, 4),
-                    created_at: new Date().toISOString()
-                }, { onConflict: 'id' });
-
-            if (userSyncError) console.error('[Google User Sync Fail]', userSyncError);
-
-            // Second: Merchant profile if seller
-            if (role === 'seller' || role === 'admin') {
-                const { error: profileError } = await supabase
-                    .from('merchants')
-                    .upsert({
-                        id: supabaseUser.id,
-                        display_name: supabaseUser.user_metadata?.full_name || supabaseUser.email,
-                        email: supabaseUser.email,
-                        store_name: `${supabaseUser.user_metadata?.full_name || 'My'}'s Store`,
-                        created_at: new Date().toISOString(),
-                    }, { onConflict: 'id' });
-                
-                if (profileError) console.error('[Google Merchant Sync Fail]', profileError);
-            }
-            
-            // Note: role is still in localStorage so we can use it for final redirect
-        } catch (e) {
-            console.error('[Google Sync Error]', e);
-        }
-    };
+    }, [ensureMerchantProfile]);
 
     useEffect(() => {
-        let initialized = false;
+        verify();
 
-        // [SURGICAL] Listen for the FIRST reliable session event from Supabase
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-            console.log(`[Auth Context Sync] Event: ${event} | Session: ${!!session}`);
-            
-            if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN') {
-                if (session && !initialized) {
-                    initialized = true;
-                    // Only hit the backend AFTER we have a valid Supabase session
-                    await initAuth(false);
-                } else if (!session) {
-                    setStatus('unauthenticated');
-                    setLoading(false);
-                    setIsInitialized(true);
-                }
+            if (event === 'SIGNED_IN' && session?.user) {
+                setUser(session.user);
+                await ensureMerchantProfile(session.user);
             } else if (event === 'SIGNED_OUT') {
-                handleLogoutCleanup();
+                setUser(null);
+                setProfile(null);
             }
         });
 
         return () => subscription.unsubscribe();
-    }, [initAuth]);
+    }, [verify, ensureMerchantProfile]);
 
-    // 2. LOGIN
-    const login = async (email: string, password: string) => {
-        try {
-            // 🛡️ Imperial Logic: Use Supabase directly for unified JWT consistency
-            const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-                email,
-                password
-            });
-
-            if (authError) throw authError;
-
-            if (authData.session) {
-                const token = authData.session.access_token;
-                localStorage.setItem('token', token);
-                setAuthHeader(token);
-                
-                // Trigger backend profile load/sync
-                await initAuth(true); 
-                
-                return authData.user;
-            } else {
-                throw new Error('Login failed: Session missing');
-            }
-        } catch (error: any) {
-            console.error('[Login Error]', error);
-            throw error;
+    const signIn = async (email, password) => {
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        if (data.user) {
+            setUser(data.user);
+            await ensureMerchantProfile(data.user);
         }
     };
 
-    // 3. REGISTER
-    const register = async (name: string, email: string, password: string, role: string = 'customer', storeName?: string) => {
-        try {
-            // 1. Sign up on Supabase directly to save metadata atomics
-            const { data: authData, error: authError } = await supabase.auth.signUp({
-                email,
-                password,
-                options: {
-                    data: {
-                        name: name,
-                        display_name: name,
-                        role: role,
-                        store_name: storeName || `${name}'s Store`,
-                    }
-                }
-            });
-
-            if (authError) throw authError;
-
-            if (authData.user) {
-                // 🛡️ 2. Double-Sync: Hydrate both users AND merchants tables
-                // First: users table (required for backend middleware)
-                const { error: userSyncError } = await supabase
-                    .from('users')
-                    .upsert({
-                        id: authData.user.id,
-                        email: email,
-                        name: name,
-                        role: role,
-                        store_slug: name.toLowerCase().replace(/[^a-z0-9]/g, '') + '-' + authData.user.id.substring(0, 4),
-                        created_at: new Date().toISOString()
-                    }, { onConflict: 'id' });
-
-                if (userSyncError) console.error('[User Sync Fail]', userSyncError);
-
-                // Second: merchants table for Sellers
-                if (role === 'seller' || role === 'admin') {
-                    const { error: profileError } = await supabase
-                        .from('merchants')
-                        .upsert({
-                            id: authData.user.id,
-                            store_name: storeName || `${name}'s Store`,
-                            display_name: name,
-                            email: email,
-                            created_at: new Date().toISOString(),
-                        }, { onConflict: 'id' });
-                    
-                    if (profileError) console.error('[Merchant Sync Fail]', profileError);
-                }
-
-                // 3. Sync State
-                await loadProfile(authData.user.id);
-                setUser({
-                    id: authData.user.id,
-                    email: authData.user.email!,
-                    name: name,
-                    role: role as any
-                });
-                setStatus('authenticated');
-                return { id: authData.user.id, email: authData.user.email!, name, role } as any;
-            } else {
-                throw new Error('Verification required or signup incomplete');
-            }
-
-        } catch (error: any) {
-            if (isAxiosError(error)) {
-                const errorData = error.response?.data;
-                const errorMsg = errorData?.error || errorData?.message || 'Registration failed';
-                throw new Error(typeof errorMsg === 'object' ? JSON.stringify(errorMsg) : errorMsg);
-            }
-            throw error;
-        }
-    };
-
-    // 4. LOGOUT
-    const logout = async () => {
-        try {
-            await client.post('/auth/logout');
-        } catch (e) {
-            // Logout error doesn't matter, we still clear local state
-     } finally {
-            handleLogoutCleanup();
-            // PLG Update: Redirect to the public product tour instead of /login
-            window.location.href = '/';
-        }
-    };
-
-    // 5. GOOGLE LOGIN (Supabase OAuth)
-    const loginWithGoogle = async () => {
-        const { error } = await supabase.auth.signInWithOAuth({
-            provider: 'google',
-            options: {
-                redirectTo: `${window.location.origin}/auth/callback`,
-            }
+    const signUp = async (email, password, storeName) => {
+        const { data, error } = await supabase.auth.signUp({
+            email,
+            password,
+            options: { data: { store_name: storeName } }
         });
-        if (error) throw new Error(error.message);
-        // After redirect, Supabase sets the session automatically.
-        // The onAuthStateChange listener will pick it up.
-    };
-
-    // 6. PASSWORD RESET
-    const resetPassword = async (email: string) => {
-        try {
-            await client.post('/auth/forgot-password', { email });
-        } catch (error: any) {
-            if (isAxiosError(error)) {
-                const errorData = error.response?.data;
-                const errorMsg = errorData?.error || errorData?.message || 'Failed to send reset email';
-                
-                throw new Error(typeof errorMsg === 'object' ? JSON.stringify(errorMsg) : errorMsg);
-            }
-            throw error;
+        if (error) throw error;
+        if (data.user) {
+            setUser(data.user);
+            // Higher-order insertion to ensure no gaps
+            await supabase.from('merchants').insert({
+                id: data.user.id,
+                email: data.user.email,
+                store_name: storeName,
+                created_at: new Date().toISOString(),
+            });
+            await verify();
         }
     };
 
-    const value = {
-        user,
-        profile,
-        status,
-        loading,
-        isInitialized,
-        login,
-        loginWithGoogle,
-        register,
-        logout,
-        resetPassword,
-        loadProfile,
-        isAuthenticated: !!user,
-        isAdmin: user?.role === 'admin' || user?.role === 'super-admin',
-        isSeller: user?.role === 'seller',
-        isSuperAdmin: user?.role === 'super-admin',
-        isAuthModalOpen,
-        authModalMode,
-        setAuthModalOpen
+    const signOut = async () => {
+        await supabase.auth.signOut();
     };
 
-    // 🛡️ Imperial Gate: Only block if not yet initialized
-    // Once initialized, we allow children to render while background refreshes happen
-    if (!isInitialized && loading) {
-        return <CinematicLoader />;
-    }
+    const updateProfile = async (data: Partial<MerchantProfile>) => {
+        if (!user) return;
+        const { error } = await supabase
+            .from('merchants')
+            .update(data)
+            .eq('id', user.id);
+        if (error) throw error;
+        setProfile(prev => prev ? { ...prev, ...data } : null);
+    };
+
+    if (isInitializing) return <CinematicLoader />;
 
     return (
-        <AuthContext.Provider value={value}>
+        <AuthContext.Provider value={{ 
+            user, profile, isInitializing, 
+            isAuthenticated: !!user,
+            signIn, signUp, signOut, updateProfile, resetAuth 
+        }}>
             {children}
         </AuthContext.Provider>
     );
@@ -404,8 +167,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
 export const useAuth = () => {
     const context = useContext(AuthContext);
-    if (context === undefined) {
-        throw new Error('useAuth must be used within an AuthProvider');
-    }
+    if (!context) throw new Error('useAuth must be used within AuthProvider');
     return context;
 };

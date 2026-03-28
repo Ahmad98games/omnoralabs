@@ -28,14 +28,13 @@ import AdminDashboard from './pages/AdminDashboard';
 import OmnoraContact from './pages/OmnoraContact';
 import { BuilderHelpPage } from './pages/builder/BuilderHelpPage';
 import SellerDashboard from './pages/SellerDashboard';
+import AuthCallback from './pages/AuthCallback';
 import { ROUTES } from './routes';
+import { useThemeInjector } from './hooks/useThemeInjector';
 
 import client from './api/client';
 
-const token = localStorage.getItem('token');
-if (token) {
-  client.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-}
+// --- App Root ---
 
 // Hardened Cache Configuration
 const queryClient = new QueryClient({
@@ -50,7 +49,7 @@ const queryClient = new QueryClient({
 });
 
 export default function App() {
-  console.log('[Boot] App rendering');
+  useThemeInjector(); // 🛡️ LAW 6: Theme Sync
   return (
     <GlobalErrorBoundary>
       <QueryClientProvider client={queryClient}>
@@ -85,12 +84,8 @@ export default function App() {
                         <Route path={ROUTES.SELLER} element={<ProtectedRoute><SellerDashboard /></ProtectedRoute>} />
                         <Route path="/builder" element={<ProtectedRoute><Navigate to="/seller?tab=builder" replace /></ProtectedRoute>} />
                         
-                        {/* Google OAuth Callback — Supabase processes tokens via onAuthStateChange */}
-                        <Route path="/auth/callback" element={
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#050505', color: '#F1D592', fontFamily: 'serif', fontSize: '18px' }}>
-                                Authenticating...
-                            </div>
-                        } />
+                        {/* Google OAuth Callback — Explicit PKCE Handling */}
+                        <Route path="/auth/callback" element={<AuthCallback />} />
 
                         {/* Fallback */}
                         <Route path="*" element={<Home />} />

@@ -245,6 +245,68 @@ export const PROP_CONFIGS: Record<string, ComponentPropConfig> = {
     ],
   },
 
+  'dynamic_product_grid': {
+    sections: [
+      {
+        title: 'Grid Layout',
+        icon: LayoutGrid,
+        fields: [
+          {
+            name: 'columns',
+            type: 'select',
+            label: 'Columns',
+            options: [{ value: 2, label: '2' }, { value: 3, label: '3' }, { value: 4, label: '4' }],
+          },
+          { name: 'gap', type: 'slider', label: 'Gap (px)', min: 8, max: 40, step: 4 },
+          {
+            name: 'productSource',
+            type: 'select',
+            label: 'Source',
+            options: [
+              { value: 'auto', label: 'All Products' },
+              { value: 'collection', label: 'By Collection' },
+              { value: 'bestsellers', label: 'Best Sellers' },
+              { value: 'manual', label: 'Manual' },
+            ],
+          },
+          {
+            name: 'collectionId',
+            type: 'text',
+            label: 'Collection ID',
+            placeholder: 'Enter collection ID',
+            visibleIf: (p: any) => p.productSource === 'collection',
+          },
+          {
+            name: 'productIds',
+            type: 'text',
+            label: 'Product IDs',
+            placeholder: 'prod_1, prod_2',
+            visibleIf: (p: any) => p.productSource === 'manual',
+          },
+          { name: 'limit', type: 'number', label: 'Product Limit', min: 1, max: 24 },
+        ],
+      },
+      {
+        title: 'Card & Theme',
+        icon: Sparkles,
+        fields: [
+          {
+            name: 'imageAspectRatio',
+            type: 'select',
+            label: 'Image Ratio',
+            options: [
+              { value: 'square', label: 'Square 1:1' },
+              { value: 'portrait', label: 'Portrait 3:4' },
+              { value: 'landscape', label: 'Landscape 16:9' },
+            ],
+          },
+          { name: 'accentColor', type: 'color', label: 'Accent Color' },
+          { name: 'textColor', type: 'color', label: 'Text Color' },
+        ],
+      },
+    ],
+  },
+
   'featured_product': {
     sections: [
       {
