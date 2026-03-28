@@ -21,10 +21,25 @@ const AuthCallback: React.FC = () => {
             }
 
             if (data.session) {
-                console.log('[AuthCallback] Session established, redirecting...');
-                navigate('/seller/dashboard');
+                console.log('[AuthCallback] Session established, syncing profile...');
+                
+                // Fetch profile to determine role
+                const { data: profile } = await supabase
+                    .from('merchants')
+                    .select('role')
+                    .eq('id', data.session.user.id)
+                    .single();
+                
+                const role = profile?.role || 'customer';
+                
+                if (role === 'admin' || role === 'super-admin') {
+                    navigate('/admin/dashboard');
+                } else if (role === 'seller') {
+                    navigate('/seller/dashboard?tab=builder');
+                } else {
+                    navigate('/profile');
+                }
             } else {
-                // If no session yet, we wait a bit or redirect to login
                 console.warn('[AuthCallback] No session found');
                 navigate('/login');
             }

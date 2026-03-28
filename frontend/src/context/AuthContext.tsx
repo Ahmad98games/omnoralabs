@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import client from '../api/client';
 import { CinematicLoader } from '../components/ui/CinematicLoader';
 
 export interface MerchantProfile {
@@ -8,6 +7,7 @@ export interface MerchantProfile {
     email: string;
     store_name: string;
     theme_settings?: any;
+    role: 'customer' | 'seller' | 'admin' | 'super-admin';
     created_at: string;
 }
 
@@ -15,10 +15,13 @@ interface AuthContextValue {
     user: any | null;
     profile: MerchantProfile | null;
     isInitializing: boolean;
+    loading: boolean;
     isAuthenticated: boolean;
-    signIn: (email, password) => Promise<void>;
-    signUp: (email, password, storeName) => Promise<void>;
+    login: (email, password) => Promise<any>;
+    register: (name, email, password, role, storeName?: string) => Promise<any>;
+    loginWithGoogle: () => Promise<void>;
     signOut: () => Promise<void>;
+    resetPassword: (email: string) => Promise<void>;
     updateProfile: (data: Partial<MerchantProfile>) => Promise<void>;
     resetAuth: () => void;
 }
@@ -32,15 +35,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const resetAuth = useCallback(async () => {
         await supabase.auth.signOut();
-        // Remove all localStorage keys starting with 'omnora-'
         Object.keys(localStorage).forEach(key => {
             if (key.startsWith('omnora-')) localStorage.removeItem(key);
         });
-        // Clear Supabase auth cookies implicitly via signOut(), but we can do a hard reset
         window.location.href = '/login';
     }, []);
 
-    const ensureMerchantProfile = useCallback(async (sbUser: any) => {
+    const ensureMerchantProfile = useCallback(async (sbUser: any, name?: string, role: any = 'customer', storeName?: string) => {
         try {
             const { data: existing, error: fetchError } = await supabase
                 .from('merchants')
@@ -51,36 +52,39 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             if (fetchError && fetchError.code !== 'PGRST116') throw fetchError;
 
             if (!existing) {
-                const storeName = sbUser.user_metadata?.store_name 
-                    || sbUser.email?.split('@')[0] 
-                    || 'My Store';
+                // 🛡️ RECOVERY: Read role from localStorage if it was saved during Login.tsx handleGoogleSignIn
+                const savedRole = localStorage.getItem('omnora_selected_role');
+                const finalRole = role || sbUser.user_metadata?.role || savedRole || 'customer';
+                const finalStoreName = storeName || sbUser.user_metadata?.store_name || (finalRole === 'seller' ? `${sbUser.email?.split('@')[0]}'s Store` : 'My Store');
 
                 const { data: newProfile, error: insertError } = await supabase
                     .from('merchants')
                     .insert({
                         id: sbUser.id,
                         email: sbUser.email,
-                        store_name: storeName,
+                        store_name: finalStoreName,
+                        role: finalRole as any,
                         created_at: new Date().toISOString(),
                     })
                     .select()
                     .single();
 
                 if (insertError) throw insertError;
-                setProfile(newProfile);
+                setProfile(newProfile as any);
+                return newProfile;
             } else {
-                setProfile(existing);
+                setProfile(existing as any);
+                return existing;
             }
         } catch (err) {
             console.error('[Auth Shield] Profile Sync Failed:', err);
+            return null;
         }
     }, []);
 
     const verify = useCallback(async () => {
         try {
-            // 🛡️ LAW 2: Always use getUser() for verification, not getSession()
             const { data: { user: sbUser }, error } = await supabase.auth.getUser();
-            
             if (error || !sbUser) {
                 setUser(null);
                 setProfile(null);
@@ -95,7 +99,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     useEffect(() => {
         verify();
-
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
             if (event === 'SIGNED_IN' && session?.user) {
                 setUser(session.user);
@@ -105,37 +108,56 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 setProfile(null);
             }
         });
-
         return () => subscription.unsubscribe();
     }, [verify, ensureMerchantProfile]);
 
-    const signIn = async (email, password) => {
+    const login = async (email, password) => {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         if (data.user) {
             setUser(data.user);
-            await ensureMerchantProfile(data.user);
+            const prof = await ensureMerchantProfile(data.user);
+            return { ...data.user, ...prof };
         }
+        return data.user;
     };
 
-    const signUp = async (email, password, storeName) => {
+    const register = async (name, email, password, role = 'customer', storeName) => {
         const { data, error } = await supabase.auth.signUp({
             email,
             password,
-            options: { data: { store_name: storeName } }
+            options: { 
+                data: { 
+                    full_name: name,
+                    store_name: storeName || (role === 'seller' ? `${name}'s Store` : null),
+                    role: role 
+                } 
+            }
         });
         if (error) throw error;
         if (data.user) {
             setUser(data.user);
-            // Higher-order insertion to ensure no gaps
-            await supabase.from('merchants').insert({
-                id: data.user.id,
-                email: data.user.email,
-                store_name: storeName,
-                created_at: new Date().toISOString(),
-            });
-            await verify();
+            const prof = await ensureMerchantProfile(data.user, name, role, storeName);
+            return { ...data.user, ...prof };
         }
+        return data.user;
+    };
+
+    const loginWithGoogle = async () => {
+        const { error } = await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+                redirectTo: `${window.location.origin}/auth/callback`
+            }
+        });
+        if (error) throw error;
+    };
+
+    const resetPassword = async (email: string) => {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: `${window.location.origin}/reset-password`,
+        });
+        if (error) throw error;
     };
 
     const signOut = async () => {
@@ -157,8 +179,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return (
         <AuthContext.Provider value={{ 
             user, profile, isInitializing, 
+            loading: isInitializing,
             isAuthenticated: !!user,
-            signIn, signUp, signOut, updateProfile, resetAuth 
+            login, register, loginWithGoogle, signOut, resetPassword, updateProfile, resetAuth 
         }}>
             {children}
         </AuthContext.Provider>
