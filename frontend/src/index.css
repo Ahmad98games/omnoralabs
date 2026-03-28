@@ -1,5 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* 🏗️ OMNORA INDUSTRIAL DESIGN SYSTEM (Task 10.1) */
-/* Aesthetic: Cold, Professional, High-End Instrument */
 
 :root {
   /* 🎨 Primary Palette */

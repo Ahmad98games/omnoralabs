@@ -77,6 +77,13 @@ export const useThemeInjector = () => {
             
             // 🛡️ BATCHED INJECTION (Industrial Rule)
             // Colors
+            root.style.setProperty('--om-bg', theme.colors.background);
+            root.style.setProperty('--om-surface', theme.colors.surface);
+            root.style.setProperty('--om-text-primary', theme.colors.text);
+            root.style.setProperty('--om-text-muted', theme.colors.textMuted);
+            root.style.setProperty('--om-border', theme.colors.border);
+            
+            // Legacy compatibility (if any components still use them)
             Object.entries(theme.colors).forEach(([key, val]) => {
                 root.style.setProperty(`--om-color-${key}`, val);
             });
@@ -89,7 +96,7 @@ export const useThemeInjector = () => {
 
             // Layout
             root.style.setProperty('--om-max-width', `${theme.layout.maxWidth}px`);
-            root.style.setProperty('--om-border-radius', `${theme.layout.borderRadius}px`);
+            root.style.setProperty('--om-radius-md', `${theme.layout.borderRadius}px`);
             root.style.setProperty('--om-button-radius', `${theme.layout.buttonRadius}px`);
 
             lastUpdate.current = Date.now();
