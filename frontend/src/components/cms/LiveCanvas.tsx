@@ -16,13 +16,9 @@ import { EmptyState } from '../ui/EmptyState';
  * Pure dynamic renderer with Zero Wasted Renders.
  */
 export const LiveCanvas: React.FC = React.memo(() => {
-    const { blocks, isHydrating, activePageId } = useBuilderStore(
-        useShallow(s => ({
-            blocks: s.nodes[s.activePageId] ?? [],
-            isHydrating: s.isHydrating,
-            activePageId: s.activePageId
-        }))
-    );
+    const blocks = useBuilderStore(s => s.nodes[s.activePageId] ?? []);
+    const isHydrating = useBuilderStore(s => s.isHydrating);
+    const activePageId = useBuilderStore(s => s.activePageId);
 
     if (isHydrating) return <CanvasSkeleton />;
     

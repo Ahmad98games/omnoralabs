@@ -13,12 +13,8 @@ export const SmartSidebar: React.FC = () => {
     const [rightTab, setRightTab] = useState<'props' | 'settings'>('props');
     const [collapsed, setCollapsed] = useState(false);
 
-    const { selectedNodeId, activePage } = useBuilderStore(
-        useShallow(s => ({
-            selectedNodeId: s.selectedNodeId,
-            activePage: s.pages[s.activePageId]
-        }))
-    );
+    const selectedNodeId = useBuilderStore(s => s.selectedNodeId);
+    const activePage = useBuilderStore(s => s.pages[s.activePageId]);
 
     if (collapsed) return (
         <button 

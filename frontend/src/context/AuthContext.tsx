@@ -128,7 +128,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const verify = useCallback(async () => {
         try {
             console.log('[Auth Shield] Core Kernel Initialization Initiated...');
-            const { data: { user: sbUser }, error } = await supabase.auth.getUser();
+            
+            // 🛡️ RACE CONDITION PROTECTION: Timeout the Supabase call
+            const authPromise = supabase.auth.getUser();
+            const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('SUPABASE_TIMEOUT')), 5000)
+            );
+
+            const { data: { user: sbUser }, error } = await Promise.race([authPromise, timeoutPromise]) as any;
             
             if (error || !sbUser) {
                 console.warn('[Auth Shield] No valid session found in Kernel.');
@@ -141,6 +148,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             }
         } catch (err) {
             console.error('[Auth Shield] VERIFICATION_FAULT:', err);
+            // Default to Guest if blocked
+            setUser(null);
+            setProfile(null);
         } finally {
             console.log('[Auth Shield] Kernel Settled.');
             setIsInitializing(false);
@@ -148,10 +158,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }, [ensureProfile]);
 
     useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            if (isInitializing) {
+                console.warn('[Auth Shield] Kernel Init timed out after 6s. Forcing settlement.');
+                setIsInitializing(false);
+            }
+        }, 6000);
+
         verify();
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
             console.log(`[Auth Pulse] State Change Triggered: ${event}`);
-            if (event === 'SIGNED_IN' && session?.user) {
+            if ((event === 'SIGNED_IN' || event === 'USER_UPDATED') && session?.user) {
                 setUser(session.user);
                 await ensureProfile(session.user);
             } else if (event === 'SIGNED_OUT') {
@@ -159,8 +176,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 setProfile(null);
             }
         });
-        return () => subscription.unsubscribe();
-    }, [verify, ensureProfile]);
+
+        return () => {
+            clearTimeout(timeoutId);
+            subscription.unsubscribe();
+        };
+    }, [verify]);
 
     const login = async (email, password) => {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
@@ -194,16 +215,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return data.user;
     };
 
-    const loginWithGoogle = async () => {
-        const { error } = await supabase.auth.signInWithOAuth({
-            provider: 'google',
-            options: {
-                redirectTo: `${window.location.origin}/auth/callback`
-            }
-        });
-        if (error) throw error;
-    };
-
     const resetPassword = async (email: string) => {
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
             redirectTo: `${window.location.origin}/reset-password`,
@@ -235,7 +246,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             isAdmin: profile?.role === 'admin' || profile?.role === 'super-admin',
             isSeller: profile?.role === 'seller',
             isCustomer: !profile || profile?.role === 'customer',
-            login, register, loginWithGoogle, signOut, resetPassword, updateProfile, resetAuth 
+            login, register, signOut, resetPassword, updateProfile, resetAuth 
         }}>
             {children}
         </AuthContext.Provider>

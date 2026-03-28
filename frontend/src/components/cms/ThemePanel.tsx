@@ -8,12 +8,8 @@ import { Palette, Type, Layout, Hexagon, ChevronRight } from 'lucide-react';
  * Full control over the Omnora Design System.
  */
 export const ThemePanel: React.FC = () => {
-    const { theme, updateTheme } = useBuilderStore(
-        useShallow(s => ({
-            theme: s.themeSettings,
-            updateTheme: s.updateThemeSettings
-        }))
-    );
+    const theme = useBuilderStore(s => s.themeSettings);
+    const updateTheme = useBuilderStore(s => s.updateThemeSettings);
 
     const handleColorChange = (key: string, value: string) => {
         updateTheme({ colors: { ...theme.colors, [key]: value } });

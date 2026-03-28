@@ -84,9 +84,6 @@ export default function App() {
                         <Route path={ROUTES.SELLER} element={<ProtectedRoute requireSeller><SellerDashboard /></ProtectedRoute>} />
                         <Route path="/builder" element={<ProtectedRoute requireSeller><Navigate to="/seller?tab=builder" replace /></ProtectedRoute>} />
                         
-                        {/* Google OAuth Callback — Explicit PKCE Handling */}
-                        <Route path="/auth/callback" element={<AuthCallback />} />
-
                         {/* Fallback */}
                         <Route path="*" element={<Home />} />
                     </Routes>

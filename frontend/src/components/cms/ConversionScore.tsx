@@ -27,12 +27,8 @@ const CONVERSION_SIGNALS: Signal[] = [
  * Audits the current page for industrial-grade conversion signals.
  */
 export const ConversionScore: React.FC = () => {
-    const { nodes, activePageId } = useBuilderStore(
-        useShallow(s => ({
-            nodes: s.nodes[s.activePageId] ?? [],
-            activePageId: s.activePageId
-        }))
-    );
+    const nodes = useBuilderStore(s => s.nodes[s.activePageId] ?? []);
+    const activePageId = useBuilderStore(s => s.activePageId);
 
     const audit = useMemo(() => {
         const foundTypes = new Set(nodes.map(n => n.type));
