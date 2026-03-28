@@ -64,13 +64,20 @@ const AuthCallback: React.FC = () => {
             alignItems: 'center', 
             justifyContent: 'center', 
             height: '100vh', 
-            background: '#050505', 
-            color: '#F1D592', 
-            gap: '20px' 
+            background: '#000000', 
+            color: '#FFFFFF', 
+            gap: '32px' 
         }}>
             <CinematicLoader />
-            <div style={{ fontFamily: 'serif', fontSize: '18px', letterSpacing: '0.1em' }}>
-                ESTABLISHING SECURE SESSION...
+            <div style={{ 
+                fontFamily: 'Inter, sans-serif', 
+                fontSize: '10px', 
+                fontWeight: '900', 
+                letterSpacing: '5px', 
+                color: 'rgba(255,255,255,0.2)', 
+                textTransform: 'uppercase' 
+            }}>
+                Establishing Secure Session
             </div>
         </div>
     );

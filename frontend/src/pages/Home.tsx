@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { useStorefront } from '../hooks/useStorefront';
 import { DynamicSection } from '../components/DynamicSection';
 import { BuilderProvider } from '../context/BuilderContext';
@@ -25,7 +26,7 @@ export default function Home() {
   const activeLayout = siteContent?.layouts?.home?.blocks || [];
 
   return (
-    <BuilderProvider initialData={siteContent || {}} isPreview={isPreview}>
+    <BuilderProvider initialData={siteContent || {}} isPreview={false}>
       <div className="min-h-screen bg-[#000000] text-white selection:bg-white/20 font-sans overflow-x-hidden selection:text-black">
         {/* 🏭 INDUSTRIAL HERO: PURE TAILWIND (Task 3.3) */}
         <section className="relative h-[90vh] flex items-center justify-center border-b border-white/10 bg-[#050505]">
