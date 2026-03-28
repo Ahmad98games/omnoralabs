@@ -17,6 +17,9 @@ interface AuthContextValue {
     isInitializing: boolean;
     loading: boolean;
     isAuthenticated: boolean;
+    isAdmin: boolean;
+    isSeller: boolean;
+    isCustomer: boolean;
     login: (email, password) => Promise<any>;
     register: (name, email, password, role, storeName?: string) => Promise<any>;
     loginWithGoogle: () => Promise<void>;
@@ -181,6 +184,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             user, profile, isInitializing, 
             loading: isInitializing,
             isAuthenticated: !!user,
+            isAdmin: profile?.role === 'admin' || profile?.role === 'super-admin',
+            isSeller: profile?.role === 'seller',
+            isCustomer: !profile || profile?.role === 'customer',
             login, register, loginWithGoogle, signOut, resetPassword, updateProfile, resetAuth 
         }}>
             {children}

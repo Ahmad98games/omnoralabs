@@ -12,13 +12,13 @@ import { useStorefront } from '../../context/StorefrontContext';
 // ─── Design Tokens ────────────────────────────────────────────────────────────
 
 const T = {
-    bg: 'rgba(10,10,15,0.85)',
-    surface: '#13131a',
-    border: '#2a2a3a',
-    accent: '#7c6dfa',
-    accentDim: 'rgba(124,109,250,0.12)',
-    text: '#f0f0f5',
-    textDim: '#8b8ba0',
+    bg: '#000000',
+    surface: '#050505',
+    border: 'rgba(255, 255, 255, 0.08)',
+    accent: '#FFFFFF',
+    accentDim: 'rgba(255, 255, 255, 0.05)',
+    text: '#FFFFFF',
+    textDim: 'rgba(255, 255, 255, 0.5)',
 };
 
 // ─── Interfaces ───────────────────────────────────────────────────────────────
@@ -86,10 +86,10 @@ export const StoreHeader: React.FC<StoreHeaderProps> = ({
             {/* Logo / Store Name */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
                 <div style={{
-                    width: 32, height: 32, borderRadius: 8,
-                    background: `linear-gradient(135deg, ${T.accent}, #9b8aff)`,
+                    width: 32, height: 32, borderRadius: 4,
+                    background: '#FFFFFF',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 14, fontWeight: 900, color: '#fff',
+                    fontSize: 14, fontWeight: 900, color: '#000',
                 }}>
                     {displayName.charAt(0).toUpperCase()}
                 </div>
@@ -139,9 +139,9 @@ export const StoreHeader: React.FC<StoreHeaderProps> = ({
                         style={{
                             width: '100%',
                             padding: '9px 16px 9px 36px',
-                            background: T.surface,
+                            background: '#080808',
                             border: `1px solid ${T.border}`,
-                            borderRadius: 10,
+                            borderRadius: 6,
                             color: T.text,
                             fontSize: 13,
                             fontWeight: 500,
@@ -169,7 +169,7 @@ export const StoreHeader: React.FC<StoreHeaderProps> = ({
                     position: 'relative',
                     background: 'transparent',
                     border: `1px solid ${T.border}`,
-                    borderRadius: 10,
+                    borderRadius: 6,
                     padding: '8px 14px',
                     cursor: 'pointer',
                     display: 'flex',
@@ -201,14 +201,14 @@ export const StoreHeader: React.FC<StoreHeaderProps> = ({
                         minWidth: 20, height: 20,
                         borderRadius: 10,
                         background: T.accent,
-                        color: '#fff',
+                        color: '#000',
                         fontSize: 10,
-                        fontWeight: 800,
+                        fontWeight: 900,
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         padding: '0 5px',
-                        boxShadow: `0 2px 8px rgba(124,109,250,0.4)`,
+                        boxShadow: `none`,
                         animation: 'omnoraHeaderBadgePop 0.3s cubic-bezier(0.16,1,0.3,1)',
                     }}>
                         {totalItems > 99 ? '99+' : totalItems}

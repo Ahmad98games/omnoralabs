@@ -17,8 +17,8 @@ const HeroSection: React.FC<any> = ({ nodeId, ...props }) => {
                 minHeight: props?.height || '80vh', 
                 display: 'flex', 
                 alignItems: 'center', 
-                background: props?.bgImage ? `url(${props?.bgImage}) center/cover` : (props?.bgColor || 'var(--db-bg)'),
-                color: props?.textColor || '#fff',
+                background: props?.bgImage ? `url(${props?.bgImage}) center/cover` : (props?.bgColor || 'var(--om-bg)'),
+                color: props?.textColor || 'var(--om-text-primary)',
                 position: 'relative'
             }}
         >
@@ -33,7 +33,7 @@ const HeroSection: React.FC<any> = ({ nodeId, ...props }) => {
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
-                    style={{ color: props?.headlineColor || 'var(--p-color, #C5A059)' }}
+                    style={{ color: props?.headlineColor || 'var(--om-text-primary)' }}
                 >
                     <EditableText nodeId={nodeId} path="props.headline" tag="span" />
                 </motion.h1>
@@ -41,8 +41,8 @@ const HeroSection: React.FC<any> = ({ nodeId, ...props }) => {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.3, duration: 0.8 }}
-                    className="eyebrow mt-4"
-                    style={{ color: props?.subheadlineColor || 'var(--s-color, rgba(255,255,255,0.6))' }}
+                    className="eyebrow mt-4 uppercase tracking-[0.3em] font-black italic"
+                    style={{ color: props?.subheadlineColor || 'var(--om-text-muted)' }}
                 >
                     <EditableText nodeId={nodeId} path="props.subheadline" tag="span" />
                 </motion.p>
@@ -56,10 +56,10 @@ const TextContent: React.FC<any> = ({ nodeId, ...props }) => {
     return (
         <section className="dynamic-text py-20" style={{ background: props?.bgColor || 'var(--db-bg)', textAlign: props?.alignment || 'left' }}>
             <div className="container max-w-3xl">
-                <h2 className="mb-8" style={{ color: props?.headlineColor || 'var(--p-color, #C5A059)' }}>
+                <h2 className="mb-8 uppercase tracking-tighter font-black h1" style={{ color: props?.headlineColor || 'var(--om-text-primary)' }}>
                     <EditableText nodeId={nodeId} path="props.title" tag="span" />
                 </h2>
-                <div className="prose prose-invert" style={{ color: props?.textColor || 'rgba(255,255,255,0.8)' }}>
+                <div className="prose prose-invert max-w-none text-xl leading-relaxed" style={{ color: props?.textColor || 'var(--om-text-muted)' }}>
                     <EditableText nodeId={nodeId} path="props.body" tag="div" />
                 </div>
             </div>
@@ -70,16 +70,16 @@ const TextContent: React.FC<any> = ({ nodeId, ...props }) => {
 const TrustSection: React.FC<any> = ({ nodeId, ...props }) => {
     if (!props) return null;
     return (
-        <section className="dynamic-trust py-12" style={{ background: props?.bgColor || 'var(--db-bg)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+        <section className="dynamic-trust py-12 border-y border-white/5" style={{ background: props?.bgColor || 'var(--om-bg)' }}>
             <div className="container">
                 <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: props?.alignment || 'center', gap: `${props?.gap || 40}px` }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', opacity: 0.8 }}>
-                        <div style={{ width: '32px', height: '32px', background: 'rgba(197, 160, 89, 0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: props?.iconColor || 'var(--accent-primary)' }}>✓</div>
-                        <EditableText nodeId={nodeId} path="props.badge1Label" tag="span" />
+                        <div style={{ width: '32px', height: '32px', background: 'rgba(255, 255, 255, 0.05)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: props?.iconColor || 'var(--om-text-primary)' }}>✓</div>
+                        <EditableText nodeId={nodeId} path="props.badge1Label" tag="span" className="text-xs font-bold tracking-widest uppercase" />
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', opacity: 0.8 }}>
-                        <div style={{ width: '32px', height: '32px', background: 'rgba(197, 160, 89, 0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: props?.iconColor || 'var(--accent-primary)' }}>✓</div>
-                        <EditableText nodeId={nodeId} path="props.badge2Label" tag="span" />
+                        <div style={{ width: '32px', height: '32px', background: 'rgba(255, 255, 255, 0.05)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: props?.iconColor || 'var(--om-text-primary)' }}>✓</div>
+                        <EditableText nodeId={nodeId} path="props.badge2Label" tag="span" className="text-xs font-bold tracking-widest uppercase" />
                     </div>
                 </div>
             </div>
@@ -90,7 +90,7 @@ const TrustSection: React.FC<any> = ({ nodeId, ...props }) => {
 const PromoBanner: React.FC<any> = ({ nodeId, ...props }) => {
     if (!props) return null;
     return (
-        <section className="promo-banner py-6" style={{ background: props?.bgColor || 'var(--accent-primary, #C5A059)', color: props?.textColor || '#000', textAlign: props?.alignment || 'center' }}>
+        <section className="promo-banner py-4 border-b border-white/5" style={{ background: props?.bgColor || 'var(--om-bg)', color: props?.textColor || 'var(--om-text-primary)', textAlign: props?.alignment || 'center' }}>
             <div className="container">
                 <span style={{ fontWeight: 900, fontSize: '0.9rem', letterSpacing: '0.1em' }}>
                     <EditableText nodeId={nodeId} path="props.message" tag="span" />
@@ -110,8 +110,8 @@ const ReviewsSection: React.FC<any> = ({ nodeId, ...props }) => {
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     {[1, 2, 3].map(i => (
-                        <div key={i} className="review-card p-8 border border-white/5 bg-white/[0.02]" style={{ borderRadius: `${props?.borderRadius || 8}px` }}>
-                            <div className="stars mb-4" style={{ color: props?.starColor || 'var(--accent-primary)' }}>★★★★★</div>
+                        <div key={i} className="review-card p-12 border border-white/10 bg-white/[0.02]" style={{ borderRadius: `${props?.borderRadius || 0}px` }}>
+                            <div className="stars mb-4 opacity-40" style={{ color: props?.starColor || 'var(--om-text-primary)' }}>★★★★★</div>
                             <p className="mb-4" style={{ fontStyle: 'italic', opacity: 0.8, color: props?.textColor || '' }}>
                                 <EditableText nodeId={nodeId} path={`props.review${i}`} tag="span" />
                             </p>
@@ -132,13 +132,13 @@ const ProductGrid: React.FC<any> = ({ nodeId, ...props }) => {
     const gap = props?.gridGap !== undefined ? `${props?.gridGap}px` : '2rem';
 
     return (
-        <section className="dynamic-products py-20" style={{ background: 'var(--db-bg)' }}>
+        <section className="dynamic-products py-24" style={{ background: 'var(--om-bg)' }}>
             <div className="container">
-                <div className="section-header mb-12">
-                    <span className="eyebrow" style={{ color: 'var(--accent-primary, #C5A059)' }}>
+                <div className="section-header mb-16">
+                    <span className="eyebrow uppercase tracking-[0.4em] font-black text-xs italic" style={{ color: 'var(--om-text-muted)' }}>
                         <EditableText nodeId={nodeId} path="props.eyebrow" tag="span" />
                     </span>
-                    <h2 style={{ color: '#fff' }}>
+                    <h2 className="text-4xl md:text-6xl font-black tracking-tighter mt-4" style={{ color: 'var(--om-text-primary)' }}>
                         <EditableText nodeId={nodeId} path="props.title" tag="span" />
                     </h2>
                 </div>
@@ -170,7 +170,7 @@ const Spacer: React.FC<any> = ({ ...props }) => {
 const AtomicButton: React.FC<any> = ({ nodeId, ...props }) => {
     if (!props) return null;
     return (
-        <div className="py-8 text-center" style={{ background: props?.bgColor || 'var(--db-bg)' }}>
+        <div className="py-8 text-center" style={{ background: props?.bgColor || 'var(--om-bg)' }}>
             <button 
                 className="btn-primary" 
                 style={{ 
@@ -205,32 +205,32 @@ const FeaturedProduct: React.FC<any> = ({ nodeId, ...props }) => {
     }, [products, props?.productId]);
 
     const content = (
-        <section className="featured-product py-20" style={{ background: props?.bgColor || 'var(--db-bg)' }}>
+        <section className="featured-product py-24" style={{ background: props?.bgColor || 'var(--om-bg)' }}>
             <div className="container">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-                    <div className="product-image-scaffold aspect-square bg-white/[0.02] border border-white/5 overflow-hidden" style={{ borderRadius: `${props?.borderRadius || 8}px`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div className="product-image-scaffold aspect-square bg-white/[0.02] border border-white/5 overflow-hidden" style={{ borderRadius: `${props?.borderRadius || 0}px`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         {product ? (
                             <img src={product?.featured_image} alt={product?.title} className="w-full h-full object-cover" />
                         ) : (
-                            <span style={{ fontSize: '0.7rem', opacity: 0.3 }}>PRODUCT IMAGE</span>
+                            <span style={{ fontSize: '0.7rem', opacity: 0.1, fontWeight: 900, letterSpacing: '0.2em' }}>PRODUCT_ENTITY_SNAPSHOT</span>
                         )}
                     </div>
                     <div className="product-info">
-                        <span className="eyebrow" style={{ color: 'var(--accent-primary)' }}>
-                            {product ? (product?.type || 'FEATURED PIECE') : 'FEATURED PIECE'}
+                        <span className="eyebrow uppercase tracking-[0.3em] font-black text-xs italic" style={{ color: 'var(--om-text-muted)' }}>
+                            {product ? (product?.product_type || 'FEATURED ARTIFACT') : 'FEATURED ARTIFACT'}
                         </span>
-                        <h2 className="mb-4">
+                        <h2 className="text-4xl md:text-6xl font-black tracking-tighter mb-8 mt-4">
                             {product ? product?.title : <EditableText nodeId={nodeId} path="props.title" tag="span" />}
                         </h2>
                         <p className="mb-8 opacity-70">
                             {product ? product?.description : <EditableText nodeId={nodeId} path="props.description" tag="span" />}
                         </p>
-                        <div className="flex items-center gap-6">
-                            <span className="text-xl font-bold text-white">
-                                {product ? `$${product?.price?.toLocaleString()}` : ''}
+                        <div className="flex items-center gap-10">
+                            <span className="text-3xl font-black tracking-tighter text-white">
+                                {product ? `$${Number(product?.base_price)?.toLocaleString()}` : ''}
                             </span>
-                            <button className="btn-primary" style={{ padding: '16px 40px', background: '#fff', color: '#000', border: 'none', fontWeight: 900, borderRadius: '4px' }}>
-                                PURCHASE NOW
+                            <button className="px-12 py-5 bg-white text-black font-black uppercase tracking-[0.2em] text-xs hover:bg-white/90 transition-all">
+                                MATERIALIZE NOW
                             </button>
                         </div>
                     </div>

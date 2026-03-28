@@ -63,39 +63,43 @@ class RootErrorBoundary extends React.Component<
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          height: '100vh',
-          fontFamily: 'system-ui, sans-serif',
-          background: '#FAFAF9',
-          gap: '16px',
-          padding: '24px',
+          height: '100vh', 
+          fontFamily: "'Inter', sans-serif",
+          background: '#000000',
+          color: '#FFFFFF',
+          gap: '24px',
+          padding: '40px',
           textAlign: 'center',
+          letterSpacing: '-0.02em'
         }}>
-          <div style={{ fontSize: '32px' }}>⚠️</div>
-          <h2 style={{ fontSize: '18px', color: '#1A1916', margin: 0, fontWeight: 500 }}>
-            Something went wrong
+          <div style={{ fontSize: '48px', opacity: 0.2, fontWeight: 900 }}>CRITICAL_KERNEL_PANIC</div>
+          <h2 style={{ fontSize: '24px', color: '#FFFFFF', margin: 0, fontWeight: 900, textTransform: 'uppercase' }}>
+            System Interrupt
           </h2>
-          <p style={{ fontSize: '13px', color: '#6B6863', margin: 0, maxWidth: '400px' }}>
+          <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.5)', margin: 0, maxW: '400px', lineHeight: 1.6 }}>
             {this.state.error}
           </p>
           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
             <button
               onClick={() => window.location.reload()}
               style={{
-                padding: '8px 16px',
-                border: '1px solid #E8E6E1',
-                borderRadius: '6px',
+                padding: '12px 24px',
+                border: 'none',
+                borderRadius: '4px',
                 background: 'white',
-                fontSize: '13px',
+                fontSize: '11px',
                 cursor: 'pointer',
-                color: '#1A1916',
+                color: 'black',
+                fontWeight: 900,
+                textTransform: 'uppercase',
+                letterSpacing: '0.1em'
               }}
             >
-              Reload page
+              RELOAD_KERNEL
             </button>
             <button
               onClick={() => {
                 try {
-                  // Scoped clear — only omnora keys, never auth tokens
                   Object.keys(localStorage)
                     .filter(k => k.startsWith('omnora-') || k.includes('omnora'))
                     .forEach(k => localStorage.removeItem(k))
@@ -103,17 +107,19 @@ class RootErrorBoundary extends React.Component<
                 window.location.href = '/'
               }}
               style={{
-                padding: '8px 16px',
-                border: 'none',
-                borderRadius: '6px',
-                background: '#FF6B35',
+                padding: '12px 24px',
+                border: '1px solid rgba(255,255,255,0.2)',
+                borderRadius: '4px',
+                background: 'transparent',
                 color: 'white',
-                fontSize: '13px',
+                fontSize: '11px',
                 cursor: 'pointer',
-                fontWeight: 500,
+                fontWeight: 900,
+                textTransform: 'uppercase',
+                letterSpacing: '0.1em'
               }}
             >
-              Clear cache and restart
+              PURGE_CACHE_RESTART
             </button>
           </div>
         </div>

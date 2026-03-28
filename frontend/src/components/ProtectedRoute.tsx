@@ -7,23 +7,27 @@ import './ProtectedRoute.css';
 interface ProtectedRouteProps {
     children: React.ReactNode;
     requireAdmin?: boolean;
+    requireSeller?: boolean;
 }
 
-export default function ProtectedRoute({ children, requireAdmin = false }: ProtectedRouteProps) {
-    const { isAuthenticated, isAdmin, loading } = useAuth();
+export default function ProtectedRoute({ 
+    children, 
+    requireAdmin = false,
+    requireSeller = false 
+}: ProtectedRouteProps) {
+    const { isAuthenticated, isAdmin, isSeller, loading } = useAuth();
     const location = useLocation();
 
     // 1. SECURITY SCAN (Loading State)
     if (loading) {
         return (
-            <div className="security-gate">
+            <div className="security-gate" style={{ background: '#000', color: '#fff', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <div className="scanner-ui">
                     <div className="scanner-icon">
-                        <Loader2 size={40} className="animate-spin" />
+                        <Loader2 size={40} className="animate-spin text-white/20" />
                     </div>
                     <div className="scanner-status">
-                        <span className="blink-text">VERIFYING CREDENTIALS</span>
-                        <div className="scanner-bar"></div>
+                        <span className="text-xs tracking-[0.2em] font-black opacity-40">INITIALIZING_AUTH_SHIELD</span>
                     </div>
                 </div>
             </div>
@@ -32,16 +36,22 @@ export default function ProtectedRoute({ children, requireAdmin = false }: Prote
 
     // 2. ACCESS DENIED (Not Logged In)
     if (!isAuthenticated) {
-        if (location.pathname.startsWith('/builder') || location.pathname.startsWith('/seller')) {
+        if (location.pathname.startsWith('/builder') || location.pathname.startsWith('/seller') || location.pathname.startsWith('/admin')) {
             return <Navigate to="/login" state={{ from: location }} replace />;
         }
-        // Redirect to Landing Page and trigger Auth Modal overlay
         return <Navigate to="/" state={{ requireAuth: true, from: location }} replace />;
     }
 
-    // 3. INSUFFICIENT CLEARANCE (Not Admin)
+    // 3. INSUFFICIENT CLEARANCE (Seller Check)
+    if (requireSeller && !isSeller && !isAdmin) {
+        console.warn('[Security] Access Denied: Seller role required');
+        return <Navigate to="/" replace />;
+    }
+
+    // 4. INSUFFICIENT CLEARANCE (Admin Check)
     if (requireAdmin && !isAdmin) {
-        return <Navigate to="/" replace state={{ requireAuth: true }} />;
+        console.warn('[Security] Access Denied: Admin role required');
+        return <Navigate to="/" replace />;
     }
 
     // 4. ACCESS GRANTED

@@ -80,9 +80,9 @@ export default function App() {
                         {/* 🛠️ Dashboard & Auth (No Storefront Header Layout Wrap) */}
                         <Route path={ROUTES.LOGIN} element={<Login />} />
                         <Route path={ROUTES.REGISTER} element={<Login />} /> 
-                        <Route path={ROUTES.ADMIN} element={<AdminDashboard />} />
-                        <Route path={ROUTES.SELLER} element={<ProtectedRoute><SellerDashboard /></ProtectedRoute>} />
-                        <Route path="/builder" element={<ProtectedRoute><Navigate to="/seller?tab=builder" replace /></ProtectedRoute>} />
+                        <Route path={ROUTES.ADMIN} element={<ProtectedRoute requireAdmin><AdminDashboard /></ProtectedRoute>} />
+                        <Route path={ROUTES.SELLER} element={<ProtectedRoute requireSeller><SellerDashboard /></ProtectedRoute>} />
+                        <Route path="/builder" element={<ProtectedRoute requireSeller><Navigate to="/seller?tab=builder" replace /></ProtectedRoute>} />
                         
                         {/* Google OAuth Callback — Explicit PKCE Handling */}
                         <Route path="/auth/callback" element={<AuthCallback />} />

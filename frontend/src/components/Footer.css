@@ -4,12 +4,11 @@
    ============================================================================ */
 
 :root {
-    --f-bg: #050505;
+    --f-bg: #000000;
     --f-border: rgba(255, 255, 255, 0.08);
-    --f-neon-cyan: #00f0ff;
-    --f-neon-gold: #ffd600;
+    --f-accent: #FFFFFF;
     --f-text-main: #ffffff;
-    --f-text-muted: #888888;
+    --f-text-muted: rgba(255, 255, 255, 0.5);
     --font-mono: 'JetBrains Mono', 'Courier New', monospace;
     --font-sans: 'Inter', sans-serif;
 }
@@ -31,9 +30,7 @@
     left: 0;
     width: 100%;
     height: 1px;
-    background: linear-gradient(90deg, transparent, var(--f-neon-cyan), transparent);
-    opacity: 0.5;
-    box-shadow: 0 0 10px var(--f-neon-cyan);
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
 }
 
 .footer-container {
@@ -138,12 +135,12 @@
     left: 0;
     width: 0%;
     height: 1px;
-    background: var(--f-neon-cyan);
+    background: var(--f-accent);
     transition: width 0.3s ease;
 }
 
 .footer-link:hover {
-    color: var(--f-neon-cyan);
+    color: var(--f-accent);
     padding-left: 5px;
 }
 
@@ -172,7 +169,7 @@
 }
 
 .input-group:focus-within {
-    border-color: var(--f-neon-cyan);
+    border-color: var(--f-accent);
 }
 
 .input-group input {
@@ -200,7 +197,7 @@
 }
 
 .input-group button:hover:not(:disabled) {
-    color: var(--f-neon-cyan);
+    color: var(--f-accent);
     transform: translateX(3px);
 }
 
@@ -233,9 +230,9 @@
 }
 
 .social-icon:hover {
-    border-color: var(--f-neon-cyan);
-    color: var(--f-neon-cyan);
-    box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+    border-color: var(--f-accent);
+    color: var(--f-accent);
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
     transform: translateY(-3px);
 }
 

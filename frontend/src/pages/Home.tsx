@@ -220,25 +220,6 @@ export default function Home() {
                     <button 
                         onClick={() => navigate('about')}
                         className="group flex items-center justify-center gap-4 px-10 py-5 border border-white/20 text-white font-bold tracking-wider uppercase text-sm transition-all hover:bg-white/5"
-                    >
-                        <div className="w-8 h-8 rounded-full border border-white/30 flex items-center justify-center group-hover:border-[#D4AF37] transition-colors">
-                            <Play size={12} className="text-white group-hover:text-[#D4AF37] ml-0.5" />
-                        </div>
-                        Our Labs
-                    </button>
-                </div>
-            </div>
-        </header>
-
-        {/* --- CURATED EDIT (BENTO GRID) --- */}
-        <section className="py-24 bg-[#020202] relative reveal" ref={addToRefs}>
-            <div className="container mx-auto px-6 md:px-12 relative z-10">
-                <div className="flex flex-col md:flex-row items-end justify-between mb-16">
-                    <div className="max-w-xl">
-                        <span className="text-[#D4AF37] text-xs font-bold tracking-[0.2em] uppercase mb-4 block">The Lookbook</span>
-                        <h2 className="text-5xl md:text-6xl font-serif font-black text-white leading-tight">
-                            Live <br/> <span className="italic font-light text-gray-400">Benchmarks.</span>
-                        </h2>
                     </div>
                 </div>
 

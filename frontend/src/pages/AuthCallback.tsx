@@ -23,21 +23,33 @@ const AuthCallback: React.FC = () => {
             if (data.session) {
                 console.log('[AuthCallback] Session established, syncing profile...');
                 
-                // Fetch profile to determine role
-                const { data: profile } = await supabase
-                    .from('merchants')
-                    .select('role')
-                    .eq('id', data.session.user.id)
-                    .single();
+                // 🔄 STRATEGY: Retry up to 3 times to account for the background AuthContext sync
+                let profile = null;
+                for (let attempt = 0; attempt < 3; attempt++) {
+                    const { data: p } = await supabase
+                        .from('merchants')
+                        .select('role')
+                        .eq('id', data.session.user.id)
+                        .single();
+                    
+                    if (p) {
+                        profile = p;
+                        break;
+                    }
+                    console.log(`[AuthCallback] Profile not found, retrying... (${attempt + 1}/3)`);
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+                }
                 
                 const role = profile?.role || 'customer';
+                console.log('[AuthCallback] Final resolved role:', role);
                 
                 if (role === 'admin' || role === 'super-admin') {
                     navigate('/admin/dashboard');
                 } else if (role === 'seller') {
                     navigate('/seller/dashboard?tab=builder');
                 } else {
-                    navigate('/profile');
+                    // 🛍️ Redirect customers to the storefront home page
+                    navigate('/');
                 }
             } else {
                 console.warn('[AuthCallback] No session found');
