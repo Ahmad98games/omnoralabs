@@ -59,12 +59,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const savedRole = localStorage.getItem('omnora_selected_role');
             const targetRole = role || sbUser.user_metadata?.role || savedRole || 'customer';
             
-            console.log(`[AuthShield] Syncing ID: ${sbUser.id} as ${targetRole}`);
+            console.log(`[Auth Profile] Commencing Convergence for ${sbUser.email} as ${targetRole}`);
 
             // 1. Try fetching from Merchants first if seller
             if (targetRole === 'seller' || targetRole === 'admin' || targetRole === 'super-admin') {
                 const { data: merchant } = await supabase.from('merchants').select('*').eq('id', sbUser.id).single();
                 if (merchant) {
+                    console.log(`[Auth Profile] Merchant Record Found: ${merchant.store_name}`);
                     setProfile(merchant as any);
                     return merchant;
                 }
@@ -72,19 +73,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 // 2. Try fetching from Customers
                 const { data: customer } = await supabase.from('customers').select('*').eq('id', sbUser.id).single();
                 if (customer) {
+                    console.log(`[Auth Profile] Customer Record Found: ${customer.full_name}`);
                     setProfile({ ...customer, role: 'customer' } as any);
                     return customer;
                 }
             }
 
-            // 3. If not found in primary table, check the OTHER table just in case (Account Crossover Protection)
+            // 3. Identification Phase (Manual record cross-check)
+            console.log('[Auth Profile] No record found in target table. Performing global cross-check...');
             const { data: altMerchant } = await supabase.from('merchants').select('*').eq('id', sbUser.id).single();
-            if (altMerchant) { setProfile(altMerchant as any); return altMerchant; }
+            if (altMerchant) { 
+                console.log('[Auth Profile] Cross-Check Match: MERCHANT');
+                setProfile(altMerchant as any); return altMerchant; 
+            }
             
             const { data: altCustomer } = await supabase.from('customers').select('*').eq('id', sbUser.id).single();
-            if (altCustomer) { setProfile({ ...altCustomer, role: 'customer' } as any); return altCustomer; }
+            if (altCustomer) { 
+                console.log('[Auth Profile] Cross-Check Match: CUSTOMER');
+                setProfile({ ...altCustomer, role: 'customer' } as any); return altCustomer; 
+            }
 
-            // 4. Initialization Phase (Record creation)
+            // 4. Initial Provisioning (First-time users)
+            console.log(`[Auth Profile] Initializing new ${targetRole} record for ${sbUser.id}...`);
             if (targetRole === 'seller') {
                 const finalStoreName = storeName || sbUser.user_metadata?.store_name || `${sbUser.email?.split('@')[0]}'s Store`;
                 const { data: newMerchant, error } = await supabase.from('merchants').insert({
@@ -94,6 +104,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     role: 'seller',
                 }).select().single();
                 if (error) throw error;
+                console.log(`[Auth Profile] Provisioned MERCHANT: ${newMerchant.id}`);
                 setProfile(newMerchant as any);
                 return newMerchant;
             } else {
@@ -103,27 +114,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     full_name: name || sbUser.user_metadata?.full_name || sbUser.email?.split('@')[0],
                 }).select().single();
                 if (error) throw error;
+                console.log(`[Auth Profile] Provisioned CUSTOMER: ${newCustomer.id}`);
                 const fullCustomer = { ...newCustomer, role: 'customer' };
                 setProfile(fullCustomer as any);
                 return fullCustomer;
             }
         } catch (err) {
-            console.error('[Auth Shield] Profile Convergence Failed:', err);
+            console.error('[Auth Profile] CONVERGENCE_ERROR:', err);
             return null;
         }
     }, []);
 
     const verify = useCallback(async () => {
         try {
+            console.log('[Auth Shield] Core Kernel Initialization Initiated...');
             const { data: { user: sbUser }, error } = await supabase.auth.getUser();
+            
             if (error || !sbUser) {
+                console.warn('[Auth Shield] No valid session found in Kernel.');
                 setUser(null);
                 setProfile(null);
             } else {
+                console.log(`[Auth Shield] Valid session found: ${sbUser.id}. Converging profile...`);
                 setUser(sbUser);
                 await ensureProfile(sbUser);
             }
+        } catch (err) {
+            console.error('[Auth Shield] VERIFICATION_FAULT:', err);
         } finally {
+            console.log('[Auth Shield] Kernel Settled.');
             setIsInitializing(false);
         }
     }, [ensureProfile]);
@@ -131,6 +150,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     useEffect(() => {
         verify();
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+            console.log(`[Auth Pulse] State Change Triggered: ${event}`);
             if (event === 'SIGNED_IN' && session?.user) {
                 setUser(session.user);
                 await ensureProfile(session.user);
