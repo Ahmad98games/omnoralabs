@@ -118,23 +118,23 @@ export interface BuilderState {
 
 const DEFAULT_THEME: ThemeSettings = {
     colors: {
-        primary: '#FF6B35',
-        secondary: '#C5A059',
-        background: '#050505',
-        surface: '#121212',
+        primary: '#FFFFFF',
+        secondary: '#A1A1AA',
+        background: '#000000',
+        surface: '#050505',
         text: '#FFFFFF',
-        textMuted: '#A1A1AA',
-        border: '#27272A',
+        textMuted: 'rgba(255, 255, 255, 0.5)',
+        border: 'rgba(255, 255, 255, 0.1)',
     },
     typography: {
-        headingFont: 'Outfit',
+        headingFont: 'Inter',
         bodyFont: 'Inter',
         baseSize: 16,
     },
     layout: {
         maxWidth: 1280,
-        borderRadius: 8,
-        buttonRadius: 6,
+        borderRadius: 0,
+        buttonRadius: 0,
     },
 };
 
