@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { User, AuthError } from '@supabase/supabase-js';
+import { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabaseClient';
 import { CinematicLoader } from '../components/ui/CinematicLoader';
 
@@ -140,37 +140,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
     }, []);
 
-    const verify = useCallback(async () => {
-        try {
-            console.log('[Auth Shield] Core Kernel Initialization Initiated...');
-            
-            // 🛡️ RACE CONDITION PROTECTION: Timeout the Supabase call
-            const authPromise = supabase.auth.getUser();
-            const timeoutPromise = new Promise((_, reject) => 
-                setTimeout(() => reject(new Error('SUPABASE_TIMEOUT')), 5000)
-            );
-
-            const { data: { user: sbUser }, error } = await Promise.race([authPromise, timeoutPromise]) as { data: { user: User | null }; error: AuthError | null };
-            
-            if (error || !sbUser) {
-                console.warn('[Auth Shield] No valid session found in Kernel.');
-                setUser(null);
-                setProfile(null);
-            } else {
-                console.log(`[Auth Shield] Valid session found: ${sbUser.id}. Converging profile...`);
-                setUser(sbUser);
-                await ensureProfile(sbUser);
-            }
-        } catch (err) {
-            console.error('[Auth Shield] VERIFICATION_FAULT:', err);
-            // Default to Guest if blocked
-            setUser(null);
-            setProfile(null);
-        } finally {
-            console.log('[Auth Shield] Kernel Settled.');
-            setIsInitializing(false);
-        }
-    }, [ensureProfile]);
+    const loginWithGoogle = async () => {
+        const { error } = await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+                redirectTo: `${window.location.origin}/auth/callback`,
+            },
+        });
+        if (error) throw error;
+    };
 
     // 🛡️ REMOVED GLOBAL REDIRECTION:
     // Global redirects inside AuthProvider cause infinite loops with ProtectedRoute.
@@ -181,34 +159,54 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (hasInitialized.current) return;
         hasInitialized.current = true;
 
-        let isMounted = true;
+        let isMounted = true; 
 
-        // 🛡️ EMERGENCY SETTLEMENT: Force loader off after 10s regardless of failures
+        // 🛡️ EMERGENCY SETTLEMENT: Loader MUST clear after 8s
         const emergencyTimeout = setTimeout(() => {
             if (isInitializing && isMounted) {
-                console.warn('[Auth Shield] EMERGENCY_RESET triggered after 10s.');
+                console.warn('[Auth Shield] EMERGENCY_RESET: Forcing Kernel to settle.');
                 setIsInitializing(false);
             }
-        }, 10000);
+        }, 8000);
 
-        const initAuth = async () => {
+        const initialize = async () => {
             try {
-                await verify();
+                // 1. Get Initial Session
+                const { data: { session } } = await supabase.auth.getSession();
+                if (isMounted) {
+                    if (session?.user) {
+                        setUser(session.user);
+                        await ensureProfile(session.user);
+                    } else {
+                        setUser(null);
+                        setProfile(null);
+                    }
+                }
+            } catch (err) {
+                console.error('[Auth Shield] Initialization Failure:', err);
             } finally {
-                if (isMounted) setIsInitializing(false);
+                if (isMounted) {
+                    setIsInitializing(false);
+                    clearTimeout(emergencyTimeout);
+                }
             }
         };
 
-        initAuth();
+        initialize();
 
+        // 2. Listen for Auth Changes (Deduplicated)
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-            console.log(`[Auth Pulse] State Change Triggered: ${event}`);
-            if ((event === 'SIGNED_IN' || event === 'USER_UPDATED') && session?.user) {
-                setUser(session.user);
-                await ensureProfile(session.user);
-            } else if (event === 'SIGNED_OUT') {
-                setUser(null);
-                setProfile(null);
+            console.log(`[Auth Pulse] ${event} detected.`);
+            
+            if (isMounted) {
+                if (session?.user) {
+                    setUser(session.user);
+                    // Only converge if we don't have a profile yet or it's a fresh sign-in
+                    await ensureProfile(session.user);
+                } else if (event === 'SIGNED_OUT') {
+                    setUser(null);
+                    setProfile(null);
+                }
             }
         });
 
@@ -217,8 +215,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             clearTimeout(emergencyTimeout);
             subscription.unsubscribe();
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [verify]); 
+    }, [ensureProfile, isInitializing]); 
 
     const login = async (email, password) => {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
@@ -279,13 +276,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         <AuthContext.Provider value={{ 
             user, profile, isInitializing, 
             loading: isInitializing,
+            isAuthenticated: !!user,
             isAdmin: profile?.role === 'admin' || profile?.role === 'super-admin',
             isSeller: profile?.role === 'seller',
             isCustomer: !profile || profile?.role === 'customer',
             isAuthModalOpen,
             authModalMode,
             setAuthModalOpen,
-            login, register, signOut, resetPassword, updateProfile, resetAuth 
+            login, loginWithGoogle, register, signOut, resetPassword, updateProfile, resetAuth 
         }}>
             {children}
         </AuthContext.Provider>
