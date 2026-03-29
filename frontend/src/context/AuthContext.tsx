@@ -71,7 +71,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 const { data: merchant } = await supabase.from('merchants').select('*').eq('id', sbUser.id).maybeSingle();
                 if (merchant) {
                     console.log(`[Auth Profile] Merchant Record Found: ${merchant.store_name}`);
-                    setProfile(merchant as any);
+                    setProfile(merchant as MerchantProfile);
                     return merchant;
                 }
             } else {
@@ -79,7 +79,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 const { data: customer } = await supabase.from('customers').select('*').eq('id', sbUser.id).maybeSingle();
                 if (customer) {
                     console.log(`[Auth Profile] Customer Record Found: ${customer.full_name}`);
-                    setProfile({ ...customer, role: 'customer' } as any);
+                    setProfile({ ...customer, role: 'customer' } as CustomerProfile);
                     return customer;
                 }
             }
@@ -89,13 +89,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const { data: altMerchant } = await supabase.from('merchants').select('*').eq('id', sbUser.id).maybeSingle();
             if (altMerchant) { 
                 console.log('[Auth Profile] Cross-Check Match: MERCHANT');
-                setProfile(altMerchant as any); return altMerchant; 
+                setProfile(altMerchant as MerchantProfile); return altMerchant; 
             }
             
             const { data: altCustomer } = await supabase.from('customers').select('*').eq('id', sbUser.id).maybeSingle();
             if (altCustomer) { 
                 console.log('[Auth Profile] Cross-Check Match: CUSTOMER');
-                setProfile({ ...altCustomer, role: 'customer' } as any); return altCustomer; 
+                setProfile({ ...altCustomer, role: 'customer' } as CustomerProfile); return altCustomer; 
             }
 
             // 4. Initial Provisioning (First-time users)
@@ -111,7 +111,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 }).select().maybeSingle();
                 if (error) throw error;
                 console.log(`[Auth Profile] Provisioned MERCHANT: ${newMerchant.id}`);
-                setProfile(newMerchant as any);
+                setProfile(newMerchant as MerchantProfile);
                 return newMerchant;
             } else {
                 const { data: newCustomer, error } = await supabase.from('customers').insert({
@@ -121,8 +121,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 }).select().maybeSingle();
                 if (error) throw error;
                 console.log(`[Auth Profile] Provisioned CUSTOMER: ${newCustomer.id}`);
-                const fullCustomer = { ...newCustomer, role: 'customer' };
-                setProfile(fullCustomer as any);
+                const fullCustomer = { ...newCustomer, role: 'customer' } as CustomerProfile;
+                setProfile(fullCustomer);
                 return fullCustomer;
             }
         } catch (err) {
@@ -165,21 +165,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     useEffect(() => {
         if (!isInitializing && profile) {
-            const targetPath = profile.role === 'seller' ? '/seller/dashboard' : '/';
-            console.log('[Auth Shield] Redirecting to:', targetPath);
-            navigate(targetPath);
+            const isStaff = profile.role === 'seller' || profile.role === 'admin' || profile.role === 'super-admin';
+            const targetPath = isStaff ? '/seller/dashboard' : '/';
+            
+            if (window.location.pathname !== targetPath) {
+                console.log('[Auth Shield] Redirecting to:', targetPath);
+                navigate(targetPath);
+            }
         }
     }, [profile, isInitializing, navigate]);
 
     useEffect(() => {
+        let isMounted = true;
+
         const timeoutId = setTimeout(() => {
-            if (isInitializing) {
+            if (isInitializing && isMounted) {
                 console.warn('[Auth Shield] Kernel Init timed out after 6s. Forcing settlement.');
                 setIsInitializing(false);
             }
         }, 6000);
 
-        verify();
+        const initAuth = async () => {
+            await verify();
+        };
+
+        initAuth();
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
             console.log(`[Auth Pulse] State Change Triggered: ${event}`);
             if ((event === 'SIGNED_IN' || event === 'USER_UPDATED') && session?.user) {
@@ -192,10 +202,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
 
         return () => {
+            isMounted = false;
             clearTimeout(timeoutId);
             subscription.unsubscribe();
         };
-    }, [verify, ensureProfile, isInitializing]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [verify]); // Removed isInitializing and ensureProfile to prevent re-init loop
 
     const login = async (email, password) => {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
