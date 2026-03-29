@@ -115,6 +115,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 const { data: newMerchant, error } = await supabase.from('merchants').insert({
                     id: sbUser.id,
                     email: sbUser.email,
+                    password_hash: 'auth-managed',
                     full_name: fallbackName,
                     store_name: finalStoreName,
                     role: targetRole,
@@ -127,6 +128,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 const { data: newCustomer, error } = await supabase.from('customers').insert({
                     id: sbUser.id,
                     email: sbUser.email,
+                    password_hash: 'auth-managed',
                     full_name: fallbackName,
                 }).select().maybeSingle();
                 if (error) throw error;
