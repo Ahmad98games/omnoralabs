@@ -25,6 +25,7 @@ interface AuthContextValue {
     user: User | null;
     profile: MerchantProfile | CustomerProfile | null;
     isInitializing: boolean;
+    isInitialized: boolean;
     loading: boolean;
     isAuthenticated: boolean;
     isAdmin: boolean;
@@ -274,7 +275,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     return (
         <AuthContext.Provider value={{ 
-            user, profile, isInitializing, 
+            user, profile, 
+            isInitializing, 
+            isInitialized: !isInitializing,
             loading: isInitializing,
             isAuthenticated: !!user,
             isAdmin: profile?.role === 'admin' || profile?.role === 'super-admin',

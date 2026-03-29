@@ -1,3 +1,4 @@
+import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -18,7 +19,7 @@ export default function Home() {
   const { isSeller, isAdmin, isInitializing } = useAuth();
   const navigate = useNavigate();
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!isInitializing && (isSeller || isAdmin)) {
       console.log('[Home Proxy] Seller detected, pivoting to Atelier...');
       navigate('/seller/dashboard?tab=builder');

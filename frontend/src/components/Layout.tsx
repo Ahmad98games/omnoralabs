@@ -1,9 +1,9 @@
-import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
     ShoppingCart, User, LogOut, Menu, X, Search,
-    LayoutDashboard, Heart
+    LayoutDashboard
 } from 'lucide-react';
 import './Layout.css';
 import Footer from './Footer';
@@ -167,7 +167,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                     <nav className="nav-desktop">
                         {isInsideTerritory ? (
                             // DYNAMIC TERRITORY MENU
-                            Object.entries(content?.pages || {}).map(([slug, page]: [string, any]) => {
+                            Object.entries(content?.pages || {}).map(([slug, page]: [string, { heroHeadline?: string; title?: string }]) => {
                                 const targetPath = slug === 'home' ? getBaseUrl() : `${getBaseUrl()}/${slug}`;
                                 return (
                                     <Link
@@ -312,7 +312,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
             {/* Main Content */}
             <main className="main-content">
                 <GlobalErrorBoundary>
-                    <Outlet />
+                    {children}
                 </GlobalErrorBoundary>
             </main>
 
@@ -323,7 +323,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
             <OmnoraNotification />
 
             {/* Guardrail 4: Powered by Omnora badge for free-tier storefronts */}
-            {isInsideTerritory && content && (content as any)?.plan !== 'pro' && (
+            {isInsideTerritory && content && (content as { plan?: string })?.plan !== 'pro' && (
                 <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40">
                     <a
                         href="https://omnora.com"
