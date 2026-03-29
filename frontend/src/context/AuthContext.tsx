@@ -30,6 +30,9 @@ interface AuthContextValue {
     isAdmin: boolean;
     isSeller: boolean;
     isCustomer: boolean;
+    isAuthModalOpen: boolean;
+    authModalMode: 'login' | 'signup';
+    setAuthModalOpen: (open: boolean, mode?: 'login' | 'signup') => void;
     login: (email: string, password: string) => Promise<unknown>;
     register: (name: string, email: string, password: string, role?: string, storeName?: string) => Promise<unknown>;
     loginWithGoogle: () => Promise<void>;
@@ -46,6 +49,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const hasInitialized = React.useRef(false);
     const [profile, setProfile] = useState<MerchantProfile | CustomerProfile | null>(null);
     const [isInitializing, setIsInitializing] = useState(true);
+    const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+    const [authModalMode, setAuthModalMode] = useState<'login' | 'signup'>('login');
+
+    const setAuthModalOpen = useCallback((open: boolean, mode: 'login' | 'signup' = 'login') => {
+        setAuthModalMode(mode);
+        setIsAuthModalOpen(open);
+    }, []);
 
     const resetAuth = useCallback(async () => {
         await supabase.auth.signOut();
@@ -272,6 +282,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             isAdmin: profile?.role === 'admin' || profile?.role === 'super-admin',
             isSeller: profile?.role === 'seller',
             isCustomer: !profile || profile?.role === 'customer',
+            isAuthModalOpen,
+            authModalMode,
+            setAuthModalOpen,
             login, register, signOut, resetPassword, updateProfile, resetAuth 
         }}>
             {children}

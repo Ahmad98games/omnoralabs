@@ -1,5 +1,6 @@
-import React from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { useStorefront } from '../hooks/useStorefront';
 import { DynamicSection } from '../components/DynamicSection';
 import { BuilderProvider } from '../context/BuilderContext';
@@ -14,6 +15,15 @@ import { CinematicLoader } from '../components/ui/CinematicLoader';
  */
 export default function Home() {
   const { content: siteContent, loading: cmsLoading } = useStorefront();
+  const { isSeller, isAdmin, isInitializing } = useAuth();
+  const navigate = useNavigate();
+
+  React.useEffect(() => {
+    if (!isInitializing && (isSeller || isAdmin)) {
+      console.log('[Home Proxy] Seller detected, pivoting to Atelier...');
+      navigate('/seller/dashboard?tab=builder');
+    }
+  }, [isInitializing, isSeller, isAdmin, navigate]);
   
   if (cmsLoading) {
     return (
