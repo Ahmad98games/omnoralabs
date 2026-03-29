@@ -1,14 +1,16 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useBuilder } from '../../context/BuilderContext';
 import {
     Trash2, Copy, ChevronUp, ChevronDown,
-    GripVertical, Plus, Image as ImageIcon, Type, Link as LinkIcon, Edit, MousePointerClick, AlignLeft, AlignCenter, AlignRight, Bold, Italic, Eye, EyeOff
+    GripVertical, Eye, EyeOff
 } from 'lucide-react';
 import {
     ElementControlProvider, useElementControl,
-    MediaPickerModal, useElementResize, SmartGuide,
+    useElementResize, SmartGuide,
     useFreePositionDrag,
-    type ElementSelection, type ElementType, type ResizeDir,
+    type ElementType, type ResizeDir,
 } from '../../platform/library/modules/ElementControlLayer';
 import { ElementToolbar, ElementResizeHandles, SmartGuides, ImageControlsFloater } from '../../platform/library/modules/ElementControlLayer';
 import { useBuilderInteractionStore } from '../../hooks/useBuilderInteractionStore';
@@ -138,8 +140,8 @@ const ContextMenu = ({ menu, onClose, onAction }: {
 
 // ─── MiniBar ──────────────────────────────────────────────────────────────────
 const MiniBar = ({
-    rect, nodeId, isSelected, onDragStart,
-}: { rect: DOMRect; nodeId: string; isSelected: boolean; onDragStart: (id: string, e: React.MouseEvent) => void; }) => {
+    rect, nodeId, onDragStart,
+}: { rect: DOMRect; nodeId: string; onDragStart: (id: string, e: React.MouseEvent) => void; }) => {
     const { deleteNode, duplicateNode, updateNode, commitHistory, reorderNode } = useBuilder();
     const node = useNodeSelector(nodeId, (n: any) => n);
     if (!node) return null;
@@ -154,7 +156,6 @@ const MiniBar = ({
             background: 'var(--accent-primary)',
             borderRadius: '6px 6px 6px 0',
             padding: '4px 8px',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
             zIndex: 10001, pointerEvents: 'auto', userSelect: 'none',
         }}>
             <div
@@ -202,14 +203,10 @@ const SpacingOverlay = ({ rect, node }: { rect: DOMRect; node: any }) => {
     const pr = parseInt(node.styles?.paddingRight) || 0;
     if (pt + pb + pl + pr === 0) return null;
 
-    const Badge = ({ val }: { val: number }) => (
-        <span style={{ fontSize: 9, color: ACCENT, fontWeight: 700, background: 'rgba(255,255,255,0.9)', padding: '1px 5px', borderRadius: 3 }}>{val}px</span>
-    );
-
     return (
         <>
-            {pt > 0 && <div style={{ position: 'fixed', top: rect.top, left: rect.left, width: rect.width, height: Math.min(pt, rect.height / 3), background: SPACING_COLOR, borderBottom: `1px dashed ${SPACING_BORDER}`, pointerEvents: 'none', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Badge val={pt} /></div>}
-            {pb > 0 && <div style={{ position: 'fixed', top: rect.bottom - Math.min(pb, rect.height / 3), left: rect.left, width: rect.width, height: Math.min(pb, rect.height / 3), background: SPACING_COLOR, borderTop: `1px dashed ${SPACING_BORDER}`, pointerEvents: 'none', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Badge val={pb} /></div>}
+            {pt > 0 && <div style={{ position: 'fixed', top: rect.top, left: rect.left, width: rect.width, height: Math.min(pt, rect.height / 3), background: SPACING_COLOR, borderBottom: `1px dashed ${SPACING_BORDER}`, pointerEvents: 'none', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span style={{ fontSize: 9, color: ACCENT, fontWeight: 700, background: 'rgba(255,255,255,0.9)', padding: '1px 5px', borderRadius: 3 }}>{pt}px</span></div>}
+            {pb > 0 && <div style={{ position: 'fixed', top: rect.bottom - Math.min(pb, rect.height / 3), left: rect.left, width: rect.width, height: Math.min(pb, rect.height / 3), background: SPACING_COLOR, borderTop: `1px dashed ${SPACING_BORDER}`, pointerEvents: 'none', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span style={{ fontSize: 9, color: ACCENT, fontWeight: 700, background: 'rgba(255,255,255,0.9)', padding: '1px 5px', borderRadius: 3 }}>{pb}px</span></div>}
             {pl > 0 && <div style={{ position: 'fixed', top: rect.top, left: rect.left, width: Math.min(pl, rect.width / 4), height: rect.height, background: SPACING_COLOR, borderRight: `1px dashed ${SPACING_BORDER}`, pointerEvents: 'none', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span style={{ fontSize: 9, color: ACCENT, fontWeight: 700, background: 'rgba(255,255,255,0.9)', padding: '1px 5px', borderRadius: 3, writingMode: 'vertical-lr' }}>{pl}</span></div>}
             {pr > 0 && <div style={{ position: 'fixed', top: rect.top, left: rect.right - Math.min(pr, rect.width / 4), width: Math.min(pr, rect.width / 4), height: rect.height, background: SPACING_COLOR, borderLeft: `1px dashed ${SPACING_BORDER}`, pointerEvents: 'none', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span style={{ fontSize: 9, color: ACCENT, fontWeight: 700, background: 'rgba(255,255,255,0.9)', padding: '1px 5px', borderRadius: 3, writingMode: 'vertical-lr' }}>{pr}</span></div>}
         </>
@@ -420,6 +417,7 @@ const ElementSelectionLayer: React.FC<{ selectedNodeId: string }> = ({ selectedN
     }, []);
 
     const elemRect = selectedElement
+         // eslint-disable-next-line react-hooks/refs
         ? (elementRectRef.current || selectedElement.rect)
         : null;
 

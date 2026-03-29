@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 /**
  * AdminProductManager: Merchant Product CMS
  *

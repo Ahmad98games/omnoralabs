@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, X } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import { SmartSidebar } from '../cms/SmartSidebar';
 import { LiveCanvas } from '../cms/LiveCanvas';
 import { ElementLibrary } from '../cms/ElementLibrary';
@@ -10,7 +10,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 // 🛡️ standard React ErrorBoundary for catching inner Canvas/Hydrating crashes
 interface ErrorBoundaryProps {
-    navigate: any; // NavigateFunction from react-router-dom
+    navigate: ReturnType<typeof useNavigate>; // NavigateFunction from react-router-dom
     lastValidPageId: string | null;
     children: React.ReactNode;
 }
@@ -42,44 +42,27 @@ class BuilderLayoutErrorBoundary extends React.Component<
     render() {
         if (this.state.hasError) {
             return (
-                <div style={{ 
-                    minHeight: '100vh', display: 'flex', flexDirection: 'column', 
-                    alignItems: 'center', justifyContent: 'center', 
-                    background: '#09090b', color: '#fff', padding: 24, textAlign: 'center' 
-                }}>
-                    <div style={{ padding: '24px', background: 'var(--surface-raised, #121214)', border: '1px solid var(--border-subtle, #27272a)', borderRadius: '16px', maxWidth: '280px', margin: '0 auto' }}>
-                        <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '0.5rem', color: '#ef4444' }}>⚠️ Layout Crashed</h2>
-                        <p style={{ color: '#a1a1aa', fontSize: '13px', lineHeight: '1.5', marginBottom: '2rem' }}>
-                            We encountered a fatal error rendering this page section. Choose an escape action to restore order.
-                        </p>
-                        <div style={{ display: 'flex', gap: '10px', flexDirection: 'column' }}>
-                            <button 
-                                onClick={() => {
-                                    const { navigate, lastValidPageId } = this.props;
-                                    if (lastValidPageId) {
-                                        navigate(`/builder/${lastValidPageId}`, { replace: true });
-                                    } else {
-                                        navigate('/builder', { replace: true });
-                                    }
-                                    this.setState({ hasError: false, errorMessage: null });
-                                }} 
-                                style={{ width: '100%', padding: '12px', background: 'transparent', borderRadius: 10, fontSize: '12px', fontWeight: 600, color: 'var(--text-primary, #fff)', cursor: 'pointer', border: '1px solid var(--border-subtle, #333)' }}
-                            >
-                                Go Back to Last Page
-                            </button>
-                            <button 
-                                onClick={() => {
-                                    const store = useBuilderStore.getState() as any;
-                                    if (store.activePageId && store.resetPageNodes) {
-                                        store.resetPageNodes(store.activePageId);
-                                    }
-                                    this.setState({ hasError: false, errorMessage: null });
-                                }} 
-                                style={{ width: '100%', padding: '12px', background: 'var(--danger, #dc2626)', borderRadius: 10, fontSize: '12px', fontWeight: 800, color: '#fff', cursor: 'pointer', border: 'none' }}
-                            >
-                                Clear Page & Start Fresh
-                            </button>
+                <div className="flex flex-col h-screen w-full items-center justify-center bg-black p-8">
+                    <div className="w-full max-w-lg border border-red-500/20 bg-[#050505] p-10 text-center">
+                        <div className="text-red-500/60 mb-4 tracking-tighter font-mono text-[10px] uppercase">
+                           [ ERR_RENDER_FATAL ]
                         </div>
+                        <h2 className="text-white text-[15px] font-medium tracking-tight mb-2">Fatal Error. Supply chain compromised.</h2>
+                        <p className="text-white/40 text-[13px] tracking-tight mb-8">
+                            Structural integrity of the current layout has failed.
+                        </p>
+                        <button 
+                            onClick={() => {
+                                const store = useBuilderStore.getState() as unknown as { activePageId: string | null; resetPageNodes?: (id: string) => void };
+                                if (store.activePageId && store.resetPageNodes) {
+                                    store.resetPageNodes(store.activePageId);
+                                }
+                                this.setState({ hasError: false, errorMessage: null });
+                            }} 
+                            className="bg-white text-black px-6 py-2 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors"
+                        >
+                            Recover and Re-route
+                        </button>
                     </div>
                 </div>
             );
@@ -90,7 +73,7 @@ class BuilderLayoutErrorBoundary extends React.Component<
 
 const BuilderLayoutContent: React.FC = () => {
     const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
-    const [isMobileSheet, setIsMobileSheet] = useState(window.innerWidth < 768);
+    const isMobileSheet = window.innerWidth < 768; // Derived state to avoid setState warning if not needed reactively
     const isSidebarOpenGlobal = useBuilderStore(state => state.isSidebarOpen);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [snapIndex, setSnapIndex] = useState(1); // 0=hidden, 1=40%, 2=90%
@@ -100,8 +83,6 @@ const BuilderLayoutContent: React.FC = () => {
         const nextVal = typeof val === 'function' ? val(useBuilderStore.getState().isSidebarOpen) : val;
         useBuilderStore.getState().setSidebarOpen(nextVal);
     };
-    const [continueAnyway, setContinueAnyway] = useState(false);
-
     const activePageId = useBuilderStore(state => state.activePageId);
     const [lastValidPageId, setLastValidPageId] = useState<'home' | string>(activePageId || 'home');
 
@@ -129,15 +110,23 @@ const BuilderLayoutContent: React.FC = () => {
     useEffect(() => {
         try {
             if (activePageId && activePageId !== lastValidPageId) {
-                setLastValidPageId(activePageId);
-                // Persist to localStorage as a safe fallback
-                try { localStorage.setItem('omnora_last_valid_page', activePageId); } catch {}
+                // Defer state update to next tick to avoid cascading render warnings
+                const timer = setTimeout(() => {
+                    setLastValidPageId((prev) => {
+                        if (prev !== activePageId) {
+                            try { localStorage.setItem('omnora_last_valid_page', activePageId); } catch (e) { console.warn(e); }
+                            return activePageId;
+                        }
+                        return prev;
+                    });
+                }, 0);
+                return () => clearTimeout(timer);
             }
         } catch (e) {
             console.error('[BuilderLayout] Page Switch Failure caught:', e);
             useBuilderStore.getState().setIsHydrating(false);
         }
-    }, [activePageId]);
+    }, [activePageId, lastValidPageId]);
     
     // 🛡️ Auto-select first page if none selected
     const pages = useBuilderStore(state => state.pages);
@@ -327,7 +316,7 @@ const BuilderLayoutContent: React.FC = () => {
 
 export const BuilderLayout: React.FC = () => {
     const navigate = useNavigate();
-    const lastValidPageId = (useBuilderStore.getState() as any).lastValidPageId 
+    const lastValidPageId = (useBuilderStore.getState() as unknown as { lastValidPageId?: string | null }).lastValidPageId 
         || localStorage.getItem('omnora_last_valid_page') 
         || null;
 

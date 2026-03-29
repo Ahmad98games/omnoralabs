@@ -1,5 +1,4 @@
 import React from 'react';
-import { useShallow } from 'zustand/react/shallow';
 import { useBuilderStore } from '../../stores/useBuilderStore';
 import { CanvasBlock } from './CanvasBlock';
 import { CanvasDropZone } from './CanvasDropZone';
@@ -15,6 +14,7 @@ import { EmptyState } from '../ui/EmptyState';
  * 🎨 ATOMIC CANVAS (Task 3.1)
  * Pure dynamic renderer with Zero Wasted Renders.
  */
+
 export const LiveCanvas: React.FC = React.memo(() => {
     const blocks = useBuilderStore(s => s.nodes[s.activePageId] ?? []);
     const isHydrating = useBuilderStore(s => s.isHydrating);
@@ -54,6 +54,7 @@ export const LiveCanvas: React.FC = React.memo(() => {
         </div>
     );
 });
+LiveCanvas.displayName = 'LiveCanvas';
 
 const CanvasSkeleton = () => (
     <div className="w-full h-full flex items-center justify-center bg-[#000000] backdrop-blur-sm relative overflow-hidden">

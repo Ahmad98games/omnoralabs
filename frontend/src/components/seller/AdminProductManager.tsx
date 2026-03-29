@@ -31,22 +31,23 @@ export const AdminProductManager = () => {
         variants: [] as ProductVariant[]
     });
 
-    const fetchProducts = async () => {
+    const fetchProducts = useCallback(async () => {
         if (!user) return;
         setIsLoading(true);
         try {
             const data = await databaseClient.getProductsByMerchant(user.id);
             setProducts(data);
-        } catch (error: any) {
-            showToast(error.message || 'Failed to fetch products', 'error');
+        } catch (error: unknown) {
+            const err = error as Error;
+            showToast(err.message || 'Failed to fetch products', 'error');
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [user, showToast]);
 
     useEffect(() => {
         fetchProducts();
-    }, [user]);
+    }, [fetchProducts]);
 
     const handleOpenModal = (product?: Product) => {
         // Guardrail 3: Free-tier product limit
@@ -61,7 +62,7 @@ export const AdminProductManager = () => {
                 description: product.description,
                 price: product.price.toString(),
                 featured_image: product.featured_image,
-                category_id: (product as any).category_id || '',
+                category_id: (product as Product & { category_id?: string }).category_id || '',
                 images: product.images || [],
                 variants: product.variants || []
             });
@@ -130,7 +131,7 @@ export const AdminProductManager = () => {
                     currency: 'USD',
                     featured_image: formData.featured_image,
                     images: formData.images,
-                    vendor: (user as any)?.name || (user as any)?.displayName || 'Vendor',
+                    vendor: (user as { name?: string }).name || (user as { displayName?: string }).displayName || 'Vendor',
                     type: 'Standard',
                     tags: [],
                     available: true,
@@ -141,8 +142,9 @@ export const AdminProductManager = () => {
             }
             await fetchProducts();
             handleCloseModal();
-        } catch (error: any) {
-            showToast(error.message || 'Failed to save product', 'error');
+        } catch (error: unknown) {
+            const err = error as Error;
+            showToast(err.message || 'Failed to save product', 'error');
         } finally {
             setIsSubmitting(false);
         }
@@ -155,8 +157,9 @@ export const AdminProductManager = () => {
             await databaseClient.deleteProduct(user.id, productId);
             setProducts(products.filter(p => p.id !== productId));
             showToast('Product deleted successfully', 'success');
-        } catch (error: any) {
-            showToast(error.message || 'Failed to delete product', 'error');
+        } catch (error: unknown) {
+            const err = error as Error;
+            showToast(err.message || 'Failed to delete product', 'error');
         }
     };
 
@@ -170,7 +173,7 @@ export const AdminProductManager = () => {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight text-white flex items-center gap-3">
-                        <Package className="text-[var(--accent-gold)]" />
+                        <Package className="text-white" />
                         Inventory
                     </h1>
                     <p className="text-gray-400 mt-2 text-sm max-w-xl">
@@ -186,13 +189,13 @@ export const AdminProductManager = () => {
                             placeholder="Search products..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="bg-[var(--bg-surface)] border border-[var(--border-primary)] rounded-lg pl-9 pr-4 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[var(--accent-gold)]/50 focus:ring-1 focus:ring-[var(--accent-gold)]/50 w-64 transition-all"
+                            className="bg-transparent border border-white/10 rounded-md pl-9 pr-4 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-white focus:ring-1 focus:ring-white w-64 transition-all"
                         />
                     </div>
                     <button
                         onClick={() => handleOpenModal()}
                         disabled={!isPro && products.length >= FREE_PRODUCT_LIMIT}
-                        className="bg-[var(--accent-gold)] hover:brightness-110 text-black px-5 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-all shadow-[0_0_20px_rgba(var(--accent-gold-rgb),0.2)] disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="bg-white hover:bg-gray-200 text-black px-5 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         title={!isPro && products.length >= FREE_PRODUCT_LIMIT ? `Free plan limit: ${FREE_PRODUCT_LIMIT} products` : 'Add a new product'}
                     >
                         {!isPro && products.length >= FREE_PRODUCT_LIMIT ? (
@@ -205,9 +208,8 @@ export const AdminProductManager = () => {
             </div>
 
             {/* Data Grid */}
-            <div className="bg-[var(--bg-surface)] border border-[var(--border-primary)] rounded-2xl overflow-hidden shadow-2xl relative">
-                {/* Cinematic accent line */}
-                <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[var(--accent-gold)]/30 to-transparent" />
+            <div className="bg-[#050505] border border-white/5 rounded-2xl overflow-hidden shadow-none relative">
+                {/* Cinematic accent line removed */}
                 
                 <div className="overflow-x-auto">
                     <table className="w-full text-left text-sm">
@@ -260,7 +262,7 @@ export const AdminProductManager = () => {
                                                     </div>
                                                 )}
                                                 <div>
-                                                    <p className="font-bold text-white group-hover:text-[var(--accent-gold)] transition-colors tracking-tight">{product.title}</p>
+                                                    <p className="font-bold text-white group-hover:text-white transition-colors tracking-tight">{product.title}</p>
                                                     <p className="text-[10px] text-[var(--text-secondary)] line-clamp-1 max-w-xs mt-0.5 uppercase tracking-wide">{product.description || 'No description'}</p>
                                                 </div>
                                             </div>
@@ -322,7 +324,7 @@ export const AdminProductManager = () => {
                                     type="text"
                                     value={formData.title}
                                     onChange={e => setFormData({ ...formData, title: e.target.value })}
-                                    className="w-full bg-[#050505] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+                                    className="w-full bg-transparent border border-white/10 rounded-md px-3 py-2 text-sm text-white focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition-all"
                                     placeholder="e.g., Cyberpunk Leather Jacket"
                                 />
                             </div>
@@ -336,7 +338,7 @@ export const AdminProductManager = () => {
                                     min="0"
                                     value={formData.price}
                                     onChange={e => setFormData({ ...formData, price: e.target.value })}
-                                    className="w-full bg-[#050505] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+                                    className="w-full bg-transparent border border-white/10 rounded-md px-3 py-2 text-sm text-white focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition-all tabular-nums"
                                     placeholder="0.00"
                                 />
                             </div>
@@ -347,7 +349,7 @@ export const AdminProductManager = () => {
                                     value={formData.description}
                                     onChange={e => setFormData({ ...formData, description: e.target.value })}
                                     rows={3}
-                                    className="w-full bg-[var(--bg-background)] border border-[var(--border-primary)] rounded-xl p-4 text-sm text-white focus:outline-none focus:border-[var(--accent-gold)] focus:ring-1 focus:ring-[var(--accent-gold)] transition-all resize-none"
+                                    className="w-full bg-transparent border border-white/10 rounded-md p-3 text-sm text-white focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition-all resize-none"
                                     placeholder="A cinematic description..."
                                 />
                             </div>
@@ -407,7 +409,7 @@ export const AdminProductManager = () => {
                                                 options: {} 
                                             }] 
                                         })}
-                                        className="text-[10px] text-[var(--accent-gold)] font-bold uppercase tracking-widest hover:brightness-125"
+                                        className="text-[10px] text-white font-bold uppercase tracking-widest hover:text-gray-300"
                                     >
                                         Add Variant
                                     </button>
@@ -459,7 +461,7 @@ export const AdminProductManager = () => {
                                 <button
                                     type="submit"
                                     disabled={isSubmitting}
-                                    className="bg-[var(--accent-gold)] hover:brightness-110 text-black px-6 py-2 rounded-xl text-sm font-black tracking-widest uppercase shadow-lg transition-all flex items-center gap-2 disabled:opacity-50"
+                                    className="bg-white hover:bg-gray-200 text-black px-6 py-2 rounded-lg text-sm font-bold tracking-tight shadow-none transition-colors flex items-center gap-2 disabled:opacity-50"
                                 >
                                     {isSubmitting && <Loader2 size={14} className="animate-spin" />}
                                     {editingProduct ? 'Save Entity' : 'Create Product'}

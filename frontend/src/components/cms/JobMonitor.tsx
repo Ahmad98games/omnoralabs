@@ -13,16 +13,16 @@ import { motion, AnimatePresence } from 'framer-motion';
 export const JobMonitor: React.FC = () => {
     const { activeJobId, setActiveJobId, setSaveStatus } = useBuilder();
 
-    const { data: job, isLoading } = useJobPolling(
+    const { data: job } = useJobPolling(
         activeJobId,
-        (result) => {
+        (_result) => {
             setSaveStatus('saved');
             setTimeout(() => {
                 setActiveJobId(null);
                 setSaveStatus('idle');
             }, 3000);
         },
-        (error) => {
+        (_error) => {
             setSaveStatus('error');
             setTimeout(() => {
                 setActiveJobId(null);

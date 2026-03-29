@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { localAIEngine, CopilotAction } from '../../lib/LocalAIEngine';
-import { Bot, Send, Loader2, X, Sparkles, AlertTriangle } from 'lucide-react';
+import { localAIEngine } from '../../lib/LocalAIEngine';
+import { Send, Loader2, X, Sparkles, AlertTriangle } from 'lucide-react';
 import { useBuilder } from '../../context/BuilderContext';
 import { useToast } from '../../context/ToastContext';
 import { executeCopilotCommands } from '../../lib/CommandExecutor';
 
 interface LocalCopilotPanelProps {
-    currentState: any; // Lightweight dispatcher subset
+    currentState: unknown; // Lightweight dispatcher subset
     onClose: () => void;
 }
 
@@ -45,9 +45,9 @@ export const LocalCopilotPanel: React.FC<LocalCopilotPanelProps> = ({ currentSta
                     setIsReady(true);
                     setChatHistory([{ role: 'assistant', text: "I'm the Omnora Design Copilot. Completely local, fully private, running on WebGPU. What are we building today?" }]);
                 }
-            } catch (err: any) {
+            } catch (err: unknown) {
                 if (mounted) {
-                    setErrorMsg(err.message || 'Fatal Error initializing WebLLM Engine.');
+                    setErrorMsg((err as Error).message || 'Fatal Error initializing WebLLM Engine.');
                 }
             }
         };
@@ -85,8 +85,8 @@ export const LocalCopilotPanel: React.FC<LocalCopilotPanelProps> = ({ currentSta
             } else {
                 setChatHistory(prev => [...prev, { role: 'assistant', text: `I couldn't identify any constructive actions to take from that prompt.` }]);
             }
-        } catch (err: any) {
-            setChatHistory(prev => [...prev, { role: 'assistant', text: `⚠️ Error executing request: ${err.message}` }]);
+        } catch (err: unknown) {
+            setChatHistory(prev => [...prev, { role: 'assistant', text: `⚠️ Error executing request: ${(err as Error).message}` }]);
         } finally {
             setIsGenerating(false);
         }

@@ -1,5 +1,4 @@
-import React, { useState, useMemo } from 'react';
-import { useShallow } from 'zustand/react/shallow';
+import React, { useState } from 'react';
 import { useBuilderStore } from '../../stores/useBuilderStore';
 import { ConversionScore } from './ConversionScore';
 import { Layers, Box, Settings, Sliders, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -14,7 +13,7 @@ export const SmartSidebar: React.FC = () => {
     const [collapsed, setCollapsed] = useState(false);
 
     const selectedNodeId = useBuilderStore(s => s.selectedNodeId);
-    const activePage = useBuilderStore(s => s.pages[s.activePageId]);
+
 
     if (collapsed) return (
         <button 
@@ -103,7 +102,7 @@ export const SmartSidebar: React.FC = () => {
     );
 };
 
-const TabButton = ({ active, onClick, icon, label }: any) => (
+const TabButton = ({ active, onClick, icon, label }: { active: boolean; onClick: () => void; icon: React.ReactNode; label: string }) => (
     <button 
         onClick={onClick}
         className={`flex-1 flex items-center justify-center gap-2 py-4 text-[10px] font-black tracking-widest uppercase transition-all relative

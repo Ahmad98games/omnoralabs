@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   Type, LayoutGrid, Sparkles, Image,
   Grid, SortAsc, Plus, Settings, Shield

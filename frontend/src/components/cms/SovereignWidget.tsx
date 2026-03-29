@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
-import { Save, X, Edit, Sliders, Settings, Layout, DollarSign, Target, CheckCircle2 } from 'lucide-react';
+import { Save, X, Edit, Sliders, Settings, Layout, Target, CheckCircle2 } from 'lucide-react';
 import { useBuilder } from '../../context/BuilderContext';
 
 export default function SovereignWidget() {
@@ -142,7 +142,7 @@ export default function SovereignWidget() {
                                     <div className="section-header">
                                         <Layout size={14} /> ACTIVE NODE: {node.type.toUpperCase()}
                                     </div>
-                                    {node.props && Object.entries(node.props).map(([key, value]: [string, any]) => (
+                                    {node.props && Object.entries(node.props).map(([key, value]: [string, unknown]) => (
                                         <div className="field-group" key={key}>
                                             <label>{key.replace(/([A-Z])/g, ' $1').toUpperCase()}</label>
                                             <input

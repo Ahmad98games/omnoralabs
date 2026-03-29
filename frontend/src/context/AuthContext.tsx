@@ -47,7 +47,6 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
-    const hasInitialized = React.useRef(false);
     const [profile, setProfile] = useState<MerchantProfile | CustomerProfile | null>(null);
     const [isInitializing, setIsInitializing] = useState(true);
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
@@ -159,14 +158,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // and ProtectedRoute.tsx for access control.
 
     useEffect(() => {
-        if (hasInitialized.current) return;
-        hasInitialized.current = true;
-
         let isMounted = true; 
 
         // 🛡️ EMERGENCY SETTLEMENT: Loader MUST clear after 8s
         const emergencyTimeout = setTimeout(() => {
-            if (isInitializing && isMounted) {
+            if (isMounted) {
                 console.warn('[Auth Shield] EMERGENCY_RESET: Forcing Kernel to settle.');
                 setIsInitializing(false);
             }
@@ -175,7 +171,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const initialize = async () => {
             try {
                 // 1. Get Initial Session
-                const { data: { session } } = await supabase.auth.getSession();
+                const { data: { session }, error } = await supabase.auth.getSession();
+                if (error) throw error;
+                
                 if (isMounted) {
                     if (session?.user) {
                         setUser(session.user);
@@ -197,7 +195,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         initialize();
 
-        // 2. Listen for Auth Changes (Deduplicated)
+        // 2. Listen for Auth Changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
             console.log(`[Auth Pulse] ${event} detected.`);
             
@@ -218,7 +216,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             clearTimeout(emergencyTimeout);
             subscription.unsubscribe();
         };
-    }, [ensureProfile, isInitializing]); 
+    }, [ensureProfile]); // Removed isInitializing from dependencies to prevent unmount cycle
 
     const login = async (email, password) => {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });

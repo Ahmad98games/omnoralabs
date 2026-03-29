@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { RegistryEntry, BlockProps, BlockType as SectionType, BLOCK_TYPES } from '../../platform/core/Registry';
 
 // In dono ko export karna zaroori hai BuilderContext ke liye

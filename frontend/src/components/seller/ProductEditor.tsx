@@ -68,9 +68,9 @@ const EditorInput: React.FC<{
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
                 placeholder={placeholder}
-                className={`w-full bg-[#050505] border border-white/10 rounded-xl py-3 text-sm text-white placeholder-gray-600 font-mono
-                    focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50
-                    focus:shadow-[0_0_15px_rgba(99,102,241,0.15)] transition-all
+                className={`w-full bg-transparent border border-white/10 rounded-md py-3 text-sm text-white placeholder-gray-600 font-mono
+                    focus:outline-none focus:border-white focus:ring-1 focus:ring-white
+                    transition-colors
                     ${prefix ? 'pl-10 pr-4' : 'px-4'}`}
             />
         </div>
@@ -105,7 +105,6 @@ const ProductEditorInner: React.FC = () => {
     const updateVariant = useProductDraftStore((s) => s.updateVariant);
     const removeVariant = useProductDraftStore((s) => s.removeVariant);
     const resetDraft = useProductDraftStore((s) => s.resetDraft);
-    const markClean = useProductDraftStore((s) => s.markClean);
     const setMerchantId = useProductDraftStore((s) => s.setMerchantId);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -222,11 +221,12 @@ const ProductEditorInner: React.FC = () => {
                 merchant_id: user.id,
             };
 
-            await databaseClient.createProduct(user.id, productPayload as any);
+            await databaseClient.createProduct(user.id, productPayload as unknown as Product);
             showToast('Product created successfully!', 'success');
             resetDraft();
-        } catch (err: any) {
-            showToast(err.message || 'Failed to save product.', 'error');
+        } catch (err: unknown) {
+            const error = err as Error;
+            showToast(error.message || 'Failed to save product.', 'error');
         } finally {
             setIsSaving(false);
         }
@@ -272,7 +272,7 @@ const ProductEditorInner: React.FC = () => {
                     <button
                         onClick={handleSave}
                         disabled={isSaving || !title.trim()}
-                        className="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 transition-all shadow-[0_0_20px_rgba(99,102,241,0.3)] hover:shadow-[0_0_30px_rgba(99,102,241,0.5)]"
+                        className="bg-white hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed text-black px-6 py-2.5 rounded-lg font-bold text-sm tracking-tight flex items-center gap-2 transition-colors"
                     >
                         {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
                         {isSaving ? 'Saving...' : 'Publish Product'}
@@ -301,9 +301,9 @@ const ProductEditorInner: React.FC = () => {
                                 onChange={(e) => setField('description', e.target.value)}
                                 rows={4}
                                 placeholder="Describe your product in detail..."
-                                className="w-full bg-[#050505] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 font-mono
-                                    focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50
-                                    focus:shadow-[0_0_15px_rgba(99,102,241,0.15)] transition-all resize-none"
+                                className="w-full bg-transparent border border-white/10 rounded-md px-4 py-3 text-sm text-white placeholder-gray-600 font-mono
+                                    focus:outline-none focus:border-white focus:ring-1 focus:ring-white
+                                    transition-colors resize-none"
                             />
                         </div>
                         <div className="grid grid-cols-2 gap-4">
@@ -337,8 +337,8 @@ const ProductEditorInner: React.FC = () => {
                             onClick={() => fileInputRef.current?.click()}
                             className={`relative border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all duration-300
                                 ${isDragOver
-                                    ? 'border-indigo-500 bg-indigo-500/5 shadow-[0_0_30px_rgba(99,102,241,0.15)]'
-                                    : 'border-white/10 hover:border-white/20 bg-[#050505]'
+                                    ? 'border-white bg-white/5'
+                                    : 'border-white/10 hover:border-white/20 bg-transparent'
                                 }`}
                         >
                             <Upload
@@ -346,7 +346,7 @@ const ProductEditorInner: React.FC = () => {
                                 className={`mx-auto mb-3 transition-colors ${isDragOver ? 'text-indigo-400' : 'text-gray-600'}`}
                             />
                             <p className="text-sm font-semibold text-gray-400">
-                                Drop images here or <span className="text-indigo-400 underline">browse</span>
+                                Drop images here or <span className="text-white underline">browse</span>
                             </p>
                             <p className="text-[10px] text-gray-600 mt-1.5 font-mono">
                                 JPEG, PNG, WebP • Max 2MB per file
@@ -369,7 +369,7 @@ const ProductEditorInner: React.FC = () => {
                                         key={item.id}
                                         className={`relative group rounded-xl overflow-hidden border transition-all aspect-square
                                             ${item.publicUrl === featuredImageUrl
-                                                ? 'border-indigo-500 ring-2 ring-indigo-500/30'
+                                                ? 'border-white ring-1 ring-white'
                                                 : 'border-white/10'
                                             }
                                             ${item.status === 'error' ? 'border-red-500/50' : ''}`}
@@ -402,7 +402,7 @@ const ProductEditorInner: React.FC = () => {
                                                         e.stopPropagation();
                                                         setFeaturedImage(item.publicUrl!);
                                                     }}
-                                                    className="bg-indigo-600/80 hover:bg-indigo-500 text-white p-1 rounded-md text-[8px] font-bold"
+                                                    className="bg-white hover:bg-gray-200 text-black p-1 rounded-md text-[8px] font-bold"
                                                     title="Set as featured"
                                                 >
                                                     ★
@@ -422,7 +422,7 @@ const ProductEditorInner: React.FC = () => {
 
                                         {/* Featured Badge */}
                                         {item.publicUrl === featuredImageUrl && (
-                                            <div className="absolute bottom-1 left-1 bg-indigo-600/90 text-[8px] text-white font-bold px-2 py-0.5 rounded-full uppercase tracking-widest">
+                                            <div className="absolute bottom-1 left-1 bg-white text-[8px] text-black font-bold px-2 py-0.5 rounded-sm uppercase tracking-widest">
                                                 Featured
                                             </div>
                                         )}
@@ -444,7 +444,7 @@ const ProductEditorInner: React.FC = () => {
                             <p className="text-gray-600 text-xs italic">No variants configured. Add variants for size, color, etc.</p>
                         ) : (
                             <div className="space-y-3">
-                                {variants.map((v, i) => (
+                                {variants.map((v) => (
                                     <div
                                         key={v.id}
                                         className="bg-[#050505] border border-white/5 rounded-xl p-4 grid grid-cols-12 gap-3 items-end group"
@@ -509,7 +509,7 @@ const ProductEditorInner: React.FC = () => {
                         )}
                         <button
                             onClick={addVariant}
-                            className="flex items-center gap-2 text-indigo-400 hover:text-indigo-300 text-xs font-bold uppercase tracking-widest transition-colors mt-2"
+                            className="flex items-center gap-2 text-white hover:text-gray-300 text-xs font-bold uppercase tracking-widest transition-colors mt-2"
                         >
                             <Plus size={14} /> Add Variant
                         </button>
@@ -572,7 +572,7 @@ const ProductEditorInner: React.FC = () => {
                             <h4 className="text-sm font-bold text-white truncate">
                                 {title || 'Product Title'}
                             </h4>
-                            <div className="flex items-baseline gap-2">
+                            <div className="flex items-baseline gap-2 tabular-nums">
                                 <span className="text-lg font-bold text-white">
                                     PKR {basePrice.toLocaleString()}
                                 </span>

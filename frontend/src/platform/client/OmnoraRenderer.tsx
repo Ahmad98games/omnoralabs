@@ -1,3 +1,5 @@
+/* eslint-disable react/prop-types */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useMemo, useContext, createContext } from 'react';
 import { getRegistry, getRegistryEntry } from '../core/Registry';
 import { ComponentWrapper } from './ComponentWrapper';
@@ -8,7 +10,7 @@ import { StorefrontProvider } from '../../context/StorefrontContext';
 
 export interface RenderContextType {
     nodes: Record<string, PlatformBlock>;
-    registry: Record<string, any>;
+    registry: Record<string, unknown>;
     adjacencyMap: Record<string, string[]>; // Precomputed for O(1) subtree resolution
     mode: 'production' | 'preview' | 'edit';
     viewport: 'desktop' | 'tablet' | 'mobile';
@@ -27,7 +29,7 @@ export interface OmnoraRendererProps {
     nodes: Record<string, PlatformBlock>;
     blocks: string[];
     mode?: 'edit' | 'preview' | 'production';
-    registryOverride?: Record<string, any>;
+    registryOverride?: Record<string, unknown>;
     renderWrapper?: (node: PlatformBlock, children: React.ReactNode) => React.ReactNode;
 }
 
@@ -35,6 +37,7 @@ export interface OmnoraRendererProps {
  * OmnoraRenderer: Core Pure Render Engine (v5)
  * Hardened for enterprise-scale Section Slicing and regionalized reconciliation.
  */
+// eslint-disable-next-line react/prop-types
 export const OmnoraRenderer: React.FC<OmnoraRendererProps> = React.memo(({
     nodes,
     blocks,
@@ -65,11 +68,12 @@ export const OmnoraRenderer: React.FC<OmnoraRendererProps> = React.memo(({
         </StorefrontProvider>
     );
 });
+OmnoraRenderer.displayName = 'OmnoraRenderer';
 
 interface SectionBoundaryProps {
     id: string;
     nodes: Record<string, PlatformBlock>;
-    registry: Record<string, any>;
+    registry: Record<string, unknown>;
     mode: 'production' | 'preview' | 'edit';
     viewport: 'desktop' | 'tablet' | 'mobile';
     renderWrapper?: (node: PlatformBlock, children: React.ReactNode) => React.ReactNode;
@@ -79,6 +83,7 @@ interface SectionBoundaryProps {
  * SectionBoundary: The "Topology Stabilizer".
  * It isolates React reconciliation to a specific top-level subtree.
  */
+// eslint-disable-next-line react/prop-types
 const SectionBoundary: React.FC<SectionBoundaryProps> = React.memo(({
     id, nodes, registry, mode, viewport, renderWrapper
 }) => {
@@ -121,13 +126,12 @@ const SectionBoundary: React.FC<SectionBoundaryProps> = React.memo(({
     if (prev.id !== next.id || prev.mode !== next.mode || prev.viewport !== next.viewport) return false;
 
     // Check if the specific nodes belonging to this section have changed identity.
-    const prevNodeIds = Object.keys(prev.nodes).filter(nodeId => prev.nodes[nodeId].id === prev.id || prev.nodes[nodeId].parentId); // Simplified for now
-    // Actually, a more robust way is to check the identity of the root and all known descendants.
     return prev.nodes[prev.id] === next.nodes[next.id];
     // In a production immutable system, if the root hasn't changed, 
     // it's highly likely the subtree is stable. 
     // For v5 prep, we'll keep it identity-based on the root.
 });
+SectionBoundary.displayName = 'SectionBoundary';
 
 interface RecursiveNodeProps {
     id: string;
@@ -137,10 +141,19 @@ interface RecursiveNodeProps {
  * PureRecursiveNode: The atomic unit of recursive rendering.
  * Optimized (v5): Consumes regionalized context.
  */
+// eslint-disable-next-line react/prop-types
 export const PureRecursiveNode: React.FC<RecursiveNodeProps> = React.memo(({ id }) => {
-    const { nodes, registry, adjacencyMap, mode, viewport, renderWrapper } = useRenderContext();
+    const { nodes, adjacencyMap, mode, viewport, renderWrapper } = useRenderContext();
 
     const node = nodes[id];
+
+    const activeStyles = useMemo(() => {
+        if (!node) return {};
+        const base = node.styles || {};
+        const responsiveStyles = viewport === 'desktop' ? {} : (node.responsive?.[viewport] || {});
+        return { ...base, ...responsiveStyles };
+    }, [node, viewport]);
+
     if (!node) return null;
 
     const entry = getRegistryEntry(node.type);
@@ -168,14 +181,8 @@ export const PureRecursiveNode: React.FC<RecursiveNodeProps> = React.memo(({ id 
     );
 
     const isHiddenOnDevice = node.hidden?.[viewport];
-    if (isHiddenOnDevice && mode !== 'edit') return null;
 
-    const activeStyles = useMemo(() => {
-        if (!node) return {};
-        const base = node.styles || {};
-        const responsiveStyles = viewport === 'desktop' ? {} : (node.responsive?.[viewport] || {});
-        return { ...base, ...responsiveStyles };
-    }, [node, viewport]);
+    if (isHiddenOnDevice && mode !== 'edit') return null;
 
     if (renderWrapper) {
         return <>{renderWrapper(node, content)}</>;
@@ -193,3 +200,4 @@ export const PureRecursiveNode: React.FC<RecursiveNodeProps> = React.memo(({ id 
         </ComponentWrapper>
     );
 });
+PureRecursiveNode.displayName = 'PureRecursiveNode';

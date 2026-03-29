@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 /**
  * GlobalSettingsPanel.tsx — Theme-Agnostic Design Token Editor
  *
@@ -11,10 +12,10 @@
  *  - Zero coupling to any specific aesthetic.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
     Palette, Type, Square, Sun, RotateCcw,
-    ChevronDown, ChevronRight, Code2, Sparkles, Megaphone,
+    ChevronDown, ChevronRight, Code2, Sparkles,
     Shield, Cpu, Settings
 } from 'lucide-react';
 import {
@@ -25,6 +26,8 @@ import {
 } from '../../stores/useGlobalThemeStore';
 
 // ─── Color Swatch Component ─────────────────────────────────────────────────
+
+// eslint-disable-next-line react/prop-types
 
 const ColorSwatch: React.FC<{
     label: string;
@@ -59,6 +62,8 @@ ColorSwatch.displayName = 'ColorSwatch';
 
 // ─── Collapsible Section Component ──────────────────────────────────────────
 
+// eslint-disable-next-line react/prop-types
+
 const Section: React.FC<{
     title: string;
     icon: React.ReactNode;
@@ -82,6 +87,8 @@ const Section: React.FC<{
 };
 
 // ─── Preset Button Component ────────────────────────────────────────────────
+
+// eslint-disable-next-line react/prop-types
 
 const PresetButton: React.FC<{
     label: string;
@@ -111,6 +118,7 @@ const POPULAR_FONTS = [
     'Fira Code', 'JetBrains Mono', 'Pacifico', 'Bebas Neue',
 ];
 
+// eslint-disable-next-line react/prop-types
 const FontInput: React.FC<{
     label: string;
     value: string;
@@ -166,13 +174,11 @@ export const GlobalSettingsPanel: React.FC = () => {
     const radii = useGlobalThemeStore((s) => s.radii);
     const shadows = useGlobalThemeStore((s) => s.shadows);
     const customCSS = useGlobalThemeStore((s) => s.customCSS);
-    const adSensePublisherId = useGlobalThemeStore((s) => s.adSensePublisherId);
     const setColors = useGlobalThemeStore((s) => s.setColors);
     const setTypography = useGlobalThemeStore((s) => s.setTypography);
     const setRadii = useGlobalThemeStore((s) => s.setRadii);
     const setShadows = useGlobalThemeStore((s) => s.setShadows);
     const setCustomCSS = useGlobalThemeStore((s) => s.setCustomCSS);
-    const setAdSensePublisherId = useGlobalThemeStore((s) => s.setAdSensePublisherId);
     const resetTheme = useGlobalThemeStore((s) => s.resetTheme);
 
     // Load current fonts on mount

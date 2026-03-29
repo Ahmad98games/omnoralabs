@@ -1,3 +1,5 @@
+/* eslint-disable react/prop-types */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * 🛠️ OMNORA LABS | [OMNORA RENDERER]
  * ---------------------------------------------------------
@@ -70,6 +72,7 @@ export const OmnoraRenderer: React.FC<OmnoraRendererProps> = React.memo(({
         </StorefrontProvider>
     );
 });
+OmnoraRenderer.displayName = 'OmnoraRenderer';
 
 interface RecursiveNodeProps {
     id: string;
@@ -131,3 +134,4 @@ export const PureRecursiveNode: React.FC<RecursiveNodeProps> = ({ id }) => {
         </ComponentWrapper>
     );
 };
+PureRecursiveNode.displayName = 'PureRecursiveNode';

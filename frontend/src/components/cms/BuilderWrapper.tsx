@@ -6,11 +6,6 @@ export const BuilderWrapper: React.FC<{ nodeId: string; children: React.ReactNod
     const node = nodes[nodeId];
     const [isHovered, setIsHovered] = useState(false);
 
-    if (!node) return null;
-
-    const isHiddenOnDevice = node.hidden?.[viewport as string];
-    if (isHiddenOnDevice && mode === 'preview') return null;
-
     const isSelected = selectedNodeId === nodeId;
 
     const handleClick = useCallback((e: React.MouseEvent) => {
@@ -18,6 +13,11 @@ export const BuilderWrapper: React.FC<{ nodeId: string; children: React.ReactNod
         e.stopPropagation();
         selectNode?.(nodeId);
     }, [isBuilderActive, mode, nodeId, selectNode]);
+
+    if (!node) return null;
+
+    const isHiddenOnDevice = node.hidden?.[viewport as string];
+    if (isHiddenOnDevice && mode === 'preview') return null;
 
     return (
         <div

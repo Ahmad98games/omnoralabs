@@ -4,6 +4,14 @@
 
 /* 🏗️ OMNORA INDUSTRIAL DESIGN SYSTEM (Task 10.1) */
 
+/* 🛑 SURGICAL ZERO-SHADOW DIRECTIVE */
+* {
+  box-shadow: none !important;
+  text-shadow: none !important;
+  --tw-ring-shadow: 0 0 transparent !important;
+  --tw-ring-offset-shadow: 0 0 transparent !important;
+}
+
 :root {
   /* 🎨 Primary Palette */
   --om-bg: #000000;

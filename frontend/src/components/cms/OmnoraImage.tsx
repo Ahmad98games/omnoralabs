@@ -79,7 +79,7 @@ export const OmnoraImage: React.FC<OmnoraImageProps> = ({
                 <img
                     src={highResSrc}
                     alt={alt}
-                    {...({ fetchPriority: 'high' } as any)} // For TS React 18 compat
+                    {...({ fetchPriority: 'high' } as React.ImgHTMLAttributes<HTMLImageElement>)} // For TS React 18 compat
                     style={{
                         position: 'absolute',
                         top: 0, left: 0, width: '100%', height: '100%',

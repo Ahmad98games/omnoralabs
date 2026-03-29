@@ -13,7 +13,6 @@ import {
     ArrowLeft,
     Hammer,
     ChevronRight,
-    Store,
     ShoppingBag,
     Settings,
     HelpCircle,
@@ -33,8 +32,6 @@ import SellerProfile from './seller/SellerProfile';
 const ProductEditor = React.lazy(() => import('../components/seller/ProductEditor'));
 import { BuilderProvider } from '../context/BuilderContext';
 import { BuilderLayout } from '../components/builder/BuilderLayout';
-import { useStorefront } from '../hooks/useStorefront';
-import { useToast } from '../context/ToastContext';
 import { useBuilder } from '../context/BuilderContext';
 import cmsApi from '../api/cmsApi';
 import { TourOverlay } from '../components/cms/help/TourOverlay';
@@ -106,48 +103,23 @@ const NAV = [
     { id: 'help',            label: 'Builder Guide',     icon: HelpCircle },
 ];
 
-// ─── KPI Card ─────────────────────────────────────────────────────────────────
-const KpiCard = ({
-    label,
-    value,
-    sub,
-    icon: Icon,
-    color,
-}: {
-    label: string;
-    value: string;
-    sub?: string;
-    icon: any;
-    color: string;
-}) => (
-    <div className="kpi-card">
-        <div className="kpi-header">
-            <div className="kpi-info">
-                <p className="kpi-label">{label}</p>
-                <p className="kpi-value">{value}</p>
-            </div>
-            <div className="kpi-icon-wrapper" style={{ '--kpi-bg': color } as React.CSSProperties}>
-                <Icon size={20} color="#fff" />
-            </div>
-        </div>
-        {sub && <p className="kpi-sub">{sub}</p>}
-    </div>
-);
-
 // ─── Main dashboard ───────────────────────────────────────────────────────────
 export default function SellerDashboard() {
-    const { user, profile, isInitialized, loading: authLoading } = useAuth();
-    const { showToast } = useToast();
+    const { user, profile, isInitialized } = useAuth();
     const [searchParams, setSearchParams] = useSearchParams();
     const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'overview');
     const [mobileSidebarOpen, setMob] = useState(false);
+    
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [stats, setStats] = useState({
         totalSales: 0,
         activeProducts: 0,
         pendingOrders: 0,
         viewCount: 0,
     });
+    
     const [loading, setLoading] = useState(true);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [localContent, setLocalContent] = useState<any>(null);
     const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
     const [tourOpen, setTourOpen] = useState(searchParams.get('tour') === 'true');
@@ -163,7 +135,7 @@ export default function SellerDashboard() {
         if (searchParams.get('tour') === 'true' && !tourOpen) {
             setTourOpen(true);
         }
-    }, [searchParams]);
+    }, [searchParams, activeTab, tourOpen]);
 
     const fetchContent = async () => {
         // Timeout guard — never block the dashboard forever
@@ -264,15 +236,12 @@ export default function SellerDashboard() {
         <div className="seller-dashboard">
 
             {/* ── Sidebar ── */}
-            <aside className={`seller-sidebar w-[220px] bg-[#050505] backdrop-blur-xl border-r border-[#1A1A1A] custom-scrollbar overflow-y-auto ${mobileSidebarOpen ? 'mobile-open' : ''}`}>
+            <aside className={`seller-sidebar w-[240px] bg-[#000000] border-r border-white/5 custom-scrollbar overflow-y-auto ${mobileSidebarOpen ? 'mobile-open' : ''}`}>
                 <div className="sidebar-brand">
                     <div className="brand-wrapper">
-                        <div className="brand-icon">
-                            <Store size={18} color="#fff" />
-                        </div>
                         <div className="brand-info">
-                            <p>{storeName}</p>
-                            <p>Seller Dashboard</p>
+                            <p className="font-sans font-semibold tracking-tight uppercase">{storeName}</p>
+                            <p className="font-sans text-[10px] tracking-widest text-white/40 uppercase mt-1">Seller Dashboard</p>
                         </div>
                     </div>
                 </div>
@@ -306,14 +275,14 @@ export default function SellerDashboard() {
             <div className="dashboard-main">
 
                 {/* Top header */}
-                <header className="top-header bg-[#050505]/80 backdrop-blur-xl border-b border-[#1A1A1A]">
+                <header className="top-header bg-[#000000] border-b border-white/5">
                     <div className="header-left">
                         <button onClick={() => setMob(o => !o)} className="menu-trigger">
                             ☰
                         </button>
-                        <h1 className="text-xl text-[#F9F9F9] tracking-tight">
-                            <span className="font-sans font-medium opacity-80">Greetings, </span>
-                            <span className="font-serif font-light text-[#F1D592]">{storeName}</span>
+                        <h1 className="text-xl text-[#ffffff] tracking-tight">
+                            <span className="font-sans font-medium opacity-50">Greetings, </span>
+                            <span className="font-sans font-semibold">{storeName}</span>
                         </h1>
                     </div>
                     <div className="header-right flex items-center">
@@ -331,7 +300,7 @@ export default function SellerDashboard() {
                         <InstallButton />
                         <button
                             onClick={save}
-                            className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#F1D592] to-[#D4AF37] text-black font-bold text-sm transition-transform duration-300 hover:scale-105 shadow-[0_10px_30px_rgba(241,213,146,0.15)] hover:shadow-[0_15px_40px_rgba(241,213,146,0.25)]"
+                            className="flex items-center gap-2 px-5 py-2 rounded-lg bg-white text-black font-semibold text-[13px] transition-colors duration-200 hover:bg-gray-200"
                         >
                             <Save size={15} /> Save changes
                         </button>

@@ -1,8 +1,7 @@
 import React from 'react';
-import { motion, Reorder } from 'framer-motion';
+import { Reorder } from 'framer-motion';
 import { useBuilder } from '../../context/BuilderContext';
-import { getRegistryEntry } from './BuilderRegistry';
-import { Layers, GripVertical, Trash2 } from 'lucide-react';
+import { GripVertical, Trash2 } from 'lucide-react';
 
 export const NavigatorPanel: React.FC = () => {
     const { pageLayouts, activePageId, reorderPageLayout, nodes, deleteNode, selectNode, selectedNodeId } = useBuilder();

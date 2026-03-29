@@ -1,7 +1,7 @@
 import React from 'react';
-import { useShallow } from 'zustand/react/shallow';
+
 import { useBuilderStore } from '../../stores/useBuilderStore';
-import { Palette, Type, Layout, Hexagon, ChevronRight } from 'lucide-react';
+import { Palette, Type, Layout } from 'lucide-react';
 
 /**
  * 🎨 THEME PANEL (Task 3.3)

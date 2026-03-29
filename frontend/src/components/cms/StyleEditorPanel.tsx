@@ -276,6 +276,7 @@ const GridTwoCol: React.FC<{ children: React.ReactNode }> = ({ children }) => (
     </div>
 );
 
+// eslint-disable-next-line react/prop-types
 const Label: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ children, style, ...props }) => (
     <div style={{ fontSize: '10px', color: '#71717a', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '6px', ...style }} {...props}>
         {children}
