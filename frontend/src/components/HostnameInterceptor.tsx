@@ -124,55 +124,12 @@ export const HostnameInterceptor: React.FC<{ children: React.ReactNode }> = ({ c
             );
         }
 
-        return <StorefrontRouter storeId={storeId} />;
+        // 🏗️ INJECT INDUSTRIAL STOREFRONT APP (SOVEREIGN ENGINE)
+        return <StorefrontApp storeId={storeId} />;
     }
 
     return <>{children}</>;
 };
 
-// Extracted Storefront Router to handle active page SEO context
-const StorefrontRouter: React.FC<{ storeId: string }> = ({ storeId }) => {
-    const { content } = useStorefront();
-    const location = useLocation();
-    const path = location.pathname.split('/').filter(Boolean).pop() || 'home';
-    
-    // Resolve active page metadata from AST
-    const activePage = useMemo(() => {
-        if (!content?.pages) return null;
-        return content.pages[path] || content.pages['home'];
-    }, [content, path]);
-
-    // Handle dynamic product SEO if on product page
-    const productId = location.pathname.includes('/product/') ? location.pathname.split('/').pop() : null;
-    const { data: product } = useQuery({
-        queryKey: ['product', productId],
-        queryFn: () => databaseClient.getProductById(productId!),
-        enabled: !!productId
-    });
-
-    return (
-        <CustomerAuthProvider>
-            <StorefrontAnalytics />
-            <SEOHead 
-                storeName={activePage?.seoMeta?.title} 
-                description={activePage?.seoMeta?.description}
-                ogImage={activePage?.seoMeta?.ogImage}
-                productData={product}
-            />
-            <Routes>
-                <Route element={<Layout children={<Outlet />} />}>
-                    <Route path={ROUTES.HOME} element={<Home />} />
-                    <Route path={ROUTES.COLLECTION} element={<Collection />} />
-                    <Route path={ROUTES.PRODUCT} element={<Product />} />
-                    <Route path={ROUTES.CART} element={<Cart />} />
-                    <Route path={ROUTES.CHECKOUT} element={<Checkout />} />
-                    <Route path={ROUTES.ABOUT} element={<About onBack={() => window.history.back()} />} />
-                    <Route path={ROUTES.CONTACT} element={<OmnoraContact />} />
-                    <Route path={ROUTES.THANK_YOU} element={<ThankYouPage />} />
-                    <Route path="account" element={<CustomerDashboard />} />
-                    <Route path="*" element={<Home />} />
-                </Route>
-            </Routes>
-        </CustomerAuthProvider>
-    );
-}
+// ─── LEGACY ROUTER REMOVED IN FAVOR OF PLATFORM/PUBLISH/STOREFRONTAPP ───
+import { StorefrontApp } from '../platform/publish/StorefrontApp';

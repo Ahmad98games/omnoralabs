@@ -8,7 +8,7 @@ const stressTest = () => {
     console.log('--- OMNORA ENGINE STRESS TEST ---');
 
     // 1. Bootstrap 500 nodes
-    const initialNodes: any = {};
+    const initialNodes: Record<string, unknown> = {};
     for (let i = 0; i < 500; i++) {
         initialNodes[`node-${i}`] = {
             id: `node-${i}`,
@@ -56,5 +56,5 @@ const stressTest = () => {
 
 // Only run in dev/test
 if (process.env.NODE_ENV === 'development') {
-    (window as any).omnoraStressTest = stressTest;
+    (window as unknown as { omnoraStressTest: typeof stressTest }).omnoraStressTest = stressTest;
 }

@@ -37,10 +37,10 @@ const CountingPulse = ({ value, prefix = "", suffix = "" }: { value: number, pre
         const end = value;
         if (start === end) return;
 
-        let totalDuration = 1500;
-        let increment = end / (totalDuration / 16);
+        const totalDuration = 1500;
+        const increment = end / (totalDuration / 16);
         
-        let timer = setInterval(() => {
+        const timer = setInterval(() => {
             start += increment;
             if (start >= end) {
                 setDisplayValue(end);

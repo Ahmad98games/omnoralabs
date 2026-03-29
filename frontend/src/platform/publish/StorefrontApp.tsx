@@ -1,34 +1,25 @@
-/**
- * StorefrontApp: The Live Customer-Facing Website (Phase 14 — Cloud-Enabled)
- *
- * Now fetches StorefrontConfig from the CLOUD via IDatabaseClient,
- * resolving by domain or storeId from URL parameters.
- *
- * Resolution order:
- *   1. ?store={storeSlug} URL parameter → databaseClient.getStoreConfigByDomain()
- *   2. Merchant subdomain parsing (e.g., my-store.omnora.com)
- *   3. Fallback: localStorage (offline/dev mode)
- *
- * SEPARATION OF CONCERNS:
- *   ✗ No BuilderContext, SmartSidebar, Toolbar, or EditingOverlay
- *   ✓ StorefrontProvider (data layer)
- *   ✓ ThemeManager (CSS variables)
- *   ✓ TemplateResolver (URL → page layout)
- *   ✓ CleanRenderer (zero-overhead rendering)
- */
-
-import React, { useEffect, useState, useMemo, useCallback } from 'react';
+import React, { useEffect, useState, useMemo, Suspense, lazy } from 'react';
+import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { publisher } from './Publisher';
 import type { StorefrontConfig } from '../core/DatabaseTypes';
 import { CleanRenderer } from './CleanRenderer';
 import { ThemeManager } from '../../components/cms/ThemeManager';
 import { StorefrontProvider, storefrontStore } from '../../context/StorefrontContext';
-import { TemplateResolver, type ResolvedTemplate } from '../core/TemplateResolver';
+import { TemplateResolver } from '../core/TemplateResolver';
+import { CustomerAuthProvider } from '../../context/CustomerAuthContext';
+import { StorefrontAnalytics } from '../../components/cms/StorefrontAnalytics';
+import { SEOHead } from '../../components/cms/SEOHead';
+
+// ─── LAZY LOADED ROUTE COMPONENTS ───────────────────────────────────────────
+const Cart = lazy(() => import('../../pages/Cart'));
+const Checkout = lazy(() => import('../../pages/Checkout'));
+const Search = lazy(() => import('../../pages/Search'));
+const CustomPage = lazy(() => import('../../pages/CustomPage'));
+const OrderConfirmation = lazy(() => import('../../pages/OrderConfirmation'));
+const CustomerDashboard = lazy(() => import('../../components/storefront/CustomerProfile'));
 
 // ─── Viewport Detection ──────────────────────────────────────────────────────
-
 type Viewport = 'desktop' | 'tablet' | 'mobile';
-
 function detectViewport(): Viewport {
     if (typeof window === 'undefined') return 'desktop';
     const w = window.innerWidth;
@@ -37,105 +28,49 @@ function detectViewport(): Viewport {
     return 'desktop';
 }
 
-/**
- * Extract store domain from URL params or subdomain.
- * ?store=my-watches → "my-watches.omnora.com"
- */
-function resolveStoreDomain(): string | null {
-    const params = new URLSearchParams(window.location.search);
-    const storeParam = params.get('store') || params.get('storeId');
-    if (storeParam) return `${storeParam}.omnora.com`;
-
-    // Subdomain detection: my-store.omnora.com
-    const hostname = window.location.hostname;
-    const parts = hostname.split('.');
-    if (parts.length >= 3 && parts[parts.length - 2] === 'omnora') {
-        return hostname;
-    }
-
-    return null;
-}
-
-// ─── Component ────────────────────────────────────────────────────────────────
-
 export interface StorefrontAppProps {
-    /** Override the URL path for testing (defaults to window.location.pathname) */
-    initialPath?: string;
-    /** Override the store domain for testing */
-    storeDomain?: string;
+    storeId: string;
 }
 
-export const StorefrontApp: React.FC<StorefrontAppProps> = ({ initialPath, storeDomain }) => {
-    const [config, setConfig] = useState<StorefrontConfig | null>(null);
-    const [loading, setLoading] = useState(true);
+const OMNORA_CORE_VERSION = '1.1.0'; // 🛠️ PRODUCTION HARDENING
+
+export const StorefrontApp: React.FC<StorefrontAppProps> = ({ storeId }) => {
+    const [config, setConfig] = useState<StorefrontConfig | null>(() => {
+        try {
+            const cachedVersion = localStorage.getItem('OMNORA_VERSION');
+            if (cachedVersion !== OMNORA_CORE_VERSION) {
+                localStorage.clear();
+                localStorage.setItem('OMNORA_VERSION', OMNORA_CORE_VERSION);
+                return null;
+            }
+            const cached = localStorage.getItem(`omnora_cache_${storeId}`);
+            return cached ? JSON.parse(cached) : null;
+        } catch { return null; }
+    });
+    
+    const [loading, setLoading] = useState(!config);
     const [loadError, setLoadError] = useState<string | null>(null);
     const [viewport, setViewport] = useState<Viewport>(detectViewport);
-    const [currentPath, setCurrentPath] = useState(initialPath || window.location.pathname);
-    const [panicClicks, setPanicClicks] = useState(0);
+    const location = useLocation();
 
-    const handlePanicClick = () => {
-        const next = panicClicks + 1;
-        setPanicClicks(next);
-        if (next >= 5) {
-            import('../../lib/kernel/Kernel').then(({ Kernel }) => {
-                Kernel.executeHardReset();
-            });
-        }
-    };
-
-    // ── Load StorefrontConfig from cloud or fallback ──────────────────────
     useEffect(() => {
         let mounted = true;
-
-        const params = new URLSearchParams(window.location.search);
-        if (params.get('force_sync') === 'true') {
-            console.warn('[StorefrontApp] Force Sync Triggered: Clearing Local Storage.');
-            try {
-                localStorage.clear();
-            } catch (e) { /* ignore safe blocks */ }
-        }
-
         const loadConfig = async () => {
-            const domain = storeDomain || resolveStoreDomain();
-
             try {
-                let loaded: StorefrontConfig | null = null;
-
-                if (domain) {
-                    // PRIMARY: Cloud fetch by domain
-                    loaded = await publisher.loadByDomain(domain);
-                    if (loaded && mounted) {
-                        console.log(
-                            `%c[Omnora Storefront] ☁️ Cloud store loaded%c\n  Domain: ${domain}\n  Build: ${loaded.buildId}`,
-                            'color: #34d399; font-weight: bold;',
-                            'color: #a1a1aa;'
-                        );
+                const forceRefresh = window.location.search.includes('revalidate=true');
+                if (!config || forceRefresh) {
+                    const loaded = await publisher.loadByDomain(storeId);
+                    if (mounted && loaded) {
+                        setConfig(loaded);
+                        storefrontStore.setMerchantId(loaded.merchantId);
+                        localStorage.setItem(`omnora_cache_${storeId}`, JSON.stringify(loaded));
+                    } else if (mounted && !config) {
+                        setLoadError('No published store found.');
                     }
-                }
-
-                if (!loaded) {
-                    // FALLBACK: localStorage
-                    loaded = await publisher.loadPublishedConfig();
-                    if (loaded && mounted) {
-                        console.log(
-                            `%c[Omnora Storefront] 💾 Loaded from localStorage%c\n  Build: ${loaded.buildId}`,
-                            'color: #facc15; font-weight: bold;',
-                            'color: #a1a1aa;'
-                        );
-                    }
-                }
-
-                if (mounted && loaded) {
-                    setConfig(loaded);
-                    // Update global storefront context with merchantId
-                    storefrontStore.setMerchantId(loaded.merchantId);
-                }
-                if (mounted && !loaded) {
-                    setLoadError('No published store found.');
                 }
             } catch (err) {
-                if (mounted) setLoadError('Failed to load storefront.');
-                console.error('[Omnora Storefront] Load error:', err);
+                if (mounted && !config) setLoadError('Failed to load storefront.');
+                console.error('[StorefrontApp] Load error:', err);
             } finally {
                 if (mounted) setLoading(false);
             }
@@ -143,143 +78,65 @@ export const StorefrontApp: React.FC<StorefrontAppProps> = ({ initialPath, store
 
         loadConfig();
         return () => { mounted = false; };
-    }, [storeDomain]);
+    }, [storeId, config]);
 
-    // ── Zombie-Tab Watcher ────────────────────────────────────────────────
-    useEffect(() => {
-        let cleanup = () => {};
-        import('../../lib/kernel/Kernel').then(({ Kernel }) => {
-            cleanup = Kernel.watchZombieTab(
-                loading,
-                setLoading,
-                async () => {
-                    const loaded = await publisher.loadByDomain(storeDomain || resolveStoreDomain() || '');
-                    if (loaded) {
-                        setConfig(loaded);
-                        storefrontStore.setMerchantId(loaded.merchantId);
-                    } else {
-                        setLoadError('Fatal sync failure. No published store.');
-                    }
-                }
-            );
-        });
-        return () => cleanup();
-    }, [loading, storeDomain]);
-
-    // ── Viewport listener ─────────────────────────────────────────────────
     useEffect(() => {
         const handleResize = () => setViewport(detectViewport());
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    // ── Client-side navigation ────────────────────────────────────────────
-    useEffect(() => {
-        const handlePopState = () => setCurrentPath(window.location.pathname);
-        window.addEventListener('popstate', handlePopState);
-        return () => window.removeEventListener('popstate', handlePopState);
-    }, []);
-
-    const navigate = useCallback((path: string) => {
-        window.history.pushState({}, '', path);
-        setCurrentPath(path);
-    }, []);
-
-    // ── Resolve the current page template ─────────────────────────────────
-    const resolvedRoute: ResolvedTemplate | null = useMemo(() => {
+    const resolvedRoute = useMemo(() => {
         if (!config) return null;
-        return TemplateResolver.resolve(currentPath);
-    }, [config, currentPath]);
+        return TemplateResolver.resolve(location.pathname);
+    }, [config, location.pathname]);
 
-    // ── Determine which root node IDs to render ───────────────────────────
-    const rootIds: string[] = useMemo(() => {
+    const rootIds = useMemo(() => {
         if (!config || !resolvedRoute) return [];
-        const layoutKey = resolvedRoute.layoutId;
-        return config.pageLayouts[layoutKey] || config.pageLayouts['index'] || [];
+        return config.pageLayouts[resolvedRoute.layoutId] || config.pageLayouts['index'] || [];
     }, [config, resolvedRoute]);
 
-    // ── Loading State ─────────────────────────────────────────────────────
-
-    if (loading) {
-        return (
-            <div style={loadingStyle}>
-                <div style={spinnerStyle} onClick={handlePanicClick} title="Tap 5 times to execute system Hard Reset" />
-                <p style={{ color: '#a1a1aa', fontSize: '14px', marginTop: 16 }}>Loading storefront…</p>
-            </div>
-        );
-    }
-
-    // ── Error / Empty / Suspended State ───────────────────────────────────
-
-    if (config && (config as any)._isSuspended) {
-        return (
-            <div style={emptyStyle}>
-                <h2 style={{ color: '#fff', marginBottom: 8, fontSize: '24px' }}>Store Currently Unavailable</h2>
-                <p style={{ color: '#71717a', fontSize: '15px', maxWidth: 400, lineHeight: 1.5 }}>
-                    This storefront has been disabled. If you are the owner, please contact platform administration.
-                </p>
-            </div>
-        );
-    }
-
-    if (loadError || !config) {
-        return (
-            <div style={emptyStyle}>
-                <h2 style={{ color: '#fff', marginBottom: 8 }}>No Published Site</h2>
-                <p style={{ color: '#71717a', fontSize: '14px', maxWidth: 400 }}>
-                    {loadError || 'Open the Omnora Builder and click "Publish" to deploy your storefront.'}
-                </p>
-            </div>
-        );
-    }
-
-    // ── Live Storefront ───────────────────────────────────────────────────
+    if (loading && !config) return <div className="min-h-screen bg-[#000000] flex items-center justify-center text-white/5 font-black uppercase tracking-[0.3em] animate-pulse text-xs">Omnora Kernel Initializing</div>;
+    if (loadError && !config) return (
+        <div className="min-h-screen bg-[#000000] text-white/20 flex flex-col items-center justify-center font-black uppercase tracking-widest text-xs text-center p-8">
+            <div className="mb-4">NULL MANIFEST ERROR</div>
+            <a href="/" className="text-white border-b border-white/20 pb-1 hover:border-white transition-all">Reload System</a>
+        </div>
+    );
 
     return (
-        <StorefrontProvider>
-            <ThemeManager theme={config.theme} />
-            <div
-                className="omnora-storefront-live"
-                style={{
-                    minHeight: '100vh',
-                    backgroundColor: 'var(--theme-bg, #050508)',
-                    color: 'var(--theme-text-primary, #f0f0f5)',
-                    fontFamily: 'var(--theme-font-body)',
-                }}
-            >
-                <CleanRenderer
-                    nodes={config.nodes}
-                    rootIds={rootIds}
-                    viewport={viewport}
-                    pageId={resolvedRoute?.layoutId}
-                    globalAnimations={config.pages?.[resolvedRoute?.layoutId || 'index']?.globalAnimations ?? true}
+        <CustomerAuthProvider>
+            <StorefrontProvider>
+                <ThemeManager theme={config!.theme} />
+                <StorefrontAnalytics />
+                <SEOHead 
+                    storeName={config!.storeName} 
+                    description={config!.seoDescription}
                 />
-            </div>
-        </StorefrontProvider>
+                
+                <div className="omnora-sovereign-shell min-h-screen bg-[#000000] text-white font-sans selection:bg-white selection:text-black">
+                    <Suspense fallback={<div className="h-[2px] w-full bg-white/20 overflow-hidden fixed top-0 left-0 z-[9999]"><div className="h-full bg-white w-1/3 animate-pulse" /></div>}>
+                        <Routes>
+                            <Route index element={<CleanRenderer nodes={config!.nodes} rootIds={rootIds} viewport={viewport} pageId="home" />} />
+                            <Route path="/cart" element={<Cart />} />
+                            <Route path="/search" element={<Search />} />
+                            <Route path="/thank-you" element={<OrderConfirmation />} />
+
+                            <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
+                            <Route path="/account/*" element={<ProtectedRoute><CustomerDashboard /></ProtectedRoute>} />
+
+                            <Route path="/:slug" element={<CustomPage config={config!} viewport={viewport} />} />
+                            <Route path="*" element={<Navigate to="/" replace />} />
+                        </Routes>
+                    </Suspense>
+                </div>
+            </StorefrontProvider>
+        </CustomerAuthProvider>
     );
 };
 
-// ─── Style Constants ──────────────────────────────────────────────────────────
-
-const loadingStyle: React.CSSProperties = {
-    display: 'flex', flexDirection: 'column',
-    alignItems: 'center', justifyContent: 'center',
-    height: '100vh', backgroundColor: '#050508',
-};
-
-const spinnerStyle: React.CSSProperties = {
-    width: 32, height: 32,
-    border: '3px solid #27272a',
-    borderTopColor: '#7c6dfa',
-    borderRadius: '50%',
-    animation: 'spin 0.8s linear infinite',
-};
-
-const emptyStyle: React.CSSProperties = {
-    display: 'flex', flexDirection: 'column',
-    alignItems: 'center', justifyContent: 'center',
-    height: '100vh', backgroundColor: '#050508',
-    textAlign: 'center', padding: '2rem',
+const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    return <div className="animate-in fade-in duration-500">{children}</div>;
 };
 
 export default StorefrontApp;

@@ -75,7 +75,6 @@ function formatOrderDetailsBody(orderData: OrderData): string {
     // Address Composition
     const addr = shippingAddress?.address || 'N/A';
     const city = shippingAddress?.city || 'Unknown';
-    const state = shippingAddress?.state || '';
     const country = shippingAddress?.country || 'Pakistan';
     // const fullAddress = `${addr}, ${city}${state ? `, ${state}` : ''}, ${country}`;
 

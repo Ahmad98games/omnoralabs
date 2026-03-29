@@ -11,33 +11,28 @@ import { Logger } from '../core/Logger';
 // Standard Blocks
 import {
     HeroBlock,
-    TextContentBlock,
-    ProductGridBlock,
     SpacerBlock
 } from '../library/Blocks';
 
 // Engine Modules
 import {
-    OmnoraMegaMenu,
-    OmnoraSmartSearch
+    // Discovery modules placeholders
 } from '../library/modules/DiscoveryEngine';
 import {
     OmnoraProductGrid,
-    OmnoraMediaGallery,
-    OmnoraVariantSelector
+    // Selection modules placeholders
 } from '../library/modules/SelectionEngine';
 import {
     OmnoraCartDrawer,
-    OmnoraBuyNowButton
+    // Transaction modules placeholders
 } from '../library/modules/TransactionPipeline';
 import {
     OmnoraTrustSeals,
-    OmnoraPolicyBlock
+    // Trust modules placeholders
 } from '../library/modules/TrustEngine';
 import {
     OmnoraRecentlyViewed,
-    OmnoraUpsellBundle,
-    OmnoraGeoSwitcher
+    // Intelligence modules placeholders
 } from '../library/modules/IntelligenceModules';
 
 /**
@@ -273,7 +268,7 @@ export const initializePlatformRegistry = () => {
     // ─── Resilience ──────────────────────────────────────────
     registerBlock({
         type: BLOCK_TYPES.FALLBACK,
-        component: ({ nodeId, props }: any) => (
+        component: ({ nodeId, props }: { nodeId: string, props: Record<string, unknown> }) => (
             <div data-node-id={nodeId} style={{
                 padding: '20px', background: 'rgba(255,0,0,0.05)',
                 border: '1px dashed #f00', borderRadius: '8px',

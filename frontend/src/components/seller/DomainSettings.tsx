@@ -75,7 +75,7 @@ export const DomainSettings: React.FC = () => {
         setLoading(true);
         setStatusType(null);
         try {
-            let cleanDomain = domain.replace(/^https?:\/\//i, '').replace(/\/$/, '').toLowerCase().trim();
+            const cleanDomain = domain.replace(/^https?:\/\//i, '').replace(/\/$/, '').toLowerCase().trim();
             if (!cleanDomain) throw new Error("Please enter a valid domain");
 
             // 1. Call Backend to add to Vercel

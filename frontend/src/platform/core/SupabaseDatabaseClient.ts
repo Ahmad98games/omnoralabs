@@ -184,7 +184,8 @@ export class SupabaseDatabaseClient implements IDatabaseClient {
             .from('store_configs')
             .upsert({
                 merchant_id: merchantId,
-                node_tree: config,
+                node_tree: config,           // Active/Last-Saved state
+                published_manifest: config,  // 🏗️ SOVEREIGN: This is the actual live site data
                 theme_vars: (config as any).themeVars || {},
                 symbol_registry: (config as any).symbolRegistry || {},
                 is_published: true,
@@ -221,7 +222,8 @@ export class SupabaseDatabaseClient implements IDatabaseClient {
         return {
             id: configRes.data.id,
             merchantId: configRes.data.merchant_id,
-            config: configRes.data.node_tree as StorefrontConfig,
+            // 🏗️ SOVEREIGN: Prioritize published_manifest for live sites, fall back to node_tree if null
+            config: (configRes.data.published_manifest || configRes.data.node_tree) as StorefrontConfig,
             domain: '',
             isLive: configRes.data.is_published,
             isSuspended: merchantRes.data?.subscription === 'suspended',

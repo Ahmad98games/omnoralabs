@@ -46,8 +46,12 @@ export const AssetProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                 setAssets(response.data.assets);
                 setPagination(response.data.pagination);
             }
-        } catch (err: any) {
-            setError(err.response?.data?.error || 'Failed to fetch gallery');
+        } catch (err: unknown) {
+            if (axios.isAxiosError(err)) {
+                setError(err.response?.data?.error || 'Failed to fetch gallery');
+            } else {
+                setError('An unexpected error occurred');
+            }
         } finally {
             setLoading(false);
         }
@@ -69,8 +73,12 @@ export const AssetProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                 return newAsset;
             }
             return null;
-        } catch (err: any) {
-            setError(err.response?.data?.error || 'Upload failed');
+        } catch (err: unknown) {
+            if (axios.isAxiosError(err)) {
+                setError(err.response?.data?.error || 'Upload failed');
+            } else {
+                setError('An unexpected error occurred');
+            }
             return null;
         } finally {
             setLoading(false);

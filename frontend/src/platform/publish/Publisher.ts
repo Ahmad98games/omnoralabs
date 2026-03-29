@@ -135,6 +135,15 @@ class Publisher {
 
             store.setPublishStatus('success');
             store.setLastPublishedAt(new Date().toISOString());
+
+            // 💾 ON-DEMAND REVALIDATION: Clear local cache to force fresh manifest load
+            if (merchantId) {
+                try {
+                    localStorage.removeItem(`omnora_cache_${merchantId}`);
+                    localStorage.removeItem(`omnora_cache_${domain}`);
+                } catch { /* ignore */ }
+            }
+
             return config.buildId;
 
         } catch (err: any) {

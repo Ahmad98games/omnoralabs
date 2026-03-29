@@ -52,7 +52,7 @@ export default function CustomerProfile() {
     
     // Address Form
     const [showAddressForm, setShowAddressForm] = useState(false);
-    const [newAddress, setNewAddress] = useState({ street: '', city: '', state: '', zip: '' });
+    // const [newAddress, setNewAddress] = useState({ street: '', city: '', state: '', zip: '' });
 
     useEffect(() => {
         const loadCustomerProfile = async () => {
@@ -119,8 +119,9 @@ export default function CustomerProfile() {
 
             if (error) throw error;
             alert('Profile updated successfully!');
-        } catch (err: any) {
-            alert(err.message || 'Update failed');
+        } catch (err: unknown) {
+            const error = err as Error;
+            alert(error.message || 'Update failed');
         } finally {
             setSaving(false);
         }
@@ -139,8 +140,9 @@ export default function CustomerProfile() {
             if (error) throw error;
             alert('Password updated successfully');
             setPasswordData({ current: '', new: '', confirm: '' });
-        } catch (err: any) {
-            alert(err.message || 'Password update failed');
+        } catch (err: unknown) {
+            const error = err as Error;
+            alert(error.message || 'Password update failed');
         } finally {
             setSaving(false);
         }
@@ -173,7 +175,7 @@ export default function CustomerProfile() {
                             <h3 className="text-xl font-bold">{profile?.full_name || 'Guest'}</h3>
                             <p className="text-sm text-gray-400">{profile?.email}</p>
                             <p className="text-xs text-gray-500 mt-1">
-                                Member since {profile?.created_at ? new Date(profile.created_at).toLocaleDateString('default', { month: 'long', year: 'numeric' }) : 'Join Date'}
+                                Member since <span className="tabular-nums">{profile?.created_at ? new Date(profile.created_at).toLocaleDateString('default', { month: 'long', year: 'numeric' }) : 'Join Date'}</span>
                             </p>
                         </div>
 
@@ -188,7 +190,7 @@ export default function CustomerProfile() {
                                 return (
                                     <button
                                         key={tab.id}
-                                        onClick={() => setActiveTab(tab.id as any)}
+                                        onClick={() => setActiveTab(tab.id as 'account' | 'orders' | 'addresses' | 'security')}
                                         className={`flex items-center space-x-3 p-3 rounded-xl transition-all ${activeTab === tab.id ? 'bg-white/10 text-white font-medium' : 'text-gray-400 hover:bg-white/5 hover:text-white'}`}
                                     >
                                         <Icon size={18} />
@@ -265,8 +267,8 @@ export default function CustomerProfile() {
                                         </div>
                                     ) : (
                                         <div className="space-y-4">
-                                            {orders.map(order => {
-                                                const statusColors: any = {
+                                            {orders.map((order: Order) => {
+                                                const statusColors: Record<string, string> = {
                                                     pending: 'bg-amber-500/10 text-amber-500 border-amber-500/20',
                                                     shipped: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
                                                     delivered: 'bg-green-500/10 text-green-500 border-green-500/20',
@@ -277,13 +279,16 @@ export default function CustomerProfile() {
                                                 return (
                                                     <div key={order.id} className="p-4 border border-white/5 rounded-xl flex items-center justify-between hover:border-white/10 transition-all">
                                                         <div>
-                                                            <p className="font-bold text-sm">Order #{order.id.substring(0, 8).toUpperCase()}</p>
-                                                            <p className="text-xs text-gray-500">{new Date(order.created_at).toLocaleDateString()}</p>
+                                                            <p className="font-bold text-sm">Order #<span className="tabular-nums">{order.id.substring(0, 8).toUpperCase()}</span></p>
+                                                            <p className="text-xs text-gray-500"><span className="tabular-nums">{new Date(order.created_at).toLocaleDateString()}</span></p>
                                                         </div>
-                                                        <div className="flex items-center space-x-4">
-                                                            <span className={`px-3 py-1 text-xs font-medium border rounded-full ${statusStyle}`}>
-                                                                {order.status.toUpperCase()}
-                                                            </span>
+                                                        <div className="flex items-center space-x-6">
+                                                            <div className="text-right">
+                                                                <p className="text-sm font-bold text-white"><span className="tabular-nums">${(order.total_cents / 100).toFixed(2)}</span></p>
+                                                                <span className={`px-2 py-0.5 text-[10px] font-bold border rounded-full ${statusStyle}`}>
+                                                                    {order.status.toUpperCase()}
+                                                                </span>
+                                                            </div>
                                                             <button className="p-2 text-gray-400 hover:text-white"><ChevronRight size={16} /></button>
                                                         </div>
                                                     </div>
@@ -329,7 +334,7 @@ export default function CustomerProfile() {
                                                 <div key={addr.id} className="p-4 border border-white/5 rounded-xl flex items-center justify-between">
                                                     <div>
                                                         <p className="font-medium">{addr.street_address}</p>
-                                                        <p className="text-xs text-gray-400">{addr.city}, {addr.state} {addr.postal_code}</p>
+                                                        <p className="text-xs text-gray-400">{addr.city}, {addr.state} <span className="tabular-nums">{addr.postal_code}</span></p>
                                                         {addr.is_default && <span className="inline-block mt-1 px-2 py-0.5 text-[10px] bg-[#7c6dfa]/20 text-[#7c6dfa] rounded-full">DEFAULT</span>}
                                                     </div>
                                                     <div className="flex space-x-2">

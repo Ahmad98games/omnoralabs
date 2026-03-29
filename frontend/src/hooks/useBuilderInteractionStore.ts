@@ -14,7 +14,7 @@ interface InteractionState {
 }
 
 // Global singleton to persist across hook mounts
-let globalState: InteractionState = {
+const globalState: InteractionState = {
     misclickCount: 0,
     invalidDragAttempts: 0,
     repeatedValidationErrors: 0,

@@ -2,19 +2,6 @@
 
 /**
  * CleanRenderer: Zero-Overhead Recursive Render Engine
- *
- * This is the PRODUCTION storefront renderer. It is intentionally
- * stripped of ALL builder UI:
- *   ✗ No ComponentWrapper (no drag, no pointer events, no hover outlines)
- *   ✗ No BuilderContext dependency
- *   ✗ No Sidebar, Toolbar, or Selection logic
- *
- * It DOES support:
- *   ✓ Recursive node rendering from StorefrontConfig
- *   ✓ IntersectionObserver scroll animations (Phase 12)
- *   ✓ Responsive style merging (Phase 11)
- *   ✓ Data binding via Registry components
- *   ✓ ThemeManager CSS variables
  */
 
 import React, { useMemo, useRef, useState, useEffect, createContext, useContext } from 'react';
@@ -41,14 +28,10 @@ const AnimationStyles = () => (
                 filter: blur(0px) !important;
             }
 
-            /* Type Presets */
             .omnora-anim-fadein { opacity: 0; }
             .omnora-anim-slideup { opacity: 0; transform: translateY(40px); }
             .omnora-anim-zoomin { opacity: 0; transform: scale(0.92); }
             .omnora-anim-blur { opacity: 0; filter: blur(12px); }
-
-            /* Default Blocks Fallbacks */
-            .omnora-anim-def-hero { opacity: 0; transform: scale(0.98); }
         }
     `}</style>
 );
@@ -74,16 +57,12 @@ const useCleanRender = () => {
 
 export interface CleanRendererProps {
     nodes: Record<string, PlatformBlock>;
-    rootIds: string[]; // top-level block IDs for the current page
+    rootIds: string[];
     viewport?: 'desktop' | 'tablet' | 'mobile';
-    pageId?: string;    // 🛡️ Stale render guard identifier
-    globalAnimations?: boolean; // 🎬 Global animation toggle
+    pageId?: string;
+    globalAnimations?: boolean;
 }
 
-/**
- * CleanRenderer: The entry point for the live storefront.
- * Takes a flat node map + root IDs and renders them recursively.
- */
 export const CleanRenderer: React.FC<CleanRendererProps> = React.memo(({
     nodes,
     rootIds,
@@ -91,192 +70,84 @@ export const CleanRenderer: React.FC<CleanRendererProps> = React.memo(({
     pageId = 'default_page',
     globalAnimations = true,
 }) => {
-    // 👁️ Live Preview Overrides
-    const [liveNodes, setLiveNodes] = useState<Record<string, PlatformBlock>>(nodes);
-    const isPreview = useMemo(() => {
-        if (typeof window === 'undefined') return false;
-        return new URLSearchParams(window.location.search).get('preview') === 'true';
-    }, []);
-
-    // Sync live nodes if prop nodes changes on static renders
-    useEffect(() => {
-        setLiveNodes(nodes);
-    }, [nodes]);
-
-    useEffect(() => {
-        if (!isPreview) return;
-
-        const handleMessage = (e: MessageEvent) => {
-            // 🛡️ 1. Origin Security Validation Guard
-            if (e.origin !== window.location.origin) return;
-
-            // 🛡️ 2. Type Guard & Stale Render check
-            if (e.data?.type === 'OMNORA_PREVIEW_UPDATE') {
-                if (e.data.activePageId && e.data.activePageId !== pageId) {
-                    // Ignore stale updates from different pages in flight triggers
-                    return; 
-                }
-                if (e.data.nodes) {
-                    setLiveNodes(e.data.nodes);
-                }
-            }
-        };
-
-        window.addEventListener('message', handleMessage);
-        return () => window.removeEventListener('message', handleMessage);
-    }, [isPreview, pageId]);
-
-    const adjacencyMap = useMemo(() => precomputeAdjacencyMap(liveNodes), [liveNodes]);
-    const adSensePublisherId = useGlobalThemeStore((s) => s.adSensePublisherId);
-
-    // Inject AdSense script safely if configured
-    useEffect(() => {
-        if (!adSensePublisherId) return;
-        
-        const scriptId = 'google-adsense-script';
-        if (document.getElementById(scriptId)) return;
-
-        const script = document.createElement('script');
-        script.id = scriptId;
-        script.async = true;
-        script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adSensePublisherId}`;
-        script.crossOrigin = 'anonymous';
-        document.head.appendChild(script);
-    }, [adSensePublisherId]);
-
-    const contextValue = useMemo<CleanRenderContextType>(() => ({
-        nodes: liveNodes,
-        adjacencyMap,
-        viewport,
-        globalAnimations,
-    }), [liveNodes, adjacencyMap, viewport, globalAnimations]);
-
-    if (!rootIds || rootIds.length === 0) return null;
+    const adjacencyMap = useMemo(() => precomputeAdjacencyMap(nodes), [nodes]);
 
     return (
-        <CleanRenderContext.Provider value={contextValue}>
+        <CleanRenderContext.Provider value={{ nodes, adjacencyMap, viewport, globalAnimations }}>
             <AnimationStyles />
-            <div style={{ position: 'relative', width: '100%' }}>
-                {/* 🛡️ Interaction Blocker Overlay during Preview Mode maps */}
-                {isPreview && (
-                    <div 
-                        style={{ 
-                            position: 'fixed', inset: 0, zIndex: 9999, 
-                            background: 'rgba(0,0,0,0.01)', cursor: 'not-allowed' 
-                        }} 
-                        title="(Preview Mode) Interactions Disabled" 
-                    />
-                )}
-
-                {rootIds.map(id => (
-                    <CleanNode key={`clean-${id}`} id={id} />
+            <div className="omnora-renderer-sovereign" data-page-id={pageId}>
+                {rootIds.map((id, index) => (
+                    <NodeRenderer key={id} nodeId={id} index={index} />
                 ))}
             </div>
         </CleanRenderContext.Provider>
     );
 });
 
-// ─── Recursive Clean Node ─────────────────────────────────────────────────────
+// ─── Internal Node Switch ────────────────────────────────────────────────────
 
-interface CleanNodeProps {
-    id: string;
+interface NodeRendererProps {
+    nodeId: string;
     index?: number;
 }
 
-const CleanNode: React.FC<CleanNodeProps> = React.memo(({ id, index = 0 }) => {
-    const { nodes, adjacencyMap, viewport } = useCleanRender();
-    const node = nodes[id];
-    if (!node) return null;
+const NodeRenderer: React.FC<NodeRendererProps> = ({ nodeId, index = 0 }) => {
+    const { nodes, adjacencyMap } = useCleanRender();
+    const block = nodes[nodeId];
 
-    // Skip hidden nodes on this viewport
-    const isHidden = node.hidden?.[viewport];
-    if (isHidden) return null;
+    if (!block) return null;
 
-    // Resolve registry entry
-    const entry = getRegistryEntry(node.type);
+    const entry = getRegistryEntry(block.type);
     if (!entry) return null;
 
-    const { component: Component, capabilities = [] } = entry;
-    const canHaveChildren = capabilities.includes('layout');
-
-    // Recursive children
-    const childIds = adjacencyMap[id];
-    const children = (canHaveChildren && childIds && childIds.length > 0) ? (
-        <>
-            {childIds.map((childId: string, idx: number) => (
-                <CleanNode key={`clean-${childId}`} id={childId} index={idx} />
-            ))}
-        </>
-    ) : null;
-
-    // Merge responsive styles
-    const activeStyles = useMemo(() => {
-        const base = node.styles || {};
-        const responsiveOverride = viewport === 'desktop' ? {} : (node.responsive?.[viewport] || {});
-        return { ...base, ...responsiveOverride };
-    }, [node, viewport]);
-
-    // Animation support
-    const hasAnim = node.animations && node.animations.type && node.animations.type !== 'none';
-
-    // 🖼️ INDUSTRIAL MEDIA OPTIMIZATION (Task 7.3)
-    const optimizedProps = useMemo(() => {
-        if (!node.props?.src) return node.props;
-        const proxyUrl = `/api/image-proxy?url=${encodeURIComponent(node.props.src)}&w=${viewport === 'mobile' ? '400' : '1200'}`;
-        return { ...node.props, src: proxyUrl };
-    }, [node.props, viewport]);
+    const Component = entry.component;
+    const childrenIds = adjacencyMap[nodeId] || [];
 
     return (
-        <CleanAnimatedDiv
-            nodeId={id}
-            type={node.type}
-            style={activeStyles}
-            animations={hasAnim ? node.animations : undefined}
+        <CleanAnimatedDiv 
+            nodeId={nodeId} 
+            type={block.type} 
+            style={block.props.style} 
+            animations={block.props.animations}
             index={index}
         >
-            <Component {...optimizedProps} nodeId={id}>
-                {children}
+            <Component {...block.props}>
+                {childrenIds.map((childId, idx) => (
+                    <NodeRenderer key={childId} nodeId={childId} index={idx} />
+                ))}
             </Component>
         </CleanAnimatedDiv>
     );
-});
-
-// ─── Default Animation Type Mappings ───────────────────────────────────────────
-
-const DEFAULT_ANIMATIONS: Record<string, { type: string; duration?: number; stagger?: number }> = {
-    hero_banner: { type: 'def-hero', duration: 600 },
-    product_grid: { type: 'slideup', stagger: 80, duration: 600 },
-    text_section: { type: 'fadein', duration: 400 },
-    trust_badges: { type: 'fadein', stagger: 60 },
-    customer_reviews: { type: 'slideup' },
-    faq_accordion: { type: 'none' }, // 🛡️ Interactive contents bypass
 };
 
-// ─── Clean Animated Div (IntersectionObserver only) ───────────────────────────
+// ─── Animation Wrapper ──────────────────────────────────────────────────────
 
 interface CleanAnimatedDivProps {
     nodeId: string;
     type: string;
     style: React.CSSProperties;
     animations?: {
-        type: 'fadeIn' | 'slideUp' | 'zoomIn' | 'blurReveal' | 'none';
-        duration: number;
-        delay: number;
-        once: boolean;
+        type?: string;
+        delay?: number;
+        duration?: number;
+        once?: boolean;
     };
     index?: number;
     children: React.ReactNode;
 }
 
-/**
- * CleanAnimatedDiv: A minimal DOM wrapper for each block.
- */
+const DEFAULT_ANIMATIONS: Record<string, { type: string; duration: number; stagger?: number }> = {
+    hero: { type: 'fadein', duration: 800, stagger: 100 },
+    section: { type: 'slideup', duration: 600, stagger: 80 },
+    product_card: { type: 'zoomin', duration: 400, stagger: 50 },
+};
+
 const CleanAnimatedDiv: React.FC<CleanAnimatedDivProps> = ({ nodeId, type, style, animations, index = 0, children }) => {
     const ref = useRef<HTMLDivElement>(null);
     const [visible, setVisible] = useState(false);
     const { globalAnimations } = useCleanRender();
 
-    const defaultAnim = DEFAULT_ANIMATIONS[type.toLowerCase()] || { type: 'fadein' };
+    const defaultAnim = DEFAULT_ANIMATIONS[type.toLowerCase()] || { type: 'fadein', duration: 600 };
     const resolvedType = animations?.type !== 'none' ? (animations?.type || defaultAnim.type) : 'none';
     const hasAnim = resolvedType !== 'none';
 
@@ -299,10 +170,9 @@ const CleanAnimatedDiv: React.FC<CleanAnimatedDivProps> = ({ nodeId, type, style
 
     const animStyle: React.CSSProperties = useMemo(() => {
         if (!hasAnim || !globalAnimations) return {};
-        
         const baseDelay = animations?.delay ?? 0;
         const staggerConstant = defaultAnim.stagger ?? 0;
-        const staggerDelay = staggerConstant ? Math.min(index, 4) * staggerConstant : 0; // 🛡️ Cap at index 4 (320ms max)
+        const staggerDelay = staggerConstant ? Math.min(index, 4) * staggerConstant : 0;
         const delay = baseDelay + staggerDelay;
         const dur = animations?.duration ?? defaultAnim.duration ?? 600;
 
@@ -312,7 +182,6 @@ const CleanAnimatedDiv: React.FC<CleanAnimatedDivProps> = ({ nodeId, type, style
         };
     }, [hasAnim, animations, globalAnimations, index, defaultAnim]);
 
-    // 🛡️ Bypasses adding component nodes frames if animations toggled off
     if (!globalAnimations) {
         return (
             <div
@@ -326,13 +195,11 @@ const CleanAnimatedDiv: React.FC<CleanAnimatedDivProps> = ({ nodeId, type, style
         );
     }
 
-    const animTypeClass = resolvedType.toLowerCase();
-
     return (
         <div
             ref={ref}
             id={nodeId}
-            className={`omnora-live ${type.toLowerCase()} ${hasAnim ? `omnora-anim-entry omnora-anim-${animTypeClass}` : ''} ${visible ? 'visible' : ''}`}
+            className={`omnora-live ${type.toLowerCase()} ${hasAnim ? `omnora-anim-entry omnora-anim-${resolvedType.toLowerCase()}` : ''} ${visible ? 'visible' : ''}`}
             style={{
                 position: 'relative',
                 width: '100%',
