@@ -9,10 +9,10 @@ enablePatches();
 export interface BuilderNode {
     id: string;
     type: string;
-    props: Record<string, any>;
+    props: Record<string, unknown>;
     parentId: string | null;
     children: string[];
-    styles: Record<string, any>;
+    styles: Record<string, unknown>;
     schemaVersion: number;
     createdAt: string;
 }
@@ -100,7 +100,7 @@ export interface BuilderState {
     duplicateNode: (nodeId: string) => void;
     moveNode: (nodeId: string, direction: 'up' | 'down') => void;
     reorderNodes: (fromIndex: number, toIndex: number) => void;
-    updateNodeProperty: (nodeId: string, path: string, value: any) => void;
+    updateNodeProperty: (nodeId: string, path: string, value: unknown) => void;
     
     // UI & Status
     setSelectedNodeId: (id: string | null) => void;
@@ -108,9 +108,11 @@ export interface BuilderState {
     setPreviewDevice: (device: BuilderState['previewDevice']) => void;
     setSidebarOpen: (val: boolean) => void;
     setIsHydrating: (val: boolean) => void;
+    setPublishStatus: (status: BuilderState['publishStatus']) => void;
+    setPublishError: (error: string | null) => void;
     
     // Theme & History
-    updateTheme: (path: string, value: any) => void;
+    updateTheme: (path: string, value: unknown) => void;
     undo: () => void;
     redo: () => void;
     resetPageNodes: (pageId: string) => void;
@@ -275,7 +277,7 @@ export const useBuilderStore = create<BuilderState>()(
                 }));
             },
 
-            reorderPages: (from, to) => {
+            reorderPages: (_from, _to) => {
                 // Reordering keys in a JS object is not strictly preserved, 
                 // but we can manage a 'pageOrder' array if needed.
                 // For now, we'll assume the list is derived and we just mark change.
@@ -374,7 +376,7 @@ export const useBuilderStore = create<BuilderState>()(
                     if (!node) return;
 
                     const keys = path.split('.');
-                    let current: any = node.props;
+                    let current: Record<string, unknown> = node.props as Record<string, unknown>;
                     const actualKeys = keys[0] === 'props' ? keys.slice(1) : keys;
                     
                     for (let i = 0; i < actualKeys.length - 1; i++) {
@@ -392,10 +394,12 @@ export const useBuilderStore = create<BuilderState>()(
             setPreviewDevice: (device) => set({ previewDevice: device }),
             setSidebarOpen: (val) => set({ isSidebarOpen: val }),
             setIsHydrating: (val) => set({ isHydrating: val }),
+            setPublishStatus: (status) => set({ publishStatus: status }),
+            setPublishError: (error) => set({ publishError: error }),
 
             updateTheme: (path, value) => set(produce((draft: BuilderState) => {
                 const keys = path.split('.');
-                let current: any = draft.themeSettings;
+                let current: Record<string, unknown> = draft.themeSettings as unknown as Record<string, unknown>;
                 for (let i = 0; i < keys.length - 1; i++) {
                     current = current[keys[i]];
                 }
