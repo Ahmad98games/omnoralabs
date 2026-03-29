@@ -26,15 +26,37 @@ CREATE POLICY "Merchants can view their own email logs" ON email_logs
 -- 3. FULL-TEXT SEARCH SCALES (Law 4 Optimization)
 -- Add optimized search_vector columns and GIN indexes.
 
--- Products
-ALTER TABLE products ADD COLUMN IF NOT EXISTS search_vector tsvector 
-    GENERATED ALWAYS AS (to_tsvector('english', title || ' ' || COALESCE(description, ''))) STORED;
-CREATE INDEX IF NOT EXISTS idx_products_search_vector ON products USING GIN (search_vector);
+-- Products (Hardened for missing tables)
+DO $$
+BEGIN
+    IF EXISTS (SELECT FROM pg_tables WHERE schemaname = 'public' AND tablename = 'products') THEN
+        -- Add column if missing
+        IF NOT EXISTS (SELECT FROM information_schema.columns WHERE table_name = 'products' AND column_name = 'search_vector') THEN
+            ALTER TABLE products ADD COLUMN search_vector tsvector 
+                GENERATED ALWAYS AS (to_tsvector('english', title || ' ' || COALESCE(description, ''))) STORED;
+        END IF;
+        -- Add index if missing
+        IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_products_search_vector') THEN
+            CREATE INDEX idx_products_search_vector ON products USING GIN (search_vector);
+        END IF;
+    END IF;
+END $$;
 
--- Blog Posts
-ALTER TABLE blog_posts ADD COLUMN IF NOT EXISTS search_vector tsvector 
-    GENERATED ALWAYS AS (to_tsvector('english', title || ' ' || COALESCE(content->>'text', ''))) STORED;
-CREATE INDEX IF NOT EXISTS idx_blog_search_vector ON blog_posts USING GIN (search_vector);
+-- Blog Posts (Hardened for missing tables)
+DO $$
+BEGIN
+    IF EXISTS (SELECT FROM pg_tables WHERE schemaname = 'public' AND tablename = 'blog_posts') THEN
+        -- Add column if missing
+        IF NOT EXISTS (SELECT FROM information_schema.columns WHERE table_name = 'blog_posts' AND column_name = 'search_vector') THEN
+            ALTER TABLE blog_posts ADD COLUMN search_vector tsvector 
+                GENERATED ALWAYS AS (to_tsvector('english', title || ' ' || COALESCE(content->>'text', ''))) STORED;
+        END IF;
+        -- Add index if missing
+        IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_blog_search_vector') THEN
+            CREATE INDEX idx_blog_search_vector ON blog_posts USING GIN (search_vector);
+        END IF;
+    END IF;
+END $$;
 
 -- 4. CACHE RELOAD
 NOTIFY pgrst, 'reload schema';

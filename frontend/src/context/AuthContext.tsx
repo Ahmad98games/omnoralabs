@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { User, AuthError } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabaseClient';
 import { CinematicLoader } from '../components/ui/CinematicLoader';
 
@@ -15,13 +17,13 @@ export interface MerchantProfile {
     id: string;
     email: string;
     store_name: string;
-    theme_settings?: any;
+    theme_settings?: Record<string, unknown>;
     role: 'seller' | 'admin' | 'super-admin';
     created_at: string;
 }
 
 interface AuthContextValue {
-    user: any | null;
+    user: User | null;
     profile: MerchantProfile | CustomerProfile | null;
     isInitializing: boolean;
     loading: boolean;
@@ -29,8 +31,8 @@ interface AuthContextValue {
     isAdmin: boolean;
     isSeller: boolean;
     isCustomer: boolean;
-    login: (email, password) => Promise<any>;
-    register: (name, email, password, role, storeName?: string) => Promise<any>;
+    login: (email: string, password: string) => Promise<unknown>;
+    register: (name: string, email: string, password: string, role?: string, storeName?: string) => Promise<unknown>;
     loginWithGoogle: () => Promise<void>;
     signOut: () => Promise<void>;
     resetPassword: (email: string) => Promise<void>;
@@ -41,7 +43,8 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [user, setUser] = useState<any | null>(null);
+    const navigate = useNavigate();
+    const [user, setUser] = useState<User | null>(null);
     const [profile, setProfile] = useState<MerchantProfile | CustomerProfile | null>(null);
     const [isInitializing, setIsInitializing] = useState(true);
 
@@ -53,7 +56,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         window.location.href = '/login';
     }, []);
 
-    const ensureProfile = useCallback(async (sbUser: any, name?: string, role: any = null, storeName?: string) => {
+    const ensureProfile = useCallback(async (sbUser: User | { id: string; email?: string; user_metadata: Record<string, unknown> }, name?: string, role: string | null = null, storeName?: string) => {
         try {
             // 🛡️ RECOVERY: Read role from localStorage if it was saved during Login.tsx handleGoogleSignIn
             const savedRole = localStorage.getItem('omnora_selected_role');
@@ -61,9 +64,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             
             console.log(`[Auth Profile] Commencing Convergence for ${sbUser.email} as ${targetRole}`);
 
-            // 1. Try fetching from Merchants first if seller
+            const fallbackName = name || sbUser.user_metadata?.full_name || sbUser.email?.split('@')[0];
+
+            // 1. Try fetching from Merchants first if seller/admin
             if (targetRole === 'seller' || targetRole === 'admin' || targetRole === 'super-admin') {
-                const { data: merchant } = await supabase.from('merchants').select('*').eq('id', sbUser.id).single();
+                const { data: merchant } = await supabase.from('merchants').select('*').eq('id', sbUser.id).maybeSingle();
                 if (merchant) {
                     console.log(`[Auth Profile] Merchant Record Found: ${merchant.store_name}`);
                     setProfile(merchant as any);
@@ -71,7 +76,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 }
             } else {
                 // 2. Try fetching from Customers
-                const { data: customer } = await supabase.from('customers').select('*').eq('id', sbUser.id).single();
+                const { data: customer } = await supabase.from('customers').select('*').eq('id', sbUser.id).maybeSingle();
                 if (customer) {
                     console.log(`[Auth Profile] Customer Record Found: ${customer.full_name}`);
                     setProfile({ ...customer, role: 'customer' } as any);
@@ -81,13 +86,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
             // 3. Identification Phase (Manual record cross-check)
             console.log('[Auth Profile] No record found in target table. Performing global cross-check...');
-            const { data: altMerchant } = await supabase.from('merchants').select('*').eq('id', sbUser.id).single();
+            const { data: altMerchant } = await supabase.from('merchants').select('*').eq('id', sbUser.id).maybeSingle();
             if (altMerchant) { 
                 console.log('[Auth Profile] Cross-Check Match: MERCHANT');
                 setProfile(altMerchant as any); return altMerchant; 
             }
             
-            const { data: altCustomer } = await supabase.from('customers').select('*').eq('id', sbUser.id).single();
+            const { data: altCustomer } = await supabase.from('customers').select('*').eq('id', sbUser.id).maybeSingle();
             if (altCustomer) { 
                 console.log('[Auth Profile] Cross-Check Match: CUSTOMER');
                 setProfile({ ...altCustomer, role: 'customer' } as any); return altCustomer; 
@@ -95,14 +100,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
             // 4. Initial Provisioning (First-time users)
             console.log(`[Auth Profile] Initializing new ${targetRole} record for ${sbUser.id}...`);
-            if (targetRole === 'seller') {
-                const finalStoreName = storeName || sbUser.user_metadata?.store_name || `${sbUser.email?.split('@')[0]}'s Store`;
+            if (targetRole === 'seller' || targetRole === 'admin' || targetRole === 'super-admin') {
+                const finalStoreName = storeName || sbUser.user_metadata?.store_name || `${fallbackName}'s Store`;
                 const { data: newMerchant, error } = await supabase.from('merchants').insert({
                     id: sbUser.id,
                     email: sbUser.email,
+                    full_name: fallbackName,
                     store_name: finalStoreName,
-                    role: 'seller',
-                }).select().single();
+                    role: targetRole,
+                }).select().maybeSingle();
                 if (error) throw error;
                 console.log(`[Auth Profile] Provisioned MERCHANT: ${newMerchant.id}`);
                 setProfile(newMerchant as any);
@@ -111,8 +117,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 const { data: newCustomer, error } = await supabase.from('customers').insert({
                     id: sbUser.id,
                     email: sbUser.email,
-                    full_name: name || sbUser.user_metadata?.full_name || sbUser.email?.split('@')[0],
-                }).select().single();
+                    full_name: fallbackName,
+                }).select().maybeSingle();
                 if (error) throw error;
                 console.log(`[Auth Profile] Provisioned CUSTOMER: ${newCustomer.id}`);
                 const fullCustomer = { ...newCustomer, role: 'customer' };
@@ -135,7 +141,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 setTimeout(() => reject(new Error('SUPABASE_TIMEOUT')), 5000)
             );
 
-            const { data: { user: sbUser }, error } = await Promise.race([authPromise, timeoutPromise]) as any;
+            const { data: { user: sbUser }, error } = await Promise.race([authPromise, timeoutPromise]) as { data: { user: User | null }; error: AuthError | null };
             
             if (error || !sbUser) {
                 console.warn('[Auth Shield] No valid session found in Kernel.');
@@ -156,6 +162,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setIsInitializing(false);
         }
     }, [ensureProfile]);
+
+    useEffect(() => {
+        if (!isInitializing && profile) {
+            const targetPath = profile.role === 'seller' ? '/seller/dashboard' : '/';
+            console.log('[Auth Shield] Redirecting to:', targetPath);
+            navigate(targetPath);
+        }
+    }, [profile, isInitializing, navigate]);
 
     useEffect(() => {
         const timeoutId = setTimeout(() => {
@@ -181,7 +195,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             clearTimeout(timeoutId);
             subscription.unsubscribe();
         };
-    }, [verify]);
+    }, [verify, ensureProfile, isInitializing]);
 
     const login = async (email, password) => {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
