@@ -7,11 +7,11 @@ import { AuthProvider } from './context/AuthContext';
 import { HostnameInterceptor } from './components/HostnameInterceptor';
 import { ToastProvider } from './context/ToastContext';
 import { AuthModal } from './components/auth/AuthModal';
-import { CartDrawer } from './components/storefront/CartDrawer';
+// CartDrawer removed from imports to satisfy lint
 import { CinematicLoader } from './components/ui/CinematicLoader';
 import { ThankYouPage } from './components/storefront/ThankYouPage';
 
-import { Routes, Route, useLocation, Outlet, Navigate } from 'react-router-dom';
+import { Routes, Route, Outlet, Navigate } from 'react-router-dom';
 import { Layout } from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
 import { RenderPipelineProvider } from './context/RenderPipelineContext';
@@ -32,7 +32,7 @@ import AuthCallback from './pages/AuthCallback';
 import { ROUTES } from './routes';
 import { useThemeInjector } from './hooks/useThemeInjector';
 
-import client from './api/client';
+// client removed from imports to satisfy lint
 
 // --- App Root ---
 
@@ -64,7 +64,7 @@ export default function App() {
                     <Suspense fallback={<CinematicLoader />}>
                     <Routes>
                         {/* 🛍️ Storefront Layout Scope */}
-                        <Route element={<Layout children={<Outlet />} />}>
+                        <Route element={<Layout><Outlet /></Layout>}>
                           <Route path={ROUTES.HOME} element={<Home />} />
                           <Route path={ROUTES.COLLECTION} element={<Collection />} />
                           <Route path={ROUTES.PRODUCT} element={<Product />} />
@@ -83,6 +83,7 @@ export default function App() {
                         <Route path={ROUTES.ADMIN} element={<ProtectedRoute requireAdmin><AdminDashboard /></ProtectedRoute>} />
                         <Route path={ROUTES.SELLER} element={<ProtectedRoute requireSeller><SellerDashboard /></ProtectedRoute>} />
                         <Route path="/builder" element={<ProtectedRoute requireSeller><Navigate to="/seller?tab=builder" replace /></ProtectedRoute>} />
+                        <Route path="/auth/callback" element={<AuthCallback />} />
                         
                         {/* Fallback */}
                         <Route path="*" element={<Home />} />

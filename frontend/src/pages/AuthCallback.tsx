@@ -1,12 +1,11 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
-import { useAuth } from '../context/AuthContext';
+// useAuth removed from imports to satisfy lint
 import { CinematicLoader } from '../components/ui/CinematicLoader';
 
 const AuthCallback: React.FC = () => {
     const navigate = useNavigate();
-    const { isAuthenticated } = useAuth() || {};
 
     useEffect(() => {
         const handleCallback = async () => {
@@ -21,21 +20,29 @@ const AuthCallback: React.FC = () => {
             const sbUser = data.session.user;
             
             // 🔄 STRATEGY: Determine true intent using DB + Metadata + LocalStorage
-            const { data: merchant } = await supabase.from('merchants').select('role').eq('id', sbUser.id).single();
-            const { data: customer } = await supabase.from('customers').select('id').eq('id', sbUser.id).single();
-            
-            const savedRole = localStorage.getItem('omnora_selected_role');
-            const targetRole = merchant?.role || (customer ? 'customer' : null) || sbUser.user_metadata?.role || savedRole || 'customer';
+            try {
+                const [merchantRes, customerRes] = await Promise.all([
+                    supabase.from('merchants').select('role').eq('id', sbUser.id).maybeSingle(),
+                    supabase.from('customers').select('id').eq('id', sbUser.id).maybeSingle()
+                ]);
+                
+                const merchant = merchantRes.data;
+                const customer = customerRes.data;
+                const savedRole = localStorage.getItem('omnora_selected_role');
+                const targetRole = merchant?.role || (customer ? 'customer' : null) || sbUser.user_metadata?.role || savedRole || 'customer';
 
-            console.log(`[AuthCallback] Terminal Intent for ${sbUser.email}: ${targetRole}`);
+                console.log(`[AuthCallback] Terminal Intent for ${sbUser.email}: ${targetRole}`);
 
-            // 🚀 Force route based on targetRole (AuthProvider will catch up on profile)
-            if (targetRole === 'admin' || targetRole === 'super-admin') {
-                navigate('/admin/dashboard');
-            } else if (targetRole === 'seller') {
-                navigate('/seller/dashboard?tab=builder');
-            } else {
-                navigate('/');
+                if (targetRole === 'admin' || targetRole === 'super-admin') {
+                    navigate('/admin/dashboard');
+                } else if (targetRole === 'seller') {
+                    navigate('/seller/dashboard?tab=builder');
+                } else {
+                    navigate('/');
+                }
+            } catch (err) {
+                console.error('[AuthCallback] Redirection Fault:', err);
+                navigate('/'); // Fallback to safe zone
             }
         };
 

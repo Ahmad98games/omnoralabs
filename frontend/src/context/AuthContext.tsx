@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { User, AuthError } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabaseClient';
 import { CinematicLoader } from '../components/ui/CinematicLoader';
@@ -43,8 +42,8 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const navigate = useNavigate();
     const [user, setUser] = useState<User | null>(null);
+    const hasInitialized = React.useRef(false);
     const [profile, setProfile] = useState<MerchantProfile | CustomerProfile | null>(null);
     const [isInitializing, setIsInitializing] = useState(true);
 
@@ -163,33 +162,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
     }, [ensureProfile]);
 
-    useEffect(() => {
-        if (!isInitializing && profile) {
-            const isStaff = profile.role === 'seller' || profile.role === 'admin' || profile.role === 'super-admin';
-            const targetPath = isStaff ? '/seller/dashboard' : '/';
-            
-            if (window.location.pathname !== targetPath) {
-                console.log('[Auth Shield] Redirecting to:', targetPath);
-                navigate(targetPath);
-            }
-        }
-    }, [profile, isInitializing, navigate]);
+    // 🛡️ REMOVED GLOBAL REDIRECTION:
+    // Global redirects inside AuthProvider cause infinite loops with ProtectedRoute.
+    // Redirection is now handled by Login.tsx / AuthCallback.tsx on sign-in,
+    // and ProtectedRoute.tsx for access control.
 
     useEffect(() => {
+        if (hasInitialized.current) return;
+        hasInitialized.current = true;
+
         let isMounted = true;
 
-        const timeoutId = setTimeout(() => {
+        // 🛡️ EMERGENCY SETTLEMENT: Force loader off after 10s regardless of failures
+        const emergencyTimeout = setTimeout(() => {
             if (isInitializing && isMounted) {
-                console.warn('[Auth Shield] Kernel Init timed out after 6s. Forcing settlement.');
+                console.warn('[Auth Shield] EMERGENCY_RESET triggered after 10s.');
                 setIsInitializing(false);
             }
-        }, 6000);
+        }, 10000);
 
         const initAuth = async () => {
-            await verify();
+            try {
+                await verify();
+            } finally {
+                if (isMounted) setIsInitializing(false);
+            }
         };
 
         initAuth();
+
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
             console.log(`[Auth Pulse] State Change Triggered: ${event}`);
             if ((event === 'SIGNED_IN' || event === 'USER_UPDATED') && session?.user) {
@@ -203,11 +204,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         return () => {
             isMounted = false;
-            clearTimeout(timeoutId);
+            clearTimeout(emergencyTimeout);
             subscription.unsubscribe();
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [verify]); // Removed isInitializing and ensureProfile to prevent re-init loop
+    }, [verify]); 
 
     const login = async (email, password) => {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
@@ -268,7 +269,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         <AuthContext.Provider value={{ 
             user, profile, isInitializing, 
             loading: isInitializing,
-            isAuthenticated: !!user,
             isAdmin: profile?.role === 'admin' || profile?.role === 'super-admin',
             isSeller: profile?.role === 'seller',
             isCustomer: !profile || profile?.role === 'customer',
