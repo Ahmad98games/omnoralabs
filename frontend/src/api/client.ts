@@ -34,7 +34,10 @@ client.interceptors.request.use(
 client.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
-    if (error.response?.status === 401 && !alreadyRedirecting) {
+    // OSTT FIX: Skip 401 interceptor on login/register endpoints to prevent premature logouts
+    const isAuthRoute = error.config?.url?.includes('/auth') || error.config?.url?.includes('/login');
+
+    if (error.response?.status === 401 && !alreadyRedirecting && !isAuthRoute) {
       alreadyRedirecting = true;
       
       console.warn('[Axios Interceptor] 401 Unauthorized. Law 2 Loop Buster engaged.');
