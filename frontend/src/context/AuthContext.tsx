@@ -122,9 +122,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     store_name: finalStoreName,
                     role: targetRole,
                 }).select().maybeSingle();
-                if (error) throw error;
-                console.log(`[Auth Profile] Provisioned MERCHANT: ${newMerchant.id}`);
-                setProfile(newMerchant as MerchantProfile);
+                
+                if (error) {
+                    console.error('[Auth Profile] Merchant Provisioning Failed:', error);
+                    throw error;
+                }
+                
+                console.log(`[Auth Profile] Provisioned MERCHANT: ${newMerchant?.id}`);
+                if (newMerchant) setProfile(newMerchant as MerchantProfile);
                 return newMerchant;
             } else {
                 const { data: newCustomer, error } = await supabase.from('customers').insert({
@@ -133,10 +138,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     password_hash: 'auth-managed',
                     full_name: fallbackName,
                 }).select().maybeSingle();
-                if (error) throw error;
-                console.log(`[Auth Profile] Provisioned CUSTOMER: ${newCustomer.id}`);
-                const fullCustomer = { ...newCustomer, role: 'customer' } as CustomerProfile;
-                setProfile(fullCustomer);
+                
+                if (error) {
+                    console.error('[Auth Profile] Customer Provisioning Failed:', error);
+                    throw error;
+                }
+                
+                console.log(`[Auth Profile] Provisioned CUSTOMER: ${newCustomer?.id}`);
+                const fullCustomer = newCustomer ? { ...newCustomer, role: 'customer' } as CustomerProfile : null;
+                if (fullCustomer) setProfile(fullCustomer);
                 return fullCustomer;
             }
         } catch (err) {

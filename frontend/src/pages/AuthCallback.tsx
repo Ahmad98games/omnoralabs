@@ -28,14 +28,22 @@ const AuthCallback: React.FC = () => {
                 
                 const merchant = merchantRes.data;
                 const customer = customerRes.data;
+                
+                // 🛡️ RECOVERY: If Google didn't provide role, check storage
                 const savedRole = localStorage.getItem('omnora_selected_role');
+                
+                // Priority: DB record > Supabase Metadata > LocalStorage > Default
                 const targetRole = merchant?.role || (customer ? 'customer' : null) || sbUser.user_metadata?.role || savedRole || 'customer';
 
                 console.log(`[AuthCallback] Terminal Intent for ${sbUser.email}: ${targetRole}`);
 
+                // Clean up transition state
+                localStorage.removeItem('omnora_selected_role');
+
                 if (targetRole === 'admin' || targetRole === 'super-admin') {
                     navigate('/admin/dashboard');
                 } else if (targetRole === 'seller') {
+                    // Force builder tab for sellers to ensure they land in the right place
                     navigate('/seller/dashboard?tab=builder');
                 } else {
                     navigate('/');

@@ -177,8 +177,10 @@ const BuilderLayoutContent: React.FC = () => {
     // 👁️ Live Preview postMessage Dispatcher (Debounced 300ms)
     useEffect(() => {
         if (!isPreviewMode) return;
+        const nodesVersion = JSON.stringify(nodes).length; 
         const timer = setTimeout(() => {
             if (iframeRef.current?.contentWindow) {
+                console.log('[Preview] Dispatching sync at version:', nodesVersion);
                 iframeRef.current.contentWindow.postMessage(
                     { type: 'OMNORA_PREVIEW_UPDATE', nodes, activePageId },
                     window.location.origin
@@ -215,8 +217,8 @@ const BuilderLayoutContent: React.FC = () => {
     const setActivePageId = useBuilderStore(state => state.setActivePageId);
 
     useEffect(() => {
-        const pageCount = Object.keys(pages || {}).length;
-        if (pageCount > 0 && !activePageId) {
+        const pageIds = Object.keys(pages || {});
+        if (pageIds.length > 0 && !activePageId) {
             const pageList = Object.values(pages);
             const homePage = pageList.find(p => p.slug === 'home' || p.slug === 'index');
             const firstPage = pageList[0];
@@ -224,7 +226,10 @@ const BuilderLayoutContent: React.FC = () => {
             
             if (pageToSelect) {
                 console.log('[BuilderLayout] Auto-selecting active page:', pageToSelect.id);
-                setActivePageId(pageToSelect.id);
+                // Wrap in a microtask to ensure we don't trigger cascading render error
+                Promise.resolve().then(() => {
+                    setActivePageId(pageToSelect.id);
+                });
             }
         }
     }, [pages, activePageId, setActivePageId]);

@@ -313,8 +313,18 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
         console.log('[Omnora AI] AST Injected successfully');
     }, [commitHistory]);
 
+    const lastContentIdRef = useRef<string | null>(null);
+
     useEffect(() => {
         const bootstrap = () => {
+            const incomingId = (initialData as { id?: string })?.id || null;
+            if (incomingId && incomingId === lastContentIdRef.current) {
+                console.log('[Omnora Kernel] Content ID match. Skipping re-bootstrap.');
+                setIsLoading(false);
+                return;
+            }
+            lastContentIdRef.current = incomingId;
+
             nodeStore.reset();
             dispatcher.reset();
 

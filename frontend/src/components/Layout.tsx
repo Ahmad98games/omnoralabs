@@ -153,7 +153,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                     <Link to={getBaseUrl() || ROUTES.HOME} className="brand" onClick={closeMenu}>
                         <div className="brand-logo" style={{ background: 'transparent' }}>
                             <img
-                                src="/images/omnoralabs_brand.png"
+                                src="/logo.png"
                                 alt="Omnora Labs"
                                 style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                             />

@@ -2,7 +2,9 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import axios, { AxiosError } from 'axios';
 import client from '../api/client';
+import { supabase } from '../lib/supabaseClient';
 import {
     LayoutDashboard,
     Package,
@@ -48,8 +50,14 @@ interface DashboardPageNode {
 }
 
 interface DashboardContent {
+    id?: string;
     pages: Record<string, DashboardPageNode>;
 }
+
+const DEFAULT_CONTENT: DashboardContent = { 
+    id: 'default-kernel-manifest',
+    pages: { home: { title: 'Home', layout: [] } } 
+};
 
 // ─── Loading Component ────────────────────────────────────────────────────────
 const OmnoraLoading: React.FC = () => (
@@ -159,25 +167,60 @@ export default function SellerDashboard() {
     const [tourOpen, setTourOpen] = useState(searchParams.get('tour') === 'true');
     const [forgeOpen, setForgeOpen] = useState(false);
     const [forgePrompt, setForgePrompt] = useState('');
+    const [error, setError] = useState<string | null>(null);
+    const hasFetchedRef = React.useRef(false);
+
+    // OSTT FIX: Move hook out of conditional block to satisfy rule of hooks
+    const initialDataMemo = React.useMemo(() => {
+        const homeNode = localContent?.pages?.home as DashboardPageNode | undefined;
+        return {
+            id: localContent?.id || 'home-root',
+            layout: homeNode?.layout || [],
+            configuration: (localContent as { configuration?: Record<string, unknown> })?.configuration || {}
+        };
+    }, [localContent]);
 
     useEffect(() => {
         const tab = searchParams.get('tab');
         if (tab && tab !== activeTab && NAV.some(n => n.id === tab)) setActiveTab(tab);
     }, [searchParams, activeTab]);
 
-    const fetchContent = React.useCallback(async () => {
+    const fetchContent = React.useCallback(async (signal?: AbortSignal) => {
         if (!isInitialized || !user) return;
         try {
-            const cmsResult = await cmsApi.get('/cms/dashboard');
-            if (cmsResult.data?.success) setLocalContent(cmsResult.data.content);
-        } catch {
-            setLocalContent({ pages: { home: { title: 'Home', layout: [] } } });
+            const cmsResult = await cmsApi.get('/cms/dashboard', { signal });
+            if (cmsResult.data?.success) {
+                setLocalContent(cmsResult.data.content);
+                setError(null);
+            }
+        } catch (err: unknown) {
+            if (axios.isCancel(err)) return;
+            
+            const axiosError = err as AxiosError; 
+            if (axiosError.response?.status === 401) {
+                console.error('[Omnora Auth] Unauthorized Access. Redirecting to Login.');
+                await supabase.auth.signOut();
+                window.location.replace('/login');
+                return;
+            }
+
+            console.error('[Omnora CMS] Fetch Failure:', err);
+            setLocalContent(DEFAULT_CONTENT);
+            setError(`Kernel Sync Failure (${err.response?.status || 'Network Error'})`);
         } finally {
             setLoading(false);
         }
     }, [isInitialized, user]);
 
-    useEffect(() => { fetchContent(); }, [fetchContent]);
+    useEffect(() => { 
+        if (hasFetchedRef.current) return;
+        hasFetchedRef.current = true;
+
+        const controller = new AbortController();
+        fetchContent(controller.signal); 
+
+        return () => controller.abort();
+    }, [fetchContent]);
 
     const save = async () => {
         setSaveStatus('saving');
@@ -206,6 +249,11 @@ export default function SellerDashboard() {
                 <aside className={`seller-sidebar ${mobileSidebarOpen ? 'mobile-open' : ''}`}>
                     <div className="sidebar-brand">
                         <div className="brand-wrapper">
+                            <img 
+                                src="/logo.png" 
+                                alt="Omnora Logo" 
+                                style={{ width: '24px', height: '24px', objectFit: 'contain', marginRight: '12px' }} 
+                            />
                             <div className="brand-info">
                                 <p>{storeName}</p>
                                 <p>Omnora OS</p>
@@ -254,6 +302,7 @@ export default function SellerDashboard() {
                             </h1>
                         </div>
                         <div className="header-right">
+                            {error && <span style={{ color: '#EF4444', fontSize: '11px', fontWeight: 600, marginRight: '16px' }}>{error}</span>}
                             {saveStatus !== 'idle' && <span className={`save-status ${saveStatus}`}>{saveStatus === 'saving' ? 'Syncing...' : 'System Synced'}</span>}
                             <InstallButton />
                             <button type="button" onClick={save} disabled={saveStatus === 'saving'} className="save-btn">Deploy</button>
@@ -279,8 +328,7 @@ export default function SellerDashboard() {
                     {isBuilder && (
                         <div style={{ position: 'fixed', inset: 0, zIndex: 1000, background: '#050505' }}>
                             <BuilderProvider
-                                // OSTT FIX: Isolated dynamic content mapping to satisfy expected layout structure
-                                initialData={(localContent?.pages?.home as unknown as { layout?: Record<string, unknown>[], configuration?: Record<string, unknown> }) || {}}
+                                initialData={initialDataMemo}
                                 isPreview={false}
                                 tenantId={user?.id}
                                 userName={user?.user_metadata?.full_name || 'Your'}
