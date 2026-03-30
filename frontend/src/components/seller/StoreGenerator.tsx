@@ -2,9 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, Terminal, Database, Cpu, Layout, Layers, ShieldCheck, Rocket } from 'lucide-react';
 import client from '../../api/client';
-import { useNodes } from '../../context/BuilderContext';
 import { useAuth } from '../../context/AuthContext';
-import { supabase } from '../../lib/supabaseClient'; // 🛡️ Load Supabase for Direct save triggers node!
+import { supabase } from '../../lib/supabaseClient';
 
 interface StoreGeneratorProps {
     prompt: string;
@@ -26,21 +25,12 @@ const STEPS = [
 export const StoreGenerator: React.FC<StoreGeneratorProps> = ({ prompt, onComplete, onCancel }) => {
     const [currentStep, setCurrentStep] = useState(0);
     const [status, setStatus] = useState<'processing' | 'completed' | 'failed'>('processing');
-    const [timerText, setTimerText] = useState<string>(''); // 🛡️ Stage timer text
-    const { user } = useAuth(); // 🛡️ Hydrate session loading guards
+    const [timerText, setTimerText] = useState<string>(''); 
+    const { user } = useAuth(); 
     
-    // Optional integration with BuilderContext
-    let injectAST: ((ast: Record<string, unknown>) => void) | null = null;
-    try {
-        const nodes = useNodes();
-        injectAST = nodes.injectAST;
-    } catch {
-        // Not in builder context, ignore
-    }
-
     // Start Generation
     useEffect(() => {
-        if (!user || status !== 'processing') return; // 🛡️ Guard against un-hydrated sessions layout!
+        if (!user || status !== 'processing') return; 
         
         const saveToDatabase = async (ast: Record<string, unknown>) => {
             try {
@@ -48,17 +38,26 @@ export const StoreGenerator: React.FC<StoreGeneratorProps> = ({ prompt, onComple
 
                 console.log('[Omnora AI Pre-Save] AST:', ast);
 
-                // 🛡️ 1. DATA EXTRACTION: Strict Fallback matching
-                let layout = ast.pages?.home?.layout;
-                if (!layout || layout.length === 0) {
-                     layout = ast.layout || ast.data?.layout || ast.home?.layout || [];
-                }
+                // 🛡️ 1. DATA EXTRACTION: Strict Fallback matching without 'any'
+                const extractLayout = (tree: Record<string, unknown>) => {
+                    const pages = tree.pages as Record<string, Record<string, unknown>> | undefined;
+                    if (pages?.home?.layout && Array.isArray(pages.home.layout)) return pages.home.layout;
+                    if (Array.isArray(tree.layout)) return tree.layout;
+                    
+                    const dataObj = tree.data as Record<string, unknown> | undefined;
+                    if (dataObj?.layout && Array.isArray(dataObj.layout)) return dataObj.layout;
+                    
+                    const homeObj = tree.home as Record<string, unknown> | undefined;
+                    if (homeObj?.layout && Array.isArray(homeObj.layout)) return homeObj.layout;
+                    
+                    return [];
+                };
 
                 const savePayload = {
                     pages: {
                         home: {
                             title: "Home",
-                            layout: layout
+                            layout: extractLayout(ast)
                         }
                     },
                     designSystem: ast.designSystem || {}
@@ -86,15 +85,12 @@ export const StoreGenerator: React.FC<StoreGeneratorProps> = ({ prompt, onComple
 
         const startGeneration = async () => {
             try {
-                const response = await client.post('/ai/generate-store', { prompt }, { timeout: 10000 }); // 🛡️ 10s Timeout protection
+                const response = await client.post('/ai/generate-store', { prompt }, { timeout: 10000 }); 
                 
                 if (response.data.success && response.data.ast) {
                     // 🛡️ Direct Ingestion: Bypass Polling
                     setTimeout(async () => {
-                        if (injectAST) injectAST(response.data.ast);
-                        
                         await saveToDatabase(response.data.ast); // 🛡️ Save triggered
-                        
                         setStatus('completed');
                         if (onComplete) onComplete();
                     }, 14000); 
@@ -122,10 +118,7 @@ export const StoreGenerator: React.FC<StoreGeneratorProps> = ({ prompt, onComple
                 };
 
                 setTimeout(async () => {
-                    if (injectAST) injectAST(fallbackAST);
-                    
                     await saveToDatabase(fallbackAST); // 🛡️ Save Fallback
-                    
                     setStatus('completed');
                     if (onComplete) onComplete();
                 }, 5000); 
@@ -139,40 +132,7 @@ export const StoreGenerator: React.FC<StoreGeneratorProps> = ({ prompt, onComple
         }, 10000); // 🛡️ 10s Stage Timer
 
         return () => clearTimeout(stageTimer);
-    }, [user, prompt, status, injectAST, onComplete]);
-
-    // Poll Status
-    useEffect(() => {
-        // jobId is currently unused in the direct path
-        if (status !== 'processing') return;
-
-        const poll = setInterval(async () => {
-            try {
-                // Polling is currently bypassed in the direct-injection path
-                // This is a placeholder for future async job tracking if needed
-                if (!status) return; 
-                if (response.data.status === 'completed') {
-                    const ast = response.data.result.ast;
-                    clearInterval(poll);
-                    
-                    // Final "Matrix" flourish before injection
-                    setCurrentStep(STEPS.length - 1);
-                    setTimeout(() => {
-                        if (injectAST) injectAST(ast);
-                        setStatus('completed');
-                        if (onComplete) onComplete();
-                    }, 1500);
-                } else if (response.data.status === 'failed') {
-                    clearInterval(poll);
-                    setStatus('failed');
-                }
-            } catch (err: unknown) {
-                console.error('[AI Store] Polling error:', err);
-            }
-        }, 2000);
-
-        return () => clearInterval(poll);
-    }, [status, injectAST, onComplete]);
+    }, [user, prompt, status, onComplete]);
 
     // Fake Step Progression for UI feel
     useEffect(() => {
@@ -267,6 +227,7 @@ export const StoreGenerator: React.FC<StoreGeneratorProps> = ({ prompt, onComple
                         <div className="text-center">
                             <p className="text-red-500 mb-4">Generation failed. Please check your API configuration.</p>
                             <button 
+                                type="button"
                                 onClick={onCancel}
                                 className="px-6 py-2 rounded border border-white/10 text-white/60 hover:text-white transition-colors"
                             >
@@ -275,8 +236,9 @@ export const StoreGenerator: React.FC<StoreGeneratorProps> = ({ prompt, onComple
                         </div>
                     ) : (
                         <button 
+                            type="button"
                             disabled
-                            className="text-[10px] tracking-[0.2em] uppercase text-white/20 select-none"
+                            className="text-[10px] tracking-[0.2em] uppercase text-white/20 select-none cursor-default"
                         >
                             Syncing Neural Weights... {Math.round((currentStep / (STEPS.length - 1)) * 100)}%
                         </button>
