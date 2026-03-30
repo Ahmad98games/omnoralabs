@@ -12,7 +12,9 @@ export async function GET(req: Request) {
     try {
         const status = await verifyDNS(domain);
         return NextResponse.json({ success: true, ...status });
-    } catch (err: any) {
-        return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    } catch (err) {
+        // OSTT FIX: Replaced 'any' with strict Error type checking
+        const errorMessage = err instanceof Error ? err.message : 'Unknown DNS verification error occurred';
+        return NextResponse.json({ success: false, error: errorMessage }, { status: 500 });
     }
 }

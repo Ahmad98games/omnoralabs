@@ -1,37 +1,44 @@
-import React, { useRef, useEffect, useCallback, useState } from 'react';
+/**
+ * 🛠️ OMNORA PLATFORM | [EDITABLE COMPONENTS]
+ * ---------------------------------------------------------
+ * OSTT Refactor: Strict Hooks, Memoized IDs, Prop Validation, and Type Safety.
+ * ---------------------------------------------------------
+ */
+
+import React, { useRef, useEffect, useCallback, useState, useMemo } from 'react';
+import PropTypes from 'prop-types';
 import { useOmnora } from '../client/OmnoraContext';
 import { useMediaStore } from '../client/AssetContext';
 
 // ─── Helper ───────────────────────────────────────────────────────────────────
 // ─── Deterministic Identity ──────────────────────────────────────────────────
 function generateElementId(nodeId: string, path: string): string {
-    // Simple stable hash for SSR parity
     const str = `${nodeId}:${path}`;
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
         const char = str.charCodeAt(i);
         hash = ((hash << 5) - hash) + char;
-        hash = hash & hash; // Convert to 32bit integer
+        hash = hash & hash;
     }
     return Math.abs(hash).toString(36).slice(0, 6);
 }
 
+// ─── EditableText ─────────────────────────────────────────────────────────────
 // ─── EditableText ─────────────────────────────────────────────────────────────
 interface EditableTextProps {
     nodeId: string;
     path: string;
     className?: string;
     style?: React.CSSProperties;
-    tag?: keyof React.JSX.IntrinsicElements;
+    tag?: keyof React.JSX.IntrinsicElements | string;
     elementId?: string;
 }
 
-export const EditableText: React.FC<EditableTextProps> = React.memo(({
-    nodeId, path, className, style, tag: Tag = 'div', elementId,
-}) => {
+export const EditableText = React.memo((props: EditableTextProps) => {
+    const { nodeId, path, className, style, tag: Tag = 'div', elementId } = props;
     const {
         nodes, updateNode, commitHistory,
-        selectedNodeId, viewport, mode, selectNode,
+        viewport, mode, selectNode,
         setIsTyping, setEditingInfo, editingInfo,
         diagnostics, setDiagnostics
     } = useOmnora();
@@ -39,41 +46,77 @@ export const EditableText: React.FC<EditableTextProps> = React.memo(({
     const node = nodes[nodeId];
     const elementRef = useRef<HTMLDivElement>(null);
     const debounceTimer = useRef<NodeJS.Timeout | null>(null);
-    const stableElemId = useRef(elementId || generateElementId(nodeId, path));
     const lastSyncedValue = useRef<string>('');
-
-    // Performance Diagnostics Tracking
+    
+    // FIX: Added a ref for the diagnostic display to bypass render-phase updates
     const renderCount = useRef(0);
-    renderCount.current++;
+    const countDisplayRef = useRef<HTMLDivElement>(null);
 
+    const stableElemId = useMemo(() => elementId || generateElementId(nodeId, path), [elementId, nodeId, path]);
+
+    const isCurrentlyEditing = editingInfo?.nodeId === nodeId && 
+                               editingInfo?.path === path && 
+                               editingInfo?.elementId === stableElemId;
+
+    const [isHovered, setIsHovered] = useState(false);
+    const [isActiveState, setIsActiveState] = useState(false);
+
+    // FIX: Shifted ALL ref reads/writes to the commit phase (useEffect)
     useEffect(() => {
+        renderCount.current += 1;
+        
         if (diagnostics.showPanel) {
-            console.debug(`[PRO-DEBUG] Render: ${nodeId} (${stableElemId.current}) | Count: ${renderCount.current}`);
+            console.debug(`[PRO-DEBUG] Render: ${nodeId} (${stableElemId}) | Count: ${renderCount.current}`);
+            
+            // Direct DOM update for diagnostic badge (no re-render triggered)
+            if (countDisplayRef.current) {
+                countDisplayRef.current.innerText = `R:${renderCount.current}`;
+            }
+            
+            // Direct DOM update for background visualizer
+            if (renderCount.current > 1 && elementRef.current) {
+                elementRef.current.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+            }
+        } else {
+            // Clean up background if diagnostics panel is turned off
+            if (elementRef.current) {
+                elementRef.current.style.backgroundColor = '';
+            }
         }
-    });
+    }); // No dependency array -> Runs after EVERY render
 
-    const isCurrentlyEditing = editingInfo?.nodeId === nodeId && editingInfo?.path === path && editingInfo?.elementId === stableElemId.current;
-
-    if (!node) return null;
-
-    const resolveBinding = (bindingPath: string) => {
-        const dataStore = {
-            product: { price: '$1,250', name: 'Signature v1', stock: '2 left' },
-            cart: { count: '3', total: '$3,750' },
-            user: { name: 'Ahmad' },
+    const displayValue = useMemo(() => {
+        if (!node) return '';
+        const resolveBinding = (bindingPath: string) => {
+            const dataStore: Record<string, unknown> = {
+                product: { price: '$1,250', name: 'Signature v1', stock: '2 left' },
+                cart: { count: '3', total: '$3,750' },
+                user: { name: 'Ahmad' },
+            };
+            const parts = bindingPath.split('.');
+            let val: unknown = dataStore;
+            for (const part of parts) {
+                if (val && typeof val === 'object') {
+                    val = (val as Record<string, unknown>)[part];
+                } else {
+                    val = undefined;
+                }
+            }
+            return val || `{{${bindingPath}}}`;
         };
-        const parts = bindingPath.split('.');
-        let val: any = dataStore;
-        for (const part of parts) val = val?.[part];
-        return val || `{{${bindingPath}}}`;
-    };
 
-    const keys = path.split('.');
-    let manifestVal: any = node;
-    for (const key of keys) manifestVal = manifestVal?.[key];
-    const displayValue = String(node.binding ? resolveBinding(node.binding) : (manifestVal || ''));
+        const keys = path.split('.');
+        let manifestVal: unknown = node;
+        for (const key of keys) {
+            if (manifestVal && typeof manifestVal === 'object') {
+                manifestVal = (manifestVal as Record<string, unknown>)[key];
+            } else {
+                manifestVal = undefined;
+            }
+        }
+        return String(node.binding ? resolveBinding(node.binding) : (manifestVal || ''));
+    }, [node, path]);
 
-    // DOM Sync: Only update DOM when NOT editing OR when the value is fundamentally different from what we expect
     useEffect(() => {
         if (elementRef.current && !isCurrentlyEditing) {
             if (elementRef.current.innerText !== displayValue) {
@@ -83,16 +126,15 @@ export const EditableText: React.FC<EditableTextProps> = React.memo(({
         }
     }, [displayValue, isCurrentlyEditing]);
 
+    if (!node) return null;
+
     const isHiddenOnDevice = node.hidden?.[viewport];
     if (isHiddenOnDevice && mode === 'preview') return null;
-
-    const [isHovered, setIsHovered] = useState(false);
-    const [isActiveState, setIsActiveState] = useState(false);
 
     const isHoveredForced = node.forcedState === 'hover';
     const isActiveForced = node.forcedState === 'active';
 
-    const p = node.props?.elementPositions?.[stableElemId.current] || { mode: 'flow', x: 0, y: 0, z: 1 };
+    const p = node.props?.elementPositions?.[stableElemId] || { mode: 'flow', x: 0, y: 0, z: 1 };
     const isFree = p.mode === 'free';
     const isMobile = viewport === 'mobile';
 
@@ -112,8 +154,8 @@ export const EditableText: React.FC<EditableTextProps> = React.memo(({
             transform: `translate3d(${finalX}px, ${finalY}px, 0) rotate(${finalRotation}deg) scale(${finalScale})`,
             transformOrigin: 'center center',
             zIndex: p.z || 1,
-            width: node.props?.elementSizes?.[stableElemId.current]?.width || 'auto',
-            height: node.props?.elementSizes?.[stableElemId.current]?.height || 'auto',
+            width: node.props?.elementSizes?.[stableElemId]?.width || 'auto',
+            height: node.props?.elementSizes?.[stableElemId]?.height || 'auto',
         } : {}),
     };
 
@@ -122,9 +164,7 @@ export const EditableText: React.FC<EditableTextProps> = React.memo(({
         const newText = e.currentTarget.innerText;
         setIsTyping?.(true);
         if (debounceTimer.current) clearTimeout(debounceTimer.current);
-        debounceTimer.current = setTimeout(() => {
-            updateNode?.(nodeId, path, newText);
-        }, 800);
+        debounceTimer.current = setTimeout(() => updateNode?.(nodeId, path, newText), 800);
     };
 
     const handleBlur = (e: React.FocusEvent) => {
@@ -144,12 +184,9 @@ export const EditableText: React.FC<EditableTextProps> = React.memo(({
         if (mode === 'preview' || node.binding) return;
         e.stopPropagation();
         selectNode?.(nodeId);
-        setEditingInfo?.({ nodeId, path, elementId: stableElemId.current });
+        setEditingInfo?.({ nodeId, path, elementId: stableElemId });
 
-        // Ensure DOM has correct text before focus
-        if (elementRef.current) {
-            elementRef.current.innerText = displayValue;
-        }
+        if (elementRef.current) elementRef.current.innerText = displayValue;
 
         requestAnimationFrame(() => {
             if (elementRef.current) {
@@ -197,7 +234,7 @@ export const EditableText: React.FC<EditableTextProps> = React.memo(({
                 onMouseDown={() => setIsActiveState(true)}
                 onMouseUp={() => setIsActiveState(false)}
                 className={`omnora-editable-text ${className || ''} ${isCurrentlyEditing ? 'is-editing' : ''}`}
-                data-element-id={stableElemId.current}
+                data-element-id={stableElemId}
                 data-element-type="text"
                 style={{
                     ...finalStyle,
@@ -205,15 +242,15 @@ export const EditableText: React.FC<EditableTextProps> = React.memo(({
                     outlineOffset: '2px',
                     cursor: mode === 'preview' ? 'default' : (isCurrentlyEditing ? 'text' : (node.binding ? 'not-allowed' : 'pointer')),
                     opacity: isHiddenOnDevice ? 0.3 : 1,
-                    backgroundColor: (diagnostics.showPanel && renderCount.current > 1) ? 'rgba(239, 68, 68, 0.1)' : undefined,
+                    // FIX: Removed renderCount from here
                 }}
                 suppressContentEditableWarning
             />
-            {/* Render Count Tooltip (Diagnostics) */}
             {diagnostics.showPanel && (
-                <div style={{ position: 'absolute', top: -14, right: 0, fontSize: 8, color: '#ef4444', fontWeight: 900, background: '#fee2e2', padding: '0 4px', borderRadius: 2, pointerEvents: 'none' }}>
-                    R:{renderCount.current}
-                </div>
+                <div 
+                    ref={countDisplayRef} // FIX: Attached ref here instead of inline {renderCount.current}
+                    style={{ position: 'absolute', top: -14, right: 0, fontSize: 8, color: '#ef4444', fontWeight: 900, background: '#fee2e2', padding: '0 4px', borderRadius: 2, pointerEvents: 'none' }}
+                />
             )}
             {mode === 'edit' && !isCurrentlyEditing && isHovered && !node.binding && (
                 <span style={{
@@ -229,23 +266,30 @@ export const EditableText: React.FC<EditableTextProps> = React.memo(({
     );
 });
 
+EditableText.displayName = 'EditableText';
+EditableText.propTypes = {
+    nodeId: PropTypes.string.isRequired,
+    path: PropTypes.string.isRequired,
+    className: PropTypes.string,
+    style: PropTypes.object,
+    tag: PropTypes.string,
+    elementId: PropTypes.string
+};
+
 // ─── EditableContainer ────────────────────────────────────────────────────────
-export const EditableContainer: React.FC<{
+interface EditableContainerProps {
     nodeId: string;
     children: React.ReactNode;
     className?: string;
     style?: React.CSSProperties;
     elementId?: string;
-}> = React.memo(({ nodeId, children, className, style, elementId }) => {
+}
+
+export const EditableContainer = React.memo((props: EditableContainerProps) => {
+    const { nodeId, children, className, style, elementId } = props;
     const { selectNode, selectedNodeId, isBuilderActive, viewport, nodes, mode } = useOmnora();
-    const node = nodes[nodeId];
-    const stableElemId = useRef(elementId || generateElementId(nodeId, 'container'));
-
-    if (!node) return null;
-    const isHiddenOnDevice = node.hidden?.[viewport];
-    if (isHiddenOnDevice && mode === 'preview') return null;
-
-    const isSelected = selectedNodeId === nodeId;
+    
+    const stableElemId = useMemo(() => elementId || generateElementId(nodeId, 'container'), [elementId, nodeId]);
 
     const handleClick = useCallback((e: React.MouseEvent) => {
         if (!isBuilderActive || mode === 'preview') return;
@@ -253,7 +297,14 @@ export const EditableContainer: React.FC<{
         selectNode?.(nodeId);
     }, [nodeId, selectNode, isBuilderActive, mode]);
 
-    const p = node.props?.elementPositions?.[stableElemId.current] || { mode: 'flow', x: 0, y: 0, z: 1 };
+    const node = nodes[nodeId];
+    if (!node) return null;
+
+    const isHiddenOnDevice = node.hidden?.[viewport];
+    if (isHiddenOnDevice && mode === 'preview') return null;
+
+    const isSelected = selectedNodeId === nodeId;
+    const p = node.props?.elementPositions?.[stableElemId] || { mode: 'flow', x: 0, y: 0, z: 1 };
     const isFree = p.mode === 'free';
     const isMobile = viewport === 'mobile';
 
@@ -271,15 +322,15 @@ export const EditableContainer: React.FC<{
                 transform: isFree ? `translate3d(${finalX}px, ${finalY}px, 0) rotate(${finalRotation}deg) scale(${finalScale})` : undefined,
                 transformOrigin: 'center center',
                 zIndex: isFree ? (p.z || 1) : undefined,
-                width: isFree ? (node.props?.elementSizes?.[stableElemId.current]?.width || 'auto') : undefined,
-                height: isFree ? (node.props?.elementSizes?.[stableElemId.current]?.height || 'auto') : undefined,
+                width: isFree ? (node.props?.elementSizes?.[stableElemId]?.width || 'auto') : undefined,
+                height: isFree ? (node.props?.elementSizes?.[stableElemId]?.height || 'auto') : undefined,
                 cursor: isBuilderActive ? 'pointer' : 'default',
                 opacity: isHiddenOnDevice ? 0.3 : 1,
                 display: isHiddenOnDevice && mode === 'preview' ? 'none' : undefined,
             }}
             onClick={handleClick}
             data-node-id={nodeId}
-            data-element-id={stableElemId.current}
+            data-element-id={stableElemId}
             data-element-type="container"
         >
             {children}
@@ -290,8 +341,17 @@ export const EditableContainer: React.FC<{
     );
 });
 
+EditableContainer.displayName = 'EditableContainer';
+EditableContainer.propTypes = {
+    nodeId: PropTypes.string.isRequired,
+    children: PropTypes.node.isRequired,
+    className: PropTypes.string,
+    style: PropTypes.object,
+    elementId: PropTypes.string
+};
+
 // ─── EditableImage ────────────────────────────────────────────────────────────
-export const EditableImage: React.FC<{
+interface EditableImageProps {
     nodeId: string;
     path: string;
     className?: string;
@@ -299,42 +359,49 @@ export const EditableImage: React.FC<{
     alt?: string;
     elementId?: string;
     onReplaceClick?: () => void;
-}> = React.memo(({ nodeId, path, className, style, alt = '', elementId, onReplaceClick }) => {
-    const { nodes, updateNode, commitHistory, isBuilderActive, viewport, mode } = useOmnora();
-    const { resolveAssetUrl } = useMediaStore();
-    const node = nodes[nodeId];
-    const stableElemId = useRef(elementId || generateElementId(nodeId, path));
-    const [hovered, setHovered] = useState(false);
+}
 
+export const EditableImage = React.memo((props: EditableImageProps) => {
+    const { nodeId, path, className, style, alt = '', elementId, onReplaceClick } = props;
+    const { nodes, isBuilderActive, viewport, mode } = useOmnora();
+    const { resolveAssetUrl } = useMediaStore();
+    const [hovered, setHovered] = useState(false);
+    
+    const stableElemId = useMemo(() => elementId || generateElementId(nodeId, path), [elementId, nodeId, path]);
+
+    const handleClick = useCallback((e: React.MouseEvent) => {
+        if (!isBuilderActive || mode === 'preview') return;
+        e.stopPropagation();
+        if (onReplaceClick) onReplaceClick();
+    }, [isBuilderActive, mode, onReplaceClick]);
+
+    const node = nodes[nodeId];
     if (!node) return null;
 
     const isHiddenOnDevice = node.hidden?.[viewport];
     if (isHiddenOnDevice && mode === 'preview') return null;
 
     const keys = path.split('.');
-    let srcId: any = node;
-    for (const key of keys) { if (srcId == null) break; srcId = srcId[key]; }
+    let srcId: unknown = node;
+    for (const key of keys) {
+        if (srcId && typeof srcId === 'object') {
+            srcId = (srcId as Record<string, unknown>)[key];
+        } else {
+            srcId = null;
+            break;
+        }
+    }
 
-    const resolvedSrc = resolveAssetUrl(srcId);
+    const resolvedSrc = resolveAssetUrl(srcId as string | undefined);
 
-    const imageFit = node.props?.imageFit || 'cover';
+    const imageFit = (node.props?.imageFit as React.CSSProperties['objectFit']) || 'cover';
     const imageRadius = node.props?.imageRadius || '0px';
     const imageShadow = node.props?.imageShadow;
-    const imageOpacity = parseFloat(node.props?.imageOpacity) || 1;
-    const imageBrightness = parseFloat(node.props?.imageBrightness) || 1;
-    const imageContrast = parseFloat(node.props?.imageContrast) || 1;
+    const imageOpacity = parseFloat(node.props?.imageOpacity as string) || 1;
+    const imageBrightness = parseFloat(node.props?.imageBrightness as string) || 1;
+    const imageContrast = parseFloat(node.props?.imageContrast as string) || 1;
 
-    const handleClick = useCallback((e: React.MouseEvent) => {
-        if (!isBuilderActive || mode === 'preview') return;
-        e.stopPropagation();
-
-        if (onReplaceClick) {
-            onReplaceClick();
-            return;
-        }
-    }, [isBuilderActive, nodeId, path, mode, onReplaceClick]);
-
-    const p = node.props?.elementPositions?.[stableElemId.current] || { mode: 'flow', x: 0, y: 0, z: 1 };
+    const p = node.props?.elementPositions?.[stableElemId] || { mode: 'flow', x: 0, y: 0, z: 1 };
     const isFree = p.mode === 'free';
     const isMobile = viewport === 'mobile';
 
@@ -349,7 +416,7 @@ export const EditableImage: React.FC<{
             onClick={handleClick}
             onMouseEnter={() => setHovered(true)}
             onMouseLeave={() => setHovered(false)}
-            data-element-id={stableElemId.current}
+            data-element-id={stableElemId}
             data-element-type="image"
             data-image-prop-path={path}
             style={{
@@ -358,11 +425,11 @@ export const EditableImage: React.FC<{
                 transform: isFree ? `translate3d(${finalX}px, ${finalY}px, 0) rotate(${finalRotation}deg) scale(${finalScale})` : undefined,
                 transformOrigin: 'center center',
                 zIndex: isFree ? (p.z || 1) : undefined,
-                width: isFree ? (node.props?.elementSizes?.[stableElemId.current]?.width || '100%') : 'inline-block',
-                height: isFree ? (node.props?.elementSizes?.[stableElemId.current]?.height || 'auto') : undefined,
+                width: isFree ? (node.props?.elementSizes?.[stableElemId]?.width || '100%') : 'inline-block',
+                height: isFree ? (node.props?.elementSizes?.[stableElemId]?.height || 'auto') : undefined,
                 cursor: mode === 'preview' ? 'default' : 'pointer',
                 opacity: isHiddenOnDevice ? 0.3 : 1,
-                borderRadius: imageRadius,
+                borderRadius: imageRadius as string,
                 overflow: 'hidden',
                 display: 'flex',
                 alignItems: 'center',
@@ -376,7 +443,7 @@ export const EditableImage: React.FC<{
                     width: '100%',
                     height: '100%',
                     display: 'block',
-                    objectFit: imageFit as any,
+                    objectFit: imageFit,
                     opacity: imageOpacity,
                     boxShadow: imageShadow ? '0 8px 32px rgba(0,0,0,0.35)' : undefined,
                     transition: 'transform 0.2s ease, filter 0.15s ease',
@@ -410,32 +477,54 @@ export const EditableImage: React.FC<{
     );
 });
 
+EditableImage.displayName = 'EditableImage';
+EditableImage.propTypes = {
+    nodeId: PropTypes.string.isRequired,
+    path: PropTypes.string.isRequired,
+    className: PropTypes.string,
+    style: PropTypes.object,
+    alt: PropTypes.string,
+    elementId: PropTypes.string,
+    onReplaceClick: PropTypes.func
+};
+
 // ─── EditableButton ───────────────────────────────────────────────────────────
-export const EditableButton: React.FC<{
+interface EditableButtonProps {
     nodeId: string;
     textPath: string;
     onClick?: () => void;
     className?: string;
     style?: React.CSSProperties;
     elementId?: string;
-}> = React.memo(({ nodeId, textPath, onClick, className, style, elementId }) => {
-    const { nodes, mode, selectNode, viewport } = useOmnora();
-    const node = nodes[nodeId];
-    const stableElemId = useRef(elementId || generateElementId(nodeId, textPath));
-    const [hovered, setHovered] = useState(false);
+}
 
+export const EditableButton = React.memo((props: EditableButtonProps) => {
+    const { nodeId, textPath, onClick, className, style, elementId } = props;
+    const { nodes, mode, selectNode, viewport } = useOmnora();
+    const [hovered, setHovered] = useState(false);
+    
+    const stableElemId = useMemo(() => elementId || generateElementId(nodeId, textPath), [elementId, nodeId, textPath]);
+
+    const node = nodes[nodeId];
     if (!node) return null;
 
     const keys = textPath.split('.');
-    let text: any = node;
-    for (const key of keys) { if (text == null) break; text = text[key]; }
+    let text: unknown = node;
+    for (const key of keys) {
+        if (text && typeof text === 'object') {
+            text = (text as Record<string, unknown>)[key];
+        } else {
+            text = null;
+            break;
+        }
+    }
 
     const p = node.props || {};
-    const size = p.ctaSize || 'md';
-    const btnStyle = p.ctaStyle || 'filled';
-    const radius = p.ctaRadius || '4px';
+    const size = (p.ctaSize as string) || 'md';
+    const btnStyle = (p.ctaStyle as string) || 'filled';
+    const radius = (p.ctaRadius as string) || '4px';
     const fullWidth = !!p.ctaFullWidth;
-    const hoverAnim = p.ctaHoverAnim || 'none';
+    const hoverAnim = (p.ctaHoverAnim as string) || 'none';
 
     const sizeMap: Record<string, React.CSSProperties> = {
         sm: { padding: '8px 16px', fontSize: 12 },
@@ -451,7 +540,7 @@ export const EditableButton: React.FC<{
         none: '',
     };
 
-    const p_pos = node.props?.elementPositions?.[stableElemId.current] || { mode: 'flow', x: 0, y: 0, z: 1 };
+    const p_pos = node.props?.elementPositions?.[stableElemId] || { mode: 'flow', x: 0, y: 0, z: 1 };
     const isFree = p_pos.mode === 'free';
     const isMobile = viewport === 'mobile';
 
@@ -470,8 +559,8 @@ export const EditableButton: React.FC<{
         position: isFree ? 'absolute' : 'relative',
         transformOrigin: 'center center',
         zIndex: isFree ? (p_pos.z || 1) : undefined,
-        width: isFree ? (node.props?.elementSizes?.[stableElemId.current]?.width || 'auto') : (fullWidth ? '100%' : undefined),
-        height: isFree ? (node.props?.elementSizes?.[stableElemId.current]?.height || 'auto') : undefined,
+        width: isFree ? (node.props?.elementSizes?.[stableElemId]?.width || 'auto') : (fullWidth ? '100%' : undefined),
+        height: isFree ? (node.props?.elementSizes?.[stableElemId]?.height || 'auto') : undefined,
         justifyContent: (fullWidth || isFree) ? 'center' : undefined,
         transition: 'all 0.18s cubic-bezier(0.16,1,0.3,1)',
         transform: hovered ? `${isFree ? `translate3d(${finalX}px, ${finalY}px, 0) rotate(${finalRotation}deg) scale(${finalScale * 1.04})` : hoverTransform[hoverAnim] || ''}` : (isFree ? `translate3d(${finalX}px, ${finalY}px, 0) rotate(${finalRotation}deg) scale(${finalScale})` : ''),
@@ -495,7 +584,7 @@ export const EditableButton: React.FC<{
             onClick={handleClick}
             onMouseEnter={() => setHovered(true)}
             onMouseLeave={() => setHovered(false)}
-            data-element-id={stableElemId.current}
+            data-element-id={stableElemId}
             data-element-type="button"
         >
             {String(text || 'Button')}
@@ -503,8 +592,18 @@ export const EditableButton: React.FC<{
     );
 });
 
+EditableButton.displayName = 'EditableButton';
+EditableButton.propTypes = {
+    nodeId: PropTypes.string.isRequired,
+    textPath: PropTypes.string.isRequired,
+    onClick: PropTypes.func,
+    className: PropTypes.string,
+    style: PropTypes.object,
+    elementId: PropTypes.string
+};
+
 // ─── EditableLogo ─────────────────────────────────────────────────────────────
-export const EditableLogo: React.FC<{
+interface EditableLogoProps {
     nodeId: string;
     src?: string;
     storeName?: string;
@@ -512,17 +611,30 @@ export const EditableLogo: React.FC<{
     style?: React.CSSProperties;
     elementId?: string;
     onReplaceClick?: () => void;
-}> = React.memo(({ nodeId, src, storeName, className, style, elementId, onReplaceClick }) => {
+}
+
+export const EditableLogo = React.memo((props: EditableLogoProps) => {
+    const { nodeId, src, storeName, className, style, elementId, onReplaceClick } = props;
     const { mode, selectNode, nodes, viewport } = useOmnora();
     const { resolveAssetUrl } = useMediaStore();
-    const stableElemId = useRef(elementId || generateElementId(nodeId, 'logo'));
     const [hovered, setHovered] = useState(false);
-    const node = nodes[nodeId];
+    
+    const stableElemId = useMemo(() => elementId || generateElementId(nodeId, 'logo'), [elementId, nodeId]);
 
+    const node = nodes[nodeId];
     const resolvedLogoSrc = resolveAssetUrl(src);
 
+    const handleClick = (e: React.MouseEvent) => {
+        if (mode === 'preview') return;
+        e.stopPropagation();
+        selectNode?.(nodeId);
+        if (hovered && src && onReplaceClick) onReplaceClick();
+    };
+
+    if (!node) return null;
+
     const p = node?.props || {};
-    const pos = p.elementPositions?.[stableElemId.current] || { mode: 'flow', x: 0, y: 0, z: 1 };
+    const pos = p.elementPositions?.[stableElemId] || { mode: 'flow', x: 0, y: 0, z: 1 };
     const isFree = pos.mode === 'free';
     const posX = pos.x || 0;
     const posY = pos.y || 0;
@@ -533,20 +645,13 @@ export const EditableLogo: React.FC<{
     const finalScale = isMobile ? (pos.mobileScale ?? pos.scale ?? 1) : (pos.scale ?? 1);
     const finalRotation = isMobile ? (pos.mobileRotation ?? pos.rotation ?? 0) : (pos.rotation ?? 0);
 
-    const handleClick = (e: React.MouseEvent) => {
-        if (mode === 'preview') return;
-        e.stopPropagation();
-        selectNode?.(nodeId);
-        if (hovered && src && onReplaceClick) onReplaceClick();
-    };
-
     return (
         <div
             className={`omnora-logo-wrap ${className || ''}`}
             onClick={handleClick}
             onMouseEnter={() => setHovered(true)}
             onMouseLeave={() => setHovered(false)}
-            data-element-id={stableElemId.current}
+            data-element-id={stableElemId}
             data-element-type="logo"
             style={{
                 ...style,
@@ -555,8 +660,8 @@ export const EditableLogo: React.FC<{
                 transform: isFree ? `translate3d(${finalX}px, ${finalY}px, 0) rotate(${finalRotation}deg) scale(${finalScale})` : undefined,
                 transformOrigin: 'center center',
                 zIndex: isFree ? (pos.z || 50) : undefined,
-                width: isFree ? (node.props?.elementSizes?.[stableElemId.current]?.width || 'auto') : undefined,
-                height: isFree ? (node.props?.elementSizes?.[stableElemId.current]?.height || 'auto') : undefined,
+                width: isFree ? (node.props?.elementSizes?.[stableElemId]?.width || 'auto') : undefined,
+                height: isFree ? (node.props?.elementSizes?.[stableElemId]?.height || 'auto') : undefined,
                 display: 'inline-flex', alignItems: 'center',
                 userSelect: 'none',
             }}
@@ -583,19 +688,37 @@ export const EditableLogo: React.FC<{
     );
 });
 
+EditableLogo.displayName = 'EditableLogo';
+EditableLogo.propTypes = {
+    nodeId: PropTypes.string.isRequired,
+    src: PropTypes.string,
+    storeName: PropTypes.string,
+    className: PropTypes.string,
+    style: PropTypes.object,
+    elementId: PropTypes.string,
+    onReplaceClick: PropTypes.func
+};
+
 // ─── EditableBadge ────────────────────────────────────────────────────────────
-export const EditableBadge: React.FC<{
+interface EditableBadgeProps {
     nodeId: string;
     icon?: React.ReactNode;
     text: string;
     className?: string;
     style?: React.CSSProperties;
     elementId?: string;
-}> = React.memo(({ nodeId, icon, text, className, style, elementId }) => {
+}
+
+export const EditableBadge = React.memo((props: EditableBadgeProps) => {
+    const { nodeId, icon, text, className, style, elementId } = props;
     const { mode, selectNode, nodes, viewport } = useOmnora();
+    
+    const stableElemId = useMemo(() => elementId || generateElementId(nodeId, 'badge'), [elementId, nodeId]);
+
     const node = nodes[nodeId];
-    const stableElemId = useRef(elementId || generateElementId(nodeId, 'badge'));
-    const pos = node?.props?.elementPositions?.[stableElemId.current] || { mode: 'flow', x: 0, y: 0, z: 1 };
+    if (!node) return null;
+
+    const pos = node?.props?.elementPositions?.[stableElemId] || { mode: 'flow', x: 0, y: 0, z: 1 };
     const isFree = pos.mode === 'free';
     const isMobile = viewport === 'mobile';
 
@@ -608,7 +731,7 @@ export const EditableBadge: React.FC<{
         <div
             className={`omnora-badge ${className || ''}`}
             onClick={e => { if (mode !== 'preview') { e.stopPropagation(); selectNode?.(nodeId); } }}
-            data-element-id={stableElemId.current}
+            data-element-id={stableElemId}
             data-element-type="badge"
             style={{
                 display: 'inline-flex', alignItems: 'center', gap: 8,
@@ -617,8 +740,8 @@ export const EditableBadge: React.FC<{
                 transform: isFree ? `translate3d(${finalX}px, ${finalY}px, 0) rotate(${finalRotation}deg) scale(${finalScale})` : undefined,
                 transformOrigin: 'center center',
                 zIndex: isFree ? (pos.z || 1) : undefined,
-                width: isFree ? (node?.props?.elementSizes?.[stableElemId.current]?.width || 'auto') : undefined,
-                height: isFree ? (node?.props?.elementSizes?.[stableElemId.current]?.height || 'auto') : undefined,
+                width: isFree ? (node?.props?.elementSizes?.[stableElemId]?.width || 'auto') : undefined,
+                height: isFree ? (node?.props?.elementSizes?.[stableElemId]?.height || 'auto') : undefined,
                 ...style,
             }}
         >
@@ -627,3 +750,13 @@ export const EditableBadge: React.FC<{
         </div>
     );
 });
+
+EditableBadge.displayName = 'EditableBadge';
+EditableBadge.propTypes = {
+    nodeId: PropTypes.string.isRequired,
+    icon: PropTypes.node,
+    text: PropTypes.string.isRequired,
+    className: PropTypes.string,
+    style: PropTypes.object,
+    elementId: PropTypes.string
+};

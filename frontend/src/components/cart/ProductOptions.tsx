@@ -1,14 +1,8 @@
 /**
  * ProductOptions: Variant Selection Block
- * 
- * Reads options + variants from StorefrontContext, renders
- * pill-style selectors for each option (Color, Size, Band...),
- * and calls setSelectedVariantByOptions when user clicks.
- *
- * Registered in BuilderRegistry as 'product_options'.
  */
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { useStorefront, type ProductVariant } from '../../context/StorefrontContext';
+import { useStorefront } from '../../context/StorefrontContext';
 
 // ─── Design Tokens ────────────────────────────────────────────────────────────
 
@@ -27,8 +21,6 @@ const T = {
     success: '#34d399',
 };
 
-// ─── Props ────────────────────────────────────────────────────────────────────
-
 export interface ProductOptionsProps {
     nodeId: string;
     layout?: 'pills' | 'dropdown';
@@ -37,8 +29,6 @@ export interface ProductOptionsProps {
     showAvailability?: boolean;
     children?: React.ReactNode;
 }
-
-// ─── Component ────────────────────────────────────────────────────────────────
 
 export const ProductOptions: React.FC<ProductOptionsProps> = ({
     nodeId,
@@ -51,24 +41,23 @@ export const ProductOptions: React.FC<ProductOptionsProps> = ({
     const product = state.product;
     const selectedVariant = state.selectedVariant;
 
-    // Build current selected options from variant
+    // OSTT FIX: ALL hooks must be declared before any early returns.
     const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
 
-    // Sync local state with store's selectedVariant
     useEffect(() => {
+        // OSTT FIX: Use timeout to prevent synchronous state update cascading renders
         if (selectedVariant?.options) {
-            setSelectedOptions(selectedVariant.options);
+            const timer = setTimeout(() => setSelectedOptions(selectedVariant.options), 0);
+            return () => clearTimeout(timer);
         }
     }, [selectedVariant]);
 
-    // Precompute which option values lead to available variants
     const availabilityMap = useMemo(() => {
-        if (!product) return {};
+        if (!product || !product.options) return {};
         const map: Record<string, Record<string, boolean>> = {};
         for (const option of product.options) {
             map[option.name] = {};
             for (const value of option.values) {
-                // Check if there's at least one variant with this option value that is available
                 const hypothetical = { ...selectedOptions, [option.name]: value };
                 const matchingVariant = product.variants.find(v =>
                     Object.entries(hypothetical).every(([k, val]) => v.options[k] === val)
@@ -85,7 +74,7 @@ export const ProductOptions: React.FC<ProductOptionsProps> = ({
         setSelectedVariantByOptions(next);
     }, [selectedOptions, setSelectedVariantByOptions]);
 
-    // No product
+    // OSTT FIX: Early returns moved down here, AFTER all hooks are declared.
     if (!product) {
         return (
             <div data-node-id={nodeId} style={{
@@ -99,7 +88,6 @@ export const ProductOptions: React.FC<ProductOptionsProps> = ({
         );
     }
 
-    // No options (single variant)
     if (!product.options || product.options.length === 0) {
         return null;
     }
@@ -235,6 +223,7 @@ const OptionPill: React.FC<{
 
     return (
         <button
+            type="button"
             onClick={isDisabled ? undefined : onClick}
             onMouseEnter={() => !isDisabled && setHov(true)}
             onMouseLeave={() => setHov(false)}
@@ -267,5 +256,6 @@ const OptionPill: React.FC<{
         </button>
     );
 };
-
+OptionPill.displayName = 'OptionPill';
+ProductOptions.displayName = 'ProductOptions';
 export default ProductOptions;

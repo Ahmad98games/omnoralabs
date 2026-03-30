@@ -1,15 +1,18 @@
 import imageCompression from 'browser-image-compression';
 
+/**
+ * MediaProcessor: Industrial Media Handling for Omnora OS
+ * Enforcing Law 4 (High Contrast/Precision) via WebP Optimization.
+ */
 export class MediaProcessor {
     /**
-     * Automates client-side image compression specifically targeting 
-     * bandwidth restrictions before the payload even hits Supabase Storage.
-     * Enforces strict 1200px boundaries.
+     * Automates client-side image compression targeting bandwidth efficiency.
+     * Enforces strict 1200px boundaries before payload hits Supabase.
      */
     static async compressForUpload(file: File): Promise<File> {
         const options = {
-            maxSizeMB: 1, // Aggressive 1MB clamp
-            maxWidthOrHeight: 1200, // Bound strictly for Web
+            maxSizeMB: 1, // Aggressive 1MB clamp for speed
+            maxWidthOrHeight: 1200, // Bound strictly for Web Canvas
             useWebWorker: true,
             fileType: 'image/webp' // Native Next-Gen Format Injection
         };
@@ -24,13 +27,13 @@ export class MediaProcessor {
     }
 
     /**
-     * Intercepts a raw Supabase Storage Object URL and dynamically restructures 
-     * it to utilize Supabase Storage's built-in /render/ Edge caching engine.
-     * Specifically forces 'format=origin-webp' natively.
+     * Intercepts a raw Supabase Storage Object URL and restructures it to 
+     * utilize Supabase Storage's /render/ Edge caching engine.
      */
     static getOptimizedUrl(originalUrl: string, width: number = 800, height?: number, quality: number = 80): string {
         if (!originalUrl) return '';
-        // If it's not a Supabase storage URL (e.g. Unsplash fallback), return as is
+        
+        // Return original if not a Supabase storage URL (e.g., Unsplash fallback)
         if (!originalUrl.includes('/storage/v1/object/public/')) return originalUrl;
 
         try {
@@ -47,13 +50,14 @@ export class MediaProcessor {
             }
             
             return finalUrl;
-        } catch (e) {
+        } catch {
+            // Using catch {} without a variable fixes the ESLint @typescript-eslint/no-unused-vars error
             return originalUrl;
         }
     }
 
     /**
-     * Instantly computes a 10px ultra-blurred footprint layout.
+     * Instantly computes a 20px ultra-blurred footprint layout for LCP optimization.
      */
     static getBlurPlaceholder(originalUrl: string): string {
         return this.getOptimizedUrl(originalUrl, 20, undefined, 10);

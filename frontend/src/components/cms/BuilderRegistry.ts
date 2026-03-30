@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { RegistryEntry, BlockProps, BlockType as SectionType, BLOCK_TYPES } from '../../platform/core/Registry';
 
 // In dono ko export karna zaroori hai BuilderContext ke liye
@@ -37,7 +36,7 @@ export const getRegistryEntry = (type: SectionType | string) => registry[type];
 // 1. Product Grid (Collection Display Block)
 import { ProductGrid } from '../cart/ProductGrid';
 registerComponent('product_grid', {
-    component: ProductGrid as any,
+    component: ProductGrid as unknown as React.ComponentType<BlockProps>,
     defaultProps: {
         columns: 3, gap: 20, limit: 12, showFilter: true,
         cardStyle: 'minimal', imageAspect: 'portrait',
@@ -112,7 +111,7 @@ registerComponent('featured_product', {
 // 5. Buy Button (E-commerce Smart Block)
 import { BuyButton } from '../cart/BuyButton';
 registerComponent('buy_button', {
-    component: BuyButton as any,
+    component: BuyButton as unknown as React.ComponentType<BlockProps>,
     defaultProps: {
         buttonText: 'Add to Cart',
         buttonColor: '#7c6dfa',
@@ -138,7 +137,7 @@ registerComponent('buy_button', {
 // 6. Product Options (Variant Selector Block)
 import { ProductOptions } from '../cart/ProductOptions';
 registerComponent('product_options', {
-    component: ProductOptions as any,
+    component: ProductOptions as unknown as React.ComponentType<BlockProps>,
     defaultProps: {
         layout: 'pills',
         showLabels: true,
@@ -160,7 +159,7 @@ registerComponent('product_options', {
 // 7. Store Header (Smart Navigation Block)
 import { StoreHeader } from '../cart/StoreHeader';
 registerComponent('store_header', {
-    component: StoreHeader as any,
+    component: StoreHeader as unknown as React.ComponentType<BlockProps>,
     defaultProps: {
         storeName: '',
         showSearch: true,
@@ -176,7 +175,7 @@ registerComponent('store_header', {
 // 8. Search Bar (Collection Filter Block)
 import { SearchBar } from '../cart/SearchBar';
 registerComponent('search_bar', {
-    component: SearchBar as any,
+    component: SearchBar as unknown as React.ComponentType<BlockProps>,
     defaultProps: {
         placeholder: 'Search products...',
         showResults: true,
@@ -192,7 +191,7 @@ registerComponent('search_bar', {
 // 9. Checkout Form (Order Pipeline Block)
 import { CheckoutBlock } from '../cart/CheckoutBlock';
 registerComponent('checkout_form', {
-    component: CheckoutBlock as any,
+    component: CheckoutBlock as unknown as React.ComponentType<BlockProps>,
     defaultProps: {},
     propSchema: {},
 });
@@ -200,7 +199,7 @@ registerComponent('checkout_form', {
 // 10. Order Confirmation (Receipt Block)
 import { OrderConfirmationBlock } from '../cart/OrderConfirmationBlock';
 registerComponent('order_confirmation', {
-    component: OrderConfirmationBlock as any,
+    component: OrderConfirmationBlock as unknown as React.ComponentType<BlockProps>,
     defaultProps: { orderId: '' },
     propSchema: {
         orderId: { label: 'Order ID (auto-detected)', type: 'text' },
@@ -210,7 +209,7 @@ registerComponent('order_confirmation', {
 // 11. Admin Dashboard (Merchant Metrics Block)
 import { AdminDashboard } from '../admin/AdminDashboard';
 registerComponent('admin_dashboard', {
-    component: AdminDashboard as any,
+    component: AdminDashboard as unknown as React.ComponentType<BlockProps>,
     defaultProps: {},
     propSchema: {},
 });
@@ -218,7 +217,7 @@ registerComponent('admin_dashboard', {
 // 12. Admin Order Manager (Merchant Order Table)
 import { OrderManager } from '../admin/OrderManager';
 registerComponent('admin_order_manager', {
-    component: OrderManager as any,
+    component: OrderManager as unknown as React.ComponentType<BlockProps>,
     defaultProps: {},
     propSchema: {},
 });
@@ -228,7 +227,7 @@ registerComponent('admin_order_manager', {
 // 13. Hero Banner (Full Dynamic Hero Section)
 import { HeroBanner } from '../blocks/HeroBanner';
 registerComponent('hero_banner', {
-    component: HeroBanner as any,
+    component: HeroBanner as unknown as React.ComponentType<BlockProps>,
     defaultProps: {
         headline: 'Elevate Your Style',
         subheadline: 'Discover our curated collection of premium timepieces, crafted for the modern connoisseur.',
@@ -262,7 +261,7 @@ registerComponent('hero_banner', {
 // 14. Countdown Timer (Conversion Tool)
 import { CountdownTimer } from '../blocks/CountdownTimer';
 registerComponent('countdown_timer', {
-    component: CountdownTimer as any,
+    component: CountdownTimer as unknown as React.ComponentType<BlockProps>,
     defaultProps: {
         targetDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
         title: '🔥 Flash Sale Ends In',
@@ -288,7 +287,7 @@ registerComponent('countdown_timer', {
 // 15. Trust Badges (Authority Tool)
 import { TrustBadges } from '../blocks/TrustBadges';
 registerComponent('trust_badges', {
-    component: TrustBadges as any,
+    component: TrustBadges as unknown as React.ComponentType<BlockProps>,
     defaultProps: {
         badgeStyle: 'filled',
         iconColor: '#7c6dfa',
@@ -332,7 +331,7 @@ registerComponent('trust_badges', {
 // 16. FAQ Accordion (Interactive Content)
 import { FAQAccordion } from '../blocks/FAQAccordion';
 registerComponent('faq_accordion', {
-    component: FAQAccordion as any,
+    component: FAQAccordion as unknown as React.ComponentType<BlockProps>,
     defaultProps: {
         title: 'Frequently Asked Questions',
         themeColor: '#7c6dfa',
@@ -356,7 +355,7 @@ registerComponent('faq_accordion', {
 // 17. Customer Reviews (Social Proof)
 import { CustomerReviews } from '../blocks/CustomerReviews';
 registerComponent('customer_reviews', {
-    component: CustomerReviews as any,
+    component: CustomerReviews as unknown as React.ComponentType<BlockProps>,
     defaultProps: {
         headline: 'What Our Customers Say',
         layout: 'grid',
@@ -383,7 +382,7 @@ registerComponent('customer_reviews', {
 // 18. Features Grid (Value Proposition)
 import { FeaturesGrid } from '../blocks/FeaturesGrid';
 registerComponent('features_grid', {
-    component: FeaturesGrid as any,
+    component: FeaturesGrid as unknown as React.ComponentType<BlockProps>,
     defaultProps: {
         headline: 'Why Choose Us',
         columns: 4,
@@ -412,7 +411,7 @@ registerComponent('features_grid', {
 // 19. Newsletter Signup (Lead Gen)
 import { NewsletterSignup } from '../blocks/NewsletterSignup';
 registerComponent('newsletter_signup', {
-    component: NewsletterSignup as any,
+    component: NewsletterSignup as unknown as React.ComponentType<BlockProps>,
     defaultProps: {
         headline: 'Stay in the Loop',
         subheadline: 'Subscribe for exclusive deals, new arrivals, and insider access.',
@@ -440,7 +439,7 @@ registerComponent('newsletter_signup', {
 // 20. Site Footer (Structure)
 import { SiteFooter } from '../blocks/SiteFooter';
 registerComponent('site_footer', {
-    component: SiteFooter as any,
+    component: SiteFooter as unknown as React.ComponentType<BlockProps>,
     defaultProps: {
         storeName: 'Omnora',
         storeDescription: 'Premium curated goods for the modern connoisseur.',
@@ -466,7 +465,7 @@ registerComponent('site_footer', {
 // 21. Announcement Bar (Navigation/Promo)
 import { AnnouncementBar } from '../blocks/AnnouncementBar';
 registerComponent('announcement_bar', {
-    component: AnnouncementBar as any,
+    component: AnnouncementBar as unknown as React.ComponentType<BlockProps>,
     defaultProps: {
         messages: ['🚚 Free shipping on orders over $50', '🔥 Flash Sale — 20% off everything!'],
         bgColor: '#7c6dfa',
@@ -492,7 +491,7 @@ registerComponent('announcement_bar', {
 // 22. Upsell Widget (AOV Booster)
 import { UpsellWidget } from '../blocks/UpsellWidget';
 registerComponent('upsell_widget', {
-    component: UpsellWidget as any,
+    component: UpsellWidget as unknown as React.ComponentType<BlockProps>,
     defaultProps: {
         title: 'Frequently Bought Together',
         maxItems: 3,
@@ -512,7 +511,7 @@ registerComponent('upsell_widget', {
 // 23. Split Hero (Image + Text)
 import { SplitHero } from '../blocks/SplitHero';
 registerComponent('split_hero', {
-    component: SplitHero as any,
+    component: SplitHero as unknown as React.ComponentType<BlockProps>,
     defaultProps: {
         imagePosition: 'right',
         imageUrl: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&q=80',

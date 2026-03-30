@@ -50,47 +50,9 @@ export interface SiteFooterProps {
 
 // ─── Defaults ─────────────────────────────────────────────────────────────────
 
-const DEFAULT_COLUMNS: FooterColumn[] = [
-    {
-        title: 'Shop', links: [
-            { label: 'New Arrivals', url: '#' }, { label: 'Best Sellers', url: '#' },
-            { label: 'Collections', url: '#' }, { label: 'Gift Cards', url: '#' },
-        ]
-    },
-    {
-        title: 'Help', links: [
-            { label: 'Contact Us', url: '#' }, { label: 'FAQs', url: '#' },
-            { label: 'Shipping Info', url: '#' }, { label: 'Returns', url: '#' },
-        ]
-    },
-    {
-        title: 'Company', links: [
-            { label: 'About Us', url: '#' }, { label: 'Careers', url: '#' },
-            { label: 'Press', url: '#' }, { label: 'Blog', url: '#' },
-        ]
-    },
-];
-
-const DEFAULT_SOCIALS: SocialLink[] = [
-    { platform: 'Twitter', url: '#' },
-    { platform: 'Instagram', url: '#' },
-    { platform: 'Facebook', url: '#' },
-    { platform: 'YouTube', url: '#' },
-];
-
 const SOCIAL_ICONS: Record<string, string> = {
     Twitter: '𝕏', Instagram: '📷', Facebook: 'f', YouTube: '▶',
     TikTok: '♪', LinkedIn: 'in', Pinterest: '📌',
-};
-
-const PAYMENT_ICONS = ['Visa', 'Mastercard', 'Amex', 'PayPal', 'Apple Pay'];
-
-// ─── Tokens ───────────────────────────────────────────────────────────────────
-
-const T = {
-    border: '#1e1e3a',
-    textDim: '#8888a8',
-    textMuted: '#555570',
 };
 
 // ─── Component ────────────────────────────────────────────────────────────────

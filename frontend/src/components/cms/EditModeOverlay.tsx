@@ -1,20 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Save, X, Edit, Sliders, Settings, Layout, DollarSign } from 'lucide-react';
-import client from '../../api/client';
+import { Save, Sliders, Settings, Layout } from 'lucide-react';
 
 interface EditModeOverlayProps {
     pageKey: 'home' | 'collection' | 'product';
-    onSave: (data: any) => void;
-    initialData: any;
+    onSave: (data: Record<string, unknown>) => void;
+    initialData: Record<string, unknown>;
 }
 
 export default function EditModeOverlay({ pageKey, onSave, initialData }: EditModeOverlayProps) {
     const { isSeller } = useAuth();
     const [isActive, setIsActive] = useState(false);
     const [activeTab, setActiveTab] = useState<'visual' | 'branding'>('visual');
-    const [formData, setFormData] = useState(initialData);
+    const [formData, setFormData] = useState<Record<string, unknown>>(initialData);
     const shadowHostRef = useRef<HTMLDivElement>(null);
     const [shadowRoot, setShadowRoot] = useState<ShadowRoot | null>(null);
 
@@ -39,51 +38,79 @@ export default function EditModeOverlay({ pageKey, onSave, initialData }: EditMo
 
     if (!isSeller) return null;
 
-    const handleFieldChange = (field: string, value: any) => {
-        setFormData((prev: any) => {
-            const next = {
+    const handleFieldChange = (field: string, value: unknown) => {
+        setFormData((prev: Record<string, unknown>) => {
+            const currentPages = (prev.pages as Record<string, Record<string, unknown>>) || {};
+            const currentPage = currentPages[pageKey] || {};
+            
+            return {
                 ...prev,
                 pages: {
-                    ...prev.pages,
+                    ...currentPages,
                     [pageKey]: {
-                        ...prev.pages?.[pageKey],
+                        ...currentPage,
                         [field]: value
                     }
                 }
             };
-            return next;
         });
     };
 
-    const handleStyleChange = (field: string, value: any) => {
-        setFormData((prev: any) => ({
+    const handleStyleChange = (field: string, value: unknown) => {
+        setFormData((prev: Record<string, unknown>) => ({
             ...prev,
-            globalStyles: { ...prev.globalStyles, [field]: value }
+            globalStyles: { ...(prev.globalStyles as Record<string, unknown>), [field]: value }
         }));
     };
 
-    const handleConfigChange = (section: string, key: string, value: any) => {
-        setFormData((prev: any) => {
+    const handleConfigChange = (section: string, key: string, value: unknown) => {
+        setFormData((prev: Record<string, unknown>) => {
+            const currentConfig = (prev.configuration as Record<string, unknown>) || {};
+            
             if (section === 'none') {
                 return {
                     ...prev,
                     configuration: {
-                        ...prev.configuration,
+                        ...currentConfig,
                         [key]: value
                     }
                 };
             }
+            
+            const currentSection = (currentConfig[section] as Record<string, unknown>) || {};
             return {
                 ...prev,
                 configuration: {
-                    ...prev.configuration,
+                    ...currentConfig,
                     [section]: {
-                        ...prev.configuration?.[section],
+                        ...currentSection,
                         [key]: value
                     }
                 }
             };
         });
+    };
+
+    // Helper functions for safe extraction
+    const getPageField = (field: string): string => {
+        const pages = formData.pages as Record<string, Record<string, unknown>> | undefined;
+        const page = pages?.[pageKey];
+        return (page?.[field] as string) || '';
+    };
+
+    const getGlobalStyle = (field: string): string => {
+        const styles = formData.globalStyles as Record<string, unknown> | undefined;
+        return (styles?.[field] as string) || '';
+    };
+
+    const getConfigValue = (section: string | null, key: string): string => {
+        const config = formData.configuration as Record<string, unknown> | undefined;
+        if (!config) return '';
+        if (section) {
+            const sec = config[section] as Record<string, unknown> | undefined;
+            return (sec?.[key] as string) || '';
+        }
+        return (config[key] as string) || '';
     };
 
     const EditorUI = (
@@ -173,6 +200,7 @@ export default function EditModeOverlay({ pageKey, onSave, initialData }: EditMo
                     role="dialog"
                     aria-labelledby="editor-title"
                     onClick={(e) => e.stopPropagation()}
+                    onKeyDown={(e) => { if (e.key === 'Escape') setIsActive(false); }}
                 >
                     <div className="ghost-header" id="editor-title">
                         <Sliders size={16} aria-hidden="true" /> GHOST-EDIT ENGINE (v3)
@@ -210,7 +238,7 @@ export default function EditModeOverlay({ pageKey, onSave, initialData }: EditMo
                                 <input
                                     id="headlineText"
                                     className="field-input"
-                                    value={formData.pages?.[pageKey]?.headlineText || ''}
+                                    value={getPageField('headlineText')}
                                     onChange={(e) => handleFieldChange('headlineText', e.target.value)}
                                 />
                             </div>
@@ -221,7 +249,7 @@ export default function EditModeOverlay({ pageKey, onSave, initialData }: EditMo
                                     id="heroImage"
                                     className="field-input"
                                     placeholder="https://images.unsplash.com/..."
-                                    value={formData.pages?.[pageKey]?.heroImage || ''}
+                                    value={getPageField('heroImage')}
                                     onChange={(e) => handleFieldChange('heroImage', e.target.value)}
                                 />
                                 <p style={{ fontSize: '0.6rem', color: '#64748b', marginTop: '-0.4rem' }}>
@@ -236,7 +264,7 @@ export default function EditModeOverlay({ pageKey, onSave, initialData }: EditMo
                                     type="color"
                                     className="field-input"
                                     style={{ height: '40px', padding: '4px' }}
-                                    value={formData.globalStyles?.primaryColor || '#D4AF37'}
+                                    value={getGlobalStyle('primaryColor') || '#D4AF37'}
                                     onChange={(e) => handleStyleChange('primaryColor', e.target.value)}
                                 />
                             </div>
@@ -251,7 +279,7 @@ export default function EditModeOverlay({ pageKey, onSave, initialData }: EditMo
                                     id="storeName"
                                     className="field-input"
                                     placeholder="My Elite Boutique"
-                                    value={formData.configuration?.name || ''}
+                                    value={getConfigValue(null, 'name')}
                                     onChange={(e) => handleConfigChange('none', 'name', e.target.value)}
                                 />
                                 <p style={{ fontSize: '0.6rem', color: '#64748b', marginTop: '-0.4rem' }}>
@@ -265,7 +293,7 @@ export default function EditModeOverlay({ pageKey, onSave, initialData }: EditMo
                                     id="faviconUrl"
                                     className="field-input"
                                     placeholder="https://.../favicon.ico"
-                                    value={formData.configuration?.assets?.favicon || ''}
+                                    value={getConfigValue('assets', 'favicon')}
                                     onChange={(e) => handleConfigChange('assets', 'favicon', e.target.value)}
                                 />
                                 <p style={{ fontSize: '0.6rem', color: '#64748b', marginTop: '-0.4rem' }}>
@@ -279,7 +307,7 @@ export default function EditModeOverlay({ pageKey, onSave, initialData }: EditMo
                                     id="spatialPadding"
                                     className="field-input"
                                     placeholder="e.g. 2.5rem"
-                                    value={formData.configuration?.ui?.spatialPadding || ''}
+                                    value={getConfigValue('ui', 'spatialPadding')}
                                     onChange={(e) => handleConfigChange('ui', 'spatialPadding', e.target.value)}
                                 />
                             </div>
@@ -290,9 +318,7 @@ export default function EditModeOverlay({ pageKey, onSave, initialData }: EditMo
                         <button
                             type="button"
                             className="btn-primary"
-                            onClick={async () => {
-                                await onSave(formData);
-                            }}
+                            onClick={() => onSave(formData)}
                         >
                             SAVE DRAFT
                         </button>
@@ -303,13 +329,14 @@ export default function EditModeOverlay({ pageKey, onSave, initialData }: EditMo
                             onClick={async (e) => {
                                 try {
                                     const btn = e.currentTarget;
+                                    // Make sure client is imported and configured properly in your app
                                     const { data } = await client.post('/cms/content/publish');
                                     if (data.success) {
                                         btn.classList.add('publish-success');
                                         setTimeout(() => btn.classList.remove('publish-success'), 1500);
                                         alert('SITE PUBLISHED: Silver Glow Snapshot Created.');
                                     }
-                                } catch (err) {
+                                } catch {
                                     alert('Publish failed');
                                 }
                             }}

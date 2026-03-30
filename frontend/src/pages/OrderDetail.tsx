@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useToast } from '../context/ToastContext';
 import client from '../api/client';
@@ -6,11 +6,8 @@ import {
     Package,
     Truck,
     CheckCircle,
-    XCircle,
     Clock,
     ArrowLeft,
-    MapPin,
-    CreditCard,
     Copy,
     Loader2
 } from 'lucide-react';
@@ -59,21 +56,21 @@ export default function OrderDetail() {
     const [loading, setLoading] = useState(true);
     const { showToast } = useToast();
 
-    useEffect(() => {
-        fetchOrder();
-    }, [id]);
-
-    const fetchOrder = async () => {
+    const fetchOrder = useCallback(async () => {
         try {
             const res = await client.get(`/orders/${id}`);
             setOrder(res.data.order);
-        } catch (error) {
+        } catch (error: unknown) {
             // Quiet fail for guest users or network issues
             console.error(error);
         } finally {
             setLoading(false);
         }
-    };
+    }, [id]);
+
+    useEffect(() => {
+        fetchOrder();
+    }, [fetchOrder]);
 
     const handleCancelOrder = async () => {
         if (!window.confirm('WARNING: Confirm order cancellation?')) return;
@@ -82,8 +79,11 @@ export default function OrderDetail() {
             await client.put(`/orders/${id}/cancel`);
             showToast('Order terminated successfully', 'success');
             fetchOrder(); // Refresh data
-        } catch (error: any) {
-            showToast(error.response?.data?.error || 'Cancellation failed', 'error');
+        } catch (error: unknown) {
+            // OSTT FIX: Strongly typed error object fallback instead of `any`
+            const err = error as { response?: { data?: { error?: string } } };
+            const errorMsg = err.response?.data?.error || 'Cancellation failed';
+            showToast(errorMsg, 'error');
         }
     };
 
@@ -111,10 +111,9 @@ export default function OrderDetail() {
         );
     }
 
-    // Helper to determine active step for timeline
     const getStepStatus = (step: string) => {
         const statusMap = { pending: 0, processing: 1, shipped: 2, delivered: 3, cancelled: -1 };
-        const current = statusMap[order.status];
+        const current = statusMap[order.status as keyof typeof statusMap];
         const target = statusMap[step as keyof typeof statusMap];
 
         if (order.status === 'cancelled') return 'cancelled';
@@ -224,7 +223,7 @@ export default function OrderDetail() {
                                 <span>Shipping</span>
                                 <span>PKR {order.shippingCost.toLocaleString()}</span>
                             </div>
-                            <div className="summary-divider"></div>
+                            <div className="summary-divider" />
                             <div className="summary-row total">
                                 <span>Total</span>
                                 <span className="total-value">PKR {order.total.toLocaleString()}</span>
@@ -243,7 +242,7 @@ export default function OrderDetail() {
                                 <p className="text-muted">{order.shippingAddress.phone}</p>
                             </div>
 
-                            <div className="detail-divider"></div>
+                            <div className="detail-divider" />
 
                             <div className="detail-group-lux mt-4">
                                 <h4 className="detail-header-lux">PAYMENT METHOD</h4>
@@ -253,7 +252,7 @@ export default function OrderDetail() {
 
                         {/* Actions */}
                         {['pending', 'processing'].includes(order.status) && (
-                            <button onClick={handleCancelOrder} className="btn-luxury-outline w-100">
+                            <button type="button" onClick={handleCancelOrder} className="btn-luxury-outline w-100">
                                 CANCEL ORDER
                             </button>
                         )}

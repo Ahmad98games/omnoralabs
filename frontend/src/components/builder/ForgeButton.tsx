@@ -20,8 +20,8 @@ export const ForgeButton: React.FC = () => {
         try {
             const success = await forge(userPrompt);
             if (success) toast.success("Store forged successfully!");
-        } catch (err: any) {
-            toast.error(err.message || "Forge failed");
+        } catch (err: unknown) {
+            toast.error((err as Error).message || "Forge failed");
         } finally {
             setIsForging(false);
         }
@@ -41,8 +41,8 @@ export const ForgeButton: React.FC = () => {
                 setIsModalOpen(true);
                 toast.success("Store Published Live!");
             }
-        } catch (err: any) {
-            toast.error(err.message || "Publishing failed");
+        } catch (err: unknown) {
+            toast.error((err as Error).message || "Publishing failed");
         } finally {
             setIsPublishing(false);
         }

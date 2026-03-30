@@ -1,12 +1,11 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from 'react';
 
 interface SectionProps {
     type: string;
-    data: any;
+    data: Record<string, unknown>;
 }
 
-const HeroSection: React.FC<{ data: any }> = ({ data }) => (
+const HeroSection: React.FC<{ data: Record<string, unknown> }> = ({ data }) => (
     <section className="hero-section" style={{ padding: '4rem 2rem', textAlign: 'center', background: 'var(--bg-surface)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
         <h1 style={{ fontSize: '3.5rem', fontWeight: 900, letterSpacing: '-0.02em', color: 'var(--p-color)', marginBottom: '1rem' }}>{data.title || 'Welcome Territory'}</h1>
         <p style={{ fontSize: '1.2rem', color: 'var(--s-color)', opacity: 0.8, maxWidth: '600px', margin: '0 auto' }}>{data.subtitle || 'Customized Sovereign Experience'}</p>
@@ -18,7 +17,7 @@ const HeroSection: React.FC<{ data: any }> = ({ data }) => (
     </section>
 );
 
-const ProductGrid: React.FC<{ data: any }> = ({ data }) => (
+const ProductGrid: React.FC<{ data: Record<string, unknown> }> = ({ data }) => (
     <section className="product-grid-section" style={{ padding: '4rem 2rem' }}>
         <h2 style={{ fontSize: '2rem', marginBottom: '2rem', color: 'var(--p-color)', fontFamily: 'monospace' }}>{data.title || 'Curated Collection'}</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '2rem' }}>
@@ -34,9 +33,9 @@ const ProductGrid: React.FC<{ data: any }> = ({ data }) => (
     </section>
 );
 
-const TextContent: React.FC<{ data: any }> = ({ data }) => (
+const TextContent: React.FC<{ data: Record<string, unknown> }> = ({ data }) => (
     <section className="text-content-section" style={{ padding: '4rem 2rem', maxWidth: '800px', margin: '0 auto' }}>
-        <div dangerouslySetInnerHTML={{ __html: data.body }} style={{ lineHeight: '1.8', color: 'rgba(255,255,255,0.9)' }} />
+        <div dangerouslySetInnerHTML={{ __html: data.body as string }} style={{ lineHeight: '1.8', color: 'rgba(255,255,255,0.9)' }} />
     </section>
 );
 

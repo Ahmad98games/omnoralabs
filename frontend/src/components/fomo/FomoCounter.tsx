@@ -18,9 +18,13 @@ export const FomoCounter: React.FC<FomoCounterProps> = ({
     const [isClient, setIsClient] = useState(false);
 
     useEffect(() => {
-        setIsClient(true);
-        // Initial random count
-        setCount(Math.floor(Math.random() * (maxUsers - minUsers + 1)) + minUsers);
+        // OSTT FIX: Using next tick for initialization to avoid set-state-in-effect cascading renders
+        const init = async () => {
+            setIsClient(true);
+            setCount(Math.floor(Math.random() * (maxUsers - minUsers + 1)) + minUsers);
+        };
+        
+        init();
 
         // Fluctuate every 15 seconds
         const interval = setInterval(() => {

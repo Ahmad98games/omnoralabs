@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CreditCard, ShieldCheck, Zap, Info, ExternalLink, Settings2, Trash2, Plus } from 'lucide-react';
+import { CreditCard, ShieldCheck, Zap, ExternalLink, Trash2 } from 'lucide-react';
 
 /**
  * 💳 PAYMENT SETTINGS (Task 3.5)
@@ -83,7 +83,14 @@ export const PaymentSettings: React.FC = () => {
     );
 };
 
-const GatewayCard = ({ name, icon, description, status }: any) => (
+interface GatewayCardProps {
+    name: string;
+    icon: React.ReactNode;
+    description: string;
+    status: 'active' | 'disconnected' | string;
+}
+
+const GatewayCard = ({ name, icon, description, status }: GatewayCardProps) => (
     <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 flex flex-col justify-between group">
         <div>
             <div className="flex justify-between items-start mb-4">

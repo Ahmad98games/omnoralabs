@@ -1,16 +1,5 @@
-/**
- * SupabaseDatabaseClient: Production Cloud Adapter
- *
- * Implements IDatabaseClient using Supabase (PostgreSQL + Auth).
- * Maps exactly to the omnora_schema.sql tables:
- *   merchants, store_configs, products, pages, nav_menus, discount_codes, orders, order_items.
- *
- * DESIGN: Drop-in replacement for MockDatabaseClient. Same interface, real cloud.
- */
-
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { StorefrontConfig } from './DatabaseTypes';
-import type { OrderCustomer, OrderLineItem } from './OrderStore';
 import type { Product } from '../../context/StorefrontContext';
 import type {
     IDatabaseClient,
@@ -98,7 +87,7 @@ export class SupabaseDatabaseClient implements IDatabaseClient {
             .eq('id', productId)
             .single();
         if (error) return null;
-        return data as Product;
+        return data as unknown as Product;
     }
 
     async getCurrentUser(): Promise<MerchantUser | null> {
@@ -140,7 +129,6 @@ export class SupabaseDatabaseClient implements IDatabaseClient {
         const { data: { user } } = await this.sb.auth.getUser();
         if (!user) throw new Error('Not authenticated');
 
-        // Fetch existing settings first so we don't accidentally overwrite with nulls
         const { data: merchant } = await this.sb
             .from('merchants')
             .select('payment_settings')
@@ -165,7 +153,8 @@ export class SupabaseDatabaseClient implements IDatabaseClient {
         if (error) throw new Error(`[updateMerchantPaymentSettings] ${error.message}`);
     }
 
-    async getMerchantPaymentSettings(merchantId: string): Promise<any> {
+    // OSTT FIX: Removed any
+    async getMerchantPaymentSettings(merchantId: string): Promise<Record<string, unknown> | null> {
         const { data, error } = await this.sb
             .from('merchants')
             .select('payment_settings')
@@ -173,21 +162,20 @@ export class SupabaseDatabaseClient implements IDatabaseClient {
             .single();
 
         if (error) throw new Error(`[getMerchantPaymentSettings] ${error.message}`);
-        return data?.payment_settings || null;
+        return (data?.payment_settings as Record<string, unknown>) || null;
     }
 
     // ── Store Configs (JSONB) ─────────────────────────────────────────────
 
     async saveStoreConfig(merchantId: string, config: StorefrontConfig, domain: string): Promise<StoreConfigRecord> {
-        // Upsert: update existing config or insert new one
         const { data, error } = await this.sb
             .from('store_configs')
             .upsert({
                 merchant_id: merchantId,
-                node_tree: config,           // Active/Last-Saved state
-                published_manifest: config,  // 🏗️ SOVEREIGN: This is the actual live site data
-                theme_vars: (config as any).themeVars || {},
-                symbol_registry: (config as any).symbolRegistry || {},
+                node_tree: config as unknown as Record<string, unknown>, // OSTT FIX: Strict casting for Supabase JSONB
+                published_manifest: config as unknown as Record<string, unknown>, 
+                theme_vars: (config as unknown as Record<string, unknown>).themeVars || {},
+                symbol_registry: (config as unknown as Record<string, unknown>).symbolRegistry || {},
                 is_published: true,
                 version: 1,
             }, { onConflict: 'merchant_id' })
@@ -196,7 +184,6 @@ export class SupabaseDatabaseClient implements IDatabaseClient {
 
         if (error) throw new Error(`[saveStoreConfig] ${error.message}`);
 
-        // Also update custom domain on merchant if provided
         if (domain) {
             await this.sb.from('merchants').update({ custom_domain: domain }).eq('id', merchantId);
         }
@@ -222,8 +209,7 @@ export class SupabaseDatabaseClient implements IDatabaseClient {
         return {
             id: configRes.data.id,
             merchantId: configRes.data.merchant_id,
-            // 🏗️ SOVEREIGN: Prioritize published_manifest for live sites, fall back to node_tree if null
-            config: (configRes.data.published_manifest || configRes.data.node_tree) as StorefrontConfig,
+            config: (configRes.data.published_manifest || configRes.data.node_tree) as unknown as StorefrontConfig,
             domain: '',
             isLive: configRes.data.is_published,
             isSuspended: merchantRes.data?.subscription === 'suspended',
@@ -232,7 +218,6 @@ export class SupabaseDatabaseClient implements IDatabaseClient {
     }
 
     async getStoreConfigByDomain(domain: string): Promise<StoreConfigRecord | null> {
-        // Look up merchant by custom_domain, then fetch their config
         const { data: merchant } = await this.sb
             .from('merchants')
             .select('id, subscription')
@@ -249,7 +234,8 @@ export class SupabaseDatabaseClient implements IDatabaseClient {
 
     // ── Orders ────────────────────────────────────────────────────────────
 
-    async createOrder(merchantId: string, customer: any, items: any[], subtotal: number, currency: string): Promise<Order> {
+    // OSTT FIX: Removed any types
+    async createOrder(merchantId: string, customer: Record<string, unknown>, items: Record<string, unknown>[], subtotal: number, currency: string): Promise<Order> {
         const { data: order, error } = await this.sb
             .from('orders')
             .insert({
@@ -273,7 +259,6 @@ export class SupabaseDatabaseClient implements IDatabaseClient {
 
         if (error || !order) throw new Error(`[createOrder] ${error?.message || 'Failed'}`);
 
-        // Insert order items
         const itemRows = items.map(item => ({
             order_id: order.id,
             product_id: item.id,
@@ -281,7 +266,7 @@ export class SupabaseDatabaseClient implements IDatabaseClient {
             title: item.title,
             quantity: item.quantity,
             unit_price: item.price,
-            total_price: item.price * item.quantity,
+            total_price: Number(item.price) * Number(item.quantity),
             image_url: item.image,
         }));
 
@@ -291,8 +276,8 @@ export class SupabaseDatabaseClient implements IDatabaseClient {
         return {
             id: order.id,
             merchantId,
-            customerEmail: customer.email,
-            customerName: customer.name,
+            customerEmail: String(customer.email),
+            customerName: String(customer.name),
             items,
             totalAmount: subtotal,
             status: 'PENDING',
@@ -311,28 +296,28 @@ export class SupabaseDatabaseClient implements IDatabaseClient {
         if (error) throw new Error(`[getOrders] ${error.message}`);
         if (!data) return [];
 
-        return data.map((row: any) => ({
-            id: row.id,
-            merchantId: row.merchant_id,
-            customerEmail: row.customer_email || '',
-            customerName: row.customer_name || '',
-            items: (row.order_items || []).map((item: any) => ({
-                id: item.product_id || item.id,
-                variantId: item.variant_id,
-                title: item.title,
-                price: parseFloat(item.unit_price),
-                quantity: item.quantity,
-                image: item.image_url || '',
+        // OSTT FIX: Removed explicit any
+        return data.map((row: Record<string, unknown>) => ({
+            id: String(row.id),
+            merchantId: String(row.merchant_id),
+            customerEmail: String(row.customer_email || ''),
+            customerName: String(row.customer_name || ''),
+            items: (row.order_items as Record<string, unknown>[] || []).map((item) => ({
+                id: String(item.product_id || item.id),
+                variantId: item.variant_id as string | undefined,
+                title: String(item.title),
+                price: parseFloat(String(item.unit_price)),
+                quantity: Number(item.quantity),
+                image: String(item.image_url || ''),
             })),
-            totalAmount: parseFloat(row.grand_total),
-            status: (row.financial_status?.toUpperCase() as Order['status']) || 'PENDING',
-            createdAt: row.created_at,
-            currency: row.currency,
+            totalAmount: parseFloat(String(row.grand_total)),
+            status: (String(row.financial_status)?.toUpperCase() as Order['status']) || 'PENDING',
+            createdAt: String(row.created_at),
+            currency: String(row.currency),
         }));
     }
 
     async getStoreAnalytics(merchantId: string): Promise<StoreAnalytics> {
-        // 1. Call the High-Fidelity Analytics RPC
         const { data, error } = await this.sb.rpc('get_high_fidelity_stats', {
             p_merchant_id: merchantId
         });
@@ -342,9 +327,7 @@ export class SupabaseDatabaseClient implements IDatabaseClient {
             throw new Error(`Failed to fetch high-fidelity analytics: ${error.message}`);
         }
 
-        // 2. Fetch Recent Orders (kept separate for depth if needed)
         const orders = await this.getOrders(merchantId);
-        
         const kpis = data.kpis;
         const dailyStats = data.dailyStats;
 
@@ -363,7 +346,7 @@ export class SupabaseDatabaseClient implements IDatabaseClient {
         eventType: 'page_view' | 'product_view' | 'add_to_cart' | 'purchase';
         productId?: string;
         sessionId?: string;
-        metadata?: any;
+        metadata?: Record<string, unknown>;
     }): Promise<void> {
         const { error } = await this.sb
             .from('interaction_logs')
@@ -391,8 +374,6 @@ export class SupabaseDatabaseClient implements IDatabaseClient {
     // ── Payments (Stripe mock — same as before) ──────────────────────────
 
     async createCheckoutSession(orderId: string, amount: number, currency: string): Promise<CheckoutSession> {
-        // In production: call a Supabase Edge Function that creates a real Stripe session.
-        // For now: mock it like MockDatabaseClient did.
         const session: CheckoutSession = {
             sessionId: `cs_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
             orderId,
@@ -406,6 +387,41 @@ export class SupabaseDatabaseClient implements IDatabaseClient {
     }
 
     // ── Products (Phase 15/58) ───────────────────────────────────────────────
+    
+    // OSTT FIX: Removed any
+    private mapProduct(row: Record<string, unknown>): Product {
+        return {
+            id: String(row.id),
+            title: String(row.title),
+            description: String(row.description || ''),
+            handle: String(row.handle),
+            vendor: String(row.vendor || ''),
+            type: String((row.categories as Record<string, unknown>)?.name || row.product_type || ''), 
+            tags: (row.tags as string[]) || [],
+            price: parseFloat(String(row.base_price)),
+            compareAtPrice: row.compare_at_price ? parseFloat(String(row.compare_at_price)) : undefined,
+            currency: String(row.currency || 'USD'),
+            featured_image: String(row.featured_image || ''),
+            images: ((row.product_images as Record<string, unknown>[]) || []).map((img) => ({
+                id: String(img.id),
+                src: String(img.url),
+                alt: String(img.alt_text || '')
+            })),
+            options: (row.options as string[]) || [], 
+            variants: ((row.product_variants as Record<string, unknown>[]) || []).map((v) => ({
+                id: String(v.id),
+                title: String(v.title),
+                price: parseFloat(String(v.price_override || row.base_price)),
+                compareAtPrice: v.compare_at_price ? parseFloat(String(v.compare_at_price)) : undefined,
+                sku: String(v.sku),
+                available: Number(v.stock_quantity) > 0,
+                options: v.options as Record<string, string>,
+                image: String(v.image_url)
+            })),
+            available: row.status === 'active',
+        };
+    }
+
     async getProductsByMerchant(merchantId: string): Promise<Product[]> {
         try {
             const { data, error } = await this.sb
@@ -415,7 +431,6 @@ export class SupabaseDatabaseClient implements IDatabaseClient {
                 .order('created_at', { ascending: false });
 
             if (error) {
-                // 🛡️ Fallback: If categories relationship is missing in Supabase, fetch without it
                 if (error.message?.includes('relationship') || error.message?.includes('categories')) {
                     console.warn('[getProducts] categories join failed, retrying without categories');
                     const { data: fbData, error: fbError } = await this.sb
@@ -425,19 +440,18 @@ export class SupabaseDatabaseClient implements IDatabaseClient {
                         .order('created_at', { ascending: false });
                     
                     if (fbError) throw fbError;
-                    return (fbData || []).map((row: any) => this.mapProduct(row));
+                    return (fbData || []).map((row) => this.mapProduct(row));
                 }
                 throw error;
             }
 
-            return (data || []).map((row: any) => this.mapProduct(row));
-        } catch (err: any) {
-            throw new Error(`[getProducts] ${err.message}`);
+            return (data || []).map((row) => this.mapProduct(row));
+        } catch (err: unknown) {
+            throw new Error(`[getProducts] ${err instanceof Error ? err.message : 'Unknown Error'}`);
         }
     }
 
     async createProduct(merchantId: string, product: Omit<Product, 'id'>): Promise<Product> {
-        // 1. Generate & Verify Handle (Slug Safety)
         const baseHandle = product.handle || product.title.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
         const { data: existing } = await this.sb
             .from('products')
@@ -448,7 +462,6 @@ export class SupabaseDatabaseClient implements IDatabaseClient {
             ? `${baseHandle}-${Math.random().toString(36).substring(2, 5)}` 
             : baseHandle;
 
-        // 2. Insert Base Product
         const { data: productData, error: productErr } = await this.sb
             .from('products')
             .insert({
@@ -466,21 +479,19 @@ export class SupabaseDatabaseClient implements IDatabaseClient {
 
         if (productErr || !productData) throw new Error(`[createProduct] ${productErr?.message || 'Failed'}`);
 
-        // 2. Insert Variants (if any)
         if (product.variants && product.variants.length > 0) {
             const variantRows = product.variants.map(v => ({
                 product_id: productData.id,
                 title: v.title,
                 sku: v.sku,
                 price_override: v.price !== product.price ? v.price : null,
-                stock_quantity: v.available ? 100 : 0, // Placeholder stock
+                stock_quantity: v.available ? 100 : 0, 
                 options: v.options,
                 image_url: v.image
             }));
             await this.sb.from('product_variants').insert(variantRows);
         }
 
-        // 3. Insert Gallery Images
         if (product.images && product.images.length > 0) {
             const imageRows = product.images.map((img, idx) => ({
                 product_id: productData.id,
@@ -495,7 +506,7 @@ export class SupabaseDatabaseClient implements IDatabaseClient {
     }
 
     async updateProduct(productId: string, updates: Partial<Product>): Promise<Product> {
-        const baseMapped: Record<string, any> = {};
+        const baseMapped: Record<string, unknown> = {};
         if (updates.title !== undefined) baseMapped.title = updates.title;
         if (updates.description !== undefined) baseMapped.description = updates.description;
         if (updates.handle !== undefined) baseMapped.handle = updates.handle;
@@ -503,13 +514,11 @@ export class SupabaseDatabaseClient implements IDatabaseClient {
         if (updates.compareAtPrice !== undefined) baseMapped.compare_at_price = updates.compareAtPrice;
         if (updates.featured_image !== undefined) baseMapped.featured_image = updates.featured_image;
 
-        // Update Base
         if (Object.keys(baseMapped).length > 0) {
             const { error } = await this.sb.from('products').update(baseMapped).eq('id', productId);
             if (error) throw new Error(`[updateProduct:base] ${error.message}`);
         }
 
-        // Update Variants (Full Replace for Sync)
         if (updates.variants !== undefined) {
             await this.sb.from('product_variants').delete().eq('product_id', productId);
             if (updates.variants.length > 0) {
@@ -526,7 +535,6 @@ export class SupabaseDatabaseClient implements IDatabaseClient {
             }
         }
 
-        // Update Images (Full Replace)
         if (updates.images !== undefined) {
             await this.sb.from('product_images').delete().eq('product_id', productId);
             if (updates.images.length > 0) {
@@ -563,14 +571,14 @@ export class SupabaseDatabaseClient implements IDatabaseClient {
             .order('name', { ascending: true });
 
         if (error) throw new Error(`[getCategories] ${error.message}`);
-        return (data || []).map((row: any) => ({
-            id: row.id,
-            merchantId: row.merchant_id,
-            name: row.name,
-            slug: row.slug,
-            description: row.description,
-            parentId: row.parent_id,
-            createdAt: row.created_at,
+        return (data || []).map((row: Record<string, unknown>) => ({
+            id: String(row.id),
+            merchantId: String(row.merchant_id),
+            name: String(row.name),
+            slug: String(row.slug),
+            description: row.description ? String(row.description) : undefined,
+            parentId: row.parent_id ? String(row.parent_id) : undefined,
+            createdAt: String(row.created_at),
         }));
     }
 
@@ -609,39 +617,6 @@ export class SupabaseDatabaseClient implements IDatabaseClient {
         if (error) throw new Error(`[deleteCategory] ${error.message}`);
     }
 
-    private mapProduct(row: any): Product {
-        return {
-            id: row.id,
-            title: row.title,
-            description: row.description || '',
-            handle: row.handle,
-            vendor: row.vendor || '',
-            type: row.categories?.name || row.product_type || '', // Use category name as type if available
-            tags: row.tags || [],
-            price: parseFloat(row.base_price),
-            compareAtPrice: row.compare_at_price ? parseFloat(row.compare_at_price) : undefined,
-            currency: row.currency || 'USD',
-            featured_image: row.featured_image || '',
-            images: (row.product_images || []).map((img: any) => ({
-                id: img.id,
-                src: img.url,
-                alt: img.alt_text || ''
-            })),
-            options: row.options || [], // In a full relational model, options would be derived from variants
-            variants: (row.product_variants || []).map((v: any) => ({
-                id: v.id,
-                title: v.title,
-                price: parseFloat(v.price_override || row.base_price),
-                compareAtPrice: v.compare_at_price ? parseFloat(v.compare_at_price) : undefined,
-                sku: v.sku,
-                available: v.stock_quantity > 0,
-                options: v.options,
-                image: v.image_url
-            })),
-            available: row.status === 'active',
-        };
-    }
-
     // ── Pages (Phase 17) ──────────────────────────────────────────────────
 
     async getPagesByMerchant(merchantId: string): Promise<CustomPage[]> {
@@ -653,16 +628,16 @@ export class SupabaseDatabaseClient implements IDatabaseClient {
 
         if (error) throw new Error(`[getPages] ${error.message}`);
 
-        return (data || []).map((row: any): CustomPage => ({
-            id: row.id,
-            merchantId: row.merchant_id,
-            title: row.title,
-            slug: row.slug,
-            status: row.status,
-            nodeIds: row.node_tree?.nodeIds || [],
-            content: row.content, // 🛡️ Map content accurate
-            createdAt: row.created_at,
-            updatedAt: row.updated_at,
+        return (data || []).map((row: Record<string, unknown>): CustomPage => ({
+            id: String(row.id),
+            merchantId: String(row.merchant_id),
+            title: String(row.title),
+            slug: String(row.slug),
+            status: String(row.status) as 'draft' | 'live',
+            nodeIds: (row.node_tree as Record<string, string[]>)?.nodeIds || [],
+            content: row.content as Record<string, unknown>, 
+            createdAt: String(row.created_at),
+            updatedAt: String(row.updated_at),
         }));
     }
 
@@ -675,7 +650,7 @@ export class SupabaseDatabaseClient implements IDatabaseClient {
                 slug: page.slug,
                 status: page.status,
                 node_tree: { nodeIds: page.nodeIds || [] },
-                content: page.content || { pages: { home: { layout: [] } } }, // 🛡️ Add stability skeleton
+                content: page.content || { pages: { home: { layout: [] } } }, 
             })
             .select()
             .single();
@@ -689,19 +664,19 @@ export class SupabaseDatabaseClient implements IDatabaseClient {
             slug: data.slug,
             status: data.status,
             nodeIds: data.node_tree?.nodeIds || [],
-            content: data.content, // 🛡️ Map content accurate
+            content: data.content,
             createdAt: data.created_at,
             updatedAt: data.updated_at,
         };
     }
 
     async updatePage(pageId: string, updates: Partial<CustomPage>): Promise<CustomPage> {
-        const mapped: Record<string, any> = {};
+        const mapped: Record<string, unknown> = {};
         if (updates.title !== undefined) mapped.title = updates.title;
         if (updates.slug !== undefined) mapped.slug = updates.slug;
         if (updates.status !== undefined) mapped.status = updates.status;
         if (updates.nodeIds !== undefined) mapped.node_tree = { nodeIds: updates.nodeIds };
-        if (updates.content !== undefined) mapped.content = updates.content; // 🛡️ Map content accurate
+        if (updates.content !== undefined) mapped.content = updates.content; 
 
         const { data, error } = await this.sb
             .from('pages')
@@ -719,7 +694,7 @@ export class SupabaseDatabaseClient implements IDatabaseClient {
             slug: data.slug,
             status: data.status,
             nodeIds: data.node_tree?.nodeIds || [],
-            content: data.content, // 🛡️ Map content accurate
+            content: data.content, 
             createdAt: data.created_at,
             updatedAt: data.updated_at,
         };
@@ -742,7 +717,7 @@ export class SupabaseDatabaseClient implements IDatabaseClient {
             .upsert({
                 merchant_id: merchantId,
                 name,
-                links,
+                links: links as unknown as Record<string, unknown>[],
             }, { onConflict: 'merchant_id,name' })
             .select()
             .single();
@@ -753,7 +728,7 @@ export class SupabaseDatabaseClient implements IDatabaseClient {
             id: data.id,
             merchantId: data.merchant_id,
             name: data.name,
-            links: data.links || [],
+            links: (data.links as unknown as NavLink[]) || [],
             updatedAt: data.updated_at,
         };
     }
@@ -772,12 +747,27 @@ export class SupabaseDatabaseClient implements IDatabaseClient {
             id: data.id,
             merchantId: data.merchant_id,
             name: data.name,
-            links: data.links || [],
+            links: (data.links as unknown as NavLink[]) || [],
             updatedAt: data.updated_at,
         };
     }
 
     // ── Discounts (Phase 18) ──────────────────────────────────────────────
+
+    // OSTT FIX: Added strict type mappings
+    private mapDiscount(row: Record<string, unknown>): DiscountCode {
+        return {
+            id: String(row.id),
+            merchantId: String(row.merchant_id),
+            code: String(row.code),
+            type: String(row.type) as 'percentage' | 'fixed_amount' | 'free_shipping',
+            value: parseFloat(String(row.value)),
+            isActive: Boolean(row.is_active),
+            usageLimit: row.usage_limit ? Number(row.usage_limit) : undefined,
+            usageCount: Number(row.usage_count) || 0,
+            createdAt: String(row.created_at),
+        };
+    }
 
     async createDiscount(merchantId: string, discount: Omit<DiscountCode, 'id' | 'merchantId' | 'usageCount' | 'createdAt'>): Promise<DiscountCode> {
         const { data, error } = await this.sb
@@ -806,11 +796,11 @@ export class SupabaseDatabaseClient implements IDatabaseClient {
             .order('created_at', { ascending: false });
 
         if (error) throw new Error(`[getDiscounts] ${error.message}`);
-        return (data || []).map((row: any) => this.mapDiscount(row));
+        return (data || []).map((row: Record<string, unknown>) => this.mapDiscount(row));
     }
 
     async updateDiscount(discountId: string, updates: Partial<DiscountCode>): Promise<DiscountCode> {
-        const mapped: Record<string, any> = {};
+        const mapped: Record<string, unknown> = {};
         if (updates.code !== undefined) mapped.code = updates.code;
         if (updates.type !== undefined) mapped.type = updates.type;
         if (updates.value !== undefined) mapped.value = updates.value;
@@ -853,19 +843,5 @@ export class SupabaseDatabaseClient implements IDatabaseClient {
         if (data.usage_limit && data.usage_count >= data.usage_limit) return null;
 
         return this.mapDiscount(data);
-    }
-
-    private mapDiscount(row: any): DiscountCode {
-        return {
-            id: row.id,
-            merchantId: row.merchant_id,
-            code: row.code,
-            type: row.type,
-            value: parseFloat(row.value),
-            isActive: row.is_active,
-            usageLimit: row.usage_limit || undefined,
-            usageCount: row.usage_count || 0,
-            createdAt: row.created_at,
-        };
     }
 }

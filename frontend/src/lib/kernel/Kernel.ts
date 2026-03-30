@@ -1,5 +1,3 @@
-import { toast } from 'react-hot-toast';
-
 /**
  * 🛠️ OMNORA LABS | [KERNEL]
  * ---------------------------------------------------------
@@ -13,19 +11,20 @@ import { supabase } from '../supabaseClient';
 import { DEFAULT_PROPS } from '../../components/cms/ComponentRegistry';
 import { runMigrations } from './utils/MigrationScript';
 import { OmnoraLogger } from './utils/logger';
+import type { PlatformBlock, StorePagePayload, MerchantSettingsPayload, KernelPatch } from '../../platform/core/types';
 
 export const CURRENT_KERNEL_VERSION = '2.1.0';
 
 export interface SystemManifest {
     id: string;
     version: string;
-    entities: Record<string, any>;
+    entities: Record<string, unknown>;
     lastSynced: string | null;
 }
 
 export class OmnoraKernel {
     private static instance: OmnoraKernel;
-    private emergencyPatches: any = null;
+    private emergencyPatches: KernelPatch | null = null;
 
     private constructor() {
         OmnoraLogger.integrity("KERNEL", "Omnora Kernel Boot Sequence Initiated.");
@@ -38,10 +37,10 @@ export class OmnoraKernel {
         return OmnoraKernel.instance;
     }
 
-    /**
-     * commitSystemState: The primary protocol for committing state changes to the registry.
-     */
-    public async commitSystemState(category: 'STORE_PAGES' | 'MERCHANT_SETTINGS', payload: any): Promise<boolean> {
+    public async commitSystemState(
+        category: 'STORE_PAGES' | 'MERCHANT_SETTINGS', 
+        payload: StorePagePayload | MerchantSettingsPayload
+    ): Promise<boolean> {
         OmnoraLogger.info("SYSTEM-INTEGRITY", `Committing state for: ${category}`);
         
         try {
@@ -58,7 +57,7 @@ export class OmnoraKernel {
                     })
                     .eq('id', id));
             } else if (category === 'MERCHANT_SETTINGS') {
-                const { id, display_name, metadata } = payload;
+                const { id, display_name, metadata } = payload as MerchantSettingsPayload;
                 ({ error } = await supabase
                     .from('merchants')
                     .update({
@@ -82,7 +81,7 @@ export class OmnoraKernel {
     /**
      * readSystemState: Standardized protocol for retrieving system state from the authority.
      */
-    public async readSystemState(category: 'STORE_PAGES' | 'MERCHANT_SETTINGS', id: string): Promise<{ data: any, error: any }> {
+    public async readSystemState(category: 'STORE_PAGES' | 'MERCHANT_SETTINGS', id: string): Promise<{ data: unknown, error: unknown }> {
         OmnoraLogger.info("KERNEL", `Reading system state: ${category} [${id}]`);
         
         if (category === 'STORE_PAGES') {
@@ -105,7 +104,7 @@ export class OmnoraKernel {
     /**
      * hydrate: Hydrate and repair the raw component tree before React mounts it
      */
-    public async hydrate(storeManifest: any, merchantId?: string): Promise<any> {
+    public async hydrate(storeManifest: unknown, merchantId?: string): Promise<Record<string, unknown> | null> {
         if (!storeManifest) return null;
 
         let ast = Array.isArray(storeManifest) ? {
@@ -130,7 +129,7 @@ export class OmnoraKernel {
         return ast;
     }
 
-    private sanitizeBlocks(blocks: any[]): any[] {
+    private sanitizeBlocks(blocks: PlatformBlock[]): PlatformBlock[] {
         return blocks.map(block => {
             const schema = DEFAULT_PROPS[block.type];
             if (!schema || !schema.defaultProps) return block;
@@ -155,6 +154,7 @@ export class OmnoraKernel {
                 .single();
             this.emergencyPatches = data || false;
         } catch (e) {
+            OmnoraLogger.error("KERNEL", "Failed to fetch kernel patches", e);
             this.emergencyPatches = false;
         }
     }
@@ -168,7 +168,9 @@ export class OmnoraKernel {
                 details: { merchant_id: merchantId, upgraded_to: version }
             });
             OmnoraLogger.info("KERNEL", `Store ${merchantId} natively upgraded to v${version}`);
-        } catch (e) {}
+        } catch (e) {
+            OmnoraLogger.error("KERNEL", "Failed to log system upgrade", e);
+        }
     }
 
     private compareVersions(v1: string, v2: string): number {

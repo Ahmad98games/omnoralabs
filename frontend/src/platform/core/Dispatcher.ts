@@ -91,28 +91,34 @@ class Dispatcher {
         }
     }
 
-    private applyPatchToNode(node: any, patch: NodePatch): any {
+    private applyPatchToNode(node: Record<string, unknown>, patch: NodePatch): Record<string, unknown> {
         // Increment revision at the root level of the node
-        const nextRevision = (node.revision || 0) + 1;
+        const nextRevision = (Number(node.revision) || 0) + 1;
         
         const cleanPath = patch.path.startsWith('activeElement.') 
             ? patch.path.replace('activeElement.', '') 
             : patch.path;
             
         // Use recursive immutable setter to ensure no "Silent Mutations"
-        const newNode = this.immutableSet(node, cleanPath.split('.'), patch.value);
+        const newNode = this.immutableSet(node, cleanPath.split('.'), patch.value) as Record<string, unknown>;
         
         return { ...newNode, revision: nextRevision };
     }
 
-    private immutableSet(obj: any, path: string[], value: any): any {
+    private immutableSet(obj: unknown, path: string[], value: unknown): unknown {
         if (path.length === 0) return value;
         
         const [head, ...tail] = path;
         const isArray = Array.isArray(obj);
-        const clone = isArray ? [...(obj || [])] : { ...(obj || {}) };
+        const clone = isArray 
+            ? [...((obj as unknown[]) || [])] 
+            : { ...((obj as Record<string, unknown>) || {}) };
         
-        clone[head] = this.immutableSet(clone[head], tail, value);
+        if (isArray) {
+            (clone as unknown[])[Number(head)] = this.immutableSet((clone as unknown[])[Number(head)], tail, value);
+        } else {
+            (clone as Record<string, unknown>)[head] = this.immutableSet((clone as Record<string, unknown>)[head], tail, value);
+        }
         return clone;
     }
 
@@ -121,7 +127,7 @@ class Dispatcher {
         patches.forEach(patch => {
             const node = nodeStore.getNode(patch.nodeId);
             if (!node) return;
-            const entry = getRegistryEntry(node.type);
+            const entry = getRegistryEntry((node as Record<string, unknown>).type as string);
             const impact = entry?.patchImpactMap?.[patch.path] || 'structural';
             if (impact === 'structural') maxImpact = 'structural';
             else if (impact === 'visual-contextual' && maxImpact !== 'structural') maxImpact = 'visual-contextual';
@@ -137,8 +143,13 @@ class Dispatcher {
         }));
     }
 
-    private getValueByPath(obj: any, path: string): any {
-        return path.split('.').reduce((acc, part) => acc && acc[part], obj);
+    private getValueByPath(obj: unknown, path: string): unknown {
+        return path.split('.').reduce((acc: unknown, part: string) => {
+            if (acc && typeof acc === 'object') {
+                return (acc as Record<string, unknown>)[part];
+            }
+            return undefined;
+        }, obj);
     }
 
     reset() {

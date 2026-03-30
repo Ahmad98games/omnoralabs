@@ -9,7 +9,7 @@ interface AnalyticsEvent {
     type: string;
     sessionId: string;
     path: string;
-    payload: Record<string, any>; // Flexible object for payload
+    payload: Record<string, unknown>; // Hardened payload type
     createdAt: string;
 }
 

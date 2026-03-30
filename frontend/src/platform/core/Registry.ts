@@ -75,31 +75,34 @@ export interface PropSchemaField {
     type: 'text' | 'number' | 'color' | 'image' | 'boolean' | 'select' | 'slider' | 'link' | 'list';
     label: string;
     options?: string[];
-    default?: any;
+    // OSTT FIX: Replaced any with unknown
+    default?: unknown;
     min?: number;
     max?: number;
     step?: number;
     unit?: string;
-    validation?: (val: any) => boolean | string;
+    validation?: (val: unknown) => boolean | string;
 }
 
 export type PropSchema = Record<string, PropSchemaField>;
 
-export interface BlockProps {
-    data?: any;
+// OSTT FIX: Extended IntrinsicAttributes to ensure TS does not fail during React.createElement casting
+export interface BlockProps extends React.Attributes {
+    data?: Record<string, unknown>;
     nodeId: string;
     children?: React.ReactNode;
+    [key: string]: unknown;
 }
 
 export interface RegistryEntry {
     type: string;
     component: React.ComponentType<BlockProps>;
-    defaultProps: Record<string, any>;
+    defaultProps: Record<string, unknown>;
     schemaVersion: number;
     propSchema?: PropSchema;
     capabilities?: BlockCapability[];
-    migrate?: (oldNode: any) => any;
-    validate?: (props: any) => boolean;
+    migrate?: (oldNode: Record<string, unknown>) => Record<string, unknown>;
+    validate?: (props: Record<string, unknown>) => boolean;
     patchImpactMap?: Record<string, 'visual-local' | 'visual-contextual' | 'structural'>;
     metadata?: {
         label: string;
@@ -146,18 +149,19 @@ export const registerBlock = (entry: RegistryEntry) => {
 /**
  * Helper to register a simple component with defaults
  */
+// OSTT FIX: Enforced strict generic types
 export const registerComponent = (type: string, component: React.ComponentType<BlockProps> | Partial<RegistryEntry>) => {
     if (typeof component === 'function') {
         registerBlock({
             type,
-            component,
+            component: component as React.ComponentType<BlockProps>,
             defaultProps: {},
             schemaVersion: 1
         });
     } else {
         registerBlock({
             type,
-            component: component.component as any,
+            component: component.component as React.ComponentType<BlockProps>,
             defaultProps: component.defaultProps || {},
             schemaVersion: component.schemaVersion || 1,
             ...component

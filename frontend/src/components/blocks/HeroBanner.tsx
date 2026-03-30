@@ -22,6 +22,7 @@ const VideoBackground = React.memo(({ url, isBuilder }: { url: string; isBuilder
         </video>
     );
 });
+VideoBackground.displayName = 'VideoBackground';
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 
@@ -207,5 +208,7 @@ function adjustBrightness(hex: string, amount: number): string {
     const b = Math.min(255, (num & 0xff) + amount);
     return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
 }
+
+HeroBanner.displayName = 'HeroBanner';
 
 export default HeroBanner;

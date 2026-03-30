@@ -18,8 +18,7 @@ interface PaymentMethodBuilderProps {
 
 /**
  * PaymentMethodBuilder: Adds custom dynamic payment handlers
- * 
- * Supports dynamic lists, screenshot toggles, and attaches anchored ID
+ * * Supports dynamic lists, screenshot toggles, and attaches anchored ID
  * nodes for Onboarding highlight overlays flawlessly.
  */
 export const PaymentMethodBuilder: React.FC<PaymentMethodBuilderProps> = ({
@@ -57,7 +56,8 @@ export const PaymentMethodBuilder: React.FC<PaymentMethodBuilderProps> = ({
         setMethods([...methods, newMethod]);
     };
 
-    const handleUpdateMethod = (id: string, key: keyof PaymentMethod, value: any) => {
+    // OSTT FIX: Strongly typed key and value pairing to avoid `any`
+    const handleUpdateMethod = <K extends keyof PaymentMethod>(id: string, key: K, value: PaymentMethod[K]) => {
         setMethods(methods.map(m => m.id === id ? { ...m, [key]: value } : m));
     };
 
@@ -86,6 +86,7 @@ export const PaymentMethodBuilder: React.FC<PaymentMethodBuilderProps> = ({
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
                 <h2 style={{ color: '#fff', fontSize: '18px', fontWeight: 600 }}>Payment Methods</h2>
                 <button 
+                    type="button"
                     onClick={handleAddMethod}
                     style={{ background: '#6366f1', color: '#fff', padding: '6px 12px', borderRadius: 4, cursor: 'pointer', border: 'none', fontSize: '12px' }}
                 >
@@ -104,8 +105,9 @@ export const PaymentMethodBuilder: React.FC<PaymentMethodBuilderProps> = ({
                     >
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12 }}>
                             <div>
-                                <label style={{ display: 'block', color: '#888', fontSize: '12px', marginBottom: 4 }}>Method Name</label>
+                                <label htmlFor={`methodName-${method.id}`} style={{ display: 'block', color: '#888', fontSize: '12px', marginBottom: 4 }}>Method Name</label>
                                 <input 
+                                    id={`methodName-${method.id}`}
                                     type="text" 
                                     placeholder="e.g. SadaPay, EasyPaisa, HBL" 
                                     value={method.name} 
@@ -114,8 +116,9 @@ export const PaymentMethodBuilder: React.FC<PaymentMethodBuilderProps> = ({
                                 />
                             </div>
                             <div>
-                                <label style={{ display: 'block', color: '#888', fontSize: '12px', marginBottom: 4 }}>Account Title</label>
+                                <label htmlFor={`accountTitle-${method.id}`} style={{ display: 'block', color: '#888', fontSize: '12px', marginBottom: 4 }}>Account Title</label>
                                 <input 
+                                    id={`accountTitle-${method.id}`}
                                     type="text" 
                                     placeholder="Account Holder Name" 
                                     value={method.accountTitle} 
@@ -126,8 +129,9 @@ export const PaymentMethodBuilder: React.FC<PaymentMethodBuilderProps> = ({
                         </div>
 
                         <div style={{ marginTop: 12 }}>
-                            <label style={{ display: 'block', color: '#888', fontSize: '12px', marginBottom: 4 }}>Account Number</label>
+                            <label htmlFor={`accountNumber-${method.id}`} style={{ display: 'block', color: '#888', fontSize: '12px', marginBottom: 4 }}>Account Number</label>
                             <input 
+                                id={`accountNumber-${method.id}`}
                                 type="text" 
                                 placeholder="IBAN or Account Number" 
                                 value={method.accountNumber} 
@@ -138,8 +142,9 @@ export const PaymentMethodBuilder: React.FC<PaymentMethodBuilderProps> = ({
 
                         {/* ANCHOR 1: Payment Instruction Box */}
                         <div style={{ marginTop: 12 }} id={index === 0 ? 'payment-instruction' : undefined}>
-                            <label style={{ display: 'block', color: '#888', fontSize: '12px', marginBottom: 4 }}>Payment Instruction</label>
+                            <label htmlFor={`instruction-${method.id}`} style={{ display: 'block', color: '#888', fontSize: '12px', marginBottom: 4 }}>Payment Instruction</label>
                             <textarea 
+                                id={`instruction-${method.id}`}
                                 placeholder="Paise bhej kar screenshot WhatsApp pe bhejein" 
                                 value={method.instruction} 
                                 onChange={(e) => handleUpdateMethod(method.id, 'instruction', e.target.value)}
@@ -148,18 +153,19 @@ export const PaymentMethodBuilder: React.FC<PaymentMethodBuilderProps> = ({
                         </div>
 
                         {/* ANCHOR 2: WhatsApp Toggle */}
-                        <div style={{ marginTop: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }} id={index === 0 ? 'whatsapp-toggle' : undefined}>
+                        <div style={{ marginTop: 12, display: 'flex', alignItems: 'center', justifyItems: 'space-between' }} id={index === 0 ? 'whatsapp-toggle' : undefined}>
                             <span style={{ color: '#fff', fontSize: '13px' }}>Show WhatsApp Screenshot Button</span>
                             <input 
                                 type="checkbox" 
                                 checked={method.showWhatsAppScreenshot} 
                                 onChange={(e) => handleUpdateMethod(method.id, 'showWhatsAppScreenshot', e.target.checked)}
-                                style={{ cursor: 'pointer', width: 16, height: 16 }}
+                                style={{ cursor: 'pointer', width: 16, height: 16, marginLeft: 'auto' }}
                             />
                         </div>
 
                         <div style={{ marginTop: 12, display: 'flex', justifyContent: 'flex-end' }}>
                             <button 
+                                type="button"
                                 onClick={() => handleRemoveMethod(method.id)}
                                 style={{ background: '#ef4444', color: '#fff', padding: '4px 10px', borderRadius: 4, cursor: 'pointer', border: 'none', fontSize: '11px' }}
                             >
@@ -172,6 +178,7 @@ export const PaymentMethodBuilder: React.FC<PaymentMethodBuilderProps> = ({
 
             {methods.length > 0 && (
                 <button 
+                    type="button"
                     onClick={handleSave}
                     disabled={loading}
                     style={{ width: '100%', background: '#6366f1', color: '#fff', padding: '10px', borderRadius: 6, cursor: 'pointer', border: 'none', fontWeight: 600, marginTop: 10 }}

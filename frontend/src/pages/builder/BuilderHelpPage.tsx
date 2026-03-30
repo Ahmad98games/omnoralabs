@@ -1,16 +1,23 @@
 import React, { useState } from 'react';
 import {
-    HelpCircle, BookOpen, MousePointer2, Image as ImageIcon,
+    BookOpen, MousePointer2, Image as ImageIcon,
     Layers, Zap, AlertTriangle, ArrowLeft, PlayCircle,
-    CheckCircle2, Compass, Sparkles, X
+    Sparkles, X
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabaseClient';
 
-const ICON_MAP: Record<string, any> = { MousePointer2, Layers, ImageIcon, Zap };
+const ICON_MAP: Record<string, React.FC<{ size?: number; color?: string }>> = { MousePointer2, Layers, ImageIcon, Zap };
 
-const DEFAULT_GUIDES = [
+interface GuideItem {
+    icon: string;
+    title: string;
+    description: string;
+    steps: string[];
+}
+
+const DEFAULT_GUIDES: GuideItem[] = [
     { icon: 'MousePointer2', title: "Editing Content", description: "Modify any text, button, or link directly on the canvas with immediate visual feedback.", steps: ["Click any component to select it", "Use the floating toolbar for settings", "Double-click text to edit inline", "Hit Enter or Esc to finish editing"] },
     { icon: 'Layers', title: "Layout Basics", description: "Build your page structure using premium pre-designed sections and modular blocks.", steps: ["Drag new sections from the sidebar", "Reorder layers via the Layers panel", "Adjust section padding and height", "Hide specific blocks on mobile devices"] },
     { icon: 'ImageIcon', title: "Media & Logo", description: "Manage your brand assets with our intelligent diagnostic-aware upload system.", steps: ["Upload PNG, JPG, or SVG logos", "Ensure dimensions are at least 512px", "Verify image integrity via diagnostics", "Browse your gallery for existing assets"] },
@@ -20,7 +27,14 @@ const DEFAULT_GUIDES = [
 const ACCENT = '#F1D592';
 const DARK = '#050505';
 
-const SectionCard = ({ icon: Icon, title, description, steps }: any) => {
+interface SectionCardProps {
+    icon: React.FC<{ size?: number; color?: string }>;
+    title: string;
+    description: string;
+    steps: string[];
+}
+
+const SectionCard = ({ icon: Icon, title, description, steps }: SectionCardProps) => {
     const [isHovered, setIsHovered] = useState(false);
 
     return (
@@ -80,9 +94,17 @@ const SectionCard = ({ icon: Icon, title, description, steps }: any) => {
     );
 };
 
+interface PageData {
+    hero?: {
+        title?: string;
+        subtitle?: string;
+    };
+    guideGrid?: GuideItem[];
+}
+
 export const BuilderHelpPage: React.FC = () => {
     const navigate = useNavigate();
-    const [pageData, setPageData] = React.useState<any>(null);
+    const [pageData, setPageData] = React.useState<PageData | null>(null);
 
     React.useEffect(() => {
         const fetchPage = async () => {
@@ -219,7 +241,7 @@ export const BuilderHelpPage: React.FC = () => {
                     gap: 32,
                     marginBottom: 80
                 }}>
-                    {(pageData?.guideGrid || DEFAULT_GUIDES).map((item: any, i: number) => (
+                    {(pageData?.guideGrid || DEFAULT_GUIDES).map((item: GuideItem, i: number) => (
                         <SectionCard
                             key={i}
                             icon={ICON_MAP[item.icon] || MousePointer2}
@@ -258,7 +280,7 @@ export const BuilderHelpPage: React.FC = () => {
                             <div>
                                 <h4 style={{ fontSize: 15, fontWeight: 700, color: '#FFFFFF', marginBottom: 6 }}>Overcrowded Viewports</h4>
                                 <p style={{ fontSize: 13, color: '#A1A1AA', lineHeight: 1.5 }}>
-                                    Don't forget to check mobile view. If a section looks too busy, use the "Hide on Mobile" toggle to keep it clean.
+                                    Don&apos;t forget to check mobile view. If a section looks too busy, use the &quot;Hide on Mobile&quot; toggle to keep it clean.
                                 </p>
                             </div>
                         </div>
@@ -276,7 +298,7 @@ export const BuilderHelpPage: React.FC = () => {
                             <div>
                                 <h4 style={{ fontSize: 15, fontWeight: 700, color: '#FFFFFF', marginBottom: 6 }}>Unsaved Drafts</h4>
                                 <p style={{ fontSize: 13, color: '#A1A1AA', lineHeight: 1.5 }}>
-                                    While the builder auto-saves locally, you must click 'Publish' to make those changes visible to your customers.
+                                    While the builder auto-saves locally, you must click &apos;Publish&apos; to make those changes visible to your customers.
                                 </p>
                             </div>
                         </div>

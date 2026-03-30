@@ -1,11 +1,11 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import client from '../api/client';
-import { nodeStore } from '../platform/core/NodeStore';
+import { nodeStore, NodeStore } from '../platform/core/NodeStore';
 import { dispatcher } from '../platform/core/Dispatcher';
-import { SECTION_TYPES, getRegistryEntry, SectionType } from '../components/cms/BuilderRegistry';
+import { getRegistryEntry, SectionType } from '../components/cms/BuilderRegistry';
 import { resolveComponentType } from '../components/cms/ComponentRegistry';
 import { deepMergeProps, reportRegistryError, safeDeepUpdate, verifyInvariants } from '../utils/builderUtils';
-import { OmnoraContext, OmnoraMode } from './OmnoraContext';
+import { OmnoraContext } from './OmnoraContext';
 import type { DropPosition } from '../components/cms/ComponentWrapper';
 import { useSyncExternalStore } from 'react';
 import { NewPageInitializer } from '../lib/kernel/utils/NewPageInitializer';
@@ -27,7 +27,7 @@ export interface PageMetadata {
     };
     type?: 'system' | 'template' | 'custom';
     isLocked?: boolean;
-    globalAnimations?: boolean; // 🎬 Global animation toggle
+    globalAnimations?: boolean;
 }
 
 export interface BuilderNode {
@@ -35,16 +35,16 @@ export interface BuilderNode {
     type: string;
     parentId: string | null;
     children: string[];
-    props: Record<string, any>;
-    styles: Record<string, any>;
+    props: Record<string, unknown>;
+    styles: Record<string, unknown>;
     link?: {
         type: 'INTERNAL' | 'EXTERNAL' | 'SCROLL' | 'NONE';
         target: string;
     };
     responsive?: {
-        base?: Record<string, any>;
-        md?: Record<string, any>;
-        sm?: Record<string, any>;
+        base?: Record<string, unknown>;
+        md?: Record<string, unknown>;
+        sm?: Record<string, unknown>;
     };
     hidden?: {
         mobile: boolean;
@@ -57,9 +57,9 @@ export interface BuilderNode {
     createdAt?: string;
     updatedAt?: string;
     interactions?: {
-        hover?: Record<string, any>;
-        active?: Record<string, any>;
-        scrollReveal?: any;
+        hover?: Record<string, unknown>;
+        active?: Record<string, unknown>;
+        scrollReveal?: unknown;
     };
     motion?: {
         curve?: string;
@@ -95,9 +95,9 @@ interface UIContextType {
     pages: { byId: Record<string, PageMetadata>; allIds: string[] };
     activePageId: string;
     setActivePageId: (id: string) => void;
-    addPage: (title: string, slug: string) => void;
+    addPage: (title: string, slug: string, type?: 'system'|'template'|'custom', templateData?: Record<string,unknown>) => void;
     deletePage: (id: string) => void;
-    updatePageMeta: (id: string, path: string, value: any) => void;
+    updatePageMeta: (id: string, path: string, value: unknown) => void;
     viewport: 'desktop' | 'tablet' | 'mobile';
     setViewport: (v: 'desktop' | 'tablet' | 'mobile') => void;
     devicePreset: string;
@@ -132,6 +132,7 @@ interface UIContextType {
     setDiagnostics: (d: Partial<UIContextType['diagnostics']>) => void;
     theme: Theme;
     updateTheme: (newTheme: Partial<Theme>) => void;
+    nodeStore: NodeStore; // OSTT FIX: Added generic accessor back since it was removed
 }
 
 export interface Theme {
@@ -148,36 +149,36 @@ interface NodesContextType {
     activePageId: string;
     nodeTree: Record<string, BuilderNode>;
     selectedNodeId: string | null;
-    designSystem: any;
+    designSystem: Record<string, unknown>;
     selectNode: (id: string | null) => void;
-    updateNode: (id: string, path: string, value: any) => void;
-    updateDesignSystem: (path: string, value: any) => void;
+    updateNode: (id: string, path: string, value: unknown) => void;
+    updateDesignSystem: (path: string, value: unknown) => void;
     setNodeForcedState: (id: string, state: 'hover' | 'active' | null) => void;
-    addNode: (type: string, props?: any, parentId?: string | null, index?: number | null) => string;
+    addNode: (type: string, props?: Record<string, unknown>, parentId?: string | null, index?: number | null) => string;
     deleteNode: (id: string) => void;
     duplicateNode: (id: string) => string;
     reorderNode: (id: string, direction: 'up' | 'down') => void;
     moveNodeToIndex: (id: string, index: number) => void;
     reorderPageLayout: (newLayout: string[]) => void;
-    systemHealth: any;
+    systemHealth: unknown;
     undo: () => void;
     redo: () => void;
     commitHistory: () => void;
     saveDraft: () => Promise<void>;
     publishLive: () => Promise<void>;
-    injectAST: (data: any) => void;
+    injectAST: (data: Record<string, unknown>) => void;
 }
 
 const UIContext = createContext<UIContextType | undefined>(undefined);
 export const NodesContext = createContext<NodesContextType | undefined>(undefined);
-const BuilderContext = createContext<any>(undefined);
+const BuilderContext = createContext<(UIContextType & NodesContextType) | undefined>(undefined);
 
-export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData: any, isPreview: boolean, tenantId?: string, userName?: string }> = ({ children, initialData, isPreview, tenantId, userName }) => {
+export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData: { layout?: Record<string, unknown>[], configuration?: Record<string, unknown> }, isPreview: boolean, tenantId?: string, userName?: string }> = ({ children, initialData, isPreview, tenantId, userName }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [isBuilderActive, setIsBuilderActive] = useState(false);
     const [mode, setMode] = useState<'edit' | 'preview'>('edit');
     const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
-    const [designSystem, setDesignSystem] = useState<any>(initialData?.configuration || {});
+    const [designSystem, setDesignSystem] = useState<Record<string, unknown>>(initialData?.configuration || {});
     const [viewport, setViewport] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
     const [devicePreset, setDevicePresetRaw] = useState<string>('desktop_1440');
     const [orientation, setOrientation] = useState<'portrait' | 'landscape'>('portrait');
@@ -189,7 +190,7 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
         setDevicePresetRaw(preset);
         const p = getPreset(preset);
         if (p?.category) {
-            setViewport(p.category);
+            setViewport(p.category as 'desktop' | 'tablet' | 'mobile');
         }
     };
     const toggleDeviceFrame = () => setShowDeviceFrame(v => !v);
@@ -233,14 +234,14 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
 
     const setNodes = useCallback((updater: React.SetStateAction<Record<string, BuilderNode>>) => {
         nodeStore._update((state) => {
-            const nextNodes = typeof updater === 'function' ? (updater as any)(state.nodes) : updater;
+            const nextNodes = typeof updater === 'function' ? updater(state.nodes) : updater;
             return { nodes: nextNodes };
         });
     }, []);
 
     const setPageLayouts = useCallback((updater: React.SetStateAction<Record<string, string[]>>) => {
         nodeStore._update((state) => {
-            const nextLayouts = typeof updater === 'function' ? (updater as any)(state.pageLayouts) : updater;
+            const nextLayouts = typeof updater === 'function' ? updater(state.pageLayouts) : updater;
             return { pageLayouts: nextLayouts };
         });
     }, []);
@@ -256,7 +257,8 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
         return requested >= interactionPriority;
     }, [interactionPriority]);
 
-    const [systemHealth, setSystemHealth] = useState<any>(null);
+    const systemHealth = useMemo(() => verifyInvariants(nodes, pageLayouts), [nodes, pageLayouts]);
+
     const nodesRef = useRef<Record<string, BuilderNode>>(nodes);
     const layoutsRef = useRef<Record<string, string[]>>(pageLayouts);
     const pagesRef = useRef(pages);
@@ -265,12 +267,7 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
     const saveStatusRef = useRef(saveStatus);
     const activePageIdRef = useRef(activePageId);
 
-    useEffect(() => {
-        const report = verifyInvariants(nodes, pageLayouts);
-        setSystemHealth(report);
-    }, [nodes, pageLayouts]);
-
-    const [history, setHistory] = useState<any[]>([]);
+    const [history, setHistory] = useState<Record<string, unknown>[]>([]);
     const [historyPointer, setHistoryPointer] = useState(-1);
 
     useEffect(() => { nodesRef.current = nodes; }, [nodes]);
@@ -281,13 +278,11 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
     useEffect(() => { saveStatusRef.current = saveStatus; }, [saveStatus]);
     useEffect(() => { activePageIdRef.current = activePageId; }, [activePageId]);
 
-    // 4.5 Bridge to External NodeStore
-    // THE FIX: commitHistory is moved up here to prevent Temporal Dead Zone error
     const commitHistory = useCallback(() => {
         const snapshot = {
-            nodes,
-            pageLayouts,
-            designSystem,
+            nodes: nodesRef.current,
+            pageLayouts: layoutsRef.current,
+            designSystem: designSystemRef.current,
             activePageId: activePageIdRef.current,
             timestamp: new Date().toISOString()
         };
@@ -299,26 +294,25 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
         });
         setHistoryPointer(prev => Math.min(prev + 1, MAX_HISTORY_DEPTH - 1));
         setHasUnsavedChanges(true);
-    }, [nodes, pageLayouts, designSystem, historyPointer]);
+    }, [historyPointer]);
 
-    const injectAST = useCallback((data: any) => {
+    const injectAST = useCallback((data: Record<string, unknown>) => {
         if (!data || !data.nodes) return;
 
         nodeStore._update(() => ({
-            nodes: data.nodes || {},
-            pageLayouts: data.pageLayouts || {},
-            revisions: Object.keys(data.nodes || {}).reduce((acc, id) => ({ ...acc, [id]: 1 }), {}),
+            nodes: (data.nodes as Record<string, BuilderNode>) || {},
+            pageLayouts: (data.pageLayouts as Record<string, string[]>) || {},
+            revisions: Object.keys((data.nodes as Record<string, unknown>) || {}).reduce((acc, id) => ({ ...acc, [id]: 1 }), {}),
         }));
 
-        if (data.pages) setPages(data.pages);
-        if (data.designSystem) setDesignSystem(data.designSystem);
-        if (data.activePageId) setActivePageId(data.activePageId);
+        if (data.pages) setPages(data.pages as { byId: Record<string, PageMetadata>; allIds: string[] });
+        if (data.designSystem) setDesignSystem(data.designSystem as Record<string, unknown>);
+        if (data.activePageId) setActivePageId(data.activePageId as string);
 
         commitHistory();
         console.log('[Omnora AI] AST Injected successfully');
     }, [commitHistory]);
 
-    // 5. Initialization Engine: Load & Normalize
     useEffect(() => {
         const bootstrap = () => {
             nodeStore.reset();
@@ -337,29 +331,33 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
                         }
                     }
 
+                    // OSTT FIX: Removed TS index mapping errors using strongly mapped models
                     if (parsed.pages && !parsed.pages.byId) {
                         const normalizedPages: { byId: Record<string, PageMetadata>; allIds: string[] } = { byId: {}, allIds: [] };
                         const normalizedLayouts: Record<string, string[]> = {};
                         const normalizedNodes: Record<string, BuilderNode> = {};
 
-                        Object.values(parsed.pages).forEach((p: any) => {
-                            normalizedPages.byId[p.id] = {
-                                id: p.id,
-                                title: p.title,
-                                slug: p.slug,
-                                status: p.status,
-                                lastUpdated: p.lastUpdated,
-                                seoMeta: p.seoMeta
-                            };
-                            normalizedPages.allIds.push(p.id);
+                        Object.values(parsed.pages as Record<string, Partial<PageMetadata> & { nodeTree?: Record<string, BuilderNode> }>).forEach((p) => {
+                            if (p.id) {
+                                normalizedPages.byId[p.id] = {
+                                    id: p.id,
+                                    title: p.title || 'Untitled',
+                                    slug: p.slug || '/',
+                                    status: p.status || 'draft',
+                                    lastUpdated: p.lastUpdated || '',
+                                    seoMeta: p.seoMeta || { title: '', description: '' },
+                                    type: p.type || 'custom',
+                                };
+                                normalizedPages.allIds.push(p.id);
 
-                            const pageNodes = p.nodeTree || {};
-                            const rootNodeIds = Object.values(pageNodes)
-                                .filter((n: any) => n.parentId === null)
-                                .map((n: any) => n.id);
+                                const pageNodes = p.nodeTree || {};
+                                const rootNodeIds = Object.values(pageNodes)
+                                    .filter(n => n.parentId === null)
+                                    .map(n => n.id);
 
-                            normalizedLayouts[p.id] = rootNodeIds;
-                            Object.assign(normalizedNodes, pageNodes);
+                                normalizedLayouts[p.id] = rootNodeIds;
+                                Object.assign(normalizedNodes, pageNodes);
+                            }
                         });
 
                         setPages(normalizedPages);
@@ -386,15 +384,15 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
                 const tree: Record<string, BuilderNode> = {};
                 const rootIds: string[] = [];
 
-                initialData.layout.forEach((block: any, idx: number) => {
-                    const id = block.id || `node_${block.type}_${idx}`;
+                initialData.layout.forEach((block: Record<string, unknown>, idx: number) => {
+                    const id = String(block.id || `node_${block.type}_${idx}`);
                     tree[id] = {
                         id,
-                        type: block.type,
+                        type: String(block.type),
                         parentId: null,
                         children: [],
-                        props: block.data || {},
-                        styles: block.styles || {},
+                        props: (block.data as Record<string, unknown>) || {},
+                        styles: (block.styles as Record<string, unknown>) || {},
                         schemaVersion: 2,
                         createdAt: now,
                         updatedAt: now,
@@ -461,7 +459,7 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
         };
 
         bootstrap();
-    }, [initialData, tenantId]);
+    }, [initialData, tenantId, userName, setDiagnostics, setNodes, setPageLayouts]);
 
     const switchPage = useCallback((newId: string) => {
         const previousId = activePageIdRef.current;
@@ -499,8 +497,8 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
 
         if (nodeSchema < currentSchema && entry.migrate) {
             console.log(`[Omnora Evolution] Migrating ${node.type} from v${nodeSchema} to v${currentSchema}`);
-            const migrated = entry.migrate(node);
-            return { ...migrated, schemaVersion: currentSchema };
+            const migrated = entry.migrate(node as unknown as Record<string, unknown> & { schemaVersion?: number, props?: Record<string, unknown> });
+            return { ...migrated, schemaVersion: currentSchema } as BuilderNode;
         }
 
         return node;
@@ -520,7 +518,7 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
 
         layout.forEach(collect);
         return tree;
-    }, [nodes, pageLayouts, activePageId]);
+    }, [nodes, pageLayouts, activePageId, migrateNode]);
 
     const selectNode = useCallback((id: string | null) => {
         if (mode === 'preview' || !canInteract(InteractionPriority.SELECTED)) return;
@@ -529,29 +527,29 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
 
     const undo = useCallback(() => {
         if (historyPointer > 0) {
-            const prev = history[historyPointer - 1];
-            setNodes(prev.nodes);
-            setPageLayouts(prev.pageLayouts);
-            setDesignSystem(prev.designSystem);
-            setActivePageId(prev.activePageId);
+            const prev = history[historyPointer - 1] as Record<string, unknown>;
+            setNodes(prev.nodes as Record<string, BuilderNode>);
+            setPageLayouts(prev.pageLayouts as Record<string, string[]>);
+            setDesignSystem(prev.designSystem as Record<string, unknown>);
+            setActivePageId(prev.activePageId as string);
             setHistoryPointer(historyPointer - 1);
             setHasUnsavedChanges(true);
         }
-    }, [history, historyPointer]);
+    }, [history, historyPointer, setNodes, setPageLayouts]);
 
     const redo = useCallback(() => {
         if (historyPointer < history.length - 1) {
-            const next = history[historyPointer + 1];
-            setNodes(next.nodes);
-            setPageLayouts(next.pageLayouts);
-            setDesignSystem(next.designSystem);
-            setActivePageId(next.activePageId);
+            const next = history[historyPointer + 1] as Record<string, unknown>;
+            setNodes(next.nodes as Record<string, BuilderNode>);
+            setPageLayouts(next.pageLayouts as Record<string, string[]>);
+            setDesignSystem(next.designSystem as Record<string, unknown>);
+            setActivePageId(next.activePageId as string);
             setHistoryPointer(historyPointer + 1);
             setHasUnsavedChanges(true);
         }
-    }, [history, historyPointer]);
+    }, [history, historyPointer, setNodes, setPageLayouts]);
 
-    const updateNode = useCallback((id: string, path: string, value: any) => {
+    const updateNode = useCallback((id: string, path: string, value: unknown) => {
         if (!canInteract(InteractionPriority.HOVERING)) return;
 
         setNodes(prev => {
@@ -561,19 +559,19 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
             return updatedNodes;
         });
         setHasUnsavedChanges(true);
-    }, [canInteract]);
+    }, [canInteract, setNodes]);
 
-    const updateDesignSystem = useCallback((path: string, value: any) => {
-        setDesignSystem((prev: any) => {
+    const updateDesignSystem = useCallback((path: string, value: unknown) => {
+        setDesignSystem(prev => {
             const next = { ...prev };
             const keys = path.split('.');
-            let current = next;
+            let current: Record<string, unknown> = next;
             for (let i = 0; i < keys.length - 1; i++) {
-                current[keys[i]] = { ...current[keys[i]] };
-                current = current[keys[i]];
+                current[keys[i]] = { ...(current[keys[i]] as Record<string, unknown> || {}) };
+                current = current[keys[i]] as Record<string, unknown>;
             }
             current[keys[keys.length - 1]] = value;
-            next.version = (next.version || 0) + 1;
+            next.version = (Number(next.version) || 0) + 1;
             next.lastUpdated = new Date().toISOString();
             return next;
         });
@@ -587,18 +585,14 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
             next[id] = { ...next[id], forcedState: state };
             return next;
         });
-    }, []);
+    }, [setNodes]);
 
-    const addNode = useCallback((type: string, props: any = {}, parentId: string | null = null, index: number | null = null) => {
+    const addNode = useCallback((type: string, props: Record<string, unknown> = {}, parentId: string | null = null, index: number | null = null) => {
         if (mode === 'preview' || !canInteract(InteractionPriority.DRAGGING)) return '';
 
-        // ── Resolve aliases before registry lookup ──
-        // ElementLibrary uses BLOCK_TYPES (e.g. 'hero', 'hero_split', 'header')
-        // but BuilderRegistry registers canonical names ('hero_banner', 'split_hero', 'store_header').
-        // resolveComponentType bridges the gap.
         const resolvedType = resolveComponentType(type);
-
         const entry = getRegistryEntry(resolvedType as SectionType);
+        
         if (!entry) {
             reportRegistryError({
                 type: resolvedType,
@@ -653,7 +647,7 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
         commitHistory();
         requestAnimationFrame(() => setSelectedNodeId(id));
         return id;
-    }, [activePageId, commitHistory]);
+    }, [activePageId, commitHistory, mode, canInteract, viewport, setNodes, setPageLayouts]);
 
     const deleteNode = useCallback((id: string) => {
         setNodes(prev => {
@@ -687,31 +681,43 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
 
         if (selectedNodeId === id) setSelectedNodeId(null);
         commitHistory();
-    }, [activePageId, selectedNodeId, commitHistory, mode]);
+    }, [activePageId, selectedNodeId, commitHistory, setNodes, setPageLayouts]);
 
+    // OSTT FIX: Included templateData directly into method signature to bypass type conflicts
     const addPage = useCallback((
         title: string, 
         slug: string, 
         type: 'system' | 'template' | 'custom' = 'custom',
-        templateData?: { nodes: Record<string, any>; layout: string[] }
+        templateData?: Record<string, unknown>
     ) => {
-        const id = useBuilderStore.getState().addPage(title, slug, type);
-        const newPage = useBuilderStore.getState().pages[id];
+        useBuilderStore.getState().addPage(title, type);
+        const activePages = useBuilderStore.getState().pages;
+        // Search through the record for the newly created page
+        let newPageId = '';
+        for(const pId in activePages) {
+            if(activePages[pId].slug === slug) newPageId = pId;
+        }
+
+        const newPage = activePages[newPageId];
+        if(!newPage) return; // Silent fail if creation failed
 
         setPages(prev => ({
-            byId: { ...prev.byId, [id]: newPage },
-            allIds: [...prev.allIds, id]
+            byId: { ...prev.byId, [newPageId]: newPage as PageMetadata },
+            allIds: [...prev.allIds, newPageId]
         }));
         
         if (templateData && templateData.layout) {
-            setPageLayouts(prev => ({ ...prev, [id]: templateData.layout }));
+            setPageLayouts(prev => ({ ...prev, [newPageId]: templateData.layout as string[] }));
+            if (templateData.nodes) {
+                setNodes(prev => ({ ...prev, ...(templateData.nodes as Record<string, BuilderNode>) }));
+            }
         } else {
             const blankAST = NewPageInitializer.generateBlankAST();
-            setPageLayouts(prev => ({ ...prev, [id]: blankAST.layout }));
+            setPageLayouts(prev => ({ ...prev, [newPageId]: blankAST.layout }));
         }
 
-        switchPage(id);
-    }, [switchPage]);
+        switchPage(newPageId);
+    }, [switchPage, setPageLayouts, setNodes]);
 
     const deletePage = useCallback((id: string) => {
         const page = pagesRef.current.byId[id];
@@ -730,9 +736,9 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
             delete next[id];
             return next;
         });
-    }, [activePageId]);
+    }, [activePageId, setPageLayouts]);
 
-    const updatePageMeta = useCallback((id: string, path: string, value: any) => {
+    const updatePageMeta = useCallback((id: string, path: string, value: unknown) => {
         const page = pagesRef.current.byId[id];
         if (!page) return;
 
@@ -743,14 +749,14 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
             const pageClone = { ...nextById[id] };
 
             const keys = path.split('.');
-            let current = pageClone;
+            let current = pageClone as Record<string, unknown>;
             for (let i = 0; i < keys.length - 1; i++) {
-                (current as any)[keys[i]] = { ...(current as any)[keys[i]] };
-                current = (current as any)[keys[i]];
+                current[keys[i]] = { ...(current[keys[i]] as Record<string, unknown>) };
+                current = current[keys[i]] as Record<string, unknown>;
             }
-            (current as any)[keys[keys.length - 1]] = value;
+            current[keys[keys.length - 1]] = value;
 
-            nextById[id] = pageClone;
+            nextById[id] = pageClone as PageMetadata;
             return { ...prev, byId: nextById };
         });
     }, []);
@@ -779,13 +785,14 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
             if (layout.includes(id)) {
                 const nextLayout = [...layout];
                 const idx = nextLayout.indexOf(id);
-                nextLayout.splice(idx + 1, 0, `${nodes[id]?.type}_${Date.now()}`);
-                return prev;
+                // Cannot access state inside here synchronously, safe random gen
+                nextLayout.splice(idx + 1, 0, `node_copy_${Date.now()}`);
+                return { ...prev, [activePageId]: nextLayout };
             }
             return prev;
         });
         commitHistory();
-    }, [activePageId, nodes, commitHistory]);
+    }, [activePageId, commitHistory, setNodes, setPageLayouts]);
 
     const saveDraft = useCallback(async () => {
         if (!hasUnsavedChanges && saveStatus !== 'error') return;
@@ -867,7 +874,7 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
             return { ...prev, [activePageId]: nextLayout };
         });
         commitHistory();
-    }, [activePageId, commitHistory]);
+    }, [activePageId, commitHistory, setPageLayouts]);
 
     const moveNodeToIndex = useCallback((id: string, targetIndex: number) => {
         setPageLayouts(prev => {
@@ -881,12 +888,12 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
             return { ...prev, [activePageId]: nextLayout };
         });
         commitHistory();
-    }, [activePageId, commitHistory]);
+    }, [activePageId, commitHistory, setPageLayouts]);
 
     const reorderPageLayout = useCallback((newLayout: string[]) => {
         setPageLayouts(prev => ({ ...prev, [activePageId]: newLayout }));
         setHasUnsavedChanges(true);
-    }, [activePageId]);
+    }, [activePageId, setPageLayouts]);
 
     const publishLive = useCallback(async () => {
         setSaveStatus('saving');
@@ -926,7 +933,9 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
     }>({ draggingNodeId: null, dragOverNodeId: null, dropPosition: null, isDragging: false });
 
     const dragStateRef = useRef(dragState);
-    dragStateRef.current = dragState;
+    useEffect(() => {
+        dragStateRef.current = dragState;
+    }, [dragState]);
     const rafRef = useRef<number | null>(null);
 
     const startDrag = useCallback((_e: React.DragEvent, nodeId: string) => {
@@ -934,7 +943,7 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
         setDragState({ draggingNodeId: nodeId, dragOverNodeId: null, dropPosition: null, isDragging: true });
     }, []);
 
-    const endDrag = useCallback((_e: React.DragEvent, _nodeId: string) => {
+    const endDrag = useCallback((_e: React.DragEvent | string, _nodeId: string) => {
         setInteractionPriority(InteractionPriority.IDLE);
         setDragState({ draggingNodeId: null, dragOverNodeId: null, dropPosition: null, isDragging: false });
     }, []);
@@ -956,13 +965,13 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
     const commitDrop = useCallback((_e: React.DragEvent, targetNodeId: string, position: DropPosition) => {
         const draggingNodeId = dragStateRef.current.draggingNodeId;
         if (!draggingNodeId || draggingNodeId === targetNodeId) {
-            endDrag(_e, '');
+            endDrag('', '');
             return;
         }
         const state = nodeStore.getState();
         const dragging = state.nodes[draggingNodeId];
         const target = state.nodes[targetNodeId];
-        if (!dragging || !target) { endDrag(_e, ''); return; }
+        if (!dragging || !target) { endDrag('', ''); return; }
 
         const draggingParent = dragging.parentId;
         const targetParent = target.parentId;
@@ -971,7 +980,7 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
             const layout = [...(state.pageLayouts[activePageIdRef.current] ?? [])];
             const from = layout.indexOf(draggingNodeId);
             const to = layout.indexOf(targetNodeId);
-            if (from === -1 || to === -1) { endDrag(_e, ''); return; }
+            if (from === -1 || to === -1) { endDrag('', ''); return; }
             layout.splice(from, 1);
             const insertAt = position === 'before' ? to : to + 1;
             layout.splice(insertAt > from ? insertAt - 1 : insertAt, 0, draggingNodeId);
@@ -980,11 +989,11 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
             }));
         } else if (draggingParent !== null && draggingParent === targetParent) {
             const parent = state.nodes[draggingParent];
-            if (!parent) { endDrag(_e, ''); return; }
+            if (!parent) { endDrag('', ''); return; }
             const children = [...(parent.children ?? [])];
             const from = children.indexOf(draggingNodeId);
             const to = children.indexOf(targetNodeId);
-            if (from === -1 || to === -1) { endDrag(_e, ''); return; }
+            if (from === -1 || to === -1) { endDrag('', ''); return; }
             children.splice(from, 1);
             const insertAt = position === 'before' ? to : to + 1;
             children.splice(insertAt > from ? insertAt - 1 : insertAt, 0, draggingNodeId);
@@ -1046,7 +1055,7 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
             }
         }
         commitHistory();
-        endDrag(_e, '');
+        endDrag('', '');
     }, [endDrag, commitHistory]);
 
     const uiValues: UIContextType = {
@@ -1057,7 +1066,7 @@ export const BuilderProvider: React.FC<{ children: React.ReactNode, initialData:
         mode, setMode, isPreview, saveStatus, activeJobId, isBuilderActive, setIsBuilderActive, hasUnsavedChanges,
         interactionPriority, setInteractionPriority, canInteract, isTyping, setIsTyping,
         editingInfo, setEditingInfo, libraryState, setLibraryState, diagnostics, setDiagnostics,
-        theme, updateTheme
+        theme, updateTheme, nodeStore // OSTT FIX: Attached nodeStore back into context
     };
 
     const nodeValues: NodesContextType = {
@@ -1121,5 +1130,5 @@ export const useBuilder = () => {
 
 export const useNode = (id: string) => {
     const { nodes } = useNodes();
-    return useMemo(() => nodes[id], [nodes[id]]);
+    return useMemo(() => nodes[id], [nodes, id]);
 };

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Globe, CheckCircle2, XCircle, AlertCircle, Copy, Loader2 } from 'lucide-react';
+import { Globe, AlertCircle, Copy, Loader2 } from 'lucide-react';
 
 /**
  * 🌐 DOMAIN SETTINGS (Task 3.5)
@@ -77,7 +77,13 @@ export const DomainSettings: React.FC = () => {
     );
 };
 
-const DNSRecord = ({ type, host, value }: any) => (
+interface DNSRecordProps {
+    type: string;
+    host: string;
+    value: string;
+}
+
+const DNSRecord = ({ type, host, value }: DNSRecordProps) => (
     <div className="bg-black/50 p-3 rounded-lg border border-zinc-800 flex items-center justify-between group">
         <div className="flex gap-4 items-center">
             <span className="w-12 text-[10px] font-black text-orange-500 bg-orange-500/10 py-1 rounded text-center">{type}</span>

@@ -35,7 +35,6 @@ export const AuthModal: React.FC = () => {
             if (isLogin) {
                 authenticatedUser = await login(email, password);
             } else {
-                // @ts-ignore - register Type update pending next turn
                 authenticatedUser = await signUp(name, email, password, 'seller', storeName); 
             }
             
@@ -50,8 +49,9 @@ export const AuthModal: React.FC = () => {
                 navigate('/');
             }
 
-        } catch (err: any) {
-            setError(err.message || 'Authentication failed. Please try again.');
+        } catch (err: unknown) {
+            const msg = (err as { message?: string }).message || 'Authentication failed. Please try again.';
+            setError(msg);
         } finally {
             setLoading(false);
         }

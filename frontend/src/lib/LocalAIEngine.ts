@@ -1,11 +1,5 @@
 import { CreateMLCEngine, MLCEngine, InitProgressReport } from '@mlc-ai/web-llm';
-
-export interface CopilotAction {
-    action: 'addNode' | 'updateNode' | 'removeNode' | 'updateProps' | 'updateStyle';
-    type?: string;
-    id?: string;
-    props?: Record<string, any>;
-}
+import type { CopilotAction, MinifiedStoreState } from '../platform/core/types';
 
 export interface Theme {
     primaryColor: string;
@@ -36,8 +30,9 @@ export class LocalAIEngine {
         const userAgent = navigator.userAgent.toLowerCase();
         const isChrome = /chrome|chromium|crios/i.test(userAgent);
         const isEdge = /edg/i.test(userAgent);
-        const isBrave = (navigator as any).brave !== undefined;
-        // Safari check: 'safari' exists in Chrome UA, so we exclude if 'chrome' is absent or if it's Firefox
+        // OSTT FIX: Strongly typed brave check
+        const nav = navigator as unknown as { brave?: unknown };
+        const isBrave = nav.brave !== undefined;
         const isFirefox = /firefox|fxios/i.test(userAgent);
         const isSafari = /safari/i.test(userAgent) && !/chrome|chromium|crios/i.test(userAgent);
 
@@ -53,7 +48,9 @@ export class LocalAIEngine {
     public async init(onProgress: (progress: InitProgressReport) => void): Promise<void> {
         if (this.isInitialized && this.engine) return;
 
-        if (!(navigator as any).gpu || !this.isChromiumBrowser()) {
+        // OSTT FIX: Strongly typed GPU check
+        const nav = navigator as unknown as { gpu?: unknown };
+        if (!nav.gpu || !this.isChromiumBrowser()) {
             throw new Error("Omnora Copilot requires a Chromium-based browser (Google Chrome, Brave, or Edge).");
         }
 
@@ -66,16 +63,16 @@ export class LocalAIEngine {
             });
             
             this.isInitialized = true;
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("Failed to initialize WebLLM engine:", error);
-            throw new Error(`WebLLM Initialization Failed: ${error.message}`);
+            throw new Error(`WebLLM Initialization Failed: ${(error as Error).message}`);
         }
     }
 
     /**
      * Generates dispatch actions based on the user's prompt and current lightweight state.
      */
-    public async generateAction(prompt: string, currentState: any): Promise<CopilotAction[]> {
+    public async generateAction(prompt: string, currentState: MinifiedStoreState): Promise<CopilotAction[]> {
         if (!this.engine || !this.isInitialized) {
             throw new Error("Local AI Engine is not initialized.");
         }
@@ -101,14 +98,16 @@ Return exactly a JSON array like:
             { role: "user" as const, content: prompt }
         ];
 
-        let response: any;
+        let response: unknown;
         try {
             response = await this.engine.chat.completions.create({
                 messages,
                 temperature: 0.1, // Highly deterministic
             });
 
-            const reply = response.choices[0]?.message.content || '[]';
+            // OSTT FIX: Deeply typed object tree resolution
+            const resObject = response as { choices?: Array<{ message?: { content?: string } }> };
+            const reply = resObject.choices?.[0]?.message?.content || '[]';
             
             // Robust Regex Extraction: Find everything from the first `[` to the last `]`
             const jsonMatch = reply.match(/\[[\s\S]*\]/);
@@ -121,17 +120,16 @@ Return exactly a JSON array like:
             const parsed = JSON.parse(cleanJSON);
             
             return Array.isArray(parsed) ? parsed : [parsed];
-        } catch (e: any) {
-            console.error("Failed to parse AI Copilot payload:", e, response?.choices[0]?.message?.content);
+        } catch (e: unknown) {
+            console.error("Failed to parse AI Copilot payload:", e);
             throw new Error("The Copilot returned an invalid format. Please try again.");
         }
     }
 
     /**
      * Analyzes standard e-commerce dashboard JSON metrics and returns conversational actionable tips.
-     * Unlike generateAction, this is not constrained to strict JSON arrays.
      */
-    public async analyzeData(dataPayload: any): Promise<string> {
+    public async analyzeData(dataPayload: MinifiedStoreState): Promise<string> {
         if (!this.engine || !this.isInitialized) {
             throw new Error("Local AI Engine is not initialized. Please click the generate button first.");
         }
@@ -149,23 +147,21 @@ ${JSON.stringify(dataPayload)}`;
         try {
             const response = await this.engine.chat.completions.create({
                 messages,
-                temperature: 0.4, // Slightly higher for varied natural language
+                temperature: 0.4, 
             });
 
             return response.choices[0]?.message.content || "No insights could be generated.";
-        } catch (e: any) {
+        } catch (e: unknown) {
             console.error("Failed to generate AI insights:", e);
             throw new Error("The Copilot Analyst failed to interpret the data.");
         }
     }
 
-    // Duplicate generateTheme removed
-
     /**
      * Generates cinematic, high-converting store content (Hero text, product descriptions).
      * Implements Regex JSON Extraction to defend against Markdown wrappers and conversational filler output by local LLMs.
      */
-    public async generateContent(brandDescription: string, refinement?: string): Promise<{ heroHeadline: string, heroSubtext: string, featuredProducts: any[] }> {
+    public async generateContent(brandDescription: string, refinement?: string): Promise<{ heroHeadline: string, heroSubtext: string, featuredProducts: Array<{ name: string; description: string }> }> {
         if (!this.engine || !this.isInitialized) {
             throw new Error("Local AI Engine is not initialized.");
         }
@@ -204,7 +200,7 @@ Format the JSON exactly like this:
         try {
             const response = await this.engine.chat.completions.create({
                 messages,
-                temperature: 0.7, // Allow for creative copy
+                temperature: 0.7,
             });
 
             const rawContent = response.choices[0].message.content;
@@ -213,7 +209,6 @@ Format the JSON exactly like this:
             }
 
             // Phase 32: The Local AI JSON Trap - Regex Extractor
-            // WebGPU models frequently hallucinate markdown wrappers like \`\`\`json \`\`\`
             const jsonMatch = rawContent.match(/\{[\s\S]*\}/);
             
             if (!jsonMatch) {
@@ -230,9 +225,9 @@ Format the JSON exactly like this:
             }
 
             return parsedContent;
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("Content generation failed:", error);
-            throw new Error(`Content Generation Error: ${error.message}`);
+            throw new Error(`Content Generation Error: ${(error as Error).message}`);
         }
     }
 
@@ -272,7 +267,7 @@ Format the JSON exactly like this:
         try {
             const response = await this.engine.chat.completions.create({
                 messages,
-                temperature: 0.6, // Slight creativity for aesthetic nuance
+                temperature: 0.6,
             });
 
             const rawContent = response.choices[0].message.content;
@@ -280,7 +275,6 @@ Format the JSON exactly like this:
                 throw new Error("AI returned no theme data.");
             }
 
-            // Regex JSON Extractor to violently strip out markdown wrappers
             const jsonMatch = rawContent.match(/\{[\s\S]*\}/);
             
             if (!jsonMatch) {
@@ -291,15 +285,14 @@ Format the JSON exactly like this:
             const cleanJsonString = jsonMatch[0];
             const parsedTheme = JSON.parse(cleanJsonString);
 
-            // Structure validation
             if (!parsedTheme.primaryColor || !parsedTheme.backgroundColor || !parsedTheme.cardColor || !parsedTheme.textColor || !parsedTheme.borderRadius) {
                 throw new Error("Parsed theme JSON is missing necessary token fields.");
             }
 
             return parsedTheme;
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("Theme generation failed:", error);
-            throw new Error(`Theme Generation Error: ${error.message}`);
+            throw new Error(`Theme Generation Error: ${(error as Error).message}`);
         }
     }
 }

@@ -2,12 +2,18 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '../../../lib/supabaseClient';
 import { SuperAdminPaymentController } from './SuperAdminPaymentController';
 
-export const Payments: React.FC = () => {
-    const [requests, setRequests] = useState<any[]>([]);
+interface BillingRequest {
+    id: string;
+    merchant_id: string;
+    merchants: { store_name: string; email: string };
+    plan: string;
+    amount: number;
+    screenshot_url: string;
+    status: string;
+}
 
-    useEffect(() => {
-        fetchRequests();
-    }, []);
+export const Payments: React.FC = () => {
+    const [requests, setRequests] = useState<BillingRequest[]>([]);
 
     const fetchRequests = async () => {
         const { data } = await supabase
@@ -15,8 +21,15 @@ export const Payments: React.FC = () => {
             .select('*, merchants(store_name, email)')
             .eq('status', 'pending')
             .order('created_at', { ascending: false });
-        if (data) setRequests(data);
+        if (data) setRequests(data as BillingRequest[]);
     };
+
+    useEffect(() => {
+        const load = async () => {
+            await fetchRequests();
+        };
+        load();
+    }, []);
 
     const handleApprove = async (id: string, merchantId: string, plan: string) => {
         await SuperAdminPaymentController.approveRequest(id, merchantId, plan, 30);

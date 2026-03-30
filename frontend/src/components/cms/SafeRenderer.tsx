@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * 🛠️ OMNORA LABS | [SAFE RENDERER]
  * ---------------------------------------------------------
@@ -101,8 +100,15 @@ export const SkeletonLoader: React.FC = () => {
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 
+interface CMSNode {
+    id: string;
+    type: string;
+    props?: Record<string, unknown>;
+    children?: string[];
+}
+
 interface SafeRendererProps {
-    blocks?: any[];
+    blocks?: CMSNode[];
     loading?: boolean;
     isBuilder?: boolean;
     fbPixelId?: string;
@@ -121,7 +127,7 @@ export const SafeRenderer: React.FC<SafeRendererProps> = ({
     walletDaysRemaining,
 }) => {
     const [isClient, setIsClient] = useState(false);
-    const [hydratedStorefrontBlocks, setHydratedStorefrontBlocks] = useState<any[]>([]);
+    const [hydratedStorefrontBlocks, setHydratedStorefrontBlocks] = useState<CMSNode[]>([]);
     const [isForceRender, setIsForceRender] = useState(false);
 
     const nodesContext = useContext(NodesContext);
@@ -209,9 +215,17 @@ export const SafeRenderer: React.FC<SafeRendererProps> = ({
     useEffect(() => {
         if (!isClient || !blocks || blocks.length === 0) return;
 
-        Kernel.hydrate(blocks).then(ast => {
-            setHydratedStorefrontBlocks(ast.blocks || ast);
-        });
+        try {
+            Kernel.hydrate(blocks).then(ast => {
+                setHydratedStorefrontBlocks(ast.blocks || ast);
+            }).catch(err => {
+                OmnoraLogger.error('SAFE-RENDERER', `Kernel hydration failed: ${err}`);
+                setHydratedStorefrontBlocks(blocks);
+            });
+        } catch (err) {
+            OmnoraLogger.error('SAFE-RENDERER', `Kernel initialization/call crashed: ${err}`);
+            setHydratedStorefrontBlocks(blocks);
+        }
 
         performance.mark('safe-render-start');
         return () => {
@@ -261,6 +275,7 @@ export const SafeRenderer: React.FC<SafeRendererProps> = ({
 
         // Safe block resolution — never throws on undefined
         const rawBuilderBlocks = pageLayouts?.[activePageId];
+        if (!rawBuilderBlocks) return null; // Safe guard for missing layout
         const safeBuilderBlocks = Array.isArray(rawBuilderBlocks) ? rawBuilderBlocks : [];
 
         // Guard: page exists but has no blocks yet
@@ -281,19 +296,20 @@ export const SafeRenderer: React.FC<SafeRendererProps> = ({
         return (
             <ErrorBoundary fallback={<StorefrontFallback />}>
                 <div style={{ position: 'relative', width: '100%' }}>
-                    {safeBuilderBlocks.map((blockId: any, index: number) => {
-                        const node = typeof blockId === 'string' ? nodes[blockId] : blockId;
+                    {safeBuilderBlocks.map((blockId: string | CMSNode, index: number) => {
+                        const node = typeof blockId === 'string' ? (nodes as Record<string, CMSNode>)[blockId] : blockId;
                         if (!node || !node.type) return null;
 
                         const realType = resolveComponentType(node.type);
                         const registryItem = ComponentRegistry[realType];
                         if (!registryItem) return null;
 
-                        const Component = registryItem as React.FC<any>;
+                        const Component = registryItem as React.FC<Record<string, unknown>>;
                         const finalProps = {
                             ...(DEFAULT_PROPS[realType]?.defaultProps || {}),
                             ...(node.props || {}),
                             isBuilder: true,
+                            nodeId: (node as CMSNode).id || String(index),
                         };
 
                         return (
@@ -402,18 +418,19 @@ export const SafeRenderer: React.FC<SafeRendererProps> = ({
 
     let renderedBlocks: React.ReactNode[] = [];
     try {
-        renderedBlocks = hydratedStorefrontBlocks.map((node: any, index: number) => {
+        renderedBlocks = hydratedStorefrontBlocks.map((node: CMSNode, index: number) => {
             if (!node || !node.type) return null;
 
             const realType = resolveComponentType(node.type);
             const registryItem = ComponentRegistry[realType];
             if (!registryItem) return null;
 
-            const Component = registryItem as React.FC<any>;
+            const Component = registryItem as React.FC<Record<string, unknown>>;
             const finalProps = {
                 ...(DEFAULT_PROPS[realType]?.defaultProps || {}),
                 ...(node.props || {}),
                 isBuilder: false,
+                nodeId: node.id || String(index),
             };
 
             return (

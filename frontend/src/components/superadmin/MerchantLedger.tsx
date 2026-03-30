@@ -21,9 +21,10 @@ export const MerchantLedger: React.FC<MerchantLedgerProps> = ({ merchants, onMer
                 suspend ? "warning" : "success"
             );
             onMerchantsUpdate(); // Trigger refresh
-        } catch (error: any) {
+        } catch (error: unknown) {
+            const err = error as { message?: string };
             showToast(
-                `Error: ${error.message || "Failed to update store status."}`,
+                `Error: ${err.message || "Failed to update store status."}`,
                 "error"
             );
         } finally {

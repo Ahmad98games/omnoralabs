@@ -28,7 +28,6 @@ const AdPlacementZone: React.FC<AdPlacementZoneProps> = ({
         return null;
     }
 
-    const hasContent = config.videoUrl || config.imageUrl;
 
     // Video Zone
     if (type === 'video') {

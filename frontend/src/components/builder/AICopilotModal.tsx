@@ -18,7 +18,14 @@ export const AICopilotModal: React.FC<Props> = ({ isOpen, onClose }) => {
     const [brandDescription, setBrandDescription] = useState('');
     const [refinement, setRefinement] = useState('');
     const [isGenerating, setIsGenerating] = useState(false);
-    const [generatedContent, setGeneratedContent] = useState<any>(null);
+    
+    // OSTT FIX: Replaced any with structured interface matching the generation engine output
+    const [generatedContent, setGeneratedContent] = useState<{
+        heroHeadline: string;
+        heroSubtext: string;
+        featuredProducts: Array<{ name: string; description: string }>;
+    } | null>(null);
+    
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
     const [progress, setProgress] = useState<InitProgressReport | null>(null);
 
@@ -43,10 +50,11 @@ export const AICopilotModal: React.FC<Props> = ({ isOpen, onClose }) => {
             const content = await localAIEngine.generateContent(brandDescription, refinement);
             setGeneratedContent(content);
             showToast('Generation complete!', 'success');
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error("Copilot Error:", err);
-            setErrorMsg(err.message || 'AI Generation failed.');
-            showToast(err.message || 'AI Generation failed.', 'error');
+            const msg = err instanceof Error ? err.message : 'AI Generation failed.';
+            setErrorMsg(msg);
+            showToast(msg, 'error');
         } finally {
             setIsGenerating(false);
             setProgress(null);
@@ -57,7 +65,8 @@ export const AICopilotModal: React.FC<Props> = ({ isOpen, onClose }) => {
         if (!generatedContent) return;
 
         // Phase 32: Safe Canvas Injection
-        const nodeArray = Object.values(nodes) as any[];
+        // OSTT FIX: Replace any with structured Record
+        const nodeArray = Object.values(nodes) as Record<string, unknown>[];
         const heroNode = nodeArray.find(n => n.type === 'HeroBanner');
         const productGrid = nodeArray.find(n => n.type === 'ProductGrid' || n.type === 'Grid'); 
 
@@ -67,8 +76,8 @@ export const AICopilotModal: React.FC<Props> = ({ isOpen, onClose }) => {
         }
 
         try {
-            updateNode(heroNode.id, 'props', { 
-                ...heroNode.props, 
+            updateNode(heroNode.id as string, 'props', { 
+                ...(heroNode.props as Record<string, unknown>), 
                 headline: generatedContent.heroHeadline,
                 subtext: generatedContent.heroSubtext
             });
@@ -111,7 +120,7 @@ export const AICopilotModal: React.FC<Props> = ({ isOpen, onClose }) => {
                         </div>
                         <h2 className="font-bold tracking-tight text-lg">[FORGE] OMNORA_AI_COPILOT_V1_STABLE</h2>
                     </div>
-                    <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-lg text-gray-400 hover:text-white transition-colors">
+                    <button type="button" onClick={onClose} className="p-2 hover:bg-white/5 rounded-lg text-gray-400 hover:text-white transition-colors">
                         <X size={16} />
                     </button>
                 </div>
@@ -176,6 +185,7 @@ export const AICopilotModal: React.FC<Props> = ({ isOpen, onClose }) => {
                 {/* Footer */}
                 <div className="px-6 py-4 border-t border-white/5 bg-white/[0.01] flex justify-end gap-3">
                     <button
+                        type="button"
                         onClick={onClose}
                         className="px-4 py-2 text-sm font-medium text-gray-400 hover:text-white transition-colors"
                     >
@@ -184,16 +194,18 @@ export const AICopilotModal: React.FC<Props> = ({ isOpen, onClose }) => {
                     
                     {!generatedContent ? (
                         <button
+                            type="button"
                             onClick={() => handleGenerate()}
                             disabled={isGenerating || !brandDescription.trim()}
                             className="bg-transparent border border-[#C9A063] text-[#C9A063] hover:bg-[#C9A063]/10 px-5 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-colors disabled:opacity-50"
                         >
                             <Wand2 size={14} />
-                            {isGenerating ? 'GENERATE.ACTION' : 'GENERATE.ACTION'}
+                            GENERATE.ACTION
                         </button>
                     ) : (
                         <div className="flex gap-2">
                             <button
+                                type="button"
                                 onClick={() => handleGenerate()}
                                 disabled={isGenerating || !refinement.trim()}
                                 className="border border-[#C9A063]/30 text-[#C9A063] hover:bg-[#C9A063]/10 px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2"
@@ -202,6 +214,7 @@ export const AICopilotModal: React.FC<Props> = ({ isOpen, onClose }) => {
                                 REGENERATE.ACTION
                             </button>
                             <button
+                                type="button"
                                 onClick={handleApply}
                                 className="bg-[#C9A063] text-black hover:bg-[#B18952] px-5 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-colors"
                             >

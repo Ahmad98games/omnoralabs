@@ -66,8 +66,8 @@ export class SupabaseStorageClient implements IStorageClient {
         if (!data) return [];
 
         return data
-            .filter((item: any) => !item.id.endsWith('/'))   // exclude folder markers
-            .map((item: any) => {
+            .filter((item: Record<string, unknown>) => typeof item.id === 'string' && !item.id.endsWith('/'))   // exclude folder markers
+            .map((item: Record<string, unknown>) => {
                 const fullPath = `${merchantId}/${item.name}`;
                 const { data: urlData } = this.sb.storage
                     .from(BUCKET)
@@ -75,14 +75,14 @@ export class SupabaseStorageClient implements IStorageClient {
 
                 return {
                     url: urlData.publicUrl,
-                    fileName: item.name,
-                    size: item.metadata?.size || 0,
-                    uploadedAt: item.created_at || new Date().toISOString(),
+                    fileName: String(item.name),
+                    size: (item.metadata as { size?: number })?.size || 0,
+                    uploadedAt: String(item.created_at || new Date().toISOString()),
                 };
             });
     }
 
-    async deleteFile(url: string, merchantId: string): Promise<void> {
+    async deleteFile(url: string, _merchantId: string): Promise<void> {
         // Extract the file path from the public URL
         const bucketPath = `${BUCKET}/`;
         const pathIndex = url.indexOf(bucketPath);

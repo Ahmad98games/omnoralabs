@@ -42,26 +42,63 @@ class GlobalErrorBoundary extends Component<Props, State> {
         if (this.state.hasError) {
             return (
                 <div style={{
-                    padding: '4rem 2rem',
+                    padding: '80px 40px',
                     textAlign: 'center',
-                    fontFamily: 'var(--font-main)',
-                    color: 'var(--royal-blue)',
-                    background: 'var(--warm-white)',
-                    minHeight: '60vh',
+                    background: 'var(--obsidian-bg)',
+                    minHeight: '400px',
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
-                    justifyContent: 'center'
+                    justifyContent: 'center',
+                    border: '1px solid var(--border-low)',
+                    borderRadius: '16px',
+                    margin: '40px'
                 }}>
-                    <h2 className="font-serif" style={{ fontSize: '2rem', marginBottom: '1rem' }}>Our apologies</h2>
-                    <p style={{ color: 'var(--text-secondary)', maxWidth: '500px', margin: '0 auto 2rem' }}>
-                        We've encountered a temporary display issue. This section is under maintenance, but the rest of the shop is available.
+                    <div style={{ 
+                        width: '40px', 
+                        height: '40px', 
+                        borderRadius: '50%', 
+                        background: 'rgba(212, 175, 55, 0.1)', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center',
+                        marginBottom: '24px'
+                    }}>
+                        <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--accent-gold)' }} />
+                    </div>
+                    <h2 style={{ 
+                        fontSize: '20px', 
+                        fontWeight: 900, 
+                        color: '#fff', 
+                        marginBottom: '12px',
+                        letterSpacing: '-0.02em',
+                        fontFamily: 'var(--font-display)' 
+                    }}>Runtime Conflict Detected</h2>
+                    <p style={{ 
+                        color: 'var(--text-ghost)', 
+                        maxWidth: '420px', 
+                        fontSize: '13px', 
+                        lineHeight: 1.6,
+                        marginBottom: '32px' 
+                    }}>
+                        The interface has encountered a synchronization discrepancy. Diagnostic data has been logged. Please refresh to re-establish the primary link.
                     </p>
                     <button
                         onClick={() => window.location.reload()}
-                        className="btn btn-primary"
+                        style={{
+                            background: 'var(--surface-high)',
+                            border: '1px solid var(--border-low)',
+                            color: '#fff',
+                            padding: '10px 24px',
+                            borderRadius: '6px',
+                            fontSize: '12px',
+                            fontWeight: 900,
+                            cursor: 'pointer',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.05em'
+                        }}
                     >
-                        Refresh Page
+                        Synchronize Client
                     </button>
                 </div>
             );

@@ -60,15 +60,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ nodeId }) => {
         () => orderStore.getVersion(),
     );
 
-    const metrics = useMemo(() => ({
-        totalRevenue: orderStore.getTotalRevenue(),
-        totalOrders: orderStore.getOrderCount(),
-        pending: orderStore.getOrdersByStatus('pending').length + orderStore.getOrdersByStatus('confirmed').length,
-        processing: orderStore.getOrdersByStatus('processing').length,
-        shipped: orderStore.getOrdersByStatus('shipped').length,
-        delivered: orderStore.getOrdersByStatus('delivered').length,
-        recentOrders: orderStore.getRecentOrders(5),
-    }), [version]);
+    const metrics = useMemo(() => {
+        // Explicit reference for re-calculation on store version update
+        if (version === -1) return null;
+        return {
+            totalRevenue: orderStore.getTotalRevenue(),
+            totalOrders: orderStore.getOrderCount(),
+            pending: orderStore.getOrdersByStatus('pending').length + orderStore.getOrdersByStatus('confirmed').length,
+            processing: orderStore.getOrdersByStatus('processing').length,
+            shipped: orderStore.getOrdersByStatus('shipped').length,
+            delivered: orderStore.getOrdersByStatus('delivered').length,
+            recentOrders: orderStore.getRecentOrders(5),
+        };
+    }, [version]);
 
     const avgOrderValue = metrics.totalOrders > 0
         ? Math.round((metrics.totalRevenue / metrics.totalOrders) * 100) / 100

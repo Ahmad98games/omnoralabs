@@ -10,7 +10,7 @@ export type OmnoraMode = 'edit' | 'preview' | 'production';
 export interface OmnoraBaseContextType {
     mode: OmnoraMode;
     viewport: 'desktop' | 'tablet' | 'mobile';
-    nodes: Record<string, any>;
+    nodes: Record<string, unknown>;
 }
 
 /**
@@ -20,17 +20,17 @@ export interface OmnoraBaseContextType {
  */
 export interface OmnoraEditorExtensions {
     selectNode?: (id: string | null) => void;
-    updateNode?: (id: string, path: string, value: any) => void;
+    updateNode?: (id: string, path: string, value: unknown) => void;
     selectedNodeId?: string | null;
     isBuilderActive?: boolean;
     isTyping?: boolean;
     setIsTyping?: (typing: boolean) => void;
-    setEditingInfo?: (info: any) => void;
-    editingInfo?: any;
+    setEditingInfo?: (info: unknown) => void;
+    editingInfo?: unknown;
     commitHistory?: () => void;
-    diagnostics?: any;
-    setDiagnostics?: (diagnostics: any) => void;
-    setLibraryState?: (state: any) => void;
+    diagnostics?: unknown;
+    setDiagnostics?: (diagnostics: unknown) => void;
+    setLibraryState?: (state: unknown) => void;
 }
 
 export type OmnoraContextType = OmnoraBaseContextType & OmnoraEditorExtensions;
@@ -73,3 +73,5 @@ export const OmnoraRuntimeProvider: React.FC<{
         </OmnoraContext.Provider>
     );
 });
+
+OmnoraRuntimeProvider.displayName = 'OmnoraRuntimeProvider';

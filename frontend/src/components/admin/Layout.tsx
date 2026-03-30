@@ -20,6 +20,7 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
         </div>
     );
 };
+MainLayout.displayName = 'MainLayout';
 
 /**
  * 📐 INDUSTRIAL CARD (Task 9.3)
@@ -36,6 +37,7 @@ export const Card: React.FC<{ title?: string; children: React.ReactNode; classNa
         {children}
     </div>
 );
+Card.displayName = 'Card';
 
 /**
  * 🖱️ INDUSTRIAL BUTTON (Task 9.3)
@@ -43,6 +45,7 @@ export const Card: React.FC<{ title?: string; children: React.ReactNode; classNa
  */
 export const Button: React.FC<{ variant?: 'primary' | 'secondary'; children: React.ReactNode; onClick?: () => void; className?: string }> = ({ variant = 'primary', children, onClick, className = "" }) => (
     <button 
+        type="button" // OSTT FIX: Explicit button type to prevent unintended form submissions
         onClick={onClick}
         className={`px-5 py-2.5 rounded-[6px] text-xs font-black uppercase tracking-widest transition-all duration-200 active:scale-[0.98]
             ${variant === 'primary' 
@@ -54,3 +57,4 @@ export const Button: React.FC<{ variant?: 'primary' | 'secondary'; children: Rea
         {children}
     </button>
 );
+Button.displayName = 'Button';

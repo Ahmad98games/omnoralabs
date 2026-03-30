@@ -69,7 +69,7 @@ export const ThankYouPage: React.FC = () => {
                     items: items || [],
                     createdAt: new Date(orderData.created_at).toLocaleDateString()
                 });
-            } catch (err: any) {
+            } catch (err: unknown) {
                 console.error("Order fetch error:", err);
             } finally {
                 setLoading(false);
@@ -87,8 +87,8 @@ export const ThankYouPage: React.FC = () => {
             await register(regName, order.email, regPassword, activeMerchantId);
             showToast("Account Created. Welcome to the portal!", "success");
             navigate('/account');
-        } catch (err: any) {
-            showToast(err.message || "Failed to create account.", "error");
+        } catch (err: unknown) {
+            showToast((err as Error).message || "Failed to create account.", "error");
         } finally {
             setIsRegistering(false);
         }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../../lib/supabaseClient';
-import { Save, Copy, Image as ImageIcon, Trash2, Plus, ArrowLeft, Globe, ChevronDown, List } from 'lucide-react';
+import { Trash2, ArrowLeft, Globe } from 'lucide-react';
 
 interface Option {
     name: string;
@@ -19,8 +19,21 @@ interface Variant {
     inventory_count: number;
 }
 
+interface Product {
+    id?: string;
+    title: string;
+    description: string;
+    price: number;
+    compare_price: number;
+    status: string;
+    images: string[];
+    slug: string;
+    seo_title: string;
+    seo_description: string;
+}
+
 export const ProductEditor: React.FC<{ productId?: string; onBack: () => void }> = ({ productId, onBack }) => {
-    const [product, setProduct] = useState<any>({
+    const [product, setProduct] = useState<Product>({
         title: '', description: '', price: 0, compare_price: 0,
         status: 'draft', images: [], slug: '', seo_title: '', seo_description: ''
     });
@@ -29,11 +42,8 @@ export const ProductEditor: React.FC<{ productId?: string; onBack: () => void }>
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
 
-    useEffect(() => {
-        if (productId) fetchProductData();
-    }, [productId]);
-
-    const fetchProductData = async () => {
+    const fetchProductData = React.useCallback(async () => {
+        if (!productId) return;
         setLoading(true);
         const { data: prod } = await supabase.from('products').select('*').eq('id', productId).single();
         const { data: opts } = await supabase.from('product_options').select('*').eq('product_id', productId).order('position');
@@ -43,13 +53,16 @@ export const ProductEditor: React.FC<{ productId?: string; onBack: () => void }>
         if (opts) setOptions(opts.map(o => ({ name: o.name, values: o.values })));
         if (vars) setVariants(vars);
         setLoading(false);
-    };
+    }, [productId]);
 
-    // --- Variant Matrix Generator (Industrial Grade) ---
+    useEffect(() => {
+        fetchProductData();
+    }, [fetchProductData]);
+
     const generateVariants = () => {
         if (options.length === 0) return;
 
-        const cartesian = (...args: any[][]) => args.reduce((a, b) => a.flatMap(d => b.map(e => [d, e].flat())));
+        const cartesian = (...args: string[][][]) => args.reduce((a, b) => a.flatMap(d => b.map(e => [d, e].flat())));
         const combinations = options.length === 1 
             ? options[0].values.map(v => [v]) 
             : cartesian(...options.map(o => o.values));

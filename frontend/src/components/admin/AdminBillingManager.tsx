@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { databaseClient } from '../../platform/core/DatabaseClient';
 import type { MerchantUser } from '../../platform/core/DatabaseTypes';
 import { GeoService, Region } from '../../lib/GeoService';
-import { Globe, Loader2, Sparkles } from 'lucide-react';
+import { Globe, Loader2, Sparkles, ExternalLink } from 'lucide-react';
 
 // Ensure LemonSqueezy types exist globally if injecting the script
 declare global {
@@ -14,7 +14,7 @@ declare global {
                 Close: () => void;
             };
             Setup: (options: {
-                eventHandler: (event: any) => void;
+                eventHandler: (event: { event: string }) => void;
             }) => void;
         };
     }
@@ -86,122 +86,141 @@ export default function AdminBillingManager() {
 
     if (isLoading) {
         return (
-            <div className="flex flex-col items-center justify-center p-24 text-gray-500">
-                <Loader2 className="h-8 w-8 animate-spin mb-4 text-[#7c6dfa]" />
-                <p className="text-sm font-medium tracking-wide">Initializing Billing Engine...</p>
+            <div style={{ display: 'flex', flexDirection: 'column', itemsCenter: 'center', justifyContent: 'center', padding: '100px', color: 'var(--text-ghost)' }}>
+                <Loader2 className="animate-spin" style={{ marginBottom: '16px', color: 'var(--accent-gold)' }} />
+                <p style={{ fontSize: '12px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Synchronizing Billing Delta...</p>
             </div>
         );
     }
 
     return (
-        <div className="p-6 max-w-2xl font-sans text-white">
-            <h2 className="text-2xl font-extrabold mb-2 text-gray-100">
-                Subscription & Billing
-            </h2>
-            <p className="text-gray-400 mb-8 text-sm leading-relaxed">
-                Manage your Omnora OS SaaS subscription. Upgrade to unlock unlimited products,
-                custom domains, and complete whitespace branding.
-            </p>
+        <div style={{ width: '100%', maxWidth: '800px' }}>
+            {/* Header Area */}
+            <div style={{ marginBottom: '40px' }}>
+                <h1 style={{ fontSize: '32px', fontWeight: 900, letterSpacing: '-0.04em', color: '#fff', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    Subscription / <span style={{ opacity: 0.4 }}>Access Vault</span>
+                </h1>
+                <p style={{ fontSize: '13px', color: 'var(--text-ghost)', marginTop: '8px' }}>Provisioning of enterprise-grade storefront capabilities and global delivery manifests.</p>
+            </div>
 
-            <div className="bg-[#13131a] border border-[#2a2a3a] rounded-2xl p-8 flex flex-col gap-6 relative overflow-hidden">
-                
-                {/* PPP Background Decoration */}
-                {isSouthAsia && !isPro && (
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 blur-[80px] rounded-full pointer-events-none" />
-                )}
+            <div style={{ 
+                background: 'var(--surface-low)', 
+                border: '1px solid var(--border-low)', 
+                borderRadius: '16px', 
+                padding: '40px',
+                position: 'relative',
+                overflow: 'hidden'
+            }}>
+                {/* Visual Accent */}
+                <div style={{ position: 'absolute', top: 0, right: 0, width: '200px', height: '200px', background: isSouthAsia ? 'var(--accent-gold)' : '#fff', opacity: 0.03, filter: 'blur(100px)', borderRadius: '50%' }} />
 
-                <div className="flex justify-between items-center relative z-10">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
                     <div>
-                        <h3 className="text-base font-bold text-gray-100 mb-1">Current Tier</h3>
-                        <p className="m-0 text-sm text-gray-400">
-                            You are currently on the <strong className="text-white capitalize">{user?.plan || 'Free'}</strong> plan.
-                        </p>
+                        <div style={{ fontSize: '10px', fontWeight: 900, color: 'var(--text-ghost)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '4px' }}>Deployment Tier</div>
+                        <div style={{ fontSize: '20px', fontWeight: 900, color: '#fff' }}>
+                            {user?.plan?.toUpperCase() || 'STANDARD CORE'}
+                        </div>
                     </div>
                     {isPro ? (
-                        <div className="bg-emerald-500/10 text-emerald-400 px-4 py-1.5 rounded-full text-xs font-bold tracking-wider">
-                            ACTIVE PRO
-                        </div>
+                        <span className="pill pill-success">Enterprise Active</span>
                     ) : (
-                        <div className="bg-indigo-500/10 text-indigo-400 px-4 py-1.5 rounded-full text-xs font-bold tracking-wider">
-                            FREE TIER
-                        </div>
+                        <span className="pill pill-pending">Standard Latency</span>
                     )}
                 </div>
 
                 {!isPro && (
-                    <div className={`
-                        relative border rounded-xl p-6 flex flex-col gap-4 mt-2 overflow-hidden
-                        ${isSouthAsia 
-                            ? 'bg-gradient-to-br from-emerald-900/20 to-emerald-800/5 border-emerald-500/30' 
-                            : 'bg-gradient-to-br from-indigo-900/20 to-indigo-800/5 border-indigo-500/30'
-                        }
-                    `}>
-                        {/* Regional Indicator Pill */}
-                        <div className="absolute top-4 right-4 flex items-center gap-1.5 px-2.5 py-1 rounded bg-black/40 border border-white/5 text-[10px] font-bold tracking-wider text-gray-400">
-                            <Globe size={12} className={isSouthAsia ? "text-emerald-400" : "text-indigo-400"} />
-                            {isSouthAsia ? "SOUTH ASIA REGION" : "GLOBAL REGION"}
+                    <div style={{ 
+                        background: 'var(--surface-mid)', 
+                        border: '1px solid var(--border-mid)',
+                        borderRadius: '12px',
+                        padding: '32px',
+                        marginTop: '24px'
+                    }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
+                            <div>
+                                <h4 style={{ fontSize: '18px', fontWeight: 900, color: '#fff', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    Elevate to Enterprise
+                                    {isSouthAsia && <Sparkles size={16} style={{ color: 'var(--accent-gold)' }} />}
+                                </h4>
+                                <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                    <div style={{ fontSize: '12px', color: 'var(--text-ghost)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <div style={{ width: '4px', height: '4px', background: 'var(--accent-gold)', borderRadius: '50%' }} />
+                                        Unlimited Vault Capacity (Products)
+                                    </div>
+                                    <div style={{ fontSize: '12px', color: 'var(--text-ghost)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <div style={{ width: '4px', height: '4px', background: 'var(--accent-gold)', borderRadius: '50%' }} />
+                                        Custom Encryption Domain Binding
+                                    </div>
+                                    <div style={{ fontSize: '12px', color: 'var(--text-ghost)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <div style={{ width: '4px', height: '4px', background: 'var(--accent-gold)', borderRadius: '50%' }} />
+                                        Advanced Settlement Key (BYOK)
+                                    </div>
+                                    <div style={{ fontSize: '12px', color: 'var(--text-ghost)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <div style={{ width: '4px', height: '4px', background: 'var(--accent-gold)', borderRadius: '50%' }} />
+                                        Complete Whitespace Neutrality
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'var(--surface-high)', padding: '6px 12px', borderRadius: '6px', border: '1px solid var(--border-low)' }}>
+                                <Globe size={12} style={{ color: isSouthAsia ? 'var(--accent-gold)' : 'var(--text-ghost)' }} />
+                                <span style={{ fontSize: '9px', fontWeight: 900, color: 'var(--text-ghost)', textTransform: 'uppercase' }}>
+                                    {isSouthAsia ? "South Asia Protocol" : "Global Standard"}
+                                </span>
+                            </div>
                         </div>
 
-                        <div>
-                            <h4 className="m-0 text-xl font-extrabold text-gray-100 flex items-center gap-2">
-                                Upgrade to Pro
-                                {isSouthAsia && <Sparkles size={18} className="text-emerald-400" />}
-                            </h4>
-                            <p className="mt-2 text-[13px] text-gray-400 leading-relaxed font-medium">
-                                • Unlimited Products & Collections<br/>
-                                • Custom Domain Binding<br/>
-                                • Bring Your Own Key (BYOK) Checkout<br/>
-                                • Removal of "Powered by Omnora" badge
-                            </p>
-                        </div>
-                        
-                        <div className="flex items-end justify-between mt-4">
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: '40px' }}>
                             <div>
                                 {isSouthAsia ? (
                                     <>
-                                        <div className="text-xs font-bold text-emerald-400 tracking-wider mb-1 uppercase">Regional Support Discount</div>
-                                        <div className="text-3xl font-black text-white leading-none">
-                                            $5<span className="text-base font-semibold text-gray-500">/mo</span>
+                                        <div style={{ fontSize: '9px', fontWeight: 900, color: 'var(--accent-gold)', textTransform: 'uppercase', marginBottom: '4px' }}>Regional Parity Applied</div>
+                                        <div style={{ fontSize: '32px', fontWeight: 900, color: '#fff', fontFamily: 'var(--font-mono)' }}>
+                                            $5<span style={{ fontSize: '14px', color: 'var(--text-ghost)', fontWeight: 400 }}>/m</span>
                                         </div>
                                     </>
                                 ) : (
-                                    <div className="text-3xl font-black text-white leading-none">
-                                        $29<span className="text-base font-semibold text-gray-500">/mo</span>
+                                    <div style={{ fontSize: '32px', fontWeight: 900, color: '#fff', fontFamily: 'var(--font-mono)' }}>
+                                        $29<span style={{ fontSize: '14px', color: 'var(--text-ghost)', fontWeight: 400 }}>/m</span>
                                     </div>
                                 )}
                             </div>
-                            
+
                             <a 
                                 href={checkoutUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className={`
-                                    inline-flex items-center justify-center px-6 py-3 text-white border-none rounded-lg font-bold text-sm cursor-pointer
-                                    transition-transform hover:scale-105 active:scale-95 shadow-lg no-underline
-                                    ${isSouthAsia 
-                                        ? 'bg-gradient-to-br from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 shadow-emerald-900/50' 
-                                        : 'bg-gradient-to-br from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 shadow-indigo-900/50'
-                                    }
-                                `}
+                                style={{
+                                    background: isSouthAsia ? 'var(--accent-gold)' : '#fff',
+                                    color: '#000',
+                                    padding: '12px 32px',
+                                    borderRadius: '8px',
+                                    fontSize: '13px',
+                                    fontWeight: 900,
+                                    textDecoration: 'none',
+                                    textTransform: 'uppercase',
+                                    transition: 'transform 0.2s',
+                                    display: 'inline-block'
+                                }}
                             >
-                                Upgrade Now
+                                Authorize Upgrade
                             </a>
                         </div>
                     </div>
                 )}
-                
+
                 {isPro && (
-                    <div className="grid grid-cols-2 gap-4 mt-2">
-                         <div className="bg-[#1a1a24] p-4 rounded-xl border border-white/5">
-                             <span className="block text-[11px] text-gray-500 font-bold mb-1 tracking-wider uppercase">Next Billing Date</span>
-                             <span className="text-[15px] text-gray-100 font-semibold">Oct 1, 2026</span>
-                         </div>
-                         <div className="bg-[#1a1a24] p-4 rounded-xl border border-white/5 flex items-center justify-center hover:bg-[#1f1f2b] transition-colors cursor-pointer">
-                             <a href="#" className="text-indigo-400 text-[13px] font-bold no-underline flex items-center gap-2">
-                                 Manage Billing Portal
-                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7 17l9.2-9.2M17 17V7H7"/></svg>
-                             </a>
-                         </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginTop: '24px' }}>
+                        <div style={{ background: 'var(--surface-mid)', padding: '20px', borderRadius: '12px', border: '1px solid var(--border-mid)' }}>
+                            <div style={{ fontSize: '10px', fontWeight: 900, color: 'var(--text-ghost)', textTransform: 'uppercase', marginBottom: '8px' }}>Security Cycle Reset</div>
+                            <div style={{ fontSize: '15px', color: '#fff', fontWeight: 800, fontFamily: 'var(--font-mono)' }}>OCT 01, 2026</div>
+                        </div>
+                        <div style={{ background: 'var(--surface-mid)', padding: '20px', borderRadius: '12px', border: '1px solid var(--border-mid)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <a href="#" style={{ color: 'var(--accent-gold)', fontSize: '12px', fontWeight: 900, textDecoration: 'none', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                Billing Access Portal
+                                <ExternalLink size={14} />
+                            </a>
+                        </div>
                     </div>
                 )}
             </div>

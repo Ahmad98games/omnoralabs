@@ -57,7 +57,7 @@ export const LayerManager: React.FC = () => {
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                             {layers.map((layer) => {
-                                const valString = styleVariables[layer.key as any] || '0';
+                                const valString = (styleVariables as Record<string, string>)[layer.key] || '0';
                                 const numericVal = parseFloat(valString);
                                 
                                 return (
@@ -72,7 +72,7 @@ export const LayerManager: React.FC = () => {
                                             max={layer.max}
                                             step={layer.step}
                                             value={isNaN(numericVal) ? 0 : numericVal}
-                                            onChange={(e) => updateStyleVariable(layer.key as any, `${e.target.value}${layer.unit || ''}`)}
+                                            onChange={(e) => updateStyleVariable(layer.key as keyof typeof styleVariables, `${e.target.value}${layer.unit || ''}`)}
                                             style={{ width: '100%', cursor: 'pointer', accentColor: '#6366F1' }}
                                         />
                                     </div>

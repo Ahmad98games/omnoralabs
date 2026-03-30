@@ -1,12 +1,3 @@
-/**
- * 🛠️ OMNORA LABS | [SETTINGS STORE]
- * ---------------------------------------------------------
- * Principal Architect: Ahmad Mahboob (@ahmad-labs)
- * Division: Universal Commerce OS / Kernel Core
- * "Precision is the foundation of industrial scale."
- * ---------------------------------------------------------
- */
-
 import { create } from 'zustand';
 import { Kernel } from '../lib/kernel/Kernel';
 import { OmnoraLogger } from '../lib/kernel/utils/logger';
@@ -22,7 +13,8 @@ export interface MerchantMetadata {
     favicon?: string | null;
     fb_pixel_id?: string;
     tt_pixel_id?: string;
-    [key: string]: any;
+    // FIX: Replaced any with a safe JSON-serializable type
+    [key: string]: string | number | boolean | undefined | null;
 }
 
 export interface MerchantSettings {
@@ -37,7 +29,6 @@ interface SettingsState {
     loading: boolean;
     saving: boolean;
     error: string | null;
-    
     loadSettings: (userId: string) => Promise<void>;
     updateSettings: (userId: string, updates: { display_name?: string; metadata: MerchantMetadata }) => Promise<boolean>;
 }
@@ -51,18 +42,18 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     loadSettings: async (userId: string) => {
         set({ loading: true, error: null });
 
-        // Timeout guard — never hang forever
         const timeout = new Promise<never>((_, reject) =>
             setTimeout(() => reject(new Error('Settings load timed out (8s)')), 8000)
         );
 
         try {
+            // FIX: Explicitly typed the Kernel result
             const result = await Promise.race([
                 Kernel.readSystemState('MERCHANT_SETTINGS', userId),
                 timeout
-            ]);
+            ]) as { data: MerchantSettings | null; error: { message: string } | null };
 
-            const { data, error } = result as { data: any; error: any };
+            const { data, error } = result;
 
             if (error) throw error;
             if (!data) throw new Error('No merchant record found');
@@ -75,9 +66,9 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
                 loading: false 
             });
             OmnoraLogger.info("SETTINGS", "Merchant settings loaded successfully via Kernel.");
-        } catch (err: any) {
-            OmnoraLogger.error("SETTINGS", `Failed to load settings: ${err.message}`);
-            // Force-clear loading so the page renders with empty defaults instead of hanging
+        } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+            OmnoraLogger.error("SETTINGS", `Failed to load settings: ${errorMessage}`);
             set({ 
                 settings: {
                     id: userId,
@@ -85,7 +76,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
                     custom_domain: null,
                     metadata: {}
                 },
-                error: err.message || 'Failed to load settings', 
+                error: errorMessage, 
                 loading: false 
             });
         }
@@ -95,7 +86,6 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
         const previousSettings = get().settings;
         if (!previousSettings) return false;
 
-        // Optimistic Update
         const newSettings = {
             ...previousSettings,
             display_name: updates.display_name !== undefined ? updates.display_name : previousSettings.display_name,
@@ -118,10 +108,10 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
 
             set({ saving: false });
             return true;
-        } catch (err: any) {
-            OmnoraLogger.error("SETTINGS", `Update failed: ${err.message}`);
-            // Rollback on failure
-            set({ settings: previousSettings, saving: false, error: err.message || 'Update failed' });
+        } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : 'Update failed';
+            OmnoraLogger.error("SETTINGS", `Update failed: ${errorMessage}`);
+            set({ settings: previousSettings, saving: false, error: errorMessage });
             return false;
         }
     }

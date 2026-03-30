@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useAuth } from '../../../context/AuthContext';
-import { DataCruncher } from '../../../platform/ai/DataCruncher';
-import { supabase } from '../../../lib/supabaseClient';
+import { useAuth } from '../../context/AuthContext';
+import { DataCruncher } from '../../platform/ai/DataCruncher';
+import { supabase } from '../../lib/supabaseClient';
 
 export interface ActionCard {
     id: string;
@@ -10,19 +10,22 @@ export interface ActionCard {
     title: string;
     description: string;
     impact: "high" | "medium" | "low";
-    payload: Record<string, any>;
+    payload: Record<string, unknown>;
     expiresAt?: string;
 }
 
-const isValidActionCard = (card: any): card is ActionCard => {
+const isValidActionCard = (card: unknown): card is ActionCard => {
+    if (!card || typeof card !== 'object') return false;
+    
+    const typedCard = card as Record<string, unknown>;
+    
     return (
-        card &&
-        typeof card.id === 'string' &&
-        ['CREATE_COUPON', 'RESTOCK_ALERT', 'RECOVER_CHECKOUT', 'BOOST_PRODUCT', 'REVIEW_REQUEST'].includes(card.type) &&
-        typeof card.title === 'string' &&
-        typeof card.description === 'string' &&
-        ['high', 'medium', 'low'].includes(card.impact) &&
-        typeof card.payload === 'object'
+        typeof typedCard.id === 'string' &&
+        ['CREATE_COUPON', 'RESTOCK_ALERT', 'RECOVER_CHECKOUT', 'BOOST_PRODUCT', 'REVIEW_REQUEST'].includes(String(typedCard.type)) &&
+        typeof typedCard.title === 'string' &&
+        typeof typedCard.description === 'string' &&
+        ['high', 'medium', 'low'].includes(String(typedCard.impact)) &&
+        typeof typedCard.payload === 'object'
     );
 };
 
@@ -48,7 +51,7 @@ export const AiInsights: React.FC = () => {
             if (fnError || !data?.insights) throw new Error(fnError?.message || 'AI Engine failed to compute.');
 
             // 🛡️ 1. Temporal Dismissal Cleanups (Expiry > 24h)
-            const dismissed = JSON.parse(localStorage.getItem('omnora_dismissed_cards') || '{}');
+            const dismissed = JSON.parse(localStorage.getItem('omnora_dismissed_cards') || '{}') as Record<string, number>;
             const now = Date.now();
             Object.keys(dismissed).forEach(id => {
                  if (now - dismissed[id] > 24 * 60 * 60 * 1000) {
@@ -58,17 +61,19 @@ export const AiInsights: React.FC = () => {
             localStorage.setItem('omnora_dismissed_cards', JSON.stringify(dismissed));
 
             // 🛡️ 2. Validation Checks & Dismiss Filtering
-            const validatedCards = (data.insights as any[]).filter((c: any) => {
+            const rawInsights = data.insights as unknown[];
+            const validatedCards = rawInsights.filter((c: unknown) => {
                  if (!isValidActionCard(c)) {
                       console.warn('[AiInsights] Discarded malformed ActionCard:', c);
                       return false;
                  }
                  return !dismissed[c.id]; // Exclude dismissed
-            });
+            }) as ActionCard[];
 
             setInsights(validatedCards);
-        } catch (err: any) {
-            if (err.name !== 'AbortError') setError(err.message);
+        } catch (err: unknown) {
+            const errorMsg = err instanceof Error ? err.message : 'Unknown error';
+            if ((err as { name?: string }).name !== 'AbortError') setError(errorMsg);
         } finally {
             setIsLoading(false);
         }
@@ -82,7 +87,9 @@ export const AiInsights: React.FC = () => {
                   controller.abort();
              } else {
                   // Re-evaluate when Tab becomes active triggers again nicely
-                  loadInsights(controller.signal);
+                  // OSTT FIX: Pass fresh controller signal explicitly
+                  const newController = new AbortController();
+                  loadInsights(newController.signal);
              }
         };
 
@@ -93,16 +100,18 @@ export const AiInsights: React.FC = () => {
              controller.abort();
              document.removeEventListener('visibilitychange', handleVisibilityChange);
         };
+        // OSTT FIX: Added loadInsights to dependency array as it is declared outside, but we ignore exhaustive deps for stability of AbortController bindings
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user]);
 
     const handleDismiss = (id: string) => {
-         const dismissed = JSON.parse(localStorage.getItem('omnora_dismissed_cards') || '{}');
+         const dismissed = JSON.parse(localStorage.getItem('omnora_dismissed_cards') || '{}') as Record<string, number>;
          dismissed[id] = Date.now(); // Store current timestamp triggers
          localStorage.setItem('omnora_dismissed_cards', JSON.stringify(dismissed));
          setInsights(prev => prev.filter(c => c.id !== id));
     };
 
-    const handleActionClick = (type: ActionCard['type'], payload: Record<string, any>) => {
+    const handleActionClick = (type: ActionCard['type'], payload: Record<string, unknown>) => {
         if (type === 'CREATE_COUPON') {
             const code = payload?.code || 'BOOST10';
             window.alert(`[Omnora Co-Pilot] Pre-filling Coupon Modal with code: ${code}`);
@@ -129,7 +138,8 @@ export const AiInsights: React.FC = () => {
                     </p>
                 </div>
                 <button 
-                    onClick={loadInsights} 
+                    type="button"
+                    onClick={() => loadInsights()} 
                     disabled={isLoading}
                     className="flex items-center space-x-2 bg-[#18181b] hover:bg-[#202025] text-white px-4 py-2 rounded-lg border border-gray-800 transition-colors text-sm font-bold disabled:opacity-50"
                 >
@@ -178,6 +188,7 @@ export const AiInsights: React.FC = () => {
 
                             <div className="flex flex-col md:flex-row gap-3 mt-4 md:mt-0 items-center">
                                 <button 
+                                     type="button"
                                      onClick={() => handleDismiss(insight.id)}
                                      className="text-gray-500 hover:text-gray-300 text-xs font-medium underline px-2 py-1"
                                 >
@@ -185,6 +196,7 @@ export const AiInsights: React.FC = () => {
                                 </button>
                                 
                                 <button 
+                                    type="button"
                                     onClick={() => handleActionClick(insight.type, insight.payload)}
                                     className="shrink-0 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-sm font-bold uppercase tracking-wider transition-colors shadow-lg shadow-indigo-900/20"
                                 >

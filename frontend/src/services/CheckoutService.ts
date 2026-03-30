@@ -1,4 +1,5 @@
 import client from '../api/client';
+import { AxiosError } from 'axios';
 
 export interface CheckoutLineItem {
     id: string;
@@ -7,6 +8,15 @@ export interface CheckoutLineItem {
     quantity: number;
     image: string;
     variantId?: string;
+}
+
+/**
+ * Logic: Created an interface for the expected API response to avoid 'any'.
+ */
+interface CheckoutResponse {
+    success: boolean;
+    url?: string;
+    error?: string;
 }
 
 export class CheckoutService {
@@ -19,8 +29,7 @@ export class CheckoutService {
         }
 
         try {
-            // Call the real backend endpoint
-            const response = await client.post('/payment/checkout/create-session', {
+            const response = await client.post<CheckoutResponse>('/payment/checkout/create-session', {
                 items: items.map(item => ({
                     id: item.id,
                     quantity: item.quantity,
@@ -34,13 +43,16 @@ export class CheckoutService {
             } else {
                 throw new Error(response.data?.error || 'Failed to create checkout session');
             }
-        } catch (err: any) {
-            console.error('Checkout API Error:', err);
-            // Re-throw specific errors for the UI to handle
-            if (err.response?.data?.error === 'MERCHANT_NO_GATEWAY') {
+        } catch (err) {
+            // FIX: Using AxiosError type guard instead of 'any'
+            const axiosError = err as AxiosError<{ error?: string }>;
+            console.error('Checkout API Error:', axiosError);
+
+            if (axiosError.response?.data?.error === 'MERCHANT_NO_GATEWAY') {
                 throw new Error('MERCHANT_NO_GATEWAY');
             }
-            throw new Error(err.response?.data?.error || 'Unable to initiate checkout. Please try again.');
+            
+            throw new Error(axiosError.response?.data?.error || 'Unable to initiate checkout. Please try again.');
         }
     }
 }

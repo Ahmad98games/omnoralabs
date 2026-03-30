@@ -1,13 +1,13 @@
 import React from 'react';
 import { useUI } from '../../../context/BuilderContext';
-import { Link2, Check, Globe, XCircle } from 'lucide-react';
+import { Check, Globe, XCircle } from 'lucide-react';
 
 interface LinkPickerEditorProps {
     value: {
         type: 'INTERNAL' | 'EXTERNAL' | 'SCROLL' | 'NONE';
         target: string;
     } | string | undefined; // Support legacy string or new object
-    onChange: (value: any) => void;
+    onChange: (value: { type: 'INTERNAL' | 'EXTERNAL' | 'SCROLL' | 'NONE'; target: string }) => void;
     label?: string;
 }
 

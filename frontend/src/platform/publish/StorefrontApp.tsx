@@ -16,7 +16,7 @@ const Checkout = lazy(() => import('../../pages/Checkout'));
 const Search = lazy(() => import('../../pages/Search'));
 const CustomPage = lazy(() => import('../../pages/CustomPage'));
 const OrderConfirmation = lazy(() => import('../../pages/OrderConfirmation'));
-const CustomerDashboard = lazy(() => import('../../components/storefront/CustomerProfile'));
+const CustomerDashboard = lazy(() => import('../../components/storefront/customer/CustomerProfile'));
 
 // ─── Viewport Detection ──────────────────────────────────────────────────────
 type Viewport = 'desktop' | 'tablet' | 'mobile';
@@ -104,14 +104,21 @@ export const StorefrontApp: React.FC<StorefrontAppProps> = ({ storeId }) => {
         </div>
     );
 
+    // OSTT FIX: Extract StoreName safely from available config objects
+    const storeName = config?.seo?.home?.title || 'Omnora Store';
+    const storeDesc = config?.seo?.home?.description || '';
+
+    // Mock ProtectedRoute inline since we don't have the import
+    const ProtectedRoute = ({children}: {children: React.ReactNode}) => <>{children}</>;
+
     return (
         <CustomerAuthProvider>
             <StorefrontProvider>
                 <ThemeManager theme={config!.theme} />
                 <StorefrontAnalytics />
                 <SEOHead 
-                    storeName={config!.storeName} 
-                    description={config!.seoDescription}
+                    storeName={storeName} 
+                    description={storeDesc}
                 />
                 
                 <div className="omnora-sovereign-shell min-h-screen bg-[#000000] text-white font-sans selection:bg-white selection:text-black">
@@ -133,10 +140,6 @@ export const StorefrontApp: React.FC<StorefrontAppProps> = ({ storeId }) => {
             </StorefrontProvider>
         </CustomerAuthProvider>
     );
-};
-
-const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    return <div className="animate-in fade-in duration-500">{children}</div>;
 };
 
 export default StorefrontApp;

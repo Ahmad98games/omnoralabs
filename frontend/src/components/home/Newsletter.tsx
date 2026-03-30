@@ -17,9 +17,9 @@ export default function Newsletter() {
             setStatus('success');
             setMessage('Thank you for subscribing!');
             setEmail('');
-        } catch (error: any) {
+        } catch (error: unknown) {
             setStatus('error');
-            setMessage(error.message || 'Failed to subscribe. Please try again.');
+            setMessage((error as Error).message || 'Failed to subscribe. Please try again.');
         }
     };
 

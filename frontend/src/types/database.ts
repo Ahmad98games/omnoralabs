@@ -3,6 +3,9 @@
  * High-Availability Commerce Interface definitions.
  */
 
+// Global Utility for JSON-safe data (replaces 'any')
+type JSONValue = string | number | boolean | null | { [key: string]: JSONValue } | JSONValue[];
+
 export interface Merchant {
     id: string;
     store_name: string;
@@ -16,7 +19,11 @@ export interface BlogPost {
     merchant_id: string;
     title: string;
     slug: string;
-    content: any; // TipTap JSON
+    /**
+     * Logic: TipTap returns a recursive JSON structure (Node/Mark). 
+     * Using JSONValue ensures we can traverse it safely without 'any'.
+     */
+    content: JSONValue; 
     status: 'draft' | 'published' | 'scheduled';
     seo_meta: {
         title?: string;
@@ -35,7 +42,10 @@ export interface SocialConnection {
     access_token_encrypted: string; // Base64 ciphertext (pgsodium)
     catalog_id: string | null;
     pixel_id: string | null;
-    settings: any;
+    /**
+     * Logic: Platform-specific settings are usually key-value pairs.
+     */
+    settings: Record<string, JSONValue>; 
     created_at: string;
     updated_at: string;
 }
@@ -48,7 +58,10 @@ export interface ShippingZone {
     rates: Array<{
         name: string;
         price_cents: number;
-        conditions?: any;
+        /**
+         * Logic: Weight-based or Price-based conditions are objects.
+         */
+        conditions?: Record<string, JSONValue>;
     }>;
     created_at: string;
     updated_at: string;

@@ -63,7 +63,10 @@ const AiContentPanel: React.FC = () => {
                 // Poll once after 4s
                 setTimeout(() => pollResult(), 4000);
             }
-        } catch (e: any) { setError(e?.response?.data?.error || 'Generation failed'); }
+        } catch (e: unknown) { 
+            const errorObj = e as { response?: { data?: { error?: string } } };
+            setError(errorObj?.response?.data?.error || 'Generation failed'); 
+        }
         setLoading(false);
     };
 
@@ -72,7 +75,9 @@ const AiContentPanel: React.FC = () => {
             const res = await apiClient.get(`/ai/content/${selectedType}`);
             if (res.data?.status === 'done') setResult(res.data.result);
             else if (res.data?.status === 'failed') setResult('❌ Generation failed. Try again.');
-        } catch { }
+        } catch (err) { 
+            console.error("Polling failed", err);
+        }
     };
 
     const copy = () => {

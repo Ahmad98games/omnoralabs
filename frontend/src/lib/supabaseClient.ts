@@ -17,8 +17,8 @@ export const supabase = createClient(supabaseUrl, supabaseKey, {
 /**
  * 🛡️ Defensive full-object error logger for Ahmad
  */
-export const handleSupabaseError = (error: any, context: string) => {
-    console.error(`[Supabase Error] -> @\${context}:`, JSON.stringify(error, null, 2));
+export const handleSupabaseError = (error: unknown, context: string) => {
+    console.error(`[Supabase Error] -> @${context}:`, JSON.stringify(error, null, 2));
     throw error;
 };
 
@@ -26,25 +26,21 @@ export const handleSupabaseError = (error: any, context: string) => {
  * ⚡ Sample Fetcher Example: Bypassing Axios completely via SDK
  */
 export const fetchProducts = async (tenantId: string) => {
-    try {
-        const { data: { session } } = await supabase.auth.getSession();
-        const { data, error } = await supabase
-            .from('products')
-            .select('*')
-            .eq('merchant_id', tenantId);
+    await supabase.auth.getSession();
+    const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('merchant_id', tenantId);
 
-        if (error) handleSupabaseError(error, 'fetchProducts');
-        return data;
-    } catch (err) {
-        throw err;
-    }
+    if (error) handleSupabaseError(error, 'fetchProducts');
+    return data;
 };
 
 /**
  * 📂 Constant 'db' object wrapper for Dashboard ops
  */
 export const db = {
-    createPage: async (userId: string, name: string, content: any) => {
+    createPage: async (userId: string, name: string, content: unknown) => {
         try {
             const slug = name.toLowerCase().replace(/[^a-z0-9]/g, '-');
             const { data, error } = await supabase
@@ -53,7 +49,7 @@ export const db = {
                     merchant_id: userId, 
                     title: name, 
                     slug: slug,
-                    content: content,
+                    content: content as Record<string, unknown>, // Cast to strict record for Supabase JSON compatibility
                     updated_at: new Date().toISOString()
                 });
             if (error) throw error;

@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, Terminal, Database, Cpu, Layout, Layers, ShieldCheck, Rocket } from 'lucide-react';
 import client from '../../api/client';
 import { useNodes } from '../../context/BuilderContext';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../lib/supabaseClient'; // 🛡️ Load Supabase for Direct save triggers node!
 
@@ -27,12 +26,11 @@ const STEPS = [
 export const StoreGenerator: React.FC<StoreGeneratorProps> = ({ prompt, onComplete, onCancel }) => {
     const [currentStep, setCurrentStep] = useState(0);
     const [status, setStatus] = useState<'processing' | 'completed' | 'failed'>('processing');
-    const [jobId, setJobId] = useState<string | null>(null);
     const [timerText, setTimerText] = useState<string>(''); // 🛡️ Stage timer text
     const { user } = useAuth(); // 🛡️ Hydrate session loading guards
     
     // Optional integration with BuilderContext
-    let injectAST: any = null;
+    let injectAST: ((ast: Record<string, unknown>) => void) | null = null;
     try {
         const nodes = useNodes();
         injectAST = nodes.injectAST;
@@ -40,13 +38,11 @@ export const StoreGenerator: React.FC<StoreGeneratorProps> = ({ prompt, onComple
         // Not in builder context, ignore
     }
 
-    const navigate = useNavigate();
-
     // Start Generation
     useEffect(() => {
         if (!user || status !== 'processing') return; // 🛡️ Guard against un-hydrated sessions layout!
-
-        const saveToDatabase = async (ast: any) => {
+        
+        const saveToDatabase = async (ast: Record<string, unknown>) => {
             try {
                 if (!user?.id) return;
 
@@ -82,8 +78,8 @@ export const StoreGenerator: React.FC<StoreGeneratorProps> = ({ prompt, onComple
 
                 if (error) throw error;
                 console.log('[Supabase Save Success] Forge AST synced securely.');
-
-            } catch (err) {
+                
+            } catch (err: unknown) {
                 console.error('[Supabase Save Failed] Forge AST synchronization error:', err);
             }
         };
@@ -105,7 +101,7 @@ export const StoreGenerator: React.FC<StoreGeneratorProps> = ({ prompt, onComple
                 } else {
                     setStatus('failed');
                 }
-            } catch (err) {
+            } catch (err: unknown) {
                 console.error('[AI Store] 404/Error detected. Triggering safe fallback template layout node.', err);
                 
                 // 🛡️ SAFE FALLBACK TEMPLATE: Prevents total White Screen lockout securely layout!
@@ -147,11 +143,14 @@ export const StoreGenerator: React.FC<StoreGeneratorProps> = ({ prompt, onComple
 
     // Poll Status
     useEffect(() => {
-        if (!jobId || status !== 'processing') return;
+        // jobId is currently unused in the direct path
+        if (status !== 'processing') return;
 
         const poll = setInterval(async () => {
             try {
-                const response = await client.get(`/api/jobs/${jobId}`);
+                // Polling is currently bypassed in the direct-injection path
+                // This is a placeholder for future async job tracking if needed
+                if (!status) return; 
                 if (response.data.status === 'completed') {
                     const ast = response.data.result.ast;
                     clearInterval(poll);
@@ -167,13 +166,13 @@ export const StoreGenerator: React.FC<StoreGeneratorProps> = ({ prompt, onComple
                     clearInterval(poll);
                     setStatus('failed');
                 }
-            } catch (err) {
+            } catch (err: unknown) {
                 console.error('[AI Store] Polling error:', err);
             }
         }, 2000);
 
         return () => clearInterval(poll);
-    }, [jobId, status, injectAST, onComplete]);
+    }, [status, injectAST, onComplete]);
 
     // Fake Step Progression for UI feel
     useEffect(() => {
@@ -213,7 +212,7 @@ export const StoreGenerator: React.FC<StoreGeneratorProps> = ({ prompt, onComple
                     </h1>
                     <p className="text-white/40 text-sm max-w-sm mx-auto">
                         {timerText || `Generating high-fidelity storefront based on:`} <br/>
-                        <span className="text-white/60 italic">"{prompt}"</span>
+                        <span className="text-white/60 italic">&quot;{prompt}&quot;</span>
                     </p>
                 </motion.div>
 

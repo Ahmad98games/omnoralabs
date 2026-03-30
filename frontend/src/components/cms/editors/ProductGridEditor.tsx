@@ -13,14 +13,14 @@
  * All changes dispatch through the Dispatcher → NodeStore pipeline
  * for instant canvas reactivity.
  */
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNodeSelector } from '../../../hooks/useNodeSelector';
 import { dispatcher } from '../../../platform/core/Dispatcher';
 import { databaseClient } from '../../../platform/core/DatabaseClient';
 import type { Product } from '../../../context/StorefrontContext';
 import {
-    Grid3X3, Package, Tag, SlidersHorizontal,
-    Check, X, Search, Loader2
+    Grid3X3, Package, SlidersHorizontal,
+    Check, Search, Loader2
 } from 'lucide-react';
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
@@ -92,7 +92,7 @@ export const ProductGridEditor: React.FC<{ nodeId: string }> = ({ nodeId }) => {
 
     // ── Async CMS Data ────────────────────────────────────────────────
     const [products, setProducts] = useState<Product[]>([]);
-    const [categories, setCategories] = useState<any[]>([]);
+    const [categories, setCategories] = useState<unknown[]>([]);
     const [loading, setLoading] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
 
@@ -100,7 +100,7 @@ export const ProductGridEditor: React.FC<{ nodeId: string }> = ({ nodeId }) => {
         const fetchData = async () => {
             setLoading(true);
             try {
-                const tenantId = (window as any).__OMNORA_TENANT_ID__ || 'default_merchant';
+                const tenantId = (window as unknown as { __OMNORA_TENANT_ID__?: string }).__OMNORA_TENANT_ID__ || 'default_merchant';
                 const [pData, cData] = await Promise.all([
                     databaseClient.getProductsByMerchant(tenantId),
                     databaseClient.getCategories(tenantId)
@@ -129,7 +129,7 @@ export const ProductGridEditor: React.FC<{ nodeId: string }> = ({ nodeId }) => {
     if (!node) return null;
 
     // ── AST Mutation Helper ───────────────────────────────────────────
-    const updateProp = (key: string, value: any) => {
+    const updateProp = (key: string, value: unknown) => {
         dispatcher.dispatch({
             nodeId,
             path: `props.${key}`,
@@ -139,9 +139,9 @@ export const ProductGridEditor: React.FC<{ nodeId: string }> = ({ nodeId }) => {
         });
     };
 
-    const props = node.props || {};
-    const selectionMode = props.selectionMode || 'category'; // 'category' | 'specific'
-    const selectedProductIds: string[] = props.productIds || [];
+    const blockProps = node.props || {};
+    const selectionMode = blockProps.selectionMode || 'category'; // 'category' | 'specific'
+    const selectedProductIds: string[] = blockProps.productIds || [];
 
     const toggleProductId = (id: string) => {
         const current = [...selectedProductIds];
@@ -195,12 +195,12 @@ export const ProductGridEditor: React.FC<{ nodeId: string }> = ({ nodeId }) => {
                             </div>
                         ) : (
                             <select
-                                value={props.category_id || ''}
+                                value={blockProps.category_id || ''}
                                 onChange={(e) => updateProp('category_id', e.target.value)}
                                 style={S.select}
                             >
                                 <option value="">All Products</option>
-                                {categories.map(cat => (
+                                {categories.map((cat: { id: string; name: string }) => (
                                     <option key={cat.id} value={cat.id}>{cat.name}</option>
                                 ))}
                             </select>
@@ -289,7 +289,7 @@ export const ProductGridEditor: React.FC<{ nodeId: string }> = ({ nodeId }) => {
                     <label style={S.label}>Columns</label>
                     <input
                         type="number" min={1} max={6}
-                        value={props.columns ?? 3}
+                        value={blockProps.columns ?? 3}
                         onChange={(e) => updateProp('columns', Math.max(1, Math.min(6, Number(e.target.value))))}
                         style={S.input}
                     />
@@ -300,12 +300,12 @@ export const ProductGridEditor: React.FC<{ nodeId: string }> = ({ nodeId }) => {
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         <input
                             type="range" min={0} max={60} step={4}
-                            value={props.gap ?? 20}
+                            value={blockProps.gap ?? 20}
                             onChange={(e) => updateProp('gap', Number(e.target.value))}
                             style={{ flex: 1, accentColor: '#7c6dfa' }}
                         />
                         <span style={{ fontSize: 11, color: '#a1a1aa', minWidth: 32, textAlign: 'right' }}>
-                            {props.gap ?? 20}px
+                            {blockProps.gap ?? 20}px
                         </span>
                     </div>
                 </div>
@@ -314,7 +314,7 @@ export const ProductGridEditor: React.FC<{ nodeId: string }> = ({ nodeId }) => {
                     <label style={S.label}>Products Limit</label>
                     <input
                         type="number" min={1} max={50}
-                        value={props.limit ?? 12}
+                        value={blockProps.limit ?? 12}
                         onChange={(e) => updateProp('limit', Math.max(1, Number(e.target.value)))}
                         style={S.input}
                     />
@@ -322,8 +322,8 @@ export const ProductGridEditor: React.FC<{ nodeId: string }> = ({ nodeId }) => {
 
                 <div style={S.row}>
                     <span style={{ fontSize: 11, color: '#a1a1aa' }}>Show Sort Filter</span>
-                    <button onClick={() => updateProp('showFilter', !props.showFilter)} style={S.toggle(props.showFilter !== false)}>
-                        <div style={S.toggleDot(props.showFilter !== false)} />
+                    <button onClick={() => updateProp('showFilter', !blockProps.showFilter)} style={S.toggle(blockProps.showFilter !== false)}>
+                        <div style={S.toggleDot(blockProps.showFilter !== false)} />
                     </button>
                 </div>
             </div>
@@ -337,7 +337,7 @@ export const ProductGridEditor: React.FC<{ nodeId: string }> = ({ nodeId }) => {
                 <div style={S.fieldGroup}>
                     <label style={S.label}>Card Style</label>
                     <select
-                        value={props.cardStyle || 'minimal'}
+                        value={blockProps.cardStyle || 'minimal'}
                         onChange={(e) => updateProp('cardStyle', e.target.value)}
                         style={S.select}
                     >
@@ -350,7 +350,7 @@ export const ProductGridEditor: React.FC<{ nodeId: string }> = ({ nodeId }) => {
                 <div style={S.fieldGroup}>
                     <label style={S.label}>Image Aspect Ratio</label>
                     <select
-                        value={props.imageAspect || 'portrait'}
+                        value={blockProps.imageAspect || 'portrait'}
                         onChange={(e) => updateProp('imageAspect', e.target.value)}
                         style={S.select}
                     >
@@ -363,5 +363,6 @@ export const ProductGridEditor: React.FC<{ nodeId: string }> = ({ nodeId }) => {
         </div>
     );
 };
+ProductGridEditor.displayName = 'ProductGridEditor';
 
 export default ProductGridEditor;

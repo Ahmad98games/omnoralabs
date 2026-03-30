@@ -2,30 +2,39 @@ import { useState, useEffect } from 'react';
 
 /**
  * useStoreHydration Hook
- * Prevents hydration mismatches in SSR/Hydration environments (like Next.js or pure React hydration)
+ * Prevents hydration mismatches in SSR/Hydration environments
  * by guarding UI rendering until the Zustand store has rehydrated from localStorage.
- * 
- * @param store The store to check for hydration
- * @returns boolean indicating if the store has finished rehydrating
  */
-export const useStoreHydration = (store: any) => {
-    const [hydrated, setHydrated] = useState(false);
+interface HydratableState { _hasHydrated?: boolean; [key: string]: unknown; }
+
+export const useStoreHydration = (store: { getState: () => HydratableState; subscribe: (listener: (state: HydratableState) => void) => () => void }) => {
+    // OSTT FIX: Initialize directly from state if possible to avoid set-state-in-effect
+    const [hydrated, setHydrated] = useState(() => {
+        try {
+            return !!store.getState()._hasHydrated;
+        } catch {
+            return false;
+        }
+    });
 
     useEffect(() => {
-        // Use the internal _hasHydrated flag if available
-        if (store.getState()._hasHydrated) {
-            setHydrated(true);
-        } else {
-            // Subscribe to changes until hydrated is true
-            const unsub = store.subscribe((state: any) => {
-                if (state._hasHydrated) {
-                    setHydrated(true);
-                    unsub();
-                }
-            });
-            return unsub;
+        const state = store.getState();
+        if (state._hasHydrated) {
+            if (!hydrated) {
+                // Use next tick to satisfy linter and avoid synchronous cascade
+                Promise.resolve().then(() => setHydrated(true));
+            }
+            return;
         }
-    }, [store]);
+
+        const unsub = store.subscribe((newState: HydratableState) => {
+            if (newState._hasHydrated) {
+                setHydrated(true);
+            }
+        });
+        
+        return unsub;
+    }, [store, hydrated]);
 
     return hydrated;
 };

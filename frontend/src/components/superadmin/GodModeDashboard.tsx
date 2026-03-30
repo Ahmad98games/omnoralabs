@@ -19,9 +19,9 @@ export const GodModeDashboard: React.FC = () => {
             ]);
             setMetrics(metricsData);
             setMerchants(merchantsData);
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error("God Mode Fetch Error:", err);
-            setError(err.message || 'Failed to load platform data.');
+            setError((err as Error).message || 'Failed to load platform data.');
         } finally {
             setLoading(false);
             setRefreshing(false);

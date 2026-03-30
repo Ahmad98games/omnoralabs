@@ -1,7 +1,6 @@
 /**
  * CartStore v2: Singleton Cart State Machine + localStorage Persistence
- * 
- * Phase 5 Upgrade: Hydrates from localStorage on init, auto-saves on change.
+ * * Phase 5 Upgrade: Hydrates from localStorage on init, auto-saves on change.
  * Publisher-Subscriber architecture (mirrors NodeStore pattern).
  * Fully decoupled from React.
  *
@@ -47,14 +46,18 @@ function loadFromStorage(): CartItem[] {
         if (!raw) return [];
         const parsed = JSON.parse(raw);
         if (!Array.isArray(parsed)) return [];
-        // Validate each item has required fields
+        
+        // Validate each item has required fields safely
         return parsed.filter(
-            (item: any) =>
-                item && typeof item.id === 'string' &&
-                typeof item.title === 'string' &&
-                typeof item.price === 'number' &&
-                typeof item.quantity === 'number'
-        );
+            (item: unknown) => {
+                const typedItem = item as Record<string, unknown>;
+                return typedItem && 
+                       typeof typedItem.id === 'string' &&
+                       typeof typedItem.title === 'string' &&
+                       typeof typedItem.price === 'number' &&
+                       typeof typedItem.quantity === 'number';
+            }
+        ) as CartItem[];
     } catch {
         // Corrupted storage — fail silently, start fresh
         return [];

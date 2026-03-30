@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Instagram, Twitter, Facebook, ArrowRight, Loader2, ShieldCheck } from 'lucide-react';
+import { Instagram, Twitter, Facebook, ArrowRight, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 // import client from '../api/client'; // Uncomment this when API is ready
 import './Footer.css'; // Don't forget this!
@@ -48,16 +48,12 @@ export default function Footer() {
                 {/* 1. BRAND COLUMN */}
                 <div className="footer-brand-col">
                     <Link to={ROUTES.HOME} className="footer-logo">
-                        <div className="logo-icon-box">
-                            <span style={{
-                                fontFamily: 'var(--font-serif)',
-                                fontSize: '1.25rem',
-                                fontWeight: '700',
-                                color: 'var(--royal-blue)',
-                                textTransform: 'uppercase'
-                            }}>
-                                Omnora
-                            </span>
+                        <div className="logo-icon-box" style={{ width: 48, height: 48, background: 'transparent' }}>
+                            <img 
+                                src="/images/omnoralabs_brand.png" 
+                                alt="Omnora Labs" 
+                                style={{ width: '100%', height: '100%', objectFit: 'contain' }} 
+                            />
                         </div>
                     </Link>
                     <p className="footer-desc">

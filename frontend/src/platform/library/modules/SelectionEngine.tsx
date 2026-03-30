@@ -1,10 +1,12 @@
 import React, { useState, useMemo } from 'react';
 import { useOmnora } from '../../client/OmnoraContext';
-import { EditableText } from '../EditableComponents';
 import { useQuery } from '@tanstack/react-query';
 import { databaseClient } from '../../../platform/core/DatabaseClient';
-import { ProductCard } from '../../../components/cart/ProductCard';
-import { StorefrontProvider } from '../../../context/StorefrontContext';
+import { StorefrontProvider, type Product } from '../../../context/StorefrontContext';
+
+// OSTT FIX: Create a single, stable memory reference for empty arrays
+// This prevents infinite re-renders without triggering the React Compiler's wrath.
+const EMPTY_ARRAY: string[] = [];
 
 /**
  * OmnoraProductGrid: Flexible layout engine with Standard/Mesh support.
@@ -13,35 +15,44 @@ export const OmnoraProductGrid: React.FC<{ nodeId: string }> = ({ nodeId }) => {
     const { nodes, viewport, mode } = useOmnora();
     const node = nodes[nodeId];
 
-    const tenantId = (window as any).__OMNORA_TENANT_ID__;
+    const tenantId = (window as unknown as { __OMNORA_TENANT_ID__?: string }).__OMNORA_TENANT_ID__;
 
     const { data: products = [], isLoading } = useQuery({
         queryKey: ['products', tenantId],
-        queryFn: () => databaseClient.getProductsByMerchant(tenantId),
+        queryFn: () => databaseClient.getProductsByMerchant(tenantId as string),
         enabled: !!tenantId,
     });
 
-    if (!node) return null;
-
-    const isMesh = node.props?.layout === 'mesh';
+    const isMesh = node?.props?.layout === 'mesh';
     const viewportMap: Record<string, 'base' | 'md' | 'sm'> = { desktop: 'base', tablet: 'md', mobile: 'sm' };
     const vp = viewportMap[viewport] || 'base';
-    const cols = node.responsive?.[vp]?.columns || (viewport === 'desktop' ? 4 : viewport === 'tablet' ? 2 : 1);
+    const cols = node?.responsive?.[vp]?.columns || (viewport === 'desktop' ? 4 : viewport === 'tablet' ? 2 : 1);
+
+    // OSTT FIX: Extract specific properties safely. 
+    // Use EMPTY_ARRAY so the memory reference never changes if productIds is undefined.
+    const selectionMode = node?.props?.selectionMode as string | undefined;
+    const categoryId = node?.props?.category_id as string | undefined;
+    const productIds = (node?.props?.productIds as string[]) || EMPTY_ARRAY;
 
     const filteredProducts = useMemo(() => {
-        if (node.props?.selectionMode === 'specific' && node.props?.productIds?.length > 0) {
-            return node.props.productIds.map((id: string) => products.find(p => p.id === id)).filter(Boolean);
+        if (selectionMode === 'specific' && productIds.length > 0) {
+            return productIds
+                .map((id: string) => products.find(p => p.id === id))
+                .filter(Boolean) as Product[];
         }
-        if (node.props?.category_id) {
-            return products.filter((p: any) => p.category_id === node.props.category_id);
+        if (categoryId) {
+            return products.filter((p: Product) => p.category_id === categoryId);
         }
         return products;
-    }, [products, node.props?.selectionMode, node.props?.productIds, node.props?.category_id]);
+    // OSTT FIX: React Compiler is happy because we exactly match the internal variables
+    }, [products, selectionMode, categoryId, productIds]); 
+
+    if (!node) return null;
 
     const gridStyle: React.CSSProperties = {
         display: 'grid',
         gridTemplateColumns: `repeat(${cols}, 1fr)`,
-        gap: node.styles?.gap || '30px',
+        gap: (node.styles?.gap as string) || '30px',
         alignItems: isMesh ? 'start' : 'stretch',
         ...node.styles
     };
@@ -51,7 +62,7 @@ export const OmnoraProductGrid: React.FC<{ nodeId: string }> = ({ nodeId }) => {
     return (
         <section className="omnora-product-grid" style={{ padding: '60px 0' }}>
             <div style={gridStyle}>
-                {filteredProducts.map((product: any, i: number) => (
+                {filteredProducts.map((product: Product, i: number) => (
                     <StorefrontProvider key={product.id} scopedProduct={product}>
                         <div style={{
                             height: isMesh && i % 2 === 0 ? '450px' : '400px',
@@ -77,7 +88,7 @@ export const OmnoraProductGrid: React.FC<{ nodeId: string }> = ({ nodeId }) => {
                                 </span>
                                 <h3 className="text-sm font-bold text-white mb-2">{product.title}</h3>
                                 <div className="text-xs font-medium text-gray-400">
-                                    ${product.price.toLocaleString()}
+                                    ${product.price?.toLocaleString()}
                                 </div>
                             </div>
                         </div>
@@ -105,7 +116,7 @@ export const OmnoraMediaGallery: React.FC<{ nodeId: string }> = ({ nodeId }) => 
 
     if (!node) return null;
 
-    const images = node.props?.images || ['https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&q=80&w=1000'];
+    const images = (node.props?.images as string[]) || ['https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&q=80&w=1000'];
 
     const isHoveredForced = node.forcedState === 'hover';
     const showZoom = isHovered || isHoveredForced;
@@ -142,6 +153,9 @@ export const OmnoraMediaGallery: React.FC<{ nodeId: string }> = ({ nodeId }) => 
                 {images.map((img: string, idx: number) => (
                     <div
                         key={idx}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => { if (e.key === 'Enter') setActiveIndex(idx); }}
                         onClick={() => setActiveIndex(idx)}
                         style={{
                             width: '80px',
@@ -171,7 +185,8 @@ export const OmnoraVariantSelector: React.FC<{ nodeId: string }> = ({ nodeId }) 
 
     if (!node) return null;
 
-    const variants = node.props?.variants || ['S', 'M', 'L', 'XL'];
+    const variants = (node.props?.variants as string[]) || ['S', 'M', 'L', 'XL'];
+    const disabledVariants = (node.props?.disabledVariants as string[]) || [];
 
     return (
         <div className="omnora-variant-selector" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -179,11 +194,12 @@ export const OmnoraVariantSelector: React.FC<{ nodeId: string }> = ({ nodeId }) 
             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                 {variants.map((v: string) => {
                     const isSelected = selected === v;
-                    const isDisabled = node.props?.disabledVariants?.includes(v);
+                    const isDisabled = disabledVariants.includes(v);
 
                     return (
                         <button
                             key={v}
+                            type="button"
                             disabled={isDisabled}
                             onClick={() => !isDisabled && setSelected(v)}
                             style={{

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 export interface SocialProofProps {
     enabled?: boolean;
@@ -32,7 +32,7 @@ const SocialProofModule: React.FC<SocialProofProps> = ({
     const [toasts, setToasts] = useState<Toast[]>([]);
     const counter = useRef(0);
 
-    const generate = () => {
+    const generate = useCallback(() => {
         const name = random(sampleNames);
         const city = random(sampleCities);
         const product = random(sampleProducts);
@@ -43,7 +43,7 @@ const SocialProofModule: React.FC<SocialProofProps> = ({
         const id = ++counter.current;
         setToasts(t => [...t.slice(-2), { id, text }]);
         setTimeout(() => setToasts(t => t.filter(x => x.id !== id)), 4500);
-    };
+    }, [sampleNames, sampleCities, sampleProducts, type]);
 
     useEffect(() => {
         if (!enabled) return;
@@ -51,7 +51,7 @@ const SocialProofModule: React.FC<SocialProofProps> = ({
         const timer = setInterval(generate, gap);
         const first = setTimeout(generate, 3000);
         return () => { clearInterval(timer); clearTimeout(first); };
-    }, [enabled, intervalSeconds]);
+    }, [enabled, intervalSeconds, generate]);
 
     return (
         <div style={{ position: 'fixed', bottom: 20, left: 20, zIndex: 900, display: 'flex', flexDirection: 'column', gap: 8, maxWidth: 340, pointerEvents: 'none' }}>

@@ -8,7 +8,7 @@ export const PromoModule: React.FC = () => {
 
     if (!node || node.type !== 'promo_banner') return null;
 
-    const updateProp = (key: string, value: any) => {
+    const updateProp = (key: string, value: unknown) => {
         updateNode(node.id, `props.${key}`, value);
     };
 

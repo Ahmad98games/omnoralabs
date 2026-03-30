@@ -1,7 +1,6 @@
 import React from 'react';
 import * as Select from '@radix-ui/react-select';
 import { Check, ChevronDown } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
 
 interface SelectOption {
     value: string;
@@ -13,7 +12,7 @@ interface RadixSelectProps {
     value: string;
     options: SelectOption[];
     onChange: (value: string) => void;
-    icon?: any;
+    icon?: React.ElementType;
     placeholder?: string;
 }
 

@@ -2,7 +2,7 @@ import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
     LayoutDashboard, Package, ShoppingBag, Users,
-    LogOut, ExternalLink, Menu, X, ShieldCheck
+    LogOut, ExternalLink, Menu, X
 } from 'lucide-react';
 import { useState } from 'react';
 import './AdminLayout.css';
@@ -18,7 +18,6 @@ export default function AdminLayout() {
         navigate('/login');
     };
 
-    // FIXED: Added ': string' to satisfy TypeScript
     const isActive = (path: string) => location.pathname.includes(path) ? 'active' : '';
 
     const closeSidebar = () => setSidebarOpen(false);
@@ -35,10 +34,10 @@ export default function AdminLayout() {
             <aside className={`admin-sidebar ${sidebarOpen ? 'open' : ''}`}>
                 <div className="sidebar-header">
                     <div className="brand-badge">
-                        <img src="/images/omnora store.png" alt="Omnora Admin" style={{ height: '24px', objectFit: 'contain' }} />
+                        <img src="/images/omnoralabs_brand.png" alt="Omnora Admin" style={{ height: '24px', objectFit: 'contain' }} />
                         <h2>OMNORA <span className="admin-tag">ADMIN</span></h2>
                     </div>
-                    <button className="close-btn mobile-only" onClick={closeSidebar}>
+                    <button type="button" className="close-btn mobile-only" onClick={closeSidebar}>
                         <X size={20} />
                     </button>
                 </div>
@@ -70,7 +69,7 @@ export default function AdminLayout() {
                         <ExternalLink size={18} />
                         <span>Live Store</span>
                     </Link>
-                    <button onClick={handleLogout} className="nav-item logout-btn">
+                    <button type="button" onClick={handleLogout} className="nav-item logout-btn">
                         <LogOut size={18} />
                         <span>Terminate Session</span>
                     </button>
@@ -80,13 +79,13 @@ export default function AdminLayout() {
             {/* Main Content Area */}
             <main className="admin-main">
                 <header className="admin-header">
-                    <button className="menu-btn mobile-only" onClick={() => setSidebarOpen(true)}>
+                    <button type="button" className="menu-btn mobile-only" onClick={() => setSidebarOpen(true)}>
                         <Menu size={24} />
                     </button>
                     <div className="header-title">
                         <h1>System Overview</h1>
                         <span className="status-indicator">
-                            <span className="blink-dot"></span> Online
+                            <span className="blink-dot" /> Online
                         </span>
                     </div>
                 </header>

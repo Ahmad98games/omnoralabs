@@ -6,13 +6,15 @@ import { Logger } from './Logger';
  * normalizeNode: Pure function to sanitize and validate a raw JSON node.
  * Includes graceful migration failure handling and strict immutability.
  */
-export const normalizeNode = (rawNode: any, id: string): PlatformBlock => {
-    if (!rawNode) return createNullNode(id);
+export const normalizeNode = (rawNode: unknown, id: string): PlatformBlock => {
+    if (!rawNode || typeof rawNode !== 'object') return createNullNode(id);
 
-    const type = rawNode.type || 'container';
+    const typedRawNode = rawNode as Record<string, unknown>;
+
+    const type = (typedRawNode.type as string) || 'container';
     const entry = getRegistryEntry(type);
 
-    let processedNode = { ...rawNode };
+    let processedNode = { ...typedRawNode };
 
     // ─── Resilience: Block Safety ───
     if (!entry) {
@@ -21,7 +23,7 @@ export const normalizeNode = (rawNode: any, id: string): PlatformBlock => {
     }
 
     // ─── Schema Migration (v4 Resilience) ───
-    const currentVersion = processedNode.schemaVersion || 0;
+    const currentVersion = (processedNode.schemaVersion as number) || 0;
     const targetVersion = entry.schemaVersion;
 
     if (currentVersion < targetVersion && entry.migrate) {
@@ -36,37 +38,42 @@ export const normalizeNode = (rawNode: any, id: string): PlatformBlock => {
         }
     }
 
+    // Safely parse deeply nested properties
+    const safeMotion = processedNode.motion as Record<string, unknown> | undefined;
+    const safeInteractions = processedNode.interactions as Record<string, unknown> | undefined;
+    const safeHidden = processedNode.hidden as Record<string, unknown> | undefined;
+
     return {
-        id: processedNode.id || id,
-        type: processedNode.type || type,
-        parentId: processedNode.parentId || null,
-        props: processedNode.props || {},
-        styles: processedNode.styles || {},
+        id: (processedNode.id as string) || id,
+        type: (processedNode.type as string) || type,
+        parentId: (processedNode.parentId as string) || null,
+        props: (processedNode.props as Record<string, unknown>) || {},
+        styles: (processedNode.styles as React.CSSProperties) || {},
         children: Array.isArray(processedNode.children) ? processedNode.children : [],
         schemaVersion: targetVersion,
-        binding: processedNode.binding || undefined,
+        binding: (processedNode.binding as string) || undefined,
         motion: {
-            preset: processedNode.motion?.preset || 'none',
-            duration: processedNode.motion?.duration || 400,
-            curve: processedNode.motion?.curve || 'ease',
+            preset: (safeMotion?.preset as string) || 'none',
+            duration: (safeMotion?.duration as number) || 400,
+            curve: (safeMotion?.curve as string) || 'ease',
         },
         interactions: {
-            hover: processedNode.interactions?.hover || {},
-            active: processedNode.interactions?.active || {},
+            hover: (safeInteractions?.hover as React.CSSProperties) || {},
+            active: (safeInteractions?.active as React.CSSProperties) || {},
         },
         hidden: {
-            desktop: !!processedNode.hidden?.desktop,
-            tablet: !!processedNode.hidden?.tablet,
-            mobile: !!processedNode.hidden?.mobile,
+            desktop: !!safeHidden?.desktop,
+            tablet: !!safeHidden?.tablet,
+            mobile: !!safeHidden?.mobile,
         },
-        forcedState: processedNode.forcedState || null,
+        forcedState: (processedNode.forcedState as 'hover' | 'active' | null) || null,
     };
 };
 
 /**
  * normalizeNodeTree: Batch normalization for an entire page state.
  */
-export const normalizeNodeTree = (rawTree: Record<string, any>): Record<string, PlatformBlock> => {
+export const normalizeNodeTree = (rawTree: Record<string, unknown>): Record<string, PlatformBlock> => {
     const normalized: Record<string, PlatformBlock> = {};
     Object.keys(rawTree).forEach(id => {
         normalized[id] = normalizeNode(rawTree[id], id);

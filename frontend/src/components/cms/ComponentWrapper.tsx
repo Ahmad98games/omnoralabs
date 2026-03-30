@@ -32,7 +32,7 @@ export interface ComponentWrapperProps {
     nodeId: string;
     type: string;
     isHidden?: boolean;
-    style?: React.CSSProperties & Record<string, any>;
+    style?: React.CSSProperties & Record<string, unknown>;
     className?: string;
     children?: React.ReactNode;
 
@@ -50,7 +50,6 @@ export interface ComponentWrapperProps {
     onDragLeave?: (e: React.DragEvent, nodeId: string) => void;
     onDrop?: (e: React.DragEvent, nodeId: string, position: DropPosition) => void;
 
-    // Phase 12: Scroll & Preview Animations
     animations?: AnimationConfig;
     animationPreviewKey?: number;
     isBuilderMode?: boolean;
@@ -60,7 +59,6 @@ interface DragState {
     pointerId: number;
     startX: number; startY: number;
     initLeft: number; initTop: number;
-    liveX: number; liveY: number;
 }
 
 const resolveDropPosition = (
@@ -96,14 +94,12 @@ export const ComponentWrapper: React.FC<ComponentWrapperProps> = ({
     const ref = useRef<HTMLDivElement>(null);
     const globalTheme = useGlobalThemeStore();
 
-    // ── Font Loading Optimization ─────────────────────────────────────────────
     useEffect(() => {
         if (globalTheme.typography.bodyFont) {
             loadGoogleFont(globalTheme.typography.bodyFont);
         }
     }, [globalTheme.typography.bodyFont]);
 
-    // ── Animation State ───────────────────────────────────────────────────────
     const [animVisible, setAnimVisible] = useState(false);
     const hasAnimation = animations && animations.type && animations.type !== 'none';
 
@@ -124,17 +120,21 @@ export const ComponentWrapper: React.FC<ComponentWrapperProps> = ({
         return () => obs.disconnect();
     }, [hasAnimation, isBuilderMode, animations?.once]);
 
-    useEffect(() => {
+   useEffect(() => {
         if (!hasAnimation || !isBuilderMode || !animationPreviewKey) return;
-        setAnimVisible(false);
-        const timer = setTimeout(() => setAnimVisible(true), 50);
-        return () => clearTimeout(timer);
+        
+        // FIX: Moved setState out of the synchronous effect body to prevent cascading renders
+        const resetTimer = setTimeout(() => {
+            setAnimVisible(false);
+            setTimeout(() => setAnimVisible(true), 50);
+        }, 0);
+        
+        return () => clearTimeout(resetTimer);
     }, [animationPreviewKey, hasAnimation, isBuilderMode]);
 
+    // FIX: Removed render-phase ref access and replaced with pure React State for drag UI
     const dragRef = useRef<DragState | null>(null);
-    const isFreeDraggingRef = useRef(false);
-    const [freeDragTick, setFreeDragTick] = useState(0);
-    const forceRepaint = useCallback(() => setFreeDragTick(n => n + 1), []);
+    const [activeDrag, setActiveDrag] = useState<{ isDragging: boolean; liveX: number; liveY: number } | null>(null);
 
     const isDetached = style?.position === 'absolute';
     const styleLeft = style?.left;
@@ -157,11 +157,10 @@ export const ComponentWrapper: React.FC<ComponentWrapperProps> = ({
 
         dragRef.current = {
             pointerId: e.pointerId, startY: e.clientY, startX: e.clientX,
-            initLeft, initTop, liveX: initLeft, liveY: initTop,
+            initLeft, initTop,
         };
-        isFreeDraggingRef.current = true;
-        forceRepaint();
-    }, [isDraggable, isDetached, styleLeft, styleTop, forceRepaint]);
+        setActiveDrag({ isDragging: true, liveX: initLeft, liveY: initTop });
+    }, [isDraggable, isDetached, styleLeft, styleTop]);
 
     const handlePointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
         const d = dragRef.current;
@@ -170,27 +169,42 @@ export const ComponentWrapper: React.FC<ComponentWrapperProps> = ({
         let newX = d.initLeft + (e.clientX - d.startX);
         let newY = d.initTop + (e.clientY - d.startY);
         if (e.shiftKey) { newX = Math.round(newX / 10) * 10; newY = Math.round(newY / 10) * 10; }
-        d.liveX = newX; d.liveY = newY;
-        forceRepaint();
-    }, [forceRepaint]);
-
-    const commitAndCleanup = useCallback((pointerId: number) => {
+        
+        setActiveDrag({ isDragging: true, liveX: newX, liveY: newY });
+    }, []);
+const commitAndCleanup = useCallback((pointerId: number) => {
         const d = dragRef.current;
         if (!d || d.pointerId !== pointerId) return;
         const el = ref.current;
-        if (el) { try { el.releasePointerCapture(pointerId); } catch {} }
+        
+        // FIX: Removed the '(_err)' completely using Optional Catch Binding.
+        // The comment inside satisfies the 'no-empty' rule.
+        if (el) { 
+            try { 
+                el.releasePointerCapture(pointerId); 
+            } catch { 
+                /* safely ignore if capture is already lost */ 
+            } 
+        }
 
-        dispatcher.dispatch([
-            { nodeId, path: 'styles.position', value: 'absolute', type: 'structural', source: 'editor' },
-            { nodeId, path: 'styles.left', value: `${d.liveX}px`, type: 'visual', source: 'editor' },
-            { nodeId, path: 'styles.top', value: `${d.liveY}px`, type: 'visual', source: 'editor' },
-            { nodeId, path: 'styles.zIndex', value: String(styleZIndex ?? 10), type: 'visual', source: 'editor' },
-        ]);
-        dragRef.current = null; isFreeDraggingRef.current = false; forceRepaint();
-    }, [nodeId, styleZIndex, forceRepaint]);
+        setActiveDrag(prev => {
+            if (prev) {
+                dispatcher.dispatch([
+                    { nodeId, path: 'styles.position', value: 'absolute', type: 'structural', source: 'editor' },
+                    { nodeId, path: 'styles.left', value: `${prev.liveX}px`, type: 'visual', source: 'editor' },
+                    { nodeId, path: 'styles.top', value: `${prev.liveY}px`, type: 'visual', source: 'editor' },
+                    { nodeId, path: 'styles.zIndex', value: String(styleZIndex ?? 10), type: 'visual', source: 'editor' },
+                ]);
+            }
+            return null;
+        });
+        dragRef.current = null;
+    }, [nodeId, styleZIndex]);
 
     const handlePointerUp = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
-        if (!isFreeDraggingRef.current) return; e.stopPropagation(); commitAndCleanup(e.pointerId);
+        if (!dragRef.current) return; 
+        e.stopPropagation(); 
+        commitAndCleanup(e.pointerId);
     }, [commitAndCleanup]);
 
     const handlePointerCancel = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
@@ -198,7 +212,7 @@ export const ComponentWrapper: React.FC<ComponentWrapperProps> = ({
     }, [commitAndCleanup]);
 
     const handleDragStart = useCallback((e: React.DragEvent) => {
-        if (isFreeDraggingRef.current || isDetached) { e.preventDefault(); return; }
+        if (dragRef.current || isDetached) { e.preventDefault(); return; }
         e.dataTransfer.effectAllowed = 'move';
         e.dataTransfer.setData('text/omnora-node-id', nodeId);
         requestAnimationFrame(() => ref.current?.setAttribute('data-dragging', 'true'));
@@ -206,11 +220,12 @@ export const ComponentWrapper: React.FC<ComponentWrapperProps> = ({
     }, [nodeId, onDragStart, isDetached]);
 
     const handleDragEnd = useCallback((e: React.DragEvent) => {
-        ref.current?.removeAttribute('data-dragging'); onDragEnd?.(e, nodeId);
+        ref.current?.removeAttribute('data-dragging'); 
+        onDragEnd?.(e, nodeId);
     }, [nodeId, onDragEnd]);
 
     const handleDragOver = useCallback((e: React.DragEvent) => {
-        if (isFreeDraggingRef.current) return;
+        if (dragRef.current) return;
         e.preventDefault(); e.stopPropagation(); e.dataTransfer.dropEffect = 'move';
         if (!ref.current) return;
         onDragOver?.(e, nodeId, resolveDropPosition(e, ref.current, acceptsChildren));
@@ -221,19 +236,18 @@ export const ComponentWrapper: React.FC<ComponentWrapperProps> = ({
     }, [nodeId, onDragLeave]);
 
     const handleDrop = useCallback((e: React.DragEvent) => {
-        if (isFreeDraggingRef.current) return; e.preventDefault(); e.stopPropagation();
+        if (dragRef.current) return; e.preventDefault(); e.stopPropagation();
         if (!ref.current) return; onDrop?.(e, nodeId, resolveDropPosition(e, ref.current, acceptsChildren));
     }, [nodeId, acceptsChildren, onDrop]);
 
-    const d = dragRef.current;
-    const isCurrentlyDragging = isFreeDraggingRef.current;
+    const isCurrentlyDragging = activeDrag?.isDragging ?? false;
 
     const dropStyle: React.CSSProperties = useMemo(() => {
         if (!isDropTarget || !dropPosition || isCurrentlyDragging) return {};
         if (dropPosition === 'before') return { boxShadow: 'inset 0 3px 0 0 #7c6dfa' };
         if (dropPosition === 'after') return { boxShadow: 'inset 0 -3px 0 0 #7c6dfa' };
         return { outline: '2px solid #7c6dfa', outlineOffset: '-2px', backgroundColor: 'rgba(124,109,250,0.04)' };
-    }, [isDropTarget, dropPosition, isCurrentlyDragging, freeDragTick]);
+    }, [isDropTarget, dropPosition, isCurrentlyDragging]);
 
     const animStyle: React.CSSProperties = useMemo(() => {
         if (!hasAnimation || !animations) return {};
@@ -245,7 +259,6 @@ export const ComponentWrapper: React.FC<ComponentWrapperProps> = ({
         };
     }, [hasAnimation, animations, animVisible]);
 
-    // ── Scoped CSS Variables & Reset ──────────────────────────────────────────
     const scopedVars = generateScopedTheme({
         primaryColor: globalTheme.colors.primary,
         backgroundColor: globalTheme.colors.background,
@@ -260,14 +273,14 @@ export const ComponentWrapper: React.FC<ComponentWrapperProps> = ({
     };
 
     const dynamicStyle: React.CSSProperties = {
-        ...cleanSlateStyle, // Global Reset
+        ...cleanSlateStyle,
         ...style,
         ...dropStyle,
         ...animStyle,
-        ...(scopedVars as any), // Scoped Theme Variables
+        ...(scopedVars as React.CSSProperties),
         position: isCurrentlyDragging || isDetached ? 'absolute' : (style?.position ?? 'relative'),
-        left: isCurrentlyDragging && d ? `${d.liveX}px` : style?.left,
-        top: isCurrentlyDragging && d ? `${d.liveY}px` : style?.top,
+        left: isCurrentlyDragging && activeDrag ? `${activeDrag.liveX}px` : style?.left,
+        top: isCurrentlyDragging && activeDrag ? `${activeDrag.liveY}px` : style?.top,
         margin: isCurrentlyDragging || isDetached ? '0' : style?.margin,
         opacity: isHidden ? 0.3 : isCurrentlyDragging ? 0.8 : (animStyle.opacity ?? (style?.opacity as number | undefined)),
         cursor: isCurrentlyDragging ? 'grabbing' : isDetached ? 'grab' : 'inherit',
@@ -275,8 +288,6 @@ export const ComponentWrapper: React.FC<ComponentWrapperProps> = ({
         transition: isCurrentlyDragging ? 'none' : (hasAnimation ? animStyle.transition : 'opacity 0.15s'),
         touchAction: isDraggable ? 'none' : undefined,
         userSelect: isCurrentlyDragging ? 'none' : undefined,
-        
-        // Apply dynamic adaptive color based on theme
         color: `var(--omnora-text)`,
         fontFamily: `var(--omnora-font)`,
     };
@@ -307,3 +318,4 @@ export const ComponentWrapper: React.FC<ComponentWrapperProps> = ({
         </div>
     );
 };
+ComponentWrapper.displayName = 'ComponentWrapper';

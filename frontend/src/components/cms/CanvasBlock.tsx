@@ -1,12 +1,22 @@
-import React, { Suspense } from 'react';
+import React, { Suspense, ReactNode } from 'react';
 import { useBuilderStore } from '../../stores/useBuilderStore';
-import { getRegistryEntry } from '../../platform/core/Registry';
+import { getRegistryEntry, RegistryEntry } from '../../platform/core/Registry';
 import { BlockFloatingToolbar } from './BlockFloatingToolbar';
 import { BlockSelectionOverlay } from './BlockSelectionOverlay';
 import { AlertTriangle, Loader2 } from 'lucide-react';
 
+interface NodeProps {
+    [key: string]: unknown;
+}
+
+interface BuilderNodeData {
+    id: string;
+    type: string;
+    props: NodeProps;
+}
+
 interface CanvasBlockProps {
-    node: any;
+    node: BuilderNodeData;
     index: number;
 }
 
@@ -14,14 +24,12 @@ interface CanvasBlockProps {
  * 🧱 CANVAS BLOCK (Task 3.1)
  * Memoized container that ONLY re-renders on specific node/index changes.
  */
-export const CanvasBlock: React.FC<CanvasBlockProps> = React.memo(({ node, index }) => {
-    // 🛡️ High-Performance Selection (Industrial Rule)
+const CanvasBlockContent = ({ node, index }: CanvasBlockProps) => {
     const isSelected = useBuilderStore(s => s.selectedNodeId === node.id);
     const isDragging = useBuilderStore(s => s.isDragging);
     const isLastDropped = useBuilderStore(s => s.lastDroppedNodeId === node.id);
 
-    // Resolve component from Registry
-    const entry = getRegistryEntry(node.type);
+    const entry = getRegistryEntry(node.type) as RegistryEntry;
     if (!entry) return <UnknownBlockFallback type={node.type} nodeId={node.id} />;
 
     const { component: Component } = entry;
@@ -34,7 +42,6 @@ export const CanvasBlock: React.FC<CanvasBlockProps> = React.memo(({ node, index
                     style={{ transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)' }}
                     data-node-id={node.id}
                 >
-                    {/* Interaction Layers */}
                     <BlockSelectionOverlay 
                         nodeId={node.id} 
                         isSelected={isSelected} 
@@ -47,26 +54,25 @@ export const CanvasBlock: React.FC<CanvasBlockProps> = React.memo(({ node, index
                         isSelected={isSelected} 
                     />
 
-                    {/* Actual Component Render */}
                     <div style={{ pointerEvents: isSelected ? 'auto' : 'none' }}>
-                        <Component {...node.props} nodeId={node.id} isBuilder={true} />
+                        <Component {...(node.props as Record<string, unknown>)} nodeId={node.id} isBuilder={true} />
                     </div>
                 </div>
             </Suspense>
         </ErrorBoundary>
     );
-}, (prev, next) => {
-    // 🛡️ Industrial Memoization (Zero Wasted Renders)
+};
+
+export const CanvasBlock = React.memo(CanvasBlockContent, (prev: CanvasBlockProps, next: CanvasBlockProps) => {
     return (
         prev.node.id === next.node.id && 
         JSON.stringify(prev.node.props) === JSON.stringify(next.node.props) &&
         prev.index === next.index
     );
 });
+CanvasBlock.displayName = 'CanvasBlock';
 
-// ─── Fallbacks ───────────────────────────────────────────────────────────────
-
-const UnknownBlockFallback = ({ type, nodeId }: any) => (
+const UnknownBlockFallback = ({ type, nodeId }: { type: string; nodeId: string }) => (
     <div className="p-8 border-2 border-dashed border-red-500/20 bg-red-500/5 rounded-xl text-center">
         <AlertTriangle className="mx-auto text-red-500 mb-2" size={24} />
         <div className="text-sm font-bold text-red-500 uppercase tracking-widest">Unknown Type: {type}</div>
@@ -74,7 +80,7 @@ const UnknownBlockFallback = ({ type, nodeId }: any) => (
     </div>
 );
 
-const BlockCrashFallback = ({ nodeId }: any) => (
+const BlockCrashFallback = ({ nodeId }: { nodeId: string }) => (
     <div className="p-8 border-2 border-zinc-800 bg-zinc-900 rounded-xl text-center">
         <AlertTriangle className="mx-auto text-orange-500 mb-2" size={24} />
         <div className="text-sm font-bold text-white uppercase">Block Rendering Error</div>
@@ -88,8 +94,11 @@ const BlockSkeleton = () => (
     </div>
 );
 
-class ErrorBoundary extends React.Component<{ children: React.ReactNode; fallback: React.ReactNode }, { hasError: boolean }> {
-    constructor(props: any) { super(props); this.state = { hasError: false }; }
+interface ErrorBoundaryProps { fallback: ReactNode; children: ReactNode; }
+interface ErrorBoundaryState { hasError: boolean; }
+
+class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+    constructor(props: ErrorBoundaryProps) { super(props); this.state = { hasError: false }; }
     static getDerivedStateFromError() { return { hasError: true }; }
     render() { return this.state.hasError ? this.props.fallback : this.props.children; }
 }

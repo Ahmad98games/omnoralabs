@@ -1,27 +1,17 @@
-/* eslint-disable react/display-name */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useRef, useLayoutEffect, useEffect, memo } from 'react';
 import { createPortal } from 'react-dom';
 import { useBuilder } from '../../context/BuilderContext';
 import {
     Undo2, Redo2, Eye, Edit3,
-    Save, Globe, Loader2,
-    Plus, ChevronDown, ChevronUp, RotateCcw, HelpCircle, Sparkles
+    Globe, Loader2,
+    Plus, RotateCcw, Sparkles
 } from 'lucide-react';
 import { DevicePresetPanel, getPreset } from './DevicePresetPanel';
 import { AICopilotModal } from '../builder/AICopilotModal';
 import { TopBarPageSelector } from '../builder/TopBarPageSelector';
 import { JobMonitor } from './JobMonitor';
-
-interface BuilderPage {
-    id: string;
-    title: string;
-    slug: string;
-    type: 'system' | 'template' | 'custom';
-    isLocked: boolean;
-    status: 'draft' | 'live';
-}
+import { useBuilderStore } from '../../stores/useBuilderStore';
+import { publisher } from '../../platform/publish/Publisher';
 
 // ─── Tokens ───────────────────────────────────────────────────────────────────
 const T = {
@@ -53,27 +43,6 @@ const Divider = () => (
     <div style={{ width: 1, height: 24, background: T.border, flexShrink: 0 }} />
 );
 
-const ToolBtn: React.FC<{
-    onClick?: () => void; title?: string; active?: boolean;
-    disabled?: boolean; children: React.ReactNode;
-}> = ({ onClick, title, active, disabled, children }) => (
-    <button
-        onClick={onClick} title={title} disabled={disabled}
-        style={{
-            height: 32, minWidth: 32, padding: '0 10px',
-            background: active ? T.accentSub : 'transparent',
-            border: `1px solid ${active ? T.accent : T.border}`,
-            borderRadius: 7, color: active ? T.accent : T.muted,
-            cursor: disabled ? 'not-allowed' : 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
-            fontSize: 12, fontWeight: 600, flexShrink: 0, transition: 'all .15s',
-            opacity: disabled ? 0.5 : 1,
-        }}
-    >
-        {children}
-    </button>
-);
-
 const SaveIndicator = memo(({ saveStatus, hasUnsavedChanges }: {
     saveStatus: string; hasUnsavedChanges: boolean;
 }) => {
@@ -98,10 +67,9 @@ const SaveIndicator = memo(({ saveStatus, hasUnsavedChanges }: {
         </div>
     );
 });
+SaveIndicator.displayName = 'SaveIndicator';
 
 // ─── Live-measured anchor rect ────────────────────────────────────────────────
-// Re-measures on every resize/scroll while `isOpen` is true.
-// Never stale.
 function useAnchorRect(
     ref: React.RefObject<HTMLButtonElement | null>,
     isOpen: boolean,
@@ -125,19 +93,14 @@ function useAnchorRect(
 }
 
 // ─── Main component ───────────────────────────────────────────────────────────
-interface Props {
+export interface BuilderToolbarProps {
     onToggleLibrary: () => void;
     libraryOpen: boolean;
 }
 
-import { useBuilderStore } from '../../stores/useBuilderStore';
-import { publisher } from '../../platform/publish/Publisher';
-
-export const BuilderToolbar: React.FC<Props> = ({ onToggleLibrary, libraryOpen }) => {
+export const BuilderToolbar: React.FC<BuilderToolbarProps> = ({ onToggleLibrary, libraryOpen }) => {
     const {
-        mode, setMode,
-        undo, redo, saveDraft, publishLive,
-        saveStatus, activeJobId, hasUnsavedChanges,
+        undo, redo, saveStatus, hasUnsavedChanges,
         pages, activePageId, setActivePageId, addPage, deletePage,
         devicePreset, setDevicePreset,
         orientation, setOrientation,
@@ -150,14 +113,10 @@ export const BuilderToolbar: React.FC<Props> = ({ onToggleLibrary, libraryOpen }
     const publishStatus = useBuilderStore(state => state.publishStatus);
     const publishError = useBuilderStore(state => state.publishError);
     const lastPublishedAt = useBuilderStore(state => state.lastPublishedAt);
-    const setPublishError = useBuilderStore(state => state.setPublishError);
-    const setPublishStatus = useBuilderStore(state => state.setPublishStatus);
 
     // 👁️ Live Preview Zustand State
     const isPreviewMode = useBuilderStore(state => state.isPreviewMode);
     const setIsPreviewMode = useBuilderStore(state => state.setIsPreviewMode);
-    const previewDevice = useBuilderStore(state => state.previewDevice);
-    const setPreviewDevice = useBuilderStore(state => state.setPreviewDevice);
 
     const [relativeTime, setRelativeTime] = useState<string>('');
 
@@ -180,7 +139,7 @@ export const BuilderToolbar: React.FC<Props> = ({ onToggleLibrary, libraryOpen }
         return () => clearInterval(timer);
     }, [lastPublishedAt]);
 
-    const [openDropdown, setOpenDropdown] = useState<'page' | 'device' | null>(null);
+    const [openDropdown, setOpenDropdown] = useState<'page' | 'device' | 'overflow' | null>(null);
     const showPagePicker   = openDropdown === 'page';
     const showDevicePicker = openDropdown === 'device';
     const close = () => setOpenDropdown(null);
@@ -188,6 +147,13 @@ export const BuilderToolbar: React.FC<Props> = ({ onToggleLibrary, libraryOpen }
     const [addingPage,  setAddingPage]  = useState(false);
     const [newPageName, setNewPageName] = useState('');
     const [isCopilotOpen, setIsCopilotOpen] = useState(false);
+    const inputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        if (addingPage && inputRef.current) {
+            inputRef.current.focus();
+        }
+    }, [addingPage]);
 
     const pagePickerBtnRef   = useRef<HTMLButtonElement>(null);
     const devicePickerBtnRef = useRef<HTMLButtonElement>(null);
@@ -203,24 +169,16 @@ export const BuilderToolbar: React.FC<Props> = ({ onToggleLibrary, libraryOpen }
     const customPages = pageIds.filter((id: string) => safePages[id]?.type === 'custom');
 
     const activeDevice = getPreset(devicePreset);
-    const displayW = orientation === 'landscape' ? activeDevice.h : activeDevice.w;
-    const displayH = orientation === 'landscape' ? activeDevice.w : activeDevice.h;
-
-    const isProcessing = saveStatus === 'processing' || !!activeJobId;
 
     const handlePublish = async () => {
         try {
-            const merchantId = 'demo_merchant'; // or resolve from context
+            const merchantId = 'demo_merchant'; 
             const domain = 'demo.omnora.com';
             await publisher.publishSite(merchantId, domain);
         } catch (err) {
             console.error('[BuilderToolbar] publishSite failed:', err);
         }
     };
-
-    // ... (handleAddPage, cancelAddPage, useEffect for global Escape)
-
-    // ... (dropdownContent and main return up to the publish button)
 
     const handleAddPage = () => {
         if (!newPageName.trim()) return;
@@ -232,7 +190,6 @@ export const BuilderToolbar: React.FC<Props> = ({ onToggleLibrary, libraryOpen }
 
     const cancelAddPage = () => { setNewPageName(''); setAddingPage(false); };
 
-    // Close on global Escape.
     useEffect(() => {
         const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') close(); };
         window.addEventListener('keydown', onKey);
@@ -241,12 +198,13 @@ export const BuilderToolbar: React.FC<Props> = ({ onToggleLibrary, libraryOpen }
 
     const dropdownContent = (showPagePicker || showDevicePicker) ? (
         <>
-            {/* FIX: backdrop is a portal child — truly full-viewport, not clipped by toolbar overflow */}
-            <div onClick={close} style={{ position: 'fixed', inset: 0, zIndex: 9998 }} />
+            {/* Backdrop */}
+            <div role="button" tabIndex={0} onClick={close} onKeyDown={(e) => { if (e.key === 'Enter') close(); }} style={{ position: 'fixed', inset: 0, zIndex: 9998 }} aria-label="Close" />
 
             {showPagePicker && pagePickerRect && (
                 <div
                     onClick={e => e.stopPropagation()}
+                    role="presentation"
                     style={{
                         position: 'fixed',
                         top: pagePickerRect.bottom + 6,
@@ -263,7 +221,7 @@ export const BuilderToolbar: React.FC<Props> = ({ onToggleLibrary, libraryOpen }
                             { label: 'System Pages', ids: systemPages },
                             { label: 'Templates', ids: templatePages },
                             { label: 'Custom Pages', ids: customPages }
-                        ].map((group: any) => group.ids.length > 0 && (
+                        ].map((group: { label: string, ids: string[] }) => group.ids.length > 0 && (
                             <div key={group.label} style={{ marginBottom: 12 }}>
                                 <p style={{
                                     fontSize: 9, fontWeight: 900, color: T.muted,
@@ -276,6 +234,7 @@ export const BuilderToolbar: React.FC<Props> = ({ onToggleLibrary, libraryOpen }
                                     return (
                                         <div key={id} style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 4 }}>
                                             <button
+                                                type="button"
                                                 onClick={() => { setActivePageId(id); close(); }}
                                                 style={{
                                                     flex: 1, padding: '8px 10px',
@@ -299,6 +258,7 @@ export const BuilderToolbar: React.FC<Props> = ({ onToggleLibrary, libraryOpen }
 
                                             {!p.isLocked && (
                                                 <button
+                                                    type="button"
                                                     onClick={(e) => { e.stopPropagation(); deletePage(id); }}
                                                     style={{
                                                         width: 28, height: 28, borderRadius: 6, background: 'none',
@@ -322,7 +282,7 @@ export const BuilderToolbar: React.FC<Props> = ({ onToggleLibrary, libraryOpen }
                         {addingPage ? (
                             <div style={{ display: 'flex', gap: 6, padding: 4 }}>
                                 <input
-                                    autoFocus
+                                    ref={inputRef}
                                     value={newPageName}
                                     onChange={e => setNewPageName(e.target.value)}
                                     onKeyDown={e => {
@@ -337,18 +297,18 @@ export const BuilderToolbar: React.FC<Props> = ({ onToggleLibrary, libraryOpen }
                                         color: T.text, background: 'rgba(255,255,255,0.02)'
                                     }}
                                 />
-                                <button onClick={handleAddPage} style={{
+                                <button type="button" onClick={handleAddPage} style={{
                                     background: T.accent, border: 'none', borderRadius: 8,
                                     padding: '5px 12px', color: '#000', fontSize: 12, fontWeight: 700, cursor: 'pointer',
                                 }}>Add</button>
-                                <button onClick={cancelAddPage} style={{
+                                <button type="button" onClick={cancelAddPage} style={{
                                     background: 'none', border: `1px solid ${T.border}`,
                                     borderRadius: 8, padding: '5px 8px', color: T.muted,
                                     fontSize: 12, cursor: 'pointer',
                                 }}>✕</button>
                             </div>
                         ) : (
-                            <button onClick={() => setAddingPage(true)} style={{
+                            <button type="button" onClick={() => setAddingPage(true)} style={{
                                 width: '100%', height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center',
                                 gap: 6, background: 'rgba(255,255,255,0.03)',
                                 border: `1px dashed ${T.border}`, borderRadius: 8,
@@ -368,10 +328,10 @@ export const BuilderToolbar: React.FC<Props> = ({ onToggleLibrary, libraryOpen }
             {showDevicePicker && devicePickerRect && (
                 <div
                     onClick={e => e.stopPropagation()}
+                    role="presentation"
                     style={{
                         position: 'fixed',
                         top: devicePickerRect.bottom + 6,
-                        // FIX: clamp so the panel never slides off the right edge of the viewport.
                         left: Math.min(devicePickerRect.left, window.innerWidth - 320),
                         zIndex: 9999,
                         animation: 'dropIn 0.15s cubic-bezier(0.16,1,0.3,1)',
@@ -397,7 +357,6 @@ export const BuilderToolbar: React.FC<Props> = ({ onToggleLibrary, libraryOpen }
     
     return (
         <>
-            {/* 🛑 Inline Error Banner */}
             {publishStatus === 'error' && publishError && (
                 <div style={{ 
                     background: '#FEF2F2', borderBottom: '1px solid #FCA5A5', 
@@ -409,6 +368,7 @@ export const BuilderToolbar: React.FC<Props> = ({ onToggleLibrary, libraryOpen }
                           ⚠️ Publish Failed: {publishError}
                      </span>
                      <button 
+                         type="button"
                          onClick={handlePublish}
                          style={{ 
                              background: '#B91C1C', color: '#fff', border: 'none', 
@@ -429,15 +389,10 @@ export const BuilderToolbar: React.FC<Props> = ({ onToggleLibrary, libraryOpen }
                     display: 'flex', alignItems: 'center',
                     padding: '0 14px', gap: 8, flexShrink: 0,
                     fontFamily: "var(--font-sans)",
-                    // FIX: no overflow:auto — that creates a new fixed-position containing block
-                    // that traps portaled children. Use clip instead so text doesn't overflow
-                    // but fixed-position descendants are unaffected.
                     position: 'relative', zIndex: 50,
                     overflowX: 'clip',
                 }}
             >
-                {/* Brand */}
-                {/* Brand */}
                 {window.innerWidth >= 1024 && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0, marginRight: 4 }}>
                         <div style={{
@@ -461,7 +416,6 @@ export const BuilderToolbar: React.FC<Props> = ({ onToggleLibrary, libraryOpen }
                 )}
 
                 {window.innerWidth < 768 ? (
-                    // 📱 MOBILE TOOLBAR LAYOUT
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6, flex: 1, overflow: 'hidden' }}>
                         <div style={{ flex: 1, minWidth: 0, overflowX: 'auto' }}>
                             <TopBarPageSelector />
@@ -469,8 +423,8 @@ export const BuilderToolbar: React.FC<Props> = ({ onToggleLibrary, libraryOpen }
 
                         <SaveIndicator saveStatus={saveStatus} hasUnsavedChanges={hasUnsavedChanges} />
 
-                        {/* Overflow Menu with ⋯ icon */}
                         <button
+                            type="button"
                             onClick={() => setOpenDropdown(v => v === 'overflow' ? null : 'overflow')}
                             style={{
                                 height: 32, width: 32, borderRadius: 8,
@@ -484,6 +438,7 @@ export const BuilderToolbar: React.FC<Props> = ({ onToggleLibrary, libraryOpen }
                         </button>
 
                         <button
+                            type="button"
                             onClick={handlePublish}
                             disabled={publishStatus === 'publishing'}
                             style={{
@@ -495,12 +450,8 @@ export const BuilderToolbar: React.FC<Props> = ({ onToggleLibrary, libraryOpen }
                         </button>
                     </div>
                 ) : (
-                    // 🖥️ DESKTOP TOOLBAR LAYOUT
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flex: 1 }}>
-                        
-                        {/* ─── LEFT ZONE ─── */}
                         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                            {/* Logo Mark (Icon Only) */}
                             <div style={{
                                 width: 24, height: 24, borderRadius: 6, background: 'var(--accent-primary)',
                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -511,8 +462,8 @@ export const BuilderToolbar: React.FC<Props> = ({ onToggleLibrary, libraryOpen }
                             <TopBarPageSelector />
                             <Divider />
                             
-                            {/* ➕ Elements Library Toggle */}
                             <button 
+                                type="button"
                                 onClick={onToggleLibrary}
                                 style={{
                                     height: 32, padding: '0 12px', background: libraryOpen ? 'var(--accent-subtle, rgba(124, 109, 250, 0.1))' : 'none',
@@ -526,14 +477,13 @@ export const BuilderToolbar: React.FC<Props> = ({ onToggleLibrary, libraryOpen }
                             </button>
                         </div>
 
-                        {/* ─── CENTER ZONE ─── */}
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8, position: 'absolute', left: '50%', transform: 'translateX(-50%)' }}>
-                            {/* Device Segmented Control */}
                             <div style={{ display: 'flex', background: 'rgba(0,0,0,0.03)', border: `1px solid ${T.border}`, borderRadius: 8, padding: 2 }}>
                                 {(['desktop', 'tablet', 'phone'] as const).map(d => {
                                     const isSel = activeDevice.category === d;
                                     return (
                                         <button
+                                            type="button"
                                             key={d}
                                             onClick={() => setDevicePreset(d === 'desktop' ? 'desktop_1440' : d === 'tablet' ? 'ipad_air' : 'iphone_14')}
                                             style={{
@@ -552,28 +502,25 @@ export const BuilderToolbar: React.FC<Props> = ({ onToggleLibrary, libraryOpen }
                                 })}
                             </div>
                             
-                            {/* Read-Only Canvas Zoom */}
                             <div style={{ fontSize: 13, color: T.muted, fontWeight: 500, padding: '0 8px' }}>
                                 100%
                             </div>
                         </div>
 
-                        {/* ─── RIGHT ZONE ─── */}
                         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                            {/* Undo / Redo */}
                             <div style={{ display: 'flex', gap: 2 }}>
-                                <button onClick={undo} style={{ height: 32, width: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', color: T.text, cursor: 'pointer' }}>
+                                <button type="button" onClick={undo} style={{ height: 32, width: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', color: T.text, cursor: 'pointer' }}>
                                     <Undo2 size={14} />
                                 </button>
-                                <button onClick={redo} style={{ height: 32, width: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', color: T.text, cursor: 'pointer' }}>
+                                <button type="button" onClick={redo} style={{ height: 32, width: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', color: T.text, cursor: 'pointer' }}>
                                     <Redo2 size={14} />
                                 </button>
                             </div>
 
                             <Divider />
 
-                            {/* Preview Toggle (Ghost) */}
                             <button 
+                                type="button"
                                 onClick={() => setIsPreviewMode(!isPreviewMode)}
                                 style={{
                                     height: 32, padding: '0 12px', background: isPreviewMode ? 'var(--surface-raised)' : 'none',
@@ -586,8 +533,8 @@ export const BuilderToolbar: React.FC<Props> = ({ onToggleLibrary, libraryOpen }
                                 <span style={{ fontSize: 13 }}>{isPreviewMode ? 'Edit' : 'Preview'}</span>
                             </button>
 
-                            {/* AI Magic */}
                             <button 
+                                type="button"
                                 onClick={() => setIsCopilotOpen(true)}
                                 style={{
                                     height: 32, padding: '0 12px', background: 'none', border: 'none',
@@ -601,7 +548,6 @@ export const BuilderToolbar: React.FC<Props> = ({ onToggleLibrary, libraryOpen }
 
                             <Divider />
 
-                            {/* Save Status & Relative Time */}
                             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                                 <SaveIndicator saveStatus={saveStatus} hasUnsavedChanges={hasUnsavedChanges} />
                                 {relativeTime && (
@@ -611,8 +557,8 @@ export const BuilderToolbar: React.FC<Props> = ({ onToggleLibrary, libraryOpen }
                                 )}
                             </div>
 
-                            {/* Publish Button */}
                             <button
+                                type="button"
                                 onClick={handlePublish}
                                 disabled={publishStatus === 'publishing'}
                                 style={{
@@ -630,8 +576,6 @@ export const BuilderToolbar: React.FC<Props> = ({ onToggleLibrary, libraryOpen }
                     </div>
                 )}
 
-
-            {/* 📱 MOBILE OVERFLOW MENU */}
             {window.innerWidth < 768 && openDropdown === 'overflow' && (
                 <div style={{
                     position: 'absolute', top: 52, right: 14, background: '#121214', 
@@ -640,11 +584,12 @@ export const BuilderToolbar: React.FC<Props> = ({ onToggleLibrary, libraryOpen }
                     fontFamily: "'Inter', sans-serif"
                 }}>
                     <div style={{ display: 'flex', gap: 4, marginBottom: 4 }}>
-                        <button onClick={undo} style={{ flex: 1, padding: '8px', background: 'transparent', border: '1px solid #1c1c1f', borderRadius: 8, color: '#fff', display: 'flex', justifyContent: 'center' }}><Undo2 size={13} /></button>
-                        <button onClick={redo} style={{ flex: 1, padding: '8px', background: 'transparent', border: '1px solid #1c1c1f', borderRadius: 8, color: '#fff', display: 'flex', justifyContent: 'center' }}><Redo2 size={13} /></button>
+                        <button type="button" onClick={undo} style={{ flex: 1, padding: '8px', background: 'transparent', border: '1px solid #1c1c1f', borderRadius: 8, color: '#fff', display: 'flex', justifyContent: 'center' }}><Undo2 size={13} /></button>
+                        <button type="button" onClick={redo} style={{ flex: 1, padding: '8px', background: 'transparent', border: '1px solid #1c1c1f', borderRadius: 8, color: '#fff', display: 'flex', justifyContent: 'center' }}><Redo2 size={13} /></button>
                     </div>
                     <div style={{ borderTop: '1px solid #1c1c1f', margin: '6px 0' }} />
                     <button 
+                        type="button"
                         onClick={() => { setIsPreviewMode(!isPreviewMode); setOpenDropdown(null); }}
                         style={{ width: '100%', padding: '9px 12px', background: 'transparent', border: 'none', borderRadius: 8, color: '#fff', fontSize: 13, display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}
                     >
@@ -652,6 +597,7 @@ export const BuilderToolbar: React.FC<Props> = ({ onToggleLibrary, libraryOpen }
                         <span>{isPreviewMode ? 'View Edit' : 'Preview'}</span>
                     </button>
                     <button 
+                        type="button"
                         onClick={() => { onToggleLibrary(); setOpenDropdown(null); }}
                         style={{ width: '100%', padding: '9px 12px', background: 'transparent', border: 'none', borderRadius: 8, color: '#fff', fontSize: 13, display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', marginTop: 3 }}
                     >
@@ -661,7 +607,6 @@ export const BuilderToolbar: React.FC<Props> = ({ onToggleLibrary, libraryOpen }
             )}
             </div>
 
-            {/* FIX: portal — dropdowns escape the toolbar's stacking context entirely */}
             {dropdownContent && createPortal(dropdownContent, document.body)}
 
             <AICopilotModal isOpen={isCopilotOpen} onClose={() => setIsCopilotOpen(false)} />

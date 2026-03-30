@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import client from '../api/client';
@@ -63,7 +63,7 @@ export function useStorefront() {
         stats: null,
         loading: isLoading, // Initial load
         isFetching, // Background revalidation
-        error: queryError ? (queryError as any).message : null,
+        error: queryError ? (queryError as { message?: string }).message || 'Unknown error' : null,
         isPreview,
         storeSlug,
         refresh: refetch

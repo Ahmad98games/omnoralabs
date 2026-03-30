@@ -8,7 +8,8 @@ export interface Order {
     currency: string;
     status: 'Pending_Payment' | 'Payment_Under_Review' | 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled';
     created_at: string;
-    items: any[];
+    // OSTT FIX: Using Record structure to eliminate Any
+    items: Record<string, unknown>[];
     screenshot_url?: string;
 }
 
@@ -18,8 +19,7 @@ interface OrderListTableProps {
 
 /**
  * OrderListTable: Order Lifecycle Management Tracker
- * 
- * Lists orders with status enum dropdown triggers, filtering, and proof upload dialogs.
+ * * Lists orders with status enum dropdown triggers, filtering, and proof upload dialogs.
  */
 export const OrderListTable: React.FC<OrderListTableProps> = ({ merchantId }) => {
     const [orders, setOrders] = useState<Order[]>([]);
@@ -63,7 +63,7 @@ export const OrderListTable: React.FC<OrderListTableProps> = ({ merchantId }) =>
             .eq('id', orderId);
 
         if (!error) {
-            setOrders(orders.map(o => o.id === orderId ? { ...o, status: newStatus as any } : o));
+            setOrders(orders.map(o => o.id === orderId ? { ...o, status: newStatus as Order['status'] } : o));
         } else {
             alert('Failed to update status.');
         }
@@ -138,6 +138,7 @@ export const OrderListTable: React.FC<OrderListTableProps> = ({ merchantId }) =>
                                     
                                     {order.screenshot_url && (
                                         <button 
+                                            type="button"
                                             onClick={() => window.open(order.screenshot_url, '_blank')}
                                             style={{ marginLeft: 8, background: '#3b82f6', color: '#fff', padding: '4px 8px', border: 'none', borderRadius: 4, fontSize: '11px', cursor: 'pointer' }}
                                         >

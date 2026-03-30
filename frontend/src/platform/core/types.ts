@@ -8,7 +8,7 @@ export interface PlatformBlock {
     id: string;
     type: string;
     parentId: string | null;
-    props: Record<string, any>;
+    props: Record<string, unknown>;
     styles: React.CSSProperties;
     children: string[]; // Standardized to non-optional for renderer stability
     schemaVersion: number; // Added for v3 resilience
@@ -60,7 +60,7 @@ export interface PlatformBlock {
  */
 export interface PlatformRegistryNode {
     nodeId: string;
-    props: Record<string, any>;
+    props: Record<string, unknown>;
     children?: React.ReactNode;
 }
 
@@ -72,4 +72,46 @@ export interface PlatformContextValue {
     viewport: 'desktop' | 'tablet' | 'mobile';
     nodes: Record<string, PlatformBlock>;
     adjacencyMap: Record<string, string[]>; // Precomputed for performance
+}
+
+// ─── Phase 15: Universal Hardening (Batch 3) ───
+
+export interface CopilotAction {
+    action: 'addNode' | 'updateNode' | 'removeNode' | 'updateProps' | 'updateStyle';
+    type?: string;
+    id?: string;
+    props?: Record<string, unknown>;
+}
+
+export interface MinifiedStoreState {
+    time: string;
+    metrics: {
+        rev_7d: number;
+        orders_7d: number;
+        capi_fidelity: number;
+        wallet_days: number;
+    };
+    alerts: {
+        low_stock: Array<{ item: string; stock: number }>;
+    };
+}
+
+export interface KernelPatch {
+    id: string;
+    active: boolean;
+    version_target: string;
+    // OSTT FIX: Replaced any with unknown
+    patch_data: Record<string, unknown>;
+}
+
+export interface StorePagePayload {
+    id: string;
+    nodes: Record<string, PlatformBlock>;
+}
+
+export interface MerchantSettingsPayload {
+    id: string;
+    display_name: string;
+    // OSTT FIX: Replaced any with unknown
+    metadata: Record<string, unknown>;
 }

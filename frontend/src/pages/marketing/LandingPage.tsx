@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { ArrowRight, Zap, Target, ShieldCheck, Box, ChevronRight, Store } from 'lucide-react';
+import { ArrowRight, Zap, Target, Box, Store } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 export const LandingPage: React.FC = () => {

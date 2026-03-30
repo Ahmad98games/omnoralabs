@@ -1,57 +1,89 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import { supabase } from '../../../lib/supabaseClient';
-import { User, Package, MapPin, Heart, Shield, Settings, CheckCircle2, ChevronRight } from 'lucide-react';
+import { Package, MapPin, Shield, ChevronRight } from 'lucide-react';
+
+interface TabButtonProps {
+    id: 'orders' | 'addresses' | 'security';
+    label: string;
+    icon: React.ElementType;
+    activeTab: string;
+    setActiveTab: (id: 'orders' | 'addresses' | 'security') => void;
+}
+
+const TabButton = ({ id, label, icon: Icon, activeTab, setActiveTab }: TabButtonProps) => (
+    <button 
+        onClick={() => setActiveTab(id)}
+        style={{ 
+            display: 'flex', alignItems: 'center', gap: 12, padding: '16px 20px', 
+            background: activeTab === id ? 'rgba(255, 107, 53, 0.1)' : 'transparent',
+            color: activeTab === id ? '#FF6B35' : '#71717a', 
+            border: 'none', borderLeft: activeTab === id ? '2px solid #FF6B35' : '2px solid transparent',
+            width: '100%', cursor: 'pointer', textAlign: 'left', fontWeight: 600, fontSize: 14,
+            transition: 'all 0.2s'
+        }}
+    >
+        <Icon size={18} /> {label}
+    </button>
+);
+
+interface CustomerOrder {
+    id: string;
+    order_number: string;
+    created_at: string;
+    total_cents: number;
+    status: string;
+    line_items?: { length: number }[];
+}
+
+interface CustomerAddress {
+    name: string;
+    street: string;
+    city: string;
+    zip: string;
+    country: string;
+    is_default?: boolean;
+}
 
 export const CustomerProfile: React.FC = () => {
     const { user } = useAuth();
-    const [orders, setOrders] = useState<any[]>([]);
-    const [addresses, setAddresses] = useState<any[]>([]);
+    const [orders, setOrders] = useState<CustomerOrder[]>([]);
+    const [addresses, setAddresses] = useState<CustomerAddress[]>([]);
     const [activeTab, setActiveTab] = useState<'orders' | 'addresses' | 'security'>('orders');
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        if (user) fetchCustomerData();
+    const fetchCustomerData = useCallback(async () => {
+        if (!user) return;
+        setLoading(true);
+        try {
+            // Fetch Orders
+            const { data: orderData } = await supabase
+                .from('orders')
+                .select('*')
+                .eq('customer_id', user.id)
+                .order('created_at', { ascending: false });
+            
+            // Fetch Profile for Addresses
+            const { data: customerData } = await supabase
+                .from('customers')
+                .select('addresses')
+                .eq('id', user.id)
+                .single();
+
+            setOrders(orderData || []);
+            setAddresses(customerData?.addresses || []);
+        } finally {
+            setLoading(false);
+        }
     }, [user]);
 
-    const fetchCustomerData = async () => {
-        setLoading(true);
-        // Fetch Orders
-        const { data: orderData } = await supabase
-            .from('orders')
-            .select('*')
-            .eq('customer_id', user.id)
-            .order('created_at', { ascending: false });
-        
-        // Fetch Profile for Addresses
-        const { data: customerData } = await supabase
-            .from('customers')
-            .select('addresses')
-            .eq('id', user.id)
-            .single();
-
-        setOrders(orderData || []);
-        setAddresses(customerData?.addresses || []);
-        setLoading(false);
-    };
-
-    if (!user) return <div style={{ padding: 40, textAlign: 'center', color: '#71717a' }}>Please sign in to view your profile.</div>;
-
-    const TabButton = ({ id, label, icon: Icon }: any) => (
-        <button 
-            onClick={() => setActiveTab(id)}
-            style={{ 
-                display: 'flex', alignItems: 'center', gap: 12, padding: '16px 20px', 
-                background: activeTab === id ? 'rgba(255, 107, 53, 0.1)' : 'transparent',
-                color: activeTab === id ? '#FF6B35' : '#71717a', 
-                border: 'none', borderLeft: activeTab === id ? '2px solid #FF6B35' : '2px solid transparent',
-                width: '100%', cursor: 'pointer', textAlign: 'left', fontWeight: 600, fontSize: 14,
-                transition: 'all 0.2s'
-            }}
-        >
-            <Icon size={18} /> {label}
-        </button>
-    );
+    useEffect(() => {
+        let isMounted = true;
+        if (isMounted) {
+            fetchCustomerData();
+        }
+        return () => { isMounted = false; };
+    }, [fetchCustomerData]);
 
     return (
         <div style={{ maxWidth: 1200, margin: '60px auto', padding: '0 20px' }}>
@@ -70,9 +102,9 @@ export const CustomerProfile: React.FC = () => {
                         </div>
                     </div>
                     <nav style={{ background: '#131316', borderRadius: 12, overflow: 'hidden', border: '1px solid #27272a' }}>
-                        <TabButton id="orders" label="Order History" icon={Package} />
-                        <TabButton id="addresses" label="Saved Addresses" icon={MapPin} />
-                        <TabButton id="security" label="Security" icon={Shield} />
+                        <TabButton id="orders" label="Order History" icon={Package} activeTab={activeTab} setActiveTab={setActiveTab} />
+                        <TabButton id="addresses" label="Saved Addresses" icon={MapPin} activeTab={activeTab} setActiveTab={setActiveTab} />
+                        <TabButton id="security" label="Security" icon={Shield} activeTab={activeTab} setActiveTab={setActiveTab} />
                     </nav>
                 </aside>
 

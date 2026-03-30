@@ -1,3 +1,8 @@
+/**
+ * UrgencyTimerModule.tsx
+ * Refactored for OSTT: Fixed hook missing dependency.
+ */
+
 import React, { useState, useEffect } from 'react';
 
 // ─── Props ────────────────────────────────────────────────────────────────────
@@ -52,6 +57,28 @@ const INTENSITY_STYLES = {
     },
 };
 
+type ThemeStyle = typeof INTENSITY_STYLES['normal'];
+
+// ─── Extracted Sub-Components (FIXED) ─────────────────────────────────────────
+
+const Digit: React.FC<{ value: number; label: string; theme: ThemeStyle }> = ({ value, label, theme }) => (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+        <div style={{
+            background: theme.digitBg, color: theme.digitColor,
+            borderRadius: 8, padding: '10px 14px', minWidth: 48,
+            fontSize: 26, fontWeight: 800, textAlign: 'center', fontVariantNumeric: 'tabular-nums',
+            border: '1px solid rgba(255,255,255,0.06)',
+        }}>
+            {String(value).padStart(2, '0')}
+        </div>
+        <div style={{ fontSize: 9, color: theme.msgColor, fontWeight: 700, letterSpacing: '0.08em' }}>{label}</div>
+    </div>
+);
+
+const Sep: React.FC<{ theme: ThemeStyle }> = ({ theme }) => (
+    <div style={{ color: theme.digitColor, fontSize: 22, fontWeight: 800, marginBottom: 16, opacity: 0.6 }}>:</div>
+);
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 const UrgencyTimerModule: React.FC<UrgencyTimerProps> = ({
@@ -62,6 +89,7 @@ const UrgencyTimerModule: React.FC<UrgencyTimerProps> = ({
 }) => {
     const [remaining, setRemaining] = useState(() => getRemainingMs(endTime));
 
+    // OSTT FIX: Passed remaining as dependency to ensure closure updates but checked for 0 to stop infinite looping.
     useEffect(() => {
         if (remaining === 0) return;
         const interval = setInterval(() => {
@@ -70,28 +98,10 @@ const UrgencyTimerModule: React.FC<UrgencyTimerProps> = ({
             if (next === 0) clearInterval(interval);
         }, 1000);
         return () => clearInterval(interval);
-    }, [endTime]);
+    }, [endTime, remaining]);
 
     const { h, m, s, expired } = formatTime(remaining);
     const theme = INTENSITY_STYLES[intensity];
-
-    const Digit: React.FC<{ value: number; label: string }> = ({ value, label }) => (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-            <div style={{
-                background: theme.digitBg, color: theme.digitColor,
-                borderRadius: 8, padding: '10px 14px', minWidth: 48,
-                fontSize: 26, fontWeight: 800, textAlign: 'center', fontVariantNumeric: 'tabular-nums',
-                border: '1px solid rgba(255,255,255,0.06)',
-            }}>
-                {String(value).padStart(2, '0')}
-            </div>
-            <div style={{ fontSize: 9, color: theme.msgColor, fontWeight: 700, letterSpacing: '0.08em' }}>{label}</div>
-        </div>
-    );
-
-    const Sep: React.FC = () => (
-        <div style={{ color: theme.digitColor, fontSize: 22, fontWeight: 800, marginBottom: 16, opacity: 0.6 }}>:</div>
-    );
 
     if (expired) return (
         <div style={{ background: theme.bg, border: theme.border, borderRadius: 12, padding: '14px 20px', textAlign: 'center', boxShadow: theme.glow }}>
@@ -103,11 +113,11 @@ const UrgencyTimerModule: React.FC<UrgencyTimerProps> = ({
         <div style={{ background: theme.bg, border: theme.border, borderRadius: displayStyle === 'floating' ? 16 : 12, padding: displayStyle === 'banner' ? '12px 24px' : '18px 24px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap', gap: 16, boxShadow: theme.glow }}>
             <span style={{ color: theme.msgColor, fontSize: 13, fontWeight: 600 }}>⏰ {message}</span>
             <div style={{ display: 'flex', alignItems: 'flex-end', gap: 6 }}>
-                <Digit value={h} label="HRS" />
-                <Sep />
-                <Digit value={m} label="MIN" />
-                <Sep />
-                <Digit value={s} label="SEC" />
+                <Digit value={h} label="HRS" theme={theme} />
+                <Sep theme={theme} />
+                <Digit value={m} label="MIN" theme={theme} />
+                <Sep theme={theme} />
+                <Digit value={s} label="SEC" theme={theme} />
             </div>
         </div>
     );

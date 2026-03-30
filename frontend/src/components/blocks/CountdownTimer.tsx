@@ -48,7 +48,7 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({
     labelMinutes = 'Min',
     labelSeconds = 'Sec',
 }) => {
-    const calcTimeLeft = (): TimeLeft => {
+    const calcTimeLeft = React.useCallback((): TimeLeft => {
         const target = new Date(targetDate).getTime();
         const diff = target - Date.now();
         if (diff <= 0) return { days: 0, hours: 0, minutes: 0, seconds: 0, expired: true };
@@ -59,9 +59,9 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({
             seconds: Math.floor((diff / 1000) % 60),
             expired: false,
         };
-    };
+    }, [targetDate]);
 
-    const [timeLeft, setTimeLeft] = useState<TimeLeft>(calcTimeLeft);
+    const [timeLeft, setTimeLeft] = useState<TimeLeft>(calcTimeLeft());
 
     useEffect(() => {
         if (isBuilder) return; // Disable ticking in builder context to prevent canvas re-render lag
@@ -75,7 +75,7 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({
         }, 1000);
 
         return () => clearInterval(timer);
-    }, [targetDate, isBuilder, expiredAction, redirectUrl]);
+    }, [isBuilder, expiredAction, redirectUrl, calcTimeLeft]);
 
     const segments = [
         { value: timeLeft.days, label: labelDays },

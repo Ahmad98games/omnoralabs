@@ -9,7 +9,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import client, { trackEvent } from '../api/client'
+import client from '../api/client'
 import './Checkout.css'
 import { useToast } from '../context/ToastContext'
 import { useScrollReveal } from '../hooks/useScrollReveal'
@@ -181,9 +181,9 @@ export default function Checkout() {
                 showToast(msg, 'error');
                 setIsProcessing(false); // Unlock on failure
             }
-        } catch (e: any) {
-            OmnoraLogger.error('CHECKOUT', `Fatal Error during committal: ${e.message}`);
-            const msg = e?.response?.data?.error || e?.message || 'Failed to create order. Please try again.';
+        } catch (e: unknown) {
+            OmnoraLogger.error('CHECKOUT', `Fatal Error during committal: ${(e as Error).message}`);
+            const msg = (e as { response?: { data?: { error?: string } } })?.response?.data?.error || (e as Error)?.message || 'Failed to create order. Please try again.';
             setError(msg);
             showToast(msg, 'error');
             setIsProcessing(false); // Unlock on failure

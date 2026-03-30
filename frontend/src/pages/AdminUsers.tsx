@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import client from '../api/client';
 import { useToast } from '../context/ToastContext';
-import { Users, Search, Shield, ShieldAlert, Trash2, Mail, Calendar, UserCheck, ShieldCheck } from 'lucide-react';
+import { Search, Shield, Trash2, Mail, Calendar, UserCheck, ShieldCheck } from 'lucide-react';
 import './AdminUsers.css';
 
 interface User {
@@ -10,6 +10,17 @@ interface User {
     email: string;
     isAdmin: boolean;
     createdAt: string;
+}
+
+interface BackendUser {
+    _id: string;
+    name?: string;
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    isAdmin?: boolean;
+    role?: string;
+    createdAt?: string;
 }
 
 const AdminUsers: React.FC = () => {
@@ -25,7 +36,7 @@ const AdminUsers: React.FC = () => {
             const rawList = Array.isArray(data) ? data : data.users || [];
 
             // Safe Data Mapping (Backend 'firstName' -> Frontend 'name', etc.)
-            const sanitizedUsers: User[] = rawList.map((u: any) => ({
+            const sanitizedUsers: User[] = (rawList as BackendUser[]).map((u) => ({
                 _id: u._id,
                 name: u.name || `${u.firstName || ''} ${u.lastName || ''}`.trim() || 'Unknown Personnel',
                 email: u.email || 'No Contact',
@@ -53,6 +64,7 @@ const AdminUsers: React.FC = () => {
             showToast('User record purged', 'success');
             setUsers(prev => prev.filter(u => u._id !== id));
         } catch (error) {
+            console.error('Termination failed:', error);
             showToast('Termination failed', 'error');
         }
     };
@@ -70,6 +82,7 @@ const AdminUsers: React.FC = () => {
             showToast(`Clearance level updated: ${newStatus ? 'COMMANDER' : 'CIVILIAN'}`, 'success');
             setUsers(prev => prev.map(u => u._id === user._id ? { ...u, isAdmin: newStatus } : u));
         } catch (error) {
+            console.error('Clearance update failed:', error);
             showToast('Clearance update failed', 'error');
         }
     };

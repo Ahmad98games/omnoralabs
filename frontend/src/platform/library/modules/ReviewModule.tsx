@@ -1,6 +1,6 @@
 import React from 'react';
 import { useBuilder } from '../../../context/BuilderContext';
-import { Quote, User, Star, ShieldCheck, Image as ImageIcon } from 'lucide-react';
+import { Quote, Star, ShieldCheck, Image as ImageIcon } from 'lucide-react';
 
 export const ReviewModule: React.FC = () => {
     const { selectedNodeId, nodeTree, updateNode, commitHistory } = useBuilder();
@@ -8,7 +8,7 @@ export const ReviewModule: React.FC = () => {
 
     if (!node || node.type !== 'reviews') return null;
 
-    const updateProp = (key: string, value: any) => {
+    const updateProp = (key: string, value: unknown) => {
         updateNode(node.id, `props.${key}`, value);
     };
 

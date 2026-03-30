@@ -9,7 +9,7 @@ export interface MinifiedStoreState {
         wallet_days: number;
     };
     alerts: {
-        low_stock: any[]; // [ { sku, name, stock } ]
+        low_stock: Array<{ item: string; stock: number }>; 
     };
 }
 
@@ -60,7 +60,7 @@ export class DataCruncher {
             const rev_7d = orders.reduce((sum, o) => sum + (o.total_amount || 0), 0);
             
             // Crunch Products (Native stock + deeply nested Variants stock limit < 5)
-            const lowStockItems: any[] = [];
+            const lowStockItems: Array<{ item: string; stock: number }> = [];
             (productsRes.data || []).forEach(p => {
                 // If base product is out of stock / low
                 if (p.stock !== null && p.stock < 5) {
@@ -69,7 +69,7 @@ export class DataCruncher {
                 
                 // If variant nested stock is low
                 if (p.variants && Array.isArray(p.variants)) {
-                    p.variants.forEach((v: any) => {
+                    (p.variants as Array<{ name: string; stock: number | null }>).forEach(v => {
                         if (v.stock !== null && v.stock < 5) {
                             lowStockItems.push({ item: `${p.title} (${v.name})`, stock: v.stock });
                         }

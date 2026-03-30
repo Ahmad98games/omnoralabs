@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { AbandonedCartService, AbandonedCartInfo } from '../../services/AbandonedCartService';
 import { ShoppingCart, Phone, Clock, MessageCircle, AlertCircle, CheckCircle } from 'lucide-react';
@@ -12,19 +12,22 @@ export const RecoveryList: React.FC = () => {
     const [carts, setCarts] = useState<AbandonedCartInfo[]>([]);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        if (user?.id) {
-            fetchCarts();
-        }
-    }, [user]);
-
-    const fetchCarts = async () => {
+    const fetchCarts = useCallback(async () => {
+        if (!user?.id) return;
         setLoading(true);
         // Using user.id as merchant_id
-        const list = await AbandonedCartService.getAbandonedCarts(user!.id);
-        setCarts(list as any);
+        const list = await AbandonedCartService.getAbandonedCarts(user.id);
+        setCarts(list as AbandonedCartInfo[]);
         setLoading(false);
-    };
+    }, [user]);
+
+    useEffect(() => {
+        // OSTT FIX: Fetch carts asynchronously on next tick to avoid synchronous setState inside effect
+        const runFetch = async () => {
+            await fetchCarts();
+        };
+        runFetch();
+    }, [fetchCarts]);
 
     const handleRecover = async (cart: ExtendedCartInfo) => {
         // Build url and open WA

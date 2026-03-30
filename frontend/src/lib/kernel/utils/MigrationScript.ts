@@ -3,7 +3,18 @@
  * Mappings for automated upgrading of deprecated component structures.
  */
 
-export const runMigrations = (ast: any) => {
+interface MigrationBlock {
+    type: string;
+    props?: Record<string, unknown>;
+}
+
+interface MigrationAST {
+    manifest_version: string;
+    blocks?: MigrationBlock[];
+    [key: string]: unknown;
+}
+
+export const runMigrations = (ast: MigrationAST): MigrationAST => {
     let currentVersion = ast.manifest_version || '1.0.0';
 
     if (currentVersion === '1.0.0') {
@@ -21,9 +32,9 @@ export const runMigrations = (ast: any) => {
 };
 
 // Example mappings
-const v1_to_v2 = (ast: any) => {
+const v1_to_v2 = (ast: MigrationAST): MigrationAST => {
     if (ast.blocks) {
-        ast.blocks = ast.blocks.map((block: any) => {
+        ast.blocks = ast.blocks.map((block: MigrationBlock) => {
             // Self-heal: Standardize legacy classNames
             if (block.type === 'hero_banner' && block.props?.headline) {
                 // Execute layout migrations
@@ -34,7 +45,7 @@ const v1_to_v2 = (ast: any) => {
     return ast;
 };
 
-const v2_to_v2_1 = (ast: any) => {
+const v2_to_v2_1 = (ast: MigrationAST): MigrationAST => {
     // Future expansion architecture
     return ast;
 };

@@ -14,7 +14,7 @@ export function useInventorySync(productId: string, initialCount: number = 0) {
         if (!productId) return;
 
         let isMounted = true;
-        let pollInterval: any = null;
+        let pollInterval: ReturnType<typeof setInterval> | null = null;
 
         // Fallback Polling
         const fetchLatestStock = async () => {

@@ -9,7 +9,7 @@ export const HeaderModule: React.FC = () => {
 
     if (!node || node.type !== 'header') return null;
 
-    const updateProp = (key: string, value: any) => {
+    const updateProp = (key: string, value: unknown) => {
         updateNode(node.id, `props.${key}`, value);
     };
 

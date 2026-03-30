@@ -9,7 +9,7 @@ interface SEOHeadProps {
     ogImage?: string;
     canonical?: string;
     type?: 'website' | 'product';
-    productData?: any;
+    productData?: Record<string, unknown>;
 }
 
 export const SEOHead: React.FC<SEOHeadProps> = ({ 
@@ -25,16 +25,17 @@ export const SEOHead: React.FC<SEOHeadProps> = ({
 
     // ─── Liquid Hydration Engine ──────────────────────────────────────────────
     // Parses placeholders like {{product.title}} from merchant-defined strings
-    const hydrate = (text: string) => {
+    const hydrate = useCallback((text: string) => {
         if (!text) return '';
         let hydrated = text;
         
         if (productData) {
-            hydrated = hydrated
-                .replace(/\{\{product\.title\}\}/g, productData.title || '')
-                .replace(/\{\{product\.description\}\}/g, (productData.description || '').substring(0, 160))
-                .replace(/\{\{product\.price\}\}/g, String(productData.price || ''))
-                .replace(/\{\{product\.type\}\}/g, productData.type || '');
+            Object.keys(productData).forEach(key => {
+                const val = productData[key];
+                if (typeof val === 'string') {
+                    hydrated = hydrated.replace(new RegExp(`{{product.${key}}}`, 'g'), val);
+                }
+            });
         }
 
         if (content?.configuration) {
@@ -42,16 +43,16 @@ export const SEOHead: React.FC<SEOHeadProps> = ({
         }
 
         return hydrated;
-    };
+    }, [content, productData]);
 
     const finalTitle = useMemo(() => {
         const base = storeName || content?.configuration?.name || 'Omnora Store';
         return hydrate(base);
-    }, [storeName, content, productData]);
+    }, [storeName, content, hydrate]);
 
     const finalDesc = useMemo(() => {
         return hydrate(description || content?.configuration?.description || 'Luxury E-commerce powered by Omnora OS.');
-    }, [description, content, productData]);
+    }, [description, content, hydrate]);
 
     const finalOGImage = ogImage || content?.configuration?.assets?.logo || '/images/omnora.jpg';
     const finalCanonical = canonical || `${window.location.origin}${location.pathname}`;

@@ -15,8 +15,7 @@ export const CartDrawer: React.FC = () => {
         cartItems, 
         updateQuantity, 
         removeItem, 
-        getCartTotal,
-        getItemCount 
+        getCartTotal
     } = cartStore;
     
     const isHydrated = useStoreHydration(useCartStore);
@@ -46,9 +45,10 @@ export const CartDrawer: React.FC = () => {
 
             showToast('Redirecting to secure checkout...', 'success');
             window.location.href = checkoutUrl;
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error('Checkout Handoff Failed:', err);
-            if (err.message === 'MERCHANT_NO_GATEWAY') {
+            const msg = (err as { message?: string }).message;
+            if (msg === 'MERCHANT_NO_GATEWAY') {
                 showToast('Merchant has not configured a payment gateway.', 'error');
             } else {
                 showToast('Unable to initiate checkout. Please try again.', 'error');
@@ -58,7 +58,6 @@ export const CartDrawer: React.FC = () => {
     };
 
     const cartTotal = getCartTotal();
-    const itemCount = getItemCount();
 
     return (
         <AnimatePresence>

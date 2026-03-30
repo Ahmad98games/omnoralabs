@@ -3,7 +3,7 @@ import { useNodeSelector } from '../../../hooks/useNodeSelector';
 import { dispatcher } from '../../../platform/core/Dispatcher';
 import { databaseClient } from '../../../platform/core/DatabaseClient';
 import type { Product } from '../../../context/StorefrontContext';
-import { Package, Search, Loader2, Check, Star } from 'lucide-react';
+import { Search, Check, Star } from 'lucide-react';
 
 const S = {
     section: {
@@ -43,7 +43,7 @@ export const FeaturedProductEditor: React.FC<{ nodeId: string }> = ({ nodeId }) 
         const fetch = async () => {
             setLoading(true);
             try {
-                const tenantId = (window as any).__OMNORA_TENANT_ID__ || 'default_tenant';
+                const tenantId = (window as unknown as { __OMNORA_TENANT_ID__?: string }).__OMNORA_TENANT_ID__ || 'default_tenant';
                 const data = await databaseClient.getProductsByMerchant(tenantId);
                 setProducts(data);
             } finally {

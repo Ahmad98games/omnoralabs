@@ -17,7 +17,7 @@ export const RenderPipelineOverlay: React.FC = () => {
         <svg 
             className="render-pipeline-overlay pointer-events-none fixed inset-0 w-full h-full z-[9999]" 
             style={{ 
-                mixBlendMode: 'var(--overlay-blend-mode)' as any,
+                mixBlendMode: 'var(--overlay-blend-mode)' as React.CSSProperties['mixBlendMode'],
                 opacity: 'var(--neon-intensity)' 
             }}
         >

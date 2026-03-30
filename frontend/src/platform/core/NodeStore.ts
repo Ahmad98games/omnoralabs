@@ -9,7 +9,7 @@ export interface NodeStoreState {
 
 type Listener = () => void;
 
-class NodeStore {
+export class NodeStore {
     private state: NodeStoreState = {
         nodes: {},
         pageLayouts: {},

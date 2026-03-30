@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { supabase } from '../../../lib/supabaseClient';
 import { CleanRenderer } from '../../../platform/publish/CleanRenderer';
 
@@ -8,8 +8,21 @@ interface PageProps {
     params: { slug: string };
 }
 
+// OSTT FIX: Replaced 'any' with explicit strict typing for page data
+interface PageData {
+    nodes: Record<string, Record<string, unknown>>;
+    layout: string[];
+    theme_vars: React.CSSProperties;
+}
+
+interface ASTBlock {
+    type: string;
+    props?: Record<string, unknown>;
+}
+
 export default function StorePage({ params }: PageProps) {
-    const [pageData, setPageData] = useState<any>(null);
+    // OSTT FIX: Applied PageData interface
+    const [pageData, setPageData] = useState<PageData | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -27,11 +40,12 @@ export default function StorePage({ params }: PageProps) {
                 if (!data) throw new Error("Store page not found or not published.");
 
                 // Convert ast_manifest (array) back to CleanRenderer structure (nodes map)
-                const nodes: Record<string, any> = {};
+                // OSTT FIX: Removed 'any' from nodes
+                const nodes: Record<string, Record<string, unknown>> = {};
                 const layout: string[] = [];
                 
                 if (data.ast_manifest && Array.isArray(data.ast_manifest)) {
-                    data.ast_manifest.forEach((block: any, index: number) => {
+                    data.ast_manifest.forEach((block: ASTBlock, index: number) => {
                         const id = `node_${block.type.toLowerCase()}_${Date.now()}_${index}`;
                         nodes[id] = {
                             id,
@@ -52,9 +66,10 @@ export default function StorePage({ params }: PageProps) {
                     layout,
                     theme_vars: data.theme_vars || {}
                 });
-            } catch (err: any) {
+            // OSTT FIX: Removed catch (err: any) and replaced with instanceof check
+            } catch (err) {
                 console.error("[StorePage fetch error]", err);
-                setError(err.message || "Failed to load store.");
+                setError(err instanceof Error ? err.message : "Failed to load store.");
             } finally {
                 setLoading(false);
             }

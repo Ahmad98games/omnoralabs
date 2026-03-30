@@ -1,5 +1,4 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useBuilder } from '../../context/BuilderContext';
 import {
@@ -18,8 +17,8 @@ import { useNodeSelector } from '../../hooks/useNodeSelector';
 import { SuggestionBubble } from './help/SuggestionBubble';
 import { FloatingParticles } from '../ui/FloatingParticles';
 import { LayerManager } from '../ui/LayerManager';
+import { BuilderNode } from '../../stores/useBuilderStore';
 
-// ─── Tokens ───────────────────────────────────────────────────────────────────
 const ACCENT = 'var(--accent-primary)';
 const ACCENT_L = 'var(--accent-subtle)';
 const DANGER = 'var(--danger)';
@@ -28,15 +27,14 @@ const SNAP_COLOR = 'var(--accent-primary)';
 const SPACING_COLOR = 'rgba(255,107,53,0.04)';
 const SPACING_BORDER = 'rgba(255,107,53,0.15)';
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-interface NodeRect { id: string; index: number; top: number; bottom: number; height: number; left: number; width: number; }
+interface NodeRect { id: string; index: number; top: number; bottom: number; height: number; left: number; width: number; absTop?: number; absBottom?: number; }
 
-function getNodeRects(nodeTree: Record<string, any>): NodeRect[] {
+function getNodeRects(nodeTree: Record<string, BuilderNode>): NodeRect[] {
     const host = document.querySelector('.omnora-shadow-host');
     if (!host?.shadowRoot) return [];
     return Object.values(nodeTree)
-        .filter((n: any) => n.parentId === null)
-        .map((n: any, i: number) => {
+        .filter((n: BuilderNode) => n.parentId === null)
+        .map((n: BuilderNode, i: number) => {
             const el = host.shadowRoot!.querySelector(`[data-node-id="${n.id}"]`) as HTMLElement | null;
             if (!el) return { id: n.id, index: i, top: 0, bottom: 0, height: 0, left: 0, width: 0 };
             const r = el.getBoundingClientRect();
@@ -44,7 +42,6 @@ function getNodeRects(nodeTree: Record<string, any>): NodeRect[] {
         });
 }
 
-// Detect element type from DOM element
 function detectElementType(el: HTMLElement): ElementType | null {
     const tag = el.tagName.toLowerCase();
     const cls = el.className?.toLowerCase?.() || '';
@@ -60,13 +57,13 @@ function detectElementType(el: HTMLElement): ElementType | null {
     return null;
 }
 
-// ─── ToolBtn ─────────────────────────────────────────────────────────────────
 const ToolBtn = ({ icon, onClick, title, danger = false, muted = false }: {
     icon: React.ReactNode; onClick: () => void; title: string; danger?: boolean; muted?: boolean;
 }) => {
     const [hov, setHov] = useState(false);
     return (
         <button
+            type="button"
             title={title}
             onClick={e => { e.stopPropagation(); onClick(); }}
             onMouseEnter={() => setHov(true)}
@@ -82,8 +79,16 @@ const ToolBtn = ({ icon, onClick, title, danger = false, muted = false }: {
     );
 };
 
-// ─── Context Menu ─────────────────────────────────────────────────────────────
 interface CtxMenu { x: number; y: number; nodeId: string; }
+
+interface ElementPosition {
+    mode: 'flow' | 'free';
+    x: number;
+    y: number;
+    z: number;
+    mobileX?: number;
+    mobileY?: number;
+}
 
 const ContextMenu = ({ menu, onClose, onAction }: {
     menu: CtxMenu; onClose: () => void; onAction: (action: string, nodeId: string) => void;
@@ -113,19 +118,23 @@ const ContextMenu = ({ menu, onClose, onAction }: {
                 animation: 'ctxFadeIn 0.12s ease',
             }}
             onClick={e => e.stopPropagation()}
+            role="menu"
+            tabIndex={0}
+            onKeyDown={(e) => { if(e.key === 'Escape') onClose(); }}
         >
             <style>{`@keyframes ctxFadeIn { from { opacity:0; transform:scale(0.96) translateY(-4px); } to { opacity:1; transform:scale(1) translateY(0); } }`}</style>
             {items.map((item, i) => (
                 <React.Fragment key={item.id}>
                     {i === 4 && <div style={{ height: 1, background: 'rgba(255,255,255,0.1)', margin: '4px 0' }} />}
                     <button
-                        onMouseEnter={e => (e.currentTarget.style.background = (item as any).danger ? 'rgba(239,68,68,0.12)' : 'rgba(255,255,255,0.08)')}
+                        type="button"
+                        onMouseEnter={e => (e.currentTarget.style.background = item.danger ? 'rgba(239,68,68,0.12)' : 'rgba(255,255,255,0.08)')}
                         onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
                         onClick={() => { onAction(item.id, menu.nodeId); onClose(); }}
                         style={{
                             display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'space-between',
                             padding: '8px 14px', background: 'transparent', border: 'none', cursor: 'pointer',
-                            color: (item as any).danger ? DANGER : '#E5E7EB', fontSize: 13, fontWeight: 500,
+                            color: item.danger ? DANGER : '#E5E7EB', fontSize: 13, fontWeight: 500,
                             textAlign: 'left', transition: 'background 0.1s',
                         }}
                     >
@@ -138,12 +147,11 @@ const ContextMenu = ({ menu, onClose, onAction }: {
     );
 };
 
-// ─── MiniBar ──────────────────────────────────────────────────────────────────
 const MiniBar = ({
     rect, nodeId, onDragStart,
-}: { rect: DOMRect; nodeId: string; onDragStart: (id: string, e: React.MouseEvent) => void; }) => {
+}: { rect: DOMRect; nodeId: string; isSelected: boolean; onDragStart: (id: string, e: React.MouseEvent) => void; }) => {
     const { deleteNode, duplicateNode, updateNode, commitHistory, reorderNode } = useBuilder();
-    const node = useNodeSelector(nodeId, (n: any) => n);
+    const node = useNodeSelector(nodeId, (n: BuilderNode) => n);
     if (!node) return null;
     const isHiddenMobile = !!node.hidden?.mobile;
 
@@ -159,7 +167,10 @@ const MiniBar = ({
             zIndex: 10001, pointerEvents: 'auto', userSelect: 'none',
         }}>
             <div
-                onMouseDown={e => onDragStart(nodeId, e)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => { if(e.key === 'Enter') onDragStart(nodeId, e as unknown as React.MouseEvent); }}
+                onMouseDown={e => onDragStart(nodeId, e as unknown as React.MouseEvent)}
                 style={{ display: 'flex', alignItems: 'center', cursor: 'grab', padding: '2px 4px', opacity: 0.75 }}
                 title="Drag to reorder"
             >
@@ -183,7 +194,6 @@ const MiniBar = ({
     );
 };
 
-// ─── Block resize handles ─────────────────────────────────────────────────────
 const BLOCK_HANDLES: { dir: string; cursor: string; pos: React.CSSProperties }[] = [
     { dir: 'n', cursor: 'ns-resize', pos: { top: -5, left: '50%', transform: 'translateX(-50%)' } },
     { dir: 's', cursor: 'ns-resize', pos: { bottom: -5, left: '50%', transform: 'translateX(-50%)' } },
@@ -195,12 +205,11 @@ const BLOCK_HANDLES: { dir: string; cursor: string; pos: React.CSSProperties }[]
     { dir: 'sw', cursor: 'nesw-resize', pos: { bottom: -5, left: -5 } },
 ];
 
-// ─── Spacing Overlay ──────────────────────────────────────────────────────────
-const SpacingOverlay = ({ rect, node }: { rect: DOMRect; node: any }) => {
-    const pt = parseInt(node.styles?.paddingTop) || 0;
-    const pb = parseInt(node.styles?.paddingBottom) || 0;
-    const pl = parseInt(node.styles?.paddingLeft) || 0;
-    const pr = parseInt(node.styles?.paddingRight) || 0;
+const SpacingOverlay = ({ rect, node }: { rect: DOMRect; node: BuilderNode }) => {
+    const pt = parseInt(node.styles?.paddingTop as string) || 0;
+    const pb = parseInt(node.styles?.paddingBottom as string) || 0;
+    const pl = parseInt(node.styles?.paddingLeft as string) || 0;
+    const pr = parseInt(node.styles?.paddingRight as string) || 0;
     if (pt + pb + pl + pr === 0) return null;
 
     return (
@@ -213,14 +222,9 @@ const SpacingOverlay = ({ rect, node }: { rect: DOMRect; node: any }) => {
     );
 };
 
-// ─── Element Selection Layer ──────────────────────────────────────────────────
-/**
- * Tracks sub-element selection (images, buttons, text) within selected blocks.
- * Runs only when a block is selected (selectedNodeId is set).
- */
 const ElementSelectionLayer: React.FC<{ selectedNodeId: string }> = ({ selectedNodeId }) => {
     const { updateNode, commitHistory, viewport, isTyping } = useBuilder();
-    const selectedNode = useNodeSelector(selectedNodeId, (n: any) => n);
+    const selectedNode = useNodeSelector(selectedNodeId, (n: BuilderNode) => n);
     const {
         selectedElement, selectElement,
         hoveredElementId, setHoveredElementId,
@@ -233,7 +237,6 @@ const ElementSelectionLayer: React.FC<{ selectedNodeId: string }> = ({ selectedN
     const elementRectRef = useRef<DOMRect | null>(null);
     const rafRef = useRef<number>(0);
 
-    // Track element rect in real-time
     useEffect(() => {
         if (!selectedElement) { elementRectRef.current = null; return; }
         const tick = () => {
@@ -248,14 +251,13 @@ const ElementSelectionLayer: React.FC<{ selectedNodeId: string }> = ({ selectedN
         return () => cancelAnimationFrame(rafRef.current);
     }, [selectedElement?.elementId]);
 
-    // Listen for element hover/click events in shadow DOM
     useEffect(() => {
         const host = document.querySelector('.omnora-shadow-host');
         const shadow = host?.shadowRoot;
         if (!shadow) return;
 
         const onOver = (e: Event) => {
-            const target = (e as MouseEvent).composedPath().find((el: any) => {
+            const target = (e as MouseEvent).composedPath().find((el: EventTarget) => {
                 const htmlEl = el as HTMLElement;
                 return htmlEl.dataset?.elementId && htmlEl.closest?.(`[data-node-id="${selectedNodeId}"]`);
             }) as HTMLElement | undefined;
@@ -270,7 +272,6 @@ const ElementSelectionLayer: React.FC<{ selectedNodeId: string }> = ({ selectedN
             const mv = e as MouseEvent;
             const path = mv.composedPath() as HTMLElement[];
 
-            // Check if clicked within our selected block
             const inBlock = path.some(el => (el as HTMLElement).dataset?.nodeId === selectedNodeId);
             if (!inBlock || isTyping) {
                 if (!isTyping) {
@@ -280,8 +281,7 @@ const ElementSelectionLayer: React.FC<{ selectedNodeId: string }> = ({ selectedN
                 return;
             }
 
-            // Find closest element-tagged element
-            const target = path.find((el: any) => {
+            const target = path.find((el: HTMLElement) => {
                 const htmlEl = el as HTMLElement;
                 return htmlEl.dataset?.elementId && htmlEl.closest?.(`[data-node-id="${selectedNodeId}"]`);
             }) as HTMLElement | undefined;
@@ -306,10 +306,8 @@ const ElementSelectionLayer: React.FC<{ selectedNodeId: string }> = ({ selectedN
                 props: { ...target.dataset },
             });
 
-            // Show image floater for images
             setShowImageFloater(elementType === 'image' || elementType === 'logo');
 
-            // Compute smart guides
             const canvasRect = document.querySelector('.canvas-frame')?.getBoundingClientRect();
             if (canvasRect) {
                 const guides: SmartGuide[] = [];
@@ -322,21 +320,20 @@ const ElementSelectionLayer: React.FC<{ selectedNodeId: string }> = ({ selectedN
             }
         };
 
-        shadow.addEventListener('mouseover', onOver as EventListener);
-        shadow.addEventListener('click', onClick as EventListener);
+        shadow.addEventListener('mouseover', onOver);
+        shadow.addEventListener('click', onClick);
         return () => {
-            shadow.removeEventListener('mouseover', onOver as EventListener);
-            shadow.removeEventListener('click', onClick as EventListener);
+            shadow.removeEventListener('mouseover', onOver);
+            shadow.removeEventListener('click', onClick);
         };
-    }, [selectedNodeId, selectElement, setHoveredElementId]);
+    }, [selectedNodeId, selectElement, setHoveredElementId, isTyping]);
 
-    // Clear element selection when block selection changes
     useEffect(() => {
         return () => {
             selectElement(null);
             setShowImageFloater(false);
         };
-    }, [selectedNodeId]);
+    }, [selectedNodeId, selectElement]);
 
     const node = selectedNode;
 
@@ -348,21 +345,21 @@ const ElementSelectionLayer: React.FC<{ selectedNodeId: string }> = ({ selectedN
                 updateNode(selectedElement.nodeId, `${propPath}.width`, `${w}px`);
                 updateNode(selectedElement.nodeId, `${propPath}.height`, `${h}px`);
             } else {
-                // Fallback: update generic element size props
                 updateNode(selectedElement.nodeId, `props.elementSizes.${selectedElement.elementId}.width`, `${w}px`);
                 updateNode(selectedElement.nodeId, `props.elementSizes.${selectedElement.elementId}.height`, `${h}px`);
             }
         });
     }, [selectedElement, startResize, updateNode]);
 
-    // Drag logic for free placement
     const currentElementId = selectedElement?.elementId;
     const isMobile = viewport === 'mobile';
-    const pos = (currentElementId && node?.props?.elementPositions?.[currentElementId]) || { mode: 'flow', x: 0, y: 0, z: 1 };
+    const elementPositions = node?.props?.elementPositions as Record<string, ElementPosition> | undefined;
+    const rawPos = (currentElementId && elementPositions) ? elementPositions[currentElementId] : null;
+    const pos = rawPos || { mode: 'flow', x: 0, y: 0, z: 1 };
     const isFree = pos.mode === 'free';
 
     const { startDrag, livePos } = useFreePositionDrag(
-        () => { }, // Live position is handled by hook state
+        () => { }, 
         (p) => {
             if (!selectedElement || !currentElementId) return;
             const prefix = isMobile ? 'mobile' : '';
@@ -374,7 +371,6 @@ const ElementSelectionLayer: React.FC<{ selectedNodeId: string }> = ({ selectedN
         }
     );
 
-    // Arrow key nudging
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (!selectedElement || !isFree || isTyping) return;
@@ -402,14 +398,12 @@ const ElementSelectionLayer: React.FC<{ selectedNodeId: string }> = ({ selectedN
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [selectedElement, isFree, pos, isTyping, viewport, updateNode, isMobile, currentElementId]);
 
-    // Image floater state
     const imagePropPath = selectedElement?.props?.imagePropPath || 'props.backgroundImage';
     const imgFit = (node?.props?.imageFit as 'cover' | 'contain') || 'cover';
-    const imgRadius = parseInt(node?.props?.imageRadius) || 0;
-    const imgOpacity = parseFloat(node?.props?.imageOpacity) || 1;
+    const imgRadius = parseInt(node?.props?.imageRadius as string) || 0;
+    const imgOpacity = parseFloat(node?.props?.imageOpacity as string) || 1;
     const imgShadow = !!node?.props?.imageShadow;
 
-    // Use elementRectRef for live positioning
     const [, forceUpdate] = useState(0);
     useEffect(() => {
         const id = setInterval(() => forceUpdate(v => v + 1), 50);
@@ -417,21 +411,17 @@ const ElementSelectionLayer: React.FC<{ selectedNodeId: string }> = ({ selectedN
     }, []);
 
     const elemRect = selectedElement
-         // eslint-disable-next-line react-hooks/refs
         ? (elementRectRef.current || selectedElement.rect)
         : null;
 
     return (
         <>
-            {/* Smart guides */}
             <SmartGuides guides={smartGuides} />
 
-            {/* Cursor lock during resize */}
             {activeCursor && (
                 <div style={{ position: 'fixed', inset: 0, zIndex: 20000, cursor: activeCursor }} />
             )}
 
-            {/* Hover ring on sub-elements */}
             {hoveredElementId && !selectedElement && (() => {
                 const host = document.querySelector('.omnora-shadow-host');
                 const el = host?.shadowRoot?.querySelector(`[data-element-id="${hoveredElementId}"]`) as HTMLElement | null;
@@ -447,7 +437,6 @@ const ElementSelectionLayer: React.FC<{ selectedNodeId: string }> = ({ selectedN
                 );
             })()}
 
-            {/* Selected element controls */}
             {selectedElement && elemRect && (
                 <>
                     {!isTyping && (
@@ -459,17 +448,20 @@ const ElementSelectionLayer: React.FC<{ selectedNodeId: string }> = ({ selectedN
                         />
                     )}
 
-                    {/* Free Drag Handle */}
                     {isFree && !isTyping && (
                         <div
+                            role="button"
+                            tabIndex={0}
+                            aria-label="Drag element"
                             onMouseDown={e => {
                                 const host = document.querySelector('.omnora-shadow-host');
                                 const container = host?.shadowRoot?.querySelector(`[data-node-id="${selectedElement.nodeId}"]`)?.getBoundingClientRect();
                                 const curX = isMobile ? (pos.mobileX ?? pos.x ?? 0) : (pos.x ?? 0);
                                 const curY = isMobile ? (pos.mobileY ?? pos.y ?? 0) : (pos.y ?? 0);
                                 const elemSize = { w: elemRect.width, h: elemRect.height };
-                                startDrag(e, { x: curX, y: curY }, container, elemSize);
+                                startDrag(e as unknown as React.MouseEvent, { x: curX, y: curY }, container || new DOMRect(), elemSize);
                             }}
+                            onKeyDown={(e) => { if(e.key === 'Enter') console.log('start dragging') }}
                             style={{
                                 position: 'fixed',
                                 top: elemRect.top, left: elemRect.left,
@@ -492,7 +484,7 @@ const ElementSelectionLayer: React.FC<{ selectedNodeId: string }> = ({ selectedN
                             openMediaPicker({
                                 nodeId: selectedElement.nodeId,
                                 propPath: imagePropPath,
-                                currentUrl: node?.props?.backgroundImage || node?.props?.imageUrl,
+                                currentUrl: (node?.props?.backgroundImage || node?.props?.imageUrl) as string,
                                 onSelect: (url) => {
                                     updateNode(selectedElement.nodeId, imagePropPath, url);
                                     commitHistory();
@@ -501,7 +493,6 @@ const ElementSelectionLayer: React.FC<{ selectedNodeId: string }> = ({ selectedN
                             setShowImageFloater(false);
                         }}
                         onEdit={() => {
-                            // Trigger double-click to activate inline text editing
                             const host = document.querySelector('.omnora-shadow-host');
                             const el = host?.shadowRoot?.querySelector(`[data-element-id="${selectedElement.elementId}"]`) as HTMLElement | null;
                             el?.dispatchEvent(new MouseEvent('dblclick', { bubbles: true, composed: true }));
@@ -512,7 +503,6 @@ const ElementSelectionLayer: React.FC<{ selectedNodeId: string }> = ({ selectedN
                         }}
                     />
 
-                    {/* Image controls floater */}
                     {showImageFloater && (selectedElement.elementType === 'image' || selectedElement.elementType === 'logo') && (
                         <ImageControlsFloater
                             rect={elemRect}
@@ -528,7 +518,7 @@ const ElementSelectionLayer: React.FC<{ selectedNodeId: string }> = ({ selectedN
                                 openMediaPicker({
                                     nodeId: selectedElement.nodeId,
                                     propPath: imagePropPath,
-                                    currentUrl: node?.props?.backgroundImage,
+                                    currentUrl: node?.props?.backgroundImage as string,
                                     onSelect: (url) => {
                                         updateNode(selectedElement.nodeId, imagePropPath, url);
                                         commitHistory();
@@ -541,7 +531,6 @@ const ElementSelectionLayer: React.FC<{ selectedNodeId: string }> = ({ selectedN
                 </>
             )}
 
-            {/* Hint pill when block is selected but no element */}
             {!selectedElement && (
                 <div style={{
                     position: 'fixed',
@@ -562,7 +551,6 @@ const ElementSelectionLayer: React.FC<{ selectedNodeId: string }> = ({ selectedN
     );
 };
 
-// ─── Main CanvasOverlay ───────────────────────────────────────────────────────
 const CanvasOverlayInner: React.FC = () => {
     const {
         selectedNodeId, selectNode,
@@ -570,7 +558,7 @@ const CanvasOverlayInner: React.FC = () => {
         moveNodeToIndex, updateNode, commitHistory,
         mode, addNode, isTyping,
         setIsTyping, setEditingInfo,
-        nodeTree // Keep nodeTree for rootNodes and getNodeRects
+        nodeTree 
     } = useBuilder();
 
     const { recordFriction } = useBuilderInteractionStore();
@@ -585,7 +573,6 @@ const CanvasOverlayInner: React.FC = () => {
         return (host?.shadowRoot?.querySelector(`[data-node-id="${id}"]`) as HTMLElement) || null;
     }, []);
 
-    // 60fps rect sync for selected block
     useEffect(() => {
         if (mode === 'preview') { setSelRect(null); return; }
         const tick = () => {
@@ -599,7 +586,6 @@ const CanvasOverlayInner: React.FC = () => {
         return () => cancelAnimationFrame(tickRef.current);
     }, [selectedNodeId, mode, findEl]);
 
-    // Hover tracking
     useEffect(() => {
         if (mode === 'preview') return;
         const host = document.querySelector('.omnora-shadow-host');
@@ -620,9 +606,8 @@ const CanvasOverlayInner: React.FC = () => {
         return () => { shadow.removeEventListener('mouseover', onOver); shadow.removeEventListener('mouseout', onOut); };
     }, [mode, selectedNodeId, nodeTree]);
 
-    // Drag state
     const [dragId, setDragId] = useState<string | null>(null);
-    const [isHydrating, setIsHydrating] = useState(false); // 🛡️ Loading lock triggers during drops
+    const [isHydrating, setIsHydrating] = useState(false); 
     const [dropIndex, setDropIndex] = useState<number | null>(null);
 
     const [dropLineY, setDropLineY] = useState<number | null>(null);
@@ -643,14 +628,11 @@ const CanvasOverlayInner: React.FC = () => {
         dragStartPos.current = { x: e.clientX, y: e.clientY };
         isDragging.current = false;
 
-        // Toggle global drag state for overlay transparency
         import('../../stores/useBuilderStore').then(m => m.useBuilderStore.getState().setIsDragging(true));
 
         const canvas = canvasEl();
         if (!canvas) return;
 
-        // 1. Capture Logical Geometry Snapshot
-        // We use absolute document coordinates to survive unmounting during scroll
         const scrollOffset = canvas.scrollTop;
         const rects = getNodeRects(nodeTree).map(r => ({
             ...r,
@@ -681,7 +663,6 @@ const CanvasOverlayInner: React.FC = () => {
                 setSnapH(Math.abs(mv.clientY - (cr.top + cr.height / 2)) < 20);
             }
 
-            // 2. Resolve Index using Geometry Snapshot + Current Scroll
             const currentScroll = canvas.scrollTop;
             const mouseAbsY = mv.clientY + currentScroll;
 
@@ -691,14 +672,14 @@ const CanvasOverlayInner: React.FC = () => {
             for (let i = 0; i < rects.length; i++) {
                 const r = rects[i];
                 if (r.id === id) continue;
-                if (mouseAbsY < (r.absTop + r.absBottom) / 2) {
+                if (mouseAbsY < (r.absTop + (r.absBottom || 0)) / 2) {
                     targetIndex = r.index;
                     lineY = r.absTop - currentScroll - 1;
                     break;
                 }
                 if (i === rects.length - 1) {
                     targetIndex = rects.length;
-                    lineY = r.absBottom - currentScroll + 1;
+                    lineY = (r.absBottom || 0) - currentScroll + 1;
                 }
             }
             setDropIndex(targetIndex);
@@ -708,14 +689,12 @@ const CanvasOverlayInner: React.FC = () => {
         const onMouseUp = () => {
             stopAutoScroll();
             
-            // Clear global drag state for overlays
             import('../../stores/useBuilderStore').then(m => m.useBuilderStore.getState().setIsDragging(false));
 
             if (isDragging.current) {
                 if (dropIndex !== null) {
                     moveNodeToIndex(id, dropIndex);
                 } else {
-                    // Invalid drag - dropped outside a zone
                     recordFriction('drag');
                 }
             }
@@ -728,9 +707,8 @@ const CanvasOverlayInner: React.FC = () => {
 
         document.addEventListener('mousemove', onMouseMove);
         document.addEventListener('mouseup', onMouseUp);
-    }, [nodeTree, dropIndex, moveNodeToIndex, isTyping]);
+    }, [nodeTree, dropIndex, moveNodeToIndex, isTyping, recordFriction]);
 
-    // Block resize
     const [blockResizeDir, setBlockResizeDir] = useState<string | null>(null);
     const [liveBlockSize, setLiveBlockSize] = useState<{ w: number; h: number } | null>(null);
 
@@ -755,9 +733,9 @@ const CanvasOverlayInner: React.FC = () => {
             newW = Math.round(newW); newH = Math.round(newH);
             setLiveBlockSize({ w: newW, h: newH });
             const widthPct = Math.min(100, Math.max(20, Math.round((newW / canvasW) * 100)));
-            updateNode(selectedNodeId!, 'styles.width', `${widthPct}%`);
+            updateNode(selectedNodeId, 'styles.width', `${widthPct}%`);
             if (dir.includes('s') || dir.includes('n')) {
-                updateNode(selectedNodeId!, 'styles.minHeight', `${newH}px`);
+                updateNode(selectedNodeId, 'styles.minHeight', `${newH}px`);
             }
         };
         const onUp = () => {
@@ -769,7 +747,6 @@ const CanvasOverlayInner: React.FC = () => {
         document.addEventListener('mouseup', onUp);
     }, [selectedNodeId, selRect, updateNode, commitHistory]);
 
-    // Context menu
     const [ctxMenu, setCtxMenu] = useState<CtxMenu | null>(null);
 
     useEffect(() => {
@@ -786,12 +763,12 @@ const CanvasOverlayInner: React.FC = () => {
             const mv = e as MouseEvent;
             setCtxMenu({ x: mv.clientX, y: mv.clientY, nodeId: id });
         };
-        shadow.addEventListener('contextmenu', onCtx as EventListener);
-        return () => shadow.removeEventListener('contextmenu', onCtx as EventListener);
+        shadow.addEventListener('contextmenu', onCtx);
+        return () => shadow.removeEventListener('contextmenu', onCtx);
     }, [mode]);
 
     const handleCtxAction = useCallback((action: string, nodeId: string) => {
-        const node = nodeTree[nodeId]; // Access node from nodeTree for its properties
+        const node = nodeTree[nodeId]; 
         switch (action) {
             case 'up': reorderNode(nodeId, 'up'); break;
             case 'down': reorderNode(nodeId, 'down'); break;
@@ -801,7 +778,6 @@ const CanvasOverlayInner: React.FC = () => {
         }
     }, [reorderNode, duplicateNode, deleteNode, updateNode, commitHistory, nodeTree]);
 
-    // Keyboard shortcuts
     useEffect(() => {
         if (mode === 'preview') return;
         const onKey = (e: KeyboardEvent) => {
@@ -814,7 +790,6 @@ const CanvasOverlayInner: React.FC = () => {
                 return;
             }
 
-            // Resolve actual target through Shadow DOM
             const target = (e.composedPath()?.[0] as HTMLElement) || document.activeElement;
             const inInput = target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable);
             if (inInput || isTyping || !selectedNodeId) return;
@@ -826,22 +801,23 @@ const CanvasOverlayInner: React.FC = () => {
         };
         window.addEventListener('keydown', onKey);
         return () => window.removeEventListener('keydown', onKey);
-    }, [mode, selectedNodeId, reorderNode, deleteNode, selectNode, duplicateNode, isTyping]);
+    }, [mode, selectedNodeId, reorderNode, deleteNode, selectNode, duplicateNode, isTyping, setEditingInfo, setIsTyping]);
 
     const allNodes = Object.values(nodeTree);
-    const rootNodes = allNodes.filter((n: any) => n.parentId === null);
-    const selectedNode = useNodeSelector(selectedNodeId || '', (n: any) => n);
-    const hoveredNode = useNodeSelector(hovId || '', (n: any) => n);
+    const rootNodes = allNodes.filter((n: BuilderNode) => n.parentId === null);
+    const selectedNode = useNodeSelector(selectedNodeId || '', (n: BuilderNode) => n);
+    const hoveredNode = useNodeSelector(hovId || '', (n: BuilderNode) => n);
 
     if (mode === 'preview') return null;
 
-    const nodeTypes = rootNodes.map((n: any) => n.type);
+    const nodeTypes = rootNodes.map((n: BuilderNode) => n.type);
     const hasHero = nodeTypes.some((t: string) => ['hero', 'hero_split'].includes(t));
     const hasTrust = nodeTypes.some((t: string) => ['trust_badges', 'policy_block', 'trust_section'].includes(t));
     const hasProducts = nodeTypes.some((t: string) => ['product_grid', 'featured_product', 'best_sellers'].includes(t));
 
     return (
         <div
+            role="presentation"
             onClick={(e) => {
                 if (e.target === e.currentTarget) {
                     recordFriction('misclick');
@@ -868,14 +844,14 @@ const CanvasOverlayInner: React.FC = () => {
 
                 if (rects.length === 0) {
                     setDropIndex(0);
-                    setDropLineY(40); // Standard offset triggers top
+                    setDropLineY(40);
                     setDragId('__external__');
                     return;
                 }
 
                 for (let i = 0; i < rects.length; i++) {
                     const r = rects[i];
-                    const midY = (r.absTop + r.absBottom) / 2;
+                    const midY = (r.absTop + (r.absBottom || 0)) / 2;
                     if (mouseAbsY < midY) {
                         targetIndex = r.index;
                         lineY = r.absTop - scrollOffset - 1;
@@ -883,7 +859,7 @@ const CanvasOverlayInner: React.FC = () => {
                     }
                     if (i === rects.length - 1) {
                         targetIndex = rects.length;
-                        lineY = r.absBottom - scrollOffset + 1;
+                        lineY = (r.absBottom || 0) - scrollOffset + 1;
                     }
                 }
 
@@ -898,15 +874,11 @@ const CanvasOverlayInner: React.FC = () => {
                     setDropIndex(null); setDropLineY(null); setDragId(null);
                 }
             }}
-            onDragEnd={() => {
-                setDropIndex(null); setDropLineY(null); setDragId(null);
-            }}
             onDrop={async (e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 if (isHydrating) return;
 
-                // ── CRITICAL: Extract the component type from drag data ──
                 const type = e.dataTransfer.getData('text/plain')?.trim();
                 if (!type) {
                     import('react-hot-toast').then(({ toast }) => toast.error('Drop failed: No component type detected.'));
@@ -929,7 +901,7 @@ const CanvasOverlayInner: React.FC = () => {
                     const props = hydrated?.blocks?.[0]?.props || {};
 
                     const newId = addNode(realType, props, null, dropIndex);
-                    // Trigger dropped animation
+                    
                     const { useBuilderStore } = await import('../../stores/useBuilderStore');
                     useBuilderStore.setState({ lastDroppedNodeId: newId });
                     setTimeout(() => useBuilderStore.setState({ lastDroppedNodeId: null }), 1000);
@@ -948,7 +920,6 @@ const CanvasOverlayInner: React.FC = () => {
 
             {ctxMenu && <ContextMenu menu={ctxMenu} onClose={() => setCtxMenu(null)} onAction={handleCtxAction} />}
 
-            {/* Empty canvas */}
             {rootNodes.length === 0 && (
                 <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none', zIndex: 5000 }}>
                     <div style={{ background: 'var(--surface-overlay)', border: '2px dashed var(--border-subtle)', borderRadius: 16, padding: '40px 48px', textAlign: 'center', maxWidth: 420, pointerEvents: 'auto', boxShadow: '0 4px 16px rgba(0,0,0,0.04)' }}>
@@ -956,6 +927,7 @@ const CanvasOverlayInner: React.FC = () => {
                         <h3 style={{ margin: '0 0 8px', fontSize: 18, fontWeight: 700, color: 'var(--text-primary)' }}>Your store is empty</h3>
                         <p style={{ margin: '0 0 20px', fontSize: 14, color: '#6B7280', lineHeight: 1.6 }}>Start with a Hero section to make a strong first impression.</p>
                         <button
+                            type="button"
                             onClick={() => addNode('hero', { headline: 'Welcome to our Store', subheadline: 'Discover amazing products', ctaText: 'Shop Now' })}
                             style={{ background: ACCENT, color: '#fff', border: 'none', borderRadius: 10, padding: '12px 28px', fontSize: 14, fontWeight: 700, cursor: 'pointer', boxShadow: '0 4px 16px rgba(99,102,241,0.35)' }}
                         >➕ Add Hero Section</button>
@@ -963,7 +935,6 @@ const CanvasOverlayInner: React.FC = () => {
                 </div>
             )}
 
-            {/* Conversion hints */}
             {rootNodes.length > 0 && (
                 <div style={{ position: 'absolute', top: 16, right: 16, zIndex: 5000, display: 'flex', flexDirection: 'column', gap: 8, pointerEvents: 'none' }}>
                     {!hasHero && <ConvHint color="#F59E0B" label="Add a Hero banner for first impressions (+20 pts)" />}
@@ -972,7 +943,6 @@ const CanvasOverlayInner: React.FC = () => {
                 </div>
             )}
 
-            {/* Hover mini-bar */}
             {hovId && hovRect && hoveredNode && !dragId && (
                 <>
                     <div style={{ position: 'fixed', top: hovRect.top, left: hovRect.left, width: hovRect.width, height: hovRect.height, border: '1.5px dashed var(--accent-primary)', opacity: 0.6, pointerEvents: 'none', zIndex: 10000, borderRadius: 2 }} />
@@ -980,10 +950,8 @@ const CanvasOverlayInner: React.FC = () => {
                 </>
             )}
 
-            {/* Selected block overlay */}
             {selRect && selectedNode && (
                 <>
-                    {/* Selection ring */}
                     <div style={{
                         position: 'fixed',
                         top: selRect.top, left: selRect.left, width: selRect.width, height: selRect.height,
@@ -997,12 +965,15 @@ const CanvasOverlayInner: React.FC = () => {
                     <SpacingOverlay rect={selRect} node={selectedNode} />
                     <MiniBar rect={selRect} nodeId={selectedNodeId!} isSelected onDragStart={startDrag} />
 
-                    {/* 8-point block resize handles */}
                     <div style={{ position: 'fixed', top: selRect.top, left: selRect.left, width: selRect.width, height: selRect.height, pointerEvents: 'none', zIndex: 10002 }}>
                         {BLOCK_HANDLES.map(({ dir, cursor, pos }) => (
                             <div
                                 key={dir}
-                                onMouseDown={e => startBlockResize(dir, e)}
+                                role="button"
+                                tabIndex={0}
+                                aria-label="Resize element"
+                                onMouseDown={e => startBlockResize(dir, e as unknown as React.MouseEvent)}
+                                onKeyDown={(e) => { if(e.key === 'Enter') console.log('resizing') }}
                                 style={{
                                     position: 'absolute', width: 10, height: 10,
                                     background: '#fff', border: `2px solid ${ACCENT}`,
@@ -1016,7 +987,6 @@ const CanvasOverlayInner: React.FC = () => {
                         ))}
                     </div>
 
-                    {/* Dimension badge */}
                     <div style={{
                         position: 'fixed',
                         top: selRect.bottom + 6, left: selRect.left + selRect.width / 2,
@@ -1029,17 +999,15 @@ const CanvasOverlayInner: React.FC = () => {
                         boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
                     }}>
                         {liveBlockSize ? `${liveBlockSize.w} × ${liveBlockSize.h}` : `${Math.round(selRect.width)} × ${Math.round(selRect.height)}`}
-                        {selectedNode.styles?.width && <span style={{ color: ACCENT, marginLeft: 6 }}>{selectedNode.styles.width}</span>}
+                        {selectedNode.styles?.width && <span style={{ color: ACCENT, marginLeft: 6 }}>{selectedNode.styles.width as string}</span>}
                     </div>
 
-                    {/* Element-level selection layer (only when block is selected) */}
                     {selectedNode && (
                         <ElementSelectionLayer selectedNodeId={selectedNodeId!} />
                     )}
                 </>
             )}
 
-            {/* Drag ghost */}
             {dragId && (() => {
                 const el = findEl(dragId);
                 const r = el?.getBoundingClientRect();
@@ -1047,7 +1015,6 @@ const CanvasOverlayInner: React.FC = () => {
                 return <div style={{ position: 'fixed', top: r.top, left: r.left, width: r.width, height: r.height, background: 'rgba(255,107,53,0.05)', border: '2px dashed var(--accent-primary)', opacity: 0.8, borderRadius: 4, pointerEvents: 'none', zIndex: 10003 }} />;
             })()}
 
-            {/* Drop line */}
             {dragId && dropLineY !== null && (
                 <div style={{ position: 'fixed', top: dropLineY, left: '50%', transform: 'translateX(-50%)', width: '80%', maxWidth: 900, height: 3, borderRadius: 3, background: ACCENT, boxShadow: `0 0 8px ${ACCENT}`, pointerEvents: 'none', zIndex: 10004 }}>
                     <div style={{ position: 'absolute', left: -5, top: '50%', transform: 'translateY(-50%)', width: 10, height: 10, borderRadius: '50%', background: ACCENT }} />
@@ -1061,33 +1028,24 @@ const CanvasOverlayInner: React.FC = () => {
                 </div>
             )}
 
-            {/* Snap guides */}
             {dragId && snapH && <div style={{ position: 'fixed', left: 0, right: 0, top: '50%', height: 1, background: SNAP_COLOR, pointerEvents: 'none', zIndex: 10005, boxShadow: `0 0 6px ${SNAP_COLOR}` }} />}
             {dragId && snapV && <div style={{ position: 'fixed', top: 0, bottom: 0, left: '50%', width: 1, background: SNAP_COLOR, pointerEvents: 'none', zIndex: 10005, boxShadow: `0 0 6px ${SNAP_COLOR}` }} />}
 
-            {/* Block resize cursor lock */}
             {blockResizeDir && <div style={{ position: 'fixed', inset: 0, zIndex: 20000, cursor: BLOCK_HANDLES.find(h => h.dir === blockResizeDir)?.cursor || 'default' }} />}
 
-            {/* Smart Suggestion Bubble */}
             <SuggestionBubble />
-
-            {/* Cinematic Ghost Particles */}
             <FloatingParticles />
-
-            {/* Visual Layers Manager */}
             <LayerManager />
         </div >
     );
 };
 
-// ─── Conversion hint ──────────────────────────────────────────────────────────
 const ConvHint = ({ color, label }: { color: string; label: string }) => (
     <div style={{ background: 'var(--surface-overlay)', border: `1.5px solid ${color}`, borderRadius: 8, padding: '8px 12px', fontSize: 12, color: 'var(--text-primary)', fontWeight: 500, boxShadow: '0 4px 12px rgba(0,0,0,0.04)', display: 'flex', alignItems: 'center', gap: 8, maxWidth: 280 }}>
         <span style={{ fontSize: 14 }}>⚠️</span><span>{label}</span>
     </div>
 );
 
-// ─── Wrapped Export ───────────────────────────────────────────────────────────
 export const CanvasOverlay: React.FC = () => (
     <ElementControlProvider>
         <CanvasOverlayInner />

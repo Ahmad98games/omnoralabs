@@ -60,9 +60,9 @@ export default function AdminDashboard() {
             setInsights(analysis);
             setInsightStatus('done');
             
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error("AI Insight failure:", err);
-            setInsights(err.message || 'Engine failure.');
+            setInsights((err as Error).message || 'Engine failure.');
             setInsightStatus('error');
         }
     };
@@ -161,7 +161,7 @@ export default function AdminDashboard() {
                         <Tooltip 
                             contentStyle={{ background: '#14141c', border: '1px solid rgba(124, 109, 250, 0.3)', borderRadius: '8px', boxShadow: '0 8px 32px rgba(0,0,0,0.4)', color: '#fff' }}
                             itemStyle={{ color: '#7c6dfa', fontWeight: 600 }}
-                            formatter={(value: any) => [`$${value}`, 'Revenue']}
+                            formatter={(value: number) => [`$${value}`, 'Revenue']}
                         />
                         <Area type="monotone" dataKey="revenue" stroke="#7c6dfa" strokeWidth={3} fillOpacity={1} fill="url(#colorRevenue)" />
                     </AreaChart>

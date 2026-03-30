@@ -2,38 +2,36 @@ import { useState, useEffect, useRef } from 'react';
 
 export function useMinimumLoadingTime(isLoading: boolean, minDuration: number = 400): boolean {
     const [shouldShowSkeleton, setShouldShowSkeleton] = useState(isLoading);
+    const [prevIsLoading, setPrevIsLoading] = useState(isLoading);
     const startTimeRef = useRef<number | null>(null);
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+    // Adjust state during render based on prop change
+    if (isLoading !== prevIsLoading) {
+        setPrevIsLoading(isLoading);
+        if (isLoading) {
+            setShouldShowSkeleton(true);
+        }
+    }
+
     useEffect(() => {
         if (isLoading) {
-            // Loading started
             startTimeRef.current = Date.now();
-            setShouldShowSkeleton(true);
-            if (timeoutRef.current) clearTimeout(timeoutRef.current);
-        } else {
+        } else if (startTimeRef.current) {
             // Loading finished - Check how much time passed
-            if (startTimeRef.current) {
-                const elapsedTime = Date.now() - startTimeRef.current;
-                const remainingTime = minDuration - elapsedTime;
+            const elapsedTime = Date.now() - startTimeRef.current;
+            const remainingTime = Math.max(0, minDuration - elapsedTime);
 
-                if (remainingTime > 0) {
-                    // If loaded too fast, wait for the remainder
-                    timeoutRef.current = setTimeout(() => {
-                        setShouldShowSkeleton(false);
-                        startTimeRef.current = null;
-                    }, remainingTime);
-                } else {
-                    // If loaded slow enough, hide immediately
-                    setShouldShowSkeleton(false);
-                    startTimeRef.current = null;
-                }
-            } else {
+            timeoutRef.current = setTimeout(() => {
                 setShouldShowSkeleton(false);
-            }
+                startTimeRef.current = null;
+            }, remainingTime);
+        } else {
+            timeoutRef.current = setTimeout(() => {
+                setShouldShowSkeleton(false);
+            }, 0);
         }
 
-        // Cleanup on unmount
         return () => {
             if (timeoutRef.current) clearTimeout(timeoutRef.current);
         };

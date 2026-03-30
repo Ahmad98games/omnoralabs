@@ -1,3 +1,8 @@
+/**
+ * LinkResolver: Environment-agnostic navigation component (v4).
+ * Refactored for OSTT: Removed 'any' from LinkProps to ensure strict navigation typing.
+ */
+
 import React from 'react';
 import { useOmnora } from '../client/OmnoraContext';
 import { Logger } from '../core/Logger';
@@ -10,7 +15,10 @@ export interface OmnoraLink {
 }
 
 interface LinkProps {
-    to: OmnoraLink | any;
+    /**
+     * FIX: Removed '| any'. Navigation must strictly follow the OmnoraLink interface.
+     */
+    to: OmnoraLink; 
     children: React.ReactNode;
     className?: string;
     style?: React.CSSProperties;
@@ -26,18 +34,19 @@ interface LinkProps {
 }
 
 /**
- * LinkResolver: Environment-agnostic navigation component (v4).
+ * LinkResolver: Navigation Logic Engine.
  */
 export const LinkResolver: React.FC<LinkProps> = ({
     to, children, className, style, resolveHref: customResolve, onNavigate
 }) => {
     const { mode } = useOmnora();
 
+    // Default fallback if link is missing or type is 'none'
     if (!to || to.type === 'none') {
         return <span className={className} style={style}>{children}</span>;
     }
 
-    const defaultResolve = (l: OmnoraLink) => {
+    const defaultResolve = (l: OmnoraLink): string => {
         if (l.type === 'url') return l.url || '#';
         if (l.type === 'anchor') return `#${l.anchorId}`;
         if (l.type === 'page') return `?page=${l.pageId}`;

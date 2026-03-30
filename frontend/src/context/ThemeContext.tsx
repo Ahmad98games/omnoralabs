@@ -5,7 +5,7 @@ interface ThemeContextType {
     toggleTheme: () => void;
     etherealGlow: boolean;
     setEtherealGlow: (v: boolean) => void;
-    updateSellerStyles: (styles: any) => void;
+    updateSellerStyles: (styles: Record<string, string | number>) => void;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -14,11 +14,11 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const [mode, setMode] = useState<'light' | 'dark'>('dark');
     const [etherealGlow, setEtherealGlow] = useState(true);
 
-    const [sellerStyles, setSellerStyles] = useState<any>(null);
+    const [sellerStyles, setSellerStyles] = useState<Record<string, string | number> | null>(null);
 
     const toggleTheme = () => setMode(prev => prev === 'light' ? 'dark' : 'light');
 
-    const updateSellerStyles = useCallback((styles: any) => setSellerStyles(styles), []);
+    const updateSellerStyles = useCallback((styles: Record<string, string | number>) => setSellerStyles(styles), []);
 
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', mode);
@@ -35,15 +35,15 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             const secondary = sellerStyles.secondary || sellerStyles.accentColor;
 
             if (primary) {
-                root.style.setProperty('--royal-blue', primary);
+                root.style.setProperty('--royal-blue', String(primary));
                 root.style.setProperty('--glow-color', `${primary}4D`); // 30% opacity
             }
             if (secondary) {
-                root.style.setProperty('--gold', secondary);
+                root.style.setProperty('--gold', String(secondary));
             }
 
-            if (sellerStyles.fontFamilyHeading) root.style.setProperty('--font-serif', sellerStyles.fontFamilyHeading);
-            if (sellerStyles.fontFamilyBody) root.style.setProperty('--font-sans', sellerStyles.fontFamilyBody);
+            if (sellerStyles.fontFamilyHeading) root.style.setProperty('--font-serif', String(sellerStyles.fontFamilyHeading));
+            if (sellerStyles.fontFamilyBody) root.style.setProperty('--font-sans', String(sellerStyles.fontFamilyBody));
         }
     }, [mode, etherealGlow, sellerStyles]);
 

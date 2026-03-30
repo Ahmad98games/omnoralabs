@@ -30,8 +30,9 @@ export const Billing: React.FC = () => {
             const { data: publicData } = supabase.storage.from('billing_receipts').getPublicUrl(fileName);
             setScreenshotUrl(publicData.publicUrl);
             showToast('Receipt uploaded successfully!', 'success');
-        } catch (error: any) {
-            showToast(error.message, 'error');
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Upload failed';
+            showToast(message, 'error');
         } finally {
             setIsUploading(false);
         }
@@ -55,8 +56,9 @@ export const Billing: React.FC = () => {
             if (error) throw error;
             showToast('Billing request sent to Super-Admin for approval.', 'success');
             setScreenshotUrl('');
-        } catch (error: any) {
-            showToast(error.message, 'error');
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Submission failed';
+            showToast(message, 'error');
         } finally {
             setIsSubmitting(false);
         }

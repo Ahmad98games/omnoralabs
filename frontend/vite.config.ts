@@ -31,7 +31,16 @@ export default defineConfig({
         ]
       },
       workbox: {
-        navigateFallback: 'offline.html',
+        navigateFallback: 'index.html',
+        navigateFallbackDenylist: [
+          /^\/api\//,
+          /^\/manifest\.webmanifest$/,
+          /^\/sw\.js$/,
+          /^\/registerSW\.js$/,
+          /supabase\.co/,
+          /stripe\.com/,
+          /^\/static\//,
+        ],
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
         globIgnores: [
           '**/node_modules/**/*', 

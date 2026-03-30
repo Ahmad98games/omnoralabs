@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from 'react';
 
 /**
@@ -16,7 +15,7 @@ import React from 'react';
 
 export interface ComponentSchema {
   version: string;
-  defaultProps: Record<string, any>;
+  defaultProps: Record<string, unknown>;
 }
 
 // ─── Default Props ────────────────────────────────────────────────────────────
@@ -423,7 +422,7 @@ export const DEFAULT_PROPS: Record<string, ComponentSchema> = {
 
 export const ComponentRegistry: Record<
   string,
-  React.LazyExoticComponent<React.FC<any>> | React.FC<any>
+  React.LazyExoticComponent<React.FC<BlockProps>> | React.FC<BlockProps>
 > = {
   // hero and hero_banner both resolve to HeroBanner.
   // hero must be a full entry here — not just an alias comment —

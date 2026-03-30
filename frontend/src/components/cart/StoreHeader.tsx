@@ -63,7 +63,7 @@ export const StoreHeader: React.FC<StoreHeaderProps> = ({
     // Resolve links: prefer prop navLinks, fallback to global storefront nav
     const resolvedLinks: HeaderNavLink[] = navLinks.length > 0
         ? navLinks
-        : (state.settings as any).navLinks || [];
+        : (state.settings as unknown as { navLinks?: HeaderNavLink[] }).navLinks || [];
 
     return (
         <header

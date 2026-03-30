@@ -79,7 +79,7 @@ export const DomainSettings: React.FC = () => {
             if (!cleanDomain) throw new Error("Please enter a valid domain");
 
             // 1. Call Backend to add to Vercel
-            const res = await client.post('/domains', { domain: cleanDomain });
+            await client.post('/domains', { domain: cleanDomain });
             
             // 2. Update Supabase
             const { error } = await supabase
@@ -93,9 +93,9 @@ export const DomainSettings: React.FC = () => {
             setMessage('Domain connected! Please update your DNS records.');
             setCurrentDomain(cleanDomain);
             checkStatus(cleanDomain);
-        } catch (err: any) {
+        } catch (err: unknown) {
             setStatusType('error');
-            setMessage(err.message || 'Failed to connect domain');
+            setMessage((err as Error).message || 'Failed to connect domain');
         } finally {
             setLoading(false);
         }
@@ -206,12 +206,12 @@ export const DomainSettings: React.FC = () => {
                             <DnsCard 
                                 type="CNAME" 
                                 host="www" 
-                                value={domainStatus?.config?.cname || (import.meta as any).env.VITE_CNAME_TARGET || 'shops.omnora.com'} 
+                                value={domainStatus?.config?.cname || import.meta.env.VITE_CNAME_TARGET || 'shops.omnora.com'} 
                             />
                             <DnsCard 
                                 type="A" 
                                 host="@" 
-                                value={domainStatus?.config?.a || (import.meta as any).env.VITE_A_RECORD || '76.76.21.21'} 
+                                value={domainStatus?.config?.a || import.meta.env.VITE_A_RECORD || '76.76.21.21'} 
                             />
                             {domainStatus?.config?.cname && (
                                 <DnsCard 

@@ -86,14 +86,18 @@ const PaymentSettingsPanel: React.FC = () => {
     const setMethod = (k: keyof PaymentMethods) =>
         setConfig(c => ({ ...c, methods: { ...c.methods, [k]: !c.methods[k] } }));
 
-    const setField = (path: string, val: any) => {
+    const setField = (path: string, val: unknown) => {
         setConfig(c => {
             const keys = path.split('.');
-            const next: any = { ...c };
+            const next = { ...c } as Record<string, unknown>;
             let cur = next;
-            for (let i = 0; i < keys.length - 1; i++) { cur[keys[i]] = { ...cur[keys[i]] }; cur = cur[keys[i]]; }
+            for (let i = 0; i < keys.length - 1; i++) { 
+                const key = keys[i];
+                cur[key] = { ...(cur[key] as Record<string, unknown>) }; 
+                cur = cur[key] as Record<string, unknown>; 
+            }
             cur[keys[keys.length - 1]] = val;
-            return next;
+            return next as unknown as Config;
         });
     };
 
@@ -148,7 +152,7 @@ const PaymentSettingsPanel: React.FC = () => {
                     {(['accountTitle', 'accountNumber', 'bankName', 'iban'] as const).map(f => (
                         <div key={f}>
                             <label style={S.label}>{f.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase())}</label>
-                            <input style={S.input} value={(config.bankDetails as any)[f]}
+                            <input style={S.input} value={(config.bankDetails as unknown as Record<string, string>)[f]}
                                 onChange={e => setField(`bankDetails.${f}`, e.target.value)} />
                         </div>
                     ))}

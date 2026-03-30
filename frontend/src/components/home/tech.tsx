@@ -84,7 +84,7 @@ const TechStackShowcase = () => {
                     
                     <br />
                     <span className="tech-subtitle" style={{fontSize: '0.8rem', opacity: 0.6}}>
-                        // FOR EDUCATIONAL PURPOSES
+                        {"// FOR EDUCATIONAL PURPOSES"}
                     </span>
                     
                 </header>

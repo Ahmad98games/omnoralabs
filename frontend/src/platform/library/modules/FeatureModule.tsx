@@ -8,7 +8,7 @@ export const FeatureModule: React.FC = () => {
 
     if (!node || node.type !== 'featured_product') return null;
 
-    const updateProp = (key: string, value: any) => {
+    const updateProp = (key: string, value: unknown) => {
         updateNode?.(node.id, `props.${key}`, value);
     };
 

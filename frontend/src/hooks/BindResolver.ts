@@ -1,52 +1,50 @@
 /**
  * Omnora Binding Resolver (v2)
- * 
- * Converts {{source.path}} and {{source.path | filter}} strings into
+ * * Converts {{source.path}} and {{source.path | filter}} strings into
  * real-time data from the StorefrontContext.
- * 
- * DESIGN: Pipeline architecture — each `|` segment is a named formatter.
+ * * DESIGN: Pipeline architecture — each `|` segment is a named formatter.
  * SAFETY: Unknown paths return '' (silent fail). Unknown filters pass through.
  */
 
-export type BindingFilter = (value: any, ...args: string[]) => any;
+export type BindingFilter = (value: unknown, ...args: string[]) => unknown;
 
 // ─── Built-in Filters ─────────────────────────────────────────────────────────
 
 const FILTERS: Record<string, BindingFilter> = {
     /** Format number as money: 299 → "$299.00" */
-    money: (value: any, currencySymbol?: string) => {
-        const num = typeof value === 'number' ? value : parseFloat(value);
+    money: (value: unknown, currencySymbol?: string) => {
+        const num = typeof value === 'number' ? value : parseFloat(String(value));
         if (isNaN(num)) return '';
         const symbol = currencySymbol || '$';
         return `${symbol}${num.toFixed(2)}`;
     },
 
     /** Uppercase transform */
-    upcase: (value: any) => String(value ?? '').toUpperCase(),
+    upcase: (value: unknown) => String(value ?? '').toUpperCase(),
 
     /** Lowercase transform */
-    downcase: (value: any) => String(value ?? '').toLowerCase(),
+    downcase: (value: unknown) => String(value ?? '').toLowerCase(),
 
     /** Capitalize first letter */
-    capitalize: (value: any) => {
+    capitalize: (value: unknown) => {
         const s = String(value ?? '');
         return s.charAt(0).toUpperCase() + s.slice(1);
     },
 
     /** Truncate string: {{product.description | truncate:80}} */
-    truncate: (value: any, length?: string) => {
+    truncate: (value: unknown, length?: string) => {
         const s = String(value ?? '');
         const max = parseInt(length || '100', 10);
         return s.length > max ? s.slice(0, max) + '...' : s;
     },
 
     /** Default value if empty: {{product.vendor | default:"Unknown"}} */
-    default: (value: any, fallback?: string) => {
+    default: (value: unknown, fallback?: string) => {
         return (value === null || value === undefined || value === '') ? (fallback || '') : value;
     },
 
     /** Image URL resizer hint: {{product.featured_image | img_url:400}} */
-    img_url: (value: any, width?: string) => {
+    img_url: (value: unknown, width?: string) => {
         if (typeof value !== 'string') return '';
         const w = width || '800';
         // Append width param for Unsplash-style URLs or pass through
@@ -57,13 +55,13 @@ const FILTERS: Record<string, BindingFilter> = {
     },
 
     /** JSON stringify for debug: {{product | json}} */
-    json: (value: any) => {
+    json: (value: unknown) => {
         try { return JSON.stringify(value, null, 2); }
         catch { return '[Circular]'; }
     },
 
     /** Pluralize: {{collection.productsCount | pluralize:"item":"items"}} */
-    pluralize: (value: any, singular?: string, plural?: string) => {
+    pluralize: (value: unknown, singular?: string, plural?: string) => {
         const num = typeof value === 'number' ? value : parseInt(String(value), 10);
         if (isNaN(num)) return '';
         return `${num} ${num === 1 ? (singular || 'item') : (plural || 'items')}`;
@@ -80,7 +78,7 @@ export class BindingResolver {
      * @param input The raw prop value (e.g., "Price: {{product.price | money}}")
      * @param context The current data context (product, collection, store, etc.)
      */
-    static resolve(input: any, context: Record<string, any>): any {
+    static resolve(input: unknown, context: Record<string, unknown>): unknown {
         if (typeof input !== 'string') return input;
 
         // Direct binding: "{{product.price | money}}" → return the resolved type
@@ -101,7 +99,7 @@ export class BindingResolver {
      * Evaluate a single expression with optional filter pipeline.
      * e.g., "product.price | money" or "product.description | truncate:80"
      */
-    private static evaluateExpression(expression: string, context: Record<string, any>): any {
+    private static evaluateExpression(expression: string, context: Record<string, unknown>): unknown {
         const segments = expression.split('|').map(s => s.trim());
         const path = segments[0];
 
@@ -127,11 +125,12 @@ export class BindingResolver {
      * Traverse a dot-separated path into a nested context object.
      * Returns undefined for invalid paths (silent fail).
      */
-    private static getValueByPath(obj: any, path: string): any {
-        if (!obj || !path) return undefined;
+    private static getValueByPath(obj: unknown, path: string): unknown {
+        if (!obj || !path || typeof obj !== 'object') return undefined;
+        
         return path.split('.').reduce((acc, part) => {
-            if (acc === null || acc === undefined) return undefined;
-            return acc[part];
+            if (acc === null || acc === undefined || typeof acc !== 'object') return undefined;
+            return (acc as Record<string, unknown>)[part];
         }, obj);
     }
 
@@ -147,7 +146,7 @@ export class BindingResolver {
      * Check if a string contains any binding expressions.
      * Useful for optimization — skip resolution for static strings.
      */
-    static hasBindings(input: any): boolean {
+    static hasBindings(input: unknown): boolean {
         if (typeof input !== 'string') return false;
         return this.BINDING_REGEX.test(input);
     }

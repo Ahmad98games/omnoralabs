@@ -1,28 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../../../lib/supabaseClient';
-import { ShoppingBag, Search, Filter, Truck, MoreVertical, CheckCircle2, AlertCircle, FileText, Download } from 'lucide-react';
+import { FileText, MoreVertical, Download } from 'lucide-react';
+
+interface Order {
+    id: string;
+    order_number: string;
+    created_at: string;
+    payment_status: string;
+    status: string;
+    fulfilment_status: string;
+    total_cents: number;
+    customers?: { full_name: string; email: string };
+    shipping_address?: { name: string; street: string; city: string; zip: string; };
+    line_items?: Array<{ title: string; variant_title?: string; qty: number; }>;
+}
 
 export const AdminOrderManager: React.FC = () => {
-    const [orders, setOrders] = useState<any[]>([]);
+    const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
-    const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'shipped' | 'delivered'>('all');
+    const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'paid' | 'shipped' | 'delivered'>('all');
 
-    useEffect(() => {
-        fetchOrders();
-        
-        // --- ⚡ Real-time Order Monitoring ---
-        const channel = supabase
-            .channel('orders_sync')
-            .on('postgres_changes', { event: '*', table: 'orders', schema: 'public' }, () => {
-                fetchOrders();
-            })
-            .subscribe();
-
-        return () => { channel.unsubscribe(); };
-    }, [statusFilter]);
-
-    const fetchOrders = async () => {
-        setLoading(true);
+    // OSTT FIX: Declared fetchOrders unconditionally via useCallback to fix dependency tree
+    const fetchOrders = useCallback(async (showLoading = true) => {
+        if (showLoading) setLoading(true);
         let query = supabase
             .from('orders')
             .select(`
@@ -36,12 +36,32 @@ export const AdminOrderManager: React.FC = () => {
         }
 
         const { data, error } = await query;
-        if (!error) setOrders(data || []);
+        if (!error && data) {
+            setOrders(data as Order[]);
+        }
         setLoading(false);
-    };
+    }, [statusFilter]);
 
-    const StatusBadge = ({ status, type }: { status: string, type: 'status' | 'payment' }) => {
-        const colors: any = {
+    useEffect(() => {
+        const init = async () => {
+            await fetchOrders(false);
+        };
+        init();
+        
+        // --- ⚡ Real-time Order Monitoring ---
+        const channel = supabase
+            .channel('orders_sync')
+            .on('postgres_changes', { event: '*', table: 'orders', schema: 'public' }, () => {
+                fetchOrders();
+            })
+            .subscribe();
+
+        return () => { channel.unsubscribe(); };
+    }, [fetchOrders]);
+
+    // OSTT FIX: Type specified to remove any
+    const StatusBadge = ({ status }: { status: string; type?: string }) => {
+        const colors: Record<string, { bg: string; text: string }> = {
             pending: { bg: '#27272a', text: '#a1a1aa' },
             paid: { bg: 'rgba(34, 197, 94, 0.1)', text: '#22c55e' },
             shipped: { bg: 'rgba(56, 189, 248, 0.1)', text: '#38bdf8' },
@@ -59,7 +79,7 @@ export const AdminOrderManager: React.FC = () => {
         );
     };
 
-    const generatePackingSlip = (order: any) => {
+    const generatePackingSlip = (order: Order) => {
         const win = window.open('', '_blank');
         if (!win) return;
         
@@ -86,15 +106,15 @@ export const AdminOrderManager: React.FC = () => {
                     <div class="grid">
                         <div>
                             <strong>Ship To:</strong><br/>
-                            ${order.shipping_address?.name}<br/>
-                            ${order.shipping_address?.street}<br/>
-                            ${order.shipping_address?.city}, ${order.shipping_address?.zip}
+                            ${order.shipping_address?.name || 'N/A'}<br/>
+                            ${order.shipping_address?.street || 'N/A'}<br/>
+                            ${order.shipping_address?.city || ''}, ${order.shipping_address?.zip || ''}
                         </div>
                     </div>
                     <table>
                         <thead><tr><th>Item</th><th>Qty</th></tr></thead>
                         <tbody>
-                            ${order.line_items.map((item: any) => `
+                            ${(order.line_items || []).map((item) => `
                                 <tr><td>${item.title} ${item.variant_title ? `(${item.variant_title})` : ''}</td><td>${item.qty}</td></tr>
                             `).join('')}
                         </tbody>
@@ -109,18 +129,27 @@ export const AdminOrderManager: React.FC = () => {
 
     return (
         <div style={{ padding: 24 }}>
-            {/* Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
                 <div>
                     <h1 style={{ fontSize: 24, fontWeight: 700, color: '#fff', marginBottom: 4 }}>Orders</h1>
                     <p style={{ fontSize: 13, color: '#71717a' }}>Track and fulfill customer orders</p>
                 </div>
-                <button style={{ padding: '10px 20px', background: '#27272a', color: '#fff', borderRadius: 8, border: 'none', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <Download size={18} /> Export CSV
-                </button>
+                <div style={{ display: 'flex', gap: '12px' }}>
+                    <select 
+                        onChange={(e) => setStatusFilter(e.target.value as 'all' | 'pending' | 'paid' | 'shipped' | 'delivered')} 
+                        style={{ padding: '10px', background: '#09090b', color: '#fff', border: '1px solid #27272a', borderRadius: '8px' }}
+                    >
+                        <option value="all">All Orders</option>
+                        <option value="pending">Pending</option>
+                        <option value="paid">Paid</option>
+                        <option value="shipped">Shipped</option>
+                    </select>
+                    <button type="button" style={{ padding: '10px 20px', background: '#27272a', color: '#fff', borderRadius: 8, border: 'none', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <Download size={18} /> Export CSV
+                    </button>
+                </div>
             </div>
 
-            {/* List */}
             <div style={{ background: '#131316', border: '1px solid #27272a', borderRadius: 12, overflow: 'hidden' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                     <thead style={{ background: '#09090b', borderBottom: '1px solid #27272a' }}>
@@ -144,8 +173,8 @@ export const AdminOrderManager: React.FC = () => {
                                 <td style={{ padding: '16px', fontWeight: 700, color: '#fff' }}>#{o.order_number}</td>
                                 <td style={{ padding: '16px', fontSize: 13, color: '#71717a' }}>{new Date(o.created_at).toLocaleDateString()}</td>
                                 <td style={{ padding: '16px' }}>
-                                    <div style={{ fontSize: 14, fontWeight: 600, color: '#fff' }}>{(o.customers as any)?.full_name || 'Guest'}</div>
-                                    <div style={{ fontSize: 11, color: '#71717a' }}>{(o.customers as any)?.email}</div>
+                                    <div style={{ fontSize: 14, fontWeight: 600, color: '#fff' }}>{o.customers?.full_name || 'Guest'}</div>
+                                    <div style={{ fontSize: 11, color: '#71717a' }}>{o.customers?.email}</div>
                                 </td>
                                 <td style={{ padding: '16px' }}>
                                     <StatusBadge status={o.payment_status} type="payment" />
@@ -158,8 +187,8 @@ export const AdminOrderManager: React.FC = () => {
                                 </td>
                                 <td style={{ padding: '16px' }}>
                                     <div style={{ display: 'flex', gap: 12 }}>
-                                        <button onClick={() => generatePackingSlip(o)} title="Packing Slip" style={{ background: 'transparent', border: 'none', color: '#71717a', cursor: 'pointer' }}><FileText size={18} /></button>
-                                        <button style={{ background: 'transparent', border: 'none', color: '#71717a', cursor: 'pointer' }}><MoreVertical size={18} /></button>
+                                        <button type="button" onClick={() => generatePackingSlip(o)} title="Packing Slip" style={{ background: 'transparent', border: 'none', color: '#71717a', cursor: 'pointer' }}><FileText size={18} /></button>
+                                        <button type="button" style={{ background: 'transparent', border: 'none', color: '#71717a', cursor: 'pointer' }}><MoreVertical size={18} /></button>
                                     </div>
                                 </td>
                             </tr>

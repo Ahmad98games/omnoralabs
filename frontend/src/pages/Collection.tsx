@@ -1,12 +1,15 @@
 import React, { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useSearchParams } from 'react-router-dom';
-import { ShoppingBag, PackageOpen, Loader2 } from 'lucide-react';
+import { ShoppingBag, PackageOpen } from 'lucide-react';
 import client from '../api/client';
 import { useToast } from '../context/ToastContext';
 import { useOmnora } from '../context/OmnoraContext';
 import { BuilderProvider } from '../context/BuilderContext';
-import { transformProductList, IGSGProduct as IProduct } from '../utils/productTransformer';
+import { transformProductList } from '../utils/productTransformer';
+
+// OSTT FIX: Import type interface specifically to ensure it does not bleed into runtime imports
+import type { IGSGProduct as IProduct } from '../utils/productTransformer';
 
 const BRAND_PLACEHOLDER = '/images/placeholder_omnora.png';
 
@@ -28,7 +31,7 @@ const PRICE_RANGES = [
 
 export default function Collection() {
     const [searchParams, setSearchParams] = useSearchParams();
-    const { siteContent, isPreview } = useOmnora();
+    const { isPreview } = useOmnora();
     const { showToast } = useToast();
 
     const activeCategory = searchParams.get('category') || 'all';
@@ -82,7 +85,8 @@ export default function Collection() {
         e.preventDefault();
         e.stopPropagation();
         const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-        const existing = cart.find((i: any) => i.id === product.id);
+        // OSTT FIX: Removed implicit any
+        const existing = cart.find((i: { id: string }) => i.id === product.id);
         if (existing) existing.quantity += 1;
         else cart.push({ ...product, quantity: 1 });
         localStorage.setItem('cart', JSON.stringify(cart));
@@ -91,7 +95,7 @@ export default function Collection() {
     };
 
     return (
-        <BuilderProvider initialData={siteContent || {}} isPreview={isPreview}>
+        <BuilderProvider initialData={{}} isPreview={isPreview}>
             <div className="min-h-screen bg-[#000000] text-white selection:bg-white/20 font-sans pt-24 selection:text-black">
                 {/* 🏗️ CATALOGUE HEADER */}
                 <header className="relative py-20 border-b border-white/5 bg-[#050505] overflow-hidden">
@@ -112,6 +116,7 @@ export default function Collection() {
                                 <div className="flex flex-col gap-1">
                                     {CATEGORIES.map(cat => (
                                         <button
+                                            type="button"
                                             key={cat.id}
                                             onClick={() => updateFilter('category', cat.id)}
                                             className={`text-left py-2 px-3 text-[11px] font-black uppercase tracking-widest transition-all duration-300 border-l-2 ${activeCategory === cat.id ? 'border-white text-white bg-white/5' : 'border-transparent text-white/40 hover:text-white hover:bg-white/[0.02]'}`}
@@ -127,6 +132,7 @@ export default function Collection() {
                                 <div className="flex flex-col gap-1">
                                     {PRICE_RANGES.map(range => (
                                         <button
+                                            type="button"
                                             key={range.id}
                                             onClick={() => updateFilter('priceRange', range.id)}
                                             className={`text-left py-2 px-3 text-[11px] font-black uppercase tracking-widest transition-all duration-300 border-l-2 ${activePriceRange === range.id ? 'border-white text-white bg-white/5' : 'border-transparent text-white/40 hover:text-white hover:bg-white/[0.02]'}`}
@@ -168,7 +174,7 @@ export default function Collection() {
                                     <PackageOpen size={48} className="mx-auto text-white/10 mb-6" strokeWidth={1} />
                                     <h2 className="text-xl font-black uppercase tracking-tight mb-2">No nodes found</h2>
                                     <p className="text-white/20 text-[10px] uppercase font-black mb-8 tracking-widest">Registry mismatch: 0 entities found</p>
-                                    <button onClick={() => setSearchParams({})} className="px-8 py-3 bg-white text-black text-[10px] font-black uppercase tracking-widest">Reset Registry</button>
+                                    <button type="button" onClick={() => setSearchParams({})} className="px-8 py-3 bg-white text-black text-[10px] font-black uppercase tracking-widest">Reset Registry</button>
                                 </div>
                             ) : (
                                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-px bg-white/10 border border-white/10 overflow-hidden">
@@ -185,6 +191,7 @@ export default function Collection() {
                                                     className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105 grayscale group-hover:grayscale-0 opacity-40 group-hover:opacity-100"
                                                 />
                                                 <button
+                                                    type="button"
                                                     onClick={(e) => handleAddToCart(e, product)}
                                                     className="absolute bottom-6 right-6 p-4 bg-white text-black opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-500 hover:bg-white/90"
                                                 >

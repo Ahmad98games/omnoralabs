@@ -55,13 +55,22 @@ export const MediaLibraryModal: React.FC<MediaLibraryModalProps> = ({ isOpen, on
     useEffect(() => {
         if (!isOpen || !merchantId) return;
         let mounted = true;
-        setLoading(true);
-        setSelectedUrl(null);
-        setError(null);
-        storageClient.getFiles(merchantId)
-            .then(files => { if (mounted) setAssets(files); })
-            .catch(() => { if (mounted) setError('Failed to load media.'); })
-            .finally(() => { if (mounted) setLoading(false); });
+
+        const loadAssets = async () => {
+            setLoading(true);
+            setSelectedUrl(null);
+            setError(null);
+            try {
+                const files = await storageClient.getFiles(merchantId);
+                if (mounted) setAssets(files);
+            } catch {
+                if (mounted) setError('Failed to load media.');
+            } finally {
+                if (mounted) setLoading(false);
+            }
+        };
+
+        loadAssets();
         return () => { mounted = false; };
     }, [isOpen, merchantId]);
 
@@ -77,8 +86,9 @@ export const MediaLibraryModal: React.FC<MediaLibraryModalProps> = ({ isOpen, on
                 const url = await storageClient.uploadFile(file, merchantId);
                 setAssets(prev => [...prev, { url, fileName: file.name, size: file.size, uploadedAt: new Date().toISOString() }]);
                 setSelectedUrl(url);
-            } catch (err: any) {
-                setError(err.message || 'Upload failed.');
+            } catch (err) {
+                const msg = err instanceof Error ? err.message : 'Upload failed.';
+                setError(msg);
             }
         }
         setUploading(false);

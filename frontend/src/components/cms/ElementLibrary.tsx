@@ -1,7 +1,7 @@
 import React, { useState, useMemo, memo, useCallback } from 'react';
 import { useBuilder } from '../../context/BuilderContext';
 import { BLOCK_TYPES as SECTION_TYPES } from '../../platform/core/Registry';
-import { X, Search, ChevronRight, Eye } from 'lucide-react';
+import { Search, ChevronRight } from 'lucide-react';
 import { NavigatorPanel } from './NavigatorPanel'; 
 
 // ─── Tokens ───────────────────────────────────────────────────────────────────
@@ -166,7 +166,7 @@ const Preview = {
 
 // ─── Block types ──────────────────────────────────────────────────────────────
 type Badge = 'essential' | 'popular' | 'sales' | 'new';
-interface Block { type: string; label: string; description: string; preview: keyof typeof Preview; badge?: Badge; defaultProps?: Record<string, any>; defaultStyles?: Record<string, string>; }
+interface Block { type: string; label: string; description: string; preview: keyof typeof Preview; badge?: Badge; defaultProps?: Record<string, unknown>; defaultStyles?: Record<string, string>; }
 interface Category { id: string; label: string; emoji: string; blocks: Block[]; }
 
 const CATEGORIES: Category[] = [
@@ -327,6 +327,7 @@ const ConversionScore = memo(({ nodeTypes }: { nodeTypes: string[] }) => {
         </div>
     );
 });
+ConversionScore.displayName = 'ConversionScore';
 
 // ─── Block card ───────────────────────────────────────────────────────────────
 const BlockCard = memo(({ block, onAdd }: { block: Block; onAdd: (b: Block) => void }) => {
@@ -442,6 +443,7 @@ const BlockCard = memo(({ block, onAdd }: { block: Block; onAdd: (b: Block) => v
         </>
     );
 });
+BlockCard.displayName = 'BlockCard';
 
 // ─── Category section ─────────────────────────────────────────────────────────
 const CategorySection = memo(({ category, onAdd, query }: { category: Category; onAdd: (b: Block) => void; query: string }) => {
@@ -484,15 +486,14 @@ const CategorySection = memo(({ category, onAdd, query }: { category: Category; 
         </div>
     );
 });
+CategorySection.displayName = 'CategorySection';
 
 // ─── Main ElementLibrary ──────────────────────────────────────────────────────
-interface Props { isOpen: boolean; onClose: () => void; }
-
-export const ElementLibrary: React.FC<Props> = ({ isOpen, onClose }) => {
+export const ElementLibrary: React.FC = () => {
     const { addNode, selectNode, nodeTree } = useBuilder();
     const [query, setQuery] = useState('');
 
-    const nodeTypes = useMemo(() => Object.values(nodeTree).map((n: any) => n.type).filter(Boolean), [nodeTree]);
+    const nodeTypes = useMemo(() => Object.values(nodeTree).map((n: { type: string }) => n.type).filter(Boolean), [nodeTree]);
     const allBlocks = useMemo(() => CATEGORIES.flatMap(c => c.blocks), []);
     const searchResults = useMemo(() => {
         if (!query.trim()) return [];
@@ -582,3 +583,4 @@ export const ElementLibrary: React.FC<Props> = ({ isOpen, onClose }) => {
         </aside>
     );
 };
+ElementLibrary.displayName = 'ElementLibrary';

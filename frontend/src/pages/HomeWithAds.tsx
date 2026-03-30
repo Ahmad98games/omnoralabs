@@ -8,14 +8,15 @@ import { OmnoraNotification } from '../components/storefront/OmnoraNotification'
 // Wrapper component that adds ad zones to the existing Home page
 export default function HomeWithAds() {
     return (
-        <div>
+        <div className="home-with-ads">
             {/* Original Home Page Content */}
             <OriginalHome />
+            
+            {/* Ad Placements */}
+            <AdPlacementZone config={adConfig.topBanner} zoneId="top-banner" />
+            <AdPlacementZone config={adConfig.sidebar} zoneId="sidebar-ads" />
+            
             <OmnoraNotification />
-                {/* Mid Page Banner */}
-
-                {/* Footer Banner */}
-            </div>
-        
+        </div>
     );
 }

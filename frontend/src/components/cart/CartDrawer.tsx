@@ -47,7 +47,6 @@ export interface CartDrawerProps {
 
 export const CartDrawer: React.FC<CartDrawerProps> = ({
     isBuilder = false,
-    triggerIcon = 'bag',
     drawerPosition = 'right',
     showProductImages = true,
     showQuantityControls = true,
@@ -58,24 +57,32 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
     checkoutButtonText = 'Proceed to Checkout',
     checkoutButtonColor = '#7c6dfa',
     upsellProductIds = [],
+    triggerIcon: _triggerIcon = 'bag', // OSTT FIX: Marked as unused to satisfy linter
 }) => {
     const cart = useCart();
     const backdropRef = useRef<HTMLDivElement>(null);
     const [promoCode, setPromoCode] = useState('');
     const [promoStatus, setPromoStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
     const [promoMsg, setPromoMsg] = useState('');
-    const [upsellProducts, setUpsellProducts] = useState<any[]>([]);
+    
+    // OSTT FIX: Defined proper interface for upsell products
+    interface UpsellProduct {
+        id: string;
+        title: string;
+        price: number;
+        image?: string;
+    }
+    const [upsellProducts, setUpsellProducts] = useState<UpsellProduct[]>([]);
 
     const isOpen = isBuilder || cart.isOpen;
 
     // 🛡️ Fetch Real Upsells using pool IDs from the storefront config
     useEffect(() => {
-        if (!upsellEnabled || !upsellProductIds?.length) {
-            setUpsellProducts([]);
-            return;
-        }
-
         const fetchUpsells = async () => {
+            if (!upsellEnabled || !upsellProductIds?.length) {
+                setUpsellProducts([]);
+                return;
+            }
             try {
                 const { data } = await supabase
                     .from('products')

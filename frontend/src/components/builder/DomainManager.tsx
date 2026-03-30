@@ -1,11 +1,17 @@
 import React, { useState } from 'react';
 import { CheckCircle, AlertCircle, RefreshCw, ArrowRight, Shield } from 'lucide-react';
 
+interface DnsStatus {
+    success: boolean;
+    propagation: 'Verified' | 'Mismatched' | 'Pending';
+    records?: { type: string; host: string; value: string }[];
+}
+
 export const DomainManager: React.FC = () => {
     const [step, setStep] = useState(1);
     const [domain, setDomain] = useState('');
     const [loading, setLoading] = useState(false);
-    const [dnsStatus, setDnsStatus] = useState<any>(null);
+    const [dnsStatus, setDnsStatus] = useState<DnsStatus | null>(null);
 
     const checkStatus = async () => {
         if (!domain) return;
@@ -14,11 +20,11 @@ export const DomainManager: React.FC = () => {
             const res = await fetch(`/api/dns-check?domain=${encodeURIComponent(domain)}`);
             const data = await res.json();
             if (data.success) {
-                setDnsStatus(data);
+                setDnsStatus(data as DnsStatus);
                 if (data.propagation === 'Verified') setStep(3);
                 else setStep(2);
             }
-        } catch (err) {
+        } catch (err: unknown) {
             console.error("DNS verification failed:", err);
         } finally {
             setLoading(false);
@@ -40,7 +46,7 @@ export const DomainManager: React.FC = () => {
                 <Shield size={20} color="#7c6dfa" /> Multi-Tenant Domain Engine
             </h2>
             <p style={{ fontSize: '12px', color: '#71717a', marginBottom: '24px' }}>
-                Connect your custom domain seamlessly using Omnora's Edge routing framework.
+                Connect your custom domain seamlessly using Omnora&apos;s Edge routing framework.
             </p>
 
             {/* Steps Progress */}

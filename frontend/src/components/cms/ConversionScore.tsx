@@ -1,5 +1,4 @@
 import React, { useMemo } from 'react';
-import { useShallow } from 'zustand/react/shallow';
 import { useBuilderStore } from '../../stores/useBuilderStore';
 import { CheckCircle2, Circle, AlertCircle, Plus } from 'lucide-react';
 
@@ -24,21 +23,21 @@ const CONVERSION_SIGNALS: Signal[] = [
 
 /**
  * 📈 CONVERSION SCORE WIDGET (Task 3.2)
- * Audits the current page for industrial-grade conversion signals.
  */
 export const ConversionScore: React.FC = () => {
     const nodes = useBuilderStore(s => s.nodes[s.activePageId] ?? []);
-    const activePageId = useBuilderStore(s => s.activePageId);
 
     const audit = useMemo(() => {
         const foundTypes = new Set(nodes.map(n => n.type));
         
-        let score = 0;
+        // OSTT FIX: Removed mutable variable inside useMemo loop
         const results = CONVERSION_SIGNALS.map(signal => {
             const isPresent = signal.types.some(type => foundTypes.has(type));
-            if (isPresent) score += signal.weight;
             return { ...signal, isPresent };
         });
+
+        // Calculate score purely
+        const score = results.reduce((acc, curr) => curr.isPresent ? acc + curr.weight : acc, 0);
 
         return { score, results };
     }, [nodes]);
@@ -59,7 +58,6 @@ export const ConversionScore: React.FC = () => {
                     </span>
                 </div>
                 
-                {/* Circular Progress (Industrial) */}
                 <div className="relative w-14 h-14 flex items-center justify-center">
                     <svg className="w-full h-full transform -rotate-90">
                         <circle cx="28" cy="28" r="24" stroke="currentColor" strokeWidth="2" fill="transparent" className="text-white/5" />
@@ -90,7 +88,7 @@ export const ConversionScore: React.FC = () => {
                         </div>
                         
                         {!res.isPresent && (
-                            <button className="p-1 text-white/40 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button type="button" className="p-1 text-white/40 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity">
                                 <Plus size={12} />
                             </button>
                         )}
@@ -109,3 +107,4 @@ export const ConversionScore: React.FC = () => {
         </div>
     );
 };
+ConversionScore.displayName = 'ConversionScore';

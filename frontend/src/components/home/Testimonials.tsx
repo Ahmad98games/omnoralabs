@@ -59,7 +59,7 @@ export default function Testimonials() {
                                     ))}
                                 </div>
 
-                                <p className="testimonial-text">"{t.text}"</p>
+                                <p className="testimonial-text">&quot;{t.text}&quot;</p>
 
                                 <div className="testimonial-footer">
                                     <div className="author-avatar">

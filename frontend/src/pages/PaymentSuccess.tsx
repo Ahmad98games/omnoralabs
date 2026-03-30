@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { CheckCircle, ArrowRight, ShoppingBag, Eye } from 'lucide-react';
+import { CheckCircle } from 'lucide-react';
 import './PaymentSuccess.css';
 
 export default function PaymentSuccess() {
@@ -8,7 +8,6 @@ export default function PaymentSuccess() {
     const orderNumber = searchParams.get('order') || 'UNKNOWN';
 
     useEffect(() => {
-        // Clear cart logic remains the same
         localStorage.removeItem('cart');
         window.dispatchEvent(new Event('cart-updated'));
     }, []);

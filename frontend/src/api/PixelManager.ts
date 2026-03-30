@@ -1,5 +1,5 @@
-import { supabase } from '../lib/supabaseClient'
-import { v4 as uuidv4 } from 'uuid'
+import { supabase } from '../lib/supabaseClient';
+import { v4 as uuidv4 } from 'uuid';
 
 export type OmnoraEvent = 'page_view' | 'product_view' | 'add_to_cart' | 'checkout_start' | 'purchase' | 'newsletter_signup';
 
@@ -12,22 +12,35 @@ interface EventData {
     email?: string;
 }
 
+// FIX: Added strict typing for the payload instead of 'any'
+interface EventPayload {
+    id: string;
+    session_id: string;
+    event_type: OmnoraEvent;
+    product_id?: string;
+    revenue_cents: number;
+    page_url: string;
+    user_agent: string;
+    created_at: string;
+}
+
 /**
  * 🛰️ INDUSTRIAL PIXEL MANAGER (Task 7.3)
  * High-Availability Batching with Session-Aware Flush.
+ * OSTT Refactored: Strict typing applied to buffer, timer, and payload.
  */
 export class PixelManager {
     private static sessionId = uuidv4();
-    private static buffer: any[] = [];
+    private static buffer: EventPayload[] = [];
     private static flushInterval = 15000; // 15s buffer
     private static isFirstEvent = true;
-    private static flushTimer: any = null;
+    private static flushTimer: ReturnType<typeof setInterval> | null = null;
 
     static async track(event: OmnoraEvent, data: EventData = {}) {
         const eventId = uuidv4();
         const timestamp = new Date().toISOString();
 
-        const payload = {
+        const payload: EventPayload = {
             id: eventId,
             session_id: this.sessionId,
             event_type: event,
@@ -59,7 +72,7 @@ export class PixelManager {
         window.addEventListener('beforeunload', () => this.flushOnUnload());
     }
 
-    private static async flushImmediate(events: any[]) {
+    private static async flushImmediate(events: EventPayload[]) {
         try {
             await supabase.from('analytics_events').insert(events);
         } catch (err) {

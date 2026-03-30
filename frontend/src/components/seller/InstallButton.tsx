@@ -1,8 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Download } from 'lucide-react';
 
+interface BeforeInstallPromptEvent extends Event {
+    prompt: () => Promise<void>;
+    userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
+}
+
 export const InstallButton = () => {
-    const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+    const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
 
     useEffect(() => {
         const handleBeforeInstallPrompt = (e: Event) => {
@@ -19,7 +24,7 @@ export const InstallButton = () => {
 
     const handleInstallClick = async () => {
         if (!deferredPrompt) return;
-        deferredPrompt.prompt();
+        await deferredPrompt.prompt();
         const { outcome } = await deferredPrompt.userChoice;
         if (outcome === 'accepted') {
             setDeferredPrompt(null);

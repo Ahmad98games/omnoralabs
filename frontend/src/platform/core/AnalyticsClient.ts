@@ -28,9 +28,6 @@ export class AnalyticsClient {
      * Retrieves top-level aggregate statistics for the merchant dashboard.
      */
     public async getDashboardStats(merchantId: string): Promise<DashboardStats> {
-        // Fallback calculations using direct table queries
-        // In a strict production environment, this would hit highly optimized PostgreSQL aggregates
-        
         try {
             // Get completed orders for revenue
             const { data: orders, error: ordersError } = await supabase
@@ -58,7 +55,7 @@ export class AnalyticsClient {
 
             if (productError) throw productError;
 
-            const totalRevenue = orders?.reduce((sum, order) => sum + (order.total_amount || 0), 0) || 0;
+            const totalRevenue = orders?.reduce((sum, order) => sum + (Number(order.total_amount) || 0), 0) || 0;
 
             return {
                 totalRevenue,
@@ -66,7 +63,7 @@ export class AnalyticsClient {
                 activeProducts: productCount || 0
             };
 
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error("AnalyticsClient: Failed to fetch dashboard stats", err);
             // Return safe fallbacks to prevent breaking the UI
             return { totalRevenue: 0, totalOrders: 0, activeProducts: 0 };
@@ -105,14 +102,14 @@ export class AnalyticsClient {
                     const orderDate = new Date(order.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
                     const existingPoint = chartData.find(p => p.date === orderDate);
                     if (existingPoint) {
-                        existingPoint.revenue += (order.total_amount || 0);
+                        existingPoint.revenue += (Number(order.total_amount) || 0);
                         existingPoint.orders = (existingPoint.orders || 0) + 1;
                     }
                 });
             }
 
             return chartData;
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error("AnalyticsClient: Failed to fetch charting data", err);
             return [];
         }

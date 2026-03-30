@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useToast } from '../context/ToastContext';
-import client from '../api/client';
-import { Heart, ShoppingBag, X, ArrowRight, Loader2 } from 'lucide-react';
+import { Heart, ShoppingBag, X, Loader2 } from 'lucide-react';
 import SmartImage from '../components/SmartImage';
 import { FALLBACK_IMAGE } from '../constants';
 import './Wishlist.css';
@@ -21,19 +20,10 @@ export default function Wishlist() {
     const [loading, setLoading] = useState(true);
     const { showToast } = useToast();
 
-    useEffect(() => {
-        fetchWishlist();
-    }, []);
-
-    const fetchWishlist = async () => {
+    const fetchWishlist = React.useCallback(async () => {
         try {
             // For now, fallback to local storage since backend might not persist wishlist for guests
-            // In a real app, this would merge local + server
             const saved = JSON.parse(localStorage.getItem('wishlist') || '[]');
-
-            // If we had a real endpoint returning populated products:
-            // const res = await client.get('/wishlist');
-            // setWishlist(res.data.products);
 
             // Simulating API delay for effect
             setTimeout(() => {
@@ -45,7 +35,14 @@ export default function Wishlist() {
             console.error(error);
             setLoading(false);
         }
-    };
+    }, []);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            fetchWishlist();
+        }, 0);
+        return () => clearTimeout(timer);
+    }, [fetchWishlist]);
 
     const removeFromWishlist = (productId: string) => {
         const updated = wishlist.filter(p => p._id !== productId);
@@ -55,8 +52,15 @@ export default function Wishlist() {
     };
 
     const addToCart = (product: Product) => {
-        const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-        const existing = cart.find((i: any) => i.id === product._id);
+        interface CartItem {
+            id: string;
+            name: string;
+            price: number;
+            image: string;
+            quantity: number;
+        }
+        const cart = JSON.parse(localStorage.getItem('cart') || '[]') as CartItem[];
+        const existing = cart.find((i) => i.id === product._id);
 
         if (existing) {
             existing.quantity++;

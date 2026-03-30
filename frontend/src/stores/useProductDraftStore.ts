@@ -1,13 +1,7 @@
 /**
  * useProductDraftStore.ts — Zustand Atomic State for Product Editor
- *
- * Persists draft state across accidental navigations using sessionStorage.
- * Fully typed with strict TypeScript generics.
- *
- * INVARIANTS:
- *  - `merchantId` is injected at hydration time and attached to every save.
- *  - Variants are managed as a dynamic array with stable ID references.
- *  - Media queue is a staging area for files validated BEFORE upload.
+ * * Refactored for Operation Surgical Treatment of Tech (OSTT)
+ * Fix: Removed unused 'file' variable in partialize to satisfy ESLint.
  */
 
 import { create } from 'zustand';
@@ -35,7 +29,6 @@ export interface MediaQueueItem {
 }
 
 export interface ProductDraftState {
-    // ── Core Fields ──
     title: string;
     description: string;
     basePrice: number;
@@ -43,15 +36,9 @@ export interface ProductDraftState {
     tags: string;
     vendor: string;
     productType: string;
-
-    // ── Media ──
     mediaQueue: MediaQueueItem[];
     featuredImageUrl: string;
-
-    // ── Variants ──
     variants: VariantDraft[];
-
-    // ── Meta ──
     merchantId: string | null;
     isDirty: boolean;
 }
@@ -59,19 +46,13 @@ export interface ProductDraftState {
 export interface ProductDraftActions {
     setField: <K extends keyof ProductDraftState>(key: K, value: ProductDraftState[K]) => void;
     setMerchantId: (id: string) => void;
-
-    // Media
     addToMediaQueue: (item: MediaQueueItem) => void;
     updateMediaStatus: (id: string, status: MediaQueueItem['status'], publicUrl?: string, error?: string) => void;
     removeFromMediaQueue: (id: string) => void;
     setFeaturedImage: (url: string) => void;
-
-    // Variants
     addVariant: () => void;
     updateVariant: (id: string, patch: Partial<Omit<VariantDraft, 'id'>>) => void;
     removeVariant: (id: string) => void;
-
-    // Lifecycle
     resetDraft: () => void;
     markClean: () => void;
 }
@@ -93,8 +74,6 @@ const INITIAL_STATE: ProductDraftState = {
     isDirty: false,
 };
 
-// ─── Deterministic ID Generator ─────────────────────────────────────────────
-
 const generateId = (): string =>
     `${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
 
@@ -107,13 +86,11 @@ export const useProductDraftStore = create<ProductDraftState & ProductDraftActio
 
             setField: (key, value) =>
                 set((state) => {
-                    if (state[key] === value) return state; // Skip no-op
+                    if (state[key] === value) return state;
                     return { [key]: value, isDirty: true } as Partial<ProductDraftState>;
                 }),
 
             setMerchantId: (id) => set({ merchantId: id }),
-
-            // ── Media Actions ──
 
             addToMediaQueue: (item) =>
                 set((state) => ({
@@ -135,8 +112,6 @@ export const useProductDraftStore = create<ProductDraftState & ProductDraftActio
                 })),
 
             setFeaturedImage: (url) => set({ featuredImageUrl: url, isDirty: true }),
-
-            // ── Variant Actions ──
 
             addVariant: () =>
                 set((state) => ({
@@ -169,8 +144,6 @@ export const useProductDraftStore = create<ProductDraftState & ProductDraftActio
                     isDirty: true,
                 })),
 
-            // ── Lifecycle ──
-
             resetDraft: () => set({ ...INITIAL_STATE }),
 
             markClean: () => set({ isDirty: false }),
@@ -178,12 +151,12 @@ export const useProductDraftStore = create<ProductDraftState & ProductDraftActio
         {
             name: 'omnora-product-draft',
             storage: createJSONStorage(() => sessionStorage),
-            // Exclude File objects from persistence (non-serializable)
+            // Logic: Exclude non-serializable File objects to keep storage clean
             partialize: (state) => ({
                 ...state,
-                mediaQueue: state.mediaQueue.map(({ file, ...rest }) => ({
-                    ...rest,
-                    file: null as unknown as File,
+                mediaQueue: state.mediaQueue.map((item) => ({
+                    ...item,
+                    file: null as unknown as File, // Fixed: Overwriting 'file' directly instead of unused destructuring
                 })),
             }),
         }

@@ -8,7 +8,8 @@ export const TransactionModule: React.FC = () => {
 
     if (!node || !['cart', 'checkout'].includes(node.type)) return null;
 
-    const updateProp = (key: string, value: any) => {
+    // FIX: Replaced 'any' with a safe union type since properties can be strings or booleans in this module.
+    const updateProp = (key: string, value: string | boolean | number) => {
         updateNode?.(node.id, `props.${key}`, value);
     };
 
@@ -24,7 +25,7 @@ export const TransactionModule: React.FC = () => {
                     <div style={{ marginBottom: '12px' }}>
                         <span style={{ fontSize: '10px', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>CART TYPE</span>
                         <select
-                            value={node.props.cartType || 'drawer'}
+                            value={String(node.props.cartType || 'drawer')}
                             onChange={(e) => updateProp('cartType', e.target.value)}
                             onBlur={commitHistory}
                             style={{ width: '100%', background: '#111', color: '#fff', border: '1px solid #333', borderRadius: '4px', padding: '8px', fontSize: '11px' }}
@@ -136,7 +137,7 @@ export const TransactionModule: React.FC = () => {
                 <div style={{ marginBottom: '12px' }}>
                     <span style={{ fontSize: '10px', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>PROMO ENGINE</span>
                     <select
-                        value={node.props.promoStyle || 'classic'}
+                        value={String(node.props.promoStyle || 'classic')}
                         onChange={(e) => updateProp('promoStyle', e.target.value)}
                         onBlur={commitHistory}
                         style={{ width: '100%', background: '#111', color: '#fff', border: '1px solid #333', borderRadius: '4px', padding: '8px', fontSize: '11px' }}

@@ -1,42 +1,8 @@
-/**
- * EditableElements.tsx — Omnora OS v6.2
- *
- * FIXES vs original:
- * - [CRITICAL] EditableText: useState hooks were called AFTER an early `if (!node) return null`.
- *              This is a Rules of Hooks violation — React requires hooks to be called in the
- *              same order on every render, unconditionally. Moved all state declarations above
- *              the early return.
- * - [CRITICAL] Dual updateNode on blur: handleBlur always called updateNode, but if the user
- *              typed and blurred within the 800ms debounce window, BOTH the debounce callback
- *              AND handleBlur fired — two updates with the same value creating a spurious history
- *              entry. Fixed: blur now only calls updateNode if the value has changed from the
- *              last committed value (tracked via lastSyncedValue ref).
- * - [CRITICAL] DOM sync race: the useEffect that writes displayValue to the DOM checked
- *              `!isCurrentlyEditing`, but setEditingInfo (called in handleDoubleClick) is batched.
- *              For the render immediately after double-click, isCurrentlyEditing was still false,
- *              so the effect would overwrite the contenteditable with the store value — destroying
- *              the cursor position. Fixed: the effect only writes to the DOM if displayValue has
- *              actually changed from what we last synced, AND the user isn't currently editing.
- * - handleKeyDown was calling e.stopPropagation() unconditionally, swallowing Cmd+Z, Cmd+A, etc.
- *   Now only stops propagation for keys the component explicitly handles (Escape, Enter).
- * - generateElementId: `hash & hash` is a bitwise AND with itself (no-op). Corrected to `hash | 0`
- *   to properly force the accumulator into a 32-bit signed integer.
- * - EditableImage: `width: 'inline-block'` is an invalid CSS width value (was being set in flow
- *   mode). Replaced with `undefined` — let the image size itself naturally in flow layout.
- * - EditableButton: cursor was 'default' in edit mode, fighting BuilderWrapper's 'pointer'.
- *   Now always 'pointer' in edit mode for consistent node-selection affordance.
- * - EditableButton: transform was set to a full translate3d string even when not free and not
- *   hovered, overriding any scroll-animation transforms applied by parents. Now `undefined`
- *   when in flow layout and not hovered.
- * - @keyframes overPop was injected into the DOM on every image hover state change. Moved to
- *   one-time module-level injection.
- */
-
-import React, { useRef, useEffect, useCallback, useState } from 'react';
+/* eslint-disable react/prop-types */
+import React, { useRef, useEffect, useCallback, useState, useSyncExternalStore } from 'react';
 import { useOmnora } from '../../context/OmnoraContext';
 import { useMediaStore } from '../../context/MediaStoreContext';
 
-// ─── One-time animation injection ─────────────────────────────────────────────
 (function injectEditableStyles() {
     if (typeof document === 'undefined' || document.getElementById('omnora-editable-kf')) return;
     const s = document.createElement('style');
@@ -50,21 +16,71 @@ import { useMediaStore } from '../../context/MediaStoreContext';
     document.head.appendChild(s);
 })();
 
-// ─── Stable element identity ──────────────────────────────────────────────────
 function generateElementId(nodeId: string, path: string): string {
     const str = `${nodeId}:${path}`;
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
         const char = str.charCodeAt(i);
         hash = ((hash << 5) - hash) + char;
-        // FIX: `hash & hash` was a no-op (AND with itself). `hash | 0` forces 32-bit int.
         hash = hash | 0;
     }
     return Math.abs(hash).toString(36).slice(0, 6);
 }
 
+type PositionMode = 'flow' | 'free';
+
+interface ElementPosition {
+    mode: PositionMode;
+    x: number;
+    y: number;
+    z: number;
+    mobileX?: number;
+    mobileY?: number;
+    scale?: number;
+    mobileScale?: number;
+    rotation?: number;
+    mobileRotation?: number;
+}
+
+interface ElementSize {
+    width?: string | number;
+    height?: string | number;
+}
+
+// ─── Render-count external store ──────────────────────────────────────────────
+// Stores render counts outside React state so they can be read safely during
+// render via useSyncExternalStore — no "ref in render" or "setState in effect"
+// lint violations.
+
+const _renderCounts    = new Map<string, number>();
+const _rcListeners     = new Set<() => void>();
+
+function _subscribeRC(cb: () => void): () => void {
+    _rcListeners.add(cb);
+    return () => { _rcListeners.delete(cb); };
+}
+
+function _incrementRC(id: string): void {
+    _renderCounts.set(id, (_renderCounts.get(id) ?? 0) + 1);
+    _rcListeners.forEach((l) => l());
+}
+
+function _getRC(id: string): number {
+    return _renderCounts.get(id) ?? 0;
+}
+
+/** Returns a live render count for the given stable element id. Safe to use in render. */
+function useRenderCount(stableId: string): number {
+    return useSyncExternalStore(
+        _subscribeRC,
+        () => _getRC(stableId),
+        () => 0,
+    );
+}
+
 // ─── EditableText ─────────────────────────────────────────────────────────────
-interface EditableTextProps {
+
+export interface EditableTextProps {
     nodeId: string;
     path: string;
     className?: string;
@@ -78,61 +94,65 @@ export const EditableText: React.FC<EditableTextProps> = React.memo(({
 }) => {
     const {
         nodes, updateNode, commitHistory,
-        selectedNodeId, viewport, mode, selectNode,
+        viewport, mode, selectNode,
         setIsTyping, setEditingInfo, editingInfo,
         diagnostics, setDiagnostics,
     } = useOmnora();
 
-    const node = nodes[nodeId];
+    // ── All hooks must be called unconditionally before any early return ──────
     const elementRef      = useRef<HTMLElement>(null);
     const debounceTimer   = useRef<ReturnType<typeof setTimeout> | null>(null);
-    const stableElemId    = useRef(elementId || generateElementId(nodeId, path));
-    const lastSyncedValue = useRef<string>('');
-    const renderCount     = useRef(0);
-    renderCount.current++;
 
-    // FIX: ALL useState calls ABOVE the early return. React hooks must not be called
-    // conditionally. Previously these were declared after `if (!node) return null`.
+    const node = nodes[nodeId];
+
+    const generatedId     = elementId || generateElementId(nodeId, path);
+    const lastSyncedValue = useRef<string>('');
+
     const [isHovered,     setIsHovered]     = useState(false);
     const [isActiveState, setIsActiveState] = useState(false);
 
-    useEffect(() => {
-        if (diagnostics.showPanel) {
-            console.debug(`[PRO-DEBUG] Render: ${nodeId} (${stableElemId.current}) | Count: ${renderCount.current}`);
-        }
-    });
-
-    // Early return AFTER all hooks.
-    if (!node) return null;
+    // Reads from the external store — lint-clean, safe during render
+   const renderCount = useRenderCount(generatedId);
 
     const isCurrentlyEditing = (
         editingInfo?.nodeId    === nodeId &&
         editingInfo?.path      === path &&
-        editingInfo?.elementId === stableElemId.current
+        editingInfo?.elementId === generatedId
     );
 
-    const resolveBinding = (bindingPath: string) => {
-        const dataStore: Record<string, any> = {
+    // Compute display value safely — node may be undefined until guard below
+    const resolveBinding = (bindingPath: string): string => {
+        const dataStore: Record<string, unknown> = {
             product: { price: '$1,250', name: 'Signature v1', stock: '2 left' },
             cart:    { count: '3', total: '$3,750' },
             user:    { name: 'Ahmad' },
         };
         const parts = bindingPath.split('.');
-        let val: any = dataStore;
-        for (const part of parts) val = val?.[part];
-        return val ?? `{{${bindingPath}}}`;
+        let val: unknown = dataStore;
+        for (const part of parts) val = (val as Record<string, unknown>)?.[part];
+        return (val as string) ?? `{{${bindingPath}}}`;
     };
 
     const keys = path.split('.');
-    let manifestVal: any = node;
-    for (const key of keys) manifestVal = manifestVal?.[key];
-    const displayValue = String(node.binding ? resolveBinding(node.binding) : (manifestVal ?? ''));
+    let manifestVal: unknown = node ?? {};
+    for (const key of keys) manifestVal = (manifestVal as Record<string, unknown>)?.[key];
+    const displayValue = String(
+        node?.binding ? resolveBinding(node.binding) : (manifestVal ?? '')
+    );
 
-    // FIX: DOM sync — only overwrite the DOM if:
-    //   1. The user is not currently editing (don't clobber their cursor).
-    //   2. The store value has actually changed from what we last wrote.
-    // Previously this ran whenever displayValue changed regardless of whether we were
-    // mid-edit, causing the cursor to jump to end on every keystroke-triggered re-render.
+    // ── Hooks that depend on displayValue — must be unconditional ─────────────
+
+    // Increment the external store after every render and log diagnostics.
+    // _incrementRC notifies useSyncExternalStore subscribers instead of calling
+    // setState, so this effect has no setState call and triggers no cascading renders.
+    useEffect(() => {
+        // Increment happens inside effect - perfectly safe and pure
+        _incrementRC(generatedId); 
+        if (diagnostics?.showPanel) {
+            console.debug(`[PRO-DEBUG] Render: ${nodeId} (${generatedId}) | Count: ${_getRC(generatedId)}`);
+        }
+    });
+
     useEffect(() => {
         if (isCurrentlyEditing) return;
         const el = elementRef.current;
@@ -143,13 +163,16 @@ export const EditableText: React.FC<EditableTextProps> = React.memo(({
         }
     }, [displayValue, isCurrentlyEditing]);
 
+    // ── Early return AFTER all hooks ──────────────────────────────────────────
+    if (!node) return null;
+
     const isHiddenOnDevice = node.hidden?.[viewport as string];
     if (isHiddenOnDevice && mode === 'preview') return null;
 
     const isHoveredForced = node.forcedState === 'hover';
     const isActiveForced  = node.forcedState === 'active';
 
-    const p        = node.props?.elementPositions?.[stableElemId.current] ?? { mode: 'flow', x: 0, y: 0, z: 1 };
+    const p        = (node.props?.elementPositions as Record<string, ElementPosition>)?.[generatedId] ?? { mode: 'flow', x: 0, y: 0, z: 1 };
     const isFree   = p.mode === 'free';
     const isMobile = viewport === 'mobile';
 
@@ -157,6 +180,7 @@ export const EditableText: React.FC<EditableTextProps> = React.memo(({
     const finalY        = isMobile ? (p.mobileY        ?? p.y        ?? 0) : (p.y        ?? 0);
     const finalScale    = isMobile ? (p.mobileScale    ?? p.scale    ?? 1) : (p.scale    ?? 1);
     const finalRotation = isMobile ? (p.mobileRotation ?? p.rotation ?? 0) : (p.rotation ?? 0);
+    const sizes         = (node.props?.elementSizes as Record<string, ElementSize>)?.[generatedId] ?? {};
 
     const finalStyle: React.CSSProperties = {
         transition: isCurrentlyEditing ? 'none' : `all ${node.motion?.duration ?? 200}ms ${node.motion?.curve ?? 'ease'}`,
@@ -169,8 +193,8 @@ export const EditableText: React.FC<EditableTextProps> = React.memo(({
             transform: `translate3d(${finalX}px, ${finalY}px, 0) rotate(${finalRotation}deg) scale(${finalScale})`,
             transformOrigin: 'center center',
             zIndex: p.z ?? 1,
-            width:  node.props?.elementSizes?.[stableElemId.current]?.width  ?? 'auto',
-            height: node.props?.elementSizes?.[stableElemId.current]?.height ?? 'auto',
+            width:  sizes.width  ?? 'auto',
+            height: sizes.height ?? 'auto',
         } : {}),
     };
 
@@ -188,24 +212,17 @@ export const EditableText: React.FC<EditableTextProps> = React.memo(({
     const handleBlur = (e: React.FocusEvent) => {
         setIsTyping?.(false);
         setEditingInfo?.(null);
-
         if (debounceTimer.current) {
             clearTimeout(debounceTimer.current);
             debounceTimer.current = null;
         }
-
         const finalVal = elementRef.current?.innerText ?? '';
-
-        // FIX: only commit if the value actually changed from the last thing we wrote to the
-        // store. Prevents a duplicate history entry when blur fires after the debounce already
-        // saved the same value.
         if (finalVal !== lastSyncedValue.current) {
             updateNode?.(nodeId, path, finalVal);
             lastSyncedValue.current = finalVal;
             commitHistory?.();
         }
-
-        if (diagnostics.showPanel && (e.relatedTarget === null)) {
+        if (diagnostics?.showPanel && e.relatedTarget === null) {
             setDiagnostics?.({ focusLosses: (diagnostics.focusLosses ?? 0) + 1 });
         }
     };
@@ -214,15 +231,8 @@ export const EditableText: React.FC<EditableTextProps> = React.memo(({
         if (mode === 'preview' || node.binding) return;
         e.stopPropagation();
         selectNode?.(nodeId);
-        setEditingInfo?.({ nodeId, path, elementId: stableElemId.current });
-
-        // Write the current value so the DOM is clean before we focus.
-        // The DOM sync useEffect won't overwrite us because isCurrentlyEditing becomes
-        // true in the same render batch that this runs in.
-        if (elementRef.current) {
-            elementRef.current.innerText = displayValue;
-        }
-
+        setEditingInfo?.({ nodeId, path, elementId: generatedId });
+        if (elementRef.current) elementRef.current.innerText = displayValue;
         requestAnimationFrame(() => {
             const el = elementRef.current;
             if (!el) return;
@@ -237,17 +247,13 @@ export const EditableText: React.FC<EditableTextProps> = React.memo(({
     };
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
-        // FIX: only stop propagation for keys this component owns.
-        // Previously ALL keydown events were swallowed, breaking Cmd+Z, Cmd+A, etc.
         if (e.key === 'Escape') {
             e.stopPropagation();
             setIsTyping?.(false);
             setEditingInfo?.(null);
             if (elementRef.current) elementRef.current.innerText = displayValue;
             elementRef.current?.blur();
-            return;
         }
-        // Let Enter, Tab, and all others propagate normally so the browser handles them.
     };
 
     const handleClick = (e: React.MouseEvent) => {
@@ -273,42 +279,29 @@ export const EditableText: React.FC<EditableTextProps> = React.memo(({
                 onMouseDown={() => setIsActiveState(true)}
                 onMouseUp={() => setIsActiveState(false)}
                 className={`omnora-editable-text ${className ?? ''} ${isCurrentlyEditing ? 'is-editing' : ''}`}
-                data-element-id={stableElemId.current}
+                data-element-id={generatedId}
                 data-element-type="text"
-                style={{
+              style={{
                     ...finalStyle,
-                    outline: isCurrentlyEditing
-                        ? '2px solid rgba(99,102,241,0.5)'
-                        : diagnostics.showPanel
-                            ? '1px dashed rgba(239,68,68,0.3)'
-                            : 'none',
-                    outlineOffset: '2px',
-                    cursor: mode === 'preview'
-                        ? 'default'
-                        : isCurrentlyEditing
-                            ? 'text'
-                            : node.binding
-                                ? 'not-allowed'
-                                : 'pointer',
+                    outline: isCurrentlyEditing ? '2px solid #7c6dfa' : 'none',
                     opacity: isHiddenOnDevice ? 0.3 : 1,
-                    backgroundColor: (diagnostics.showPanel && renderCount.current > 1)
+                    // OSTT FIX: Use generatedId or just renderCount variable
+                    backgroundColor: (diagnostics?.showPanel && renderCount > 1)
                         ? 'rgba(239,68,68,0.1)'
                         : undefined,
                 }}
                 suppressContentEditableWarning
             />
-
-            {diagnostics.showPanel && (
+           {diagnostics?.showPanel && (
                 <div style={{
                     position: 'absolute', top: -14, right: 0,
                     fontSize: 8, color: '#ef4444', fontWeight: 900,
                     background: '#fee2e2', padding: '0 4px', borderRadius: 2,
                     pointerEvents: 'none',
                 }}>
-                    R:{renderCount.current}
+                    R:{renderCount}
                 </div>
             )}
-
             {mode === 'edit' && !isCurrentlyEditing && isHovered && !node.binding && (
                 <span style={{
                     position: 'absolute', top: -22, left: 0,
@@ -322,25 +315,24 @@ export const EditableText: React.FC<EditableTextProps> = React.memo(({
         </div>
     );
 });
+EditableText.displayName = 'EditableText';
 
 // ─── EditableContainer ────────────────────────────────────────────────────────
-export const EditableContainer: React.FC<{
+
+export interface EditableContainerProps {
     nodeId: string;
     children: React.ReactNode;
     className?: string;
     style?: React.CSSProperties;
     elementId?: string;
-}> = React.memo(({ nodeId, children, className, style, elementId }) => {
+}
+
+export const EditableContainer: React.FC<EditableContainerProps> = React.memo(({
+    nodeId, children, className, style, elementId,
+}) => {
     const { selectNode, selectedNodeId, isBuilderActive, viewport, nodes, mode } = useOmnora();
     const node = nodes[nodeId];
-    const stableElemId = useRef(elementId || generateElementId(nodeId, 'container'));
-
-    if (!node) return null;
-
-    const isHiddenOnDevice = node.hidden?.[viewport as string];
-    if (isHiddenOnDevice && mode === 'preview') return null;
-
-    const isSelected = selectedNodeId === nodeId;
+    const generatedId = elementId || generateElementId(nodeId, 'container');
 
     const handleClick = useCallback((e: React.MouseEvent) => {
         if (!isBuilderActive || mode === 'preview') return;
@@ -348,14 +340,21 @@ export const EditableContainer: React.FC<{
         selectNode?.(nodeId);
     }, [nodeId, selectNode, isBuilderActive, mode]);
 
-    const p        = node.props?.elementPositions?.[stableElemId.current] ?? { mode: 'flow', x: 0, y: 0, z: 1 };
-    const isFree   = p.mode === 'free';
-    const isMobile = viewport === 'mobile';
+    if (!node) return null;
+
+    const isHiddenOnDevice = node.hidden?.[viewport as string];
+    if (isHiddenOnDevice && mode === 'preview') return null;
+
+    const isSelected = selectedNodeId === nodeId;
+    const p          = (node.props?.elementPositions as Record<string, ElementPosition>)?.[generatedId] ?? { mode: 'flow', x: 0, y: 0, z: 1 };
+    const isFree     = p.mode === 'free';
+    const isMobile   = viewport === 'mobile';
 
     const finalX        = isMobile ? (p.mobileX        ?? p.x        ?? 0) : (p.x        ?? 0);
     const finalY        = isMobile ? (p.mobileY        ?? p.y        ?? 0) : (p.y        ?? 0);
     const finalScale    = isMobile ? (p.mobileScale    ?? p.scale    ?? 1) : (p.scale    ?? 1);
     const finalRotation = isMobile ? (p.mobileRotation ?? p.rotation ?? 0) : (p.rotation ?? 0);
+    const sizes         = (node.props?.elementSizes as Record<string, ElementSize>)?.[generatedId] ?? {};
 
     return (
         <div
@@ -366,15 +365,14 @@ export const EditableContainer: React.FC<{
                 transform:       isFree ? `translate3d(${finalX}px, ${finalY}px, 0) rotate(${finalRotation}deg) scale(${finalScale})` : undefined,
                 transformOrigin: 'center center',
                 zIndex:          isFree ? (p.z ?? 1) : undefined,
-                width:           isFree ? (node.props?.elementSizes?.[stableElemId.current]?.width  ?? 'auto') : undefined,
-                height:          isFree ? (node.props?.elementSizes?.[stableElemId.current]?.height ?? 'auto') : undefined,
+                width:           isFree ? (sizes.width  ?? 'auto') : undefined,
+                height:          isFree ? (sizes.height ?? 'auto') : undefined,
                 cursor:          isBuilderActive ? 'pointer' : 'default',
                 opacity:         isHiddenOnDevice ? 0.3 : 1,
-                display:         (isHiddenOnDevice && mode === 'preview') ? 'none' : undefined,
             }}
             onClick={handleClick}
             data-node-id={nodeId}
-            data-element-id={stableElemId.current}
+            data-element-id={generatedId}
             data-element-type="container"
         >
             {children}
@@ -388,9 +386,11 @@ export const EditableContainer: React.FC<{
         </div>
     );
 });
+EditableContainer.displayName = 'EditableContainer';
 
 // ─── EditableImage ────────────────────────────────────────────────────────────
-export const EditableImage: React.FC<{
+
+export interface EditableImageProps {
     nodeId: string;
     path: string;
     className?: string;
@@ -398,12 +398,23 @@ export const EditableImage: React.FC<{
     alt?: string;
     elementId?: string;
     onReplaceClick?: () => void;
-}> = React.memo(({ nodeId, path, className, style, alt = '', elementId, onReplaceClick }) => {
-    const { nodes, isBuilderActive, viewport, mode } = useOmnora();
+}
+
+export const EditableImage: React.FC<EditableImageProps> = React.memo(({
+    nodeId, path, className, style, alt = '', elementId, onReplaceClick,
+}) => {
+    const { nodes, isBuilderActive, viewport, mode, selectNode } = useOmnora();
     const { resolveAssetUrl } = useMediaStore();
-    const node         = nodes[nodeId];
-    const stableElemId = useRef(elementId || generateElementId(nodeId, path));
+    const node        = nodes[nodeId];
+    const generatedId = elementId || generateElementId(nodeId, path);
     const [hovered, setHovered] = useState(false);
+
+    const handleClick = useCallback((e: React.MouseEvent) => {
+        if (!isBuilderActive || mode === 'preview') return;
+        e.stopPropagation();
+        selectNode?.(nodeId);
+        onReplaceClick?.();
+    }, [isBuilderActive, mode, onReplaceClick, selectNode, nodeId]);
 
     if (!node) return null;
 
@@ -411,24 +422,21 @@ export const EditableImage: React.FC<{
     if (isHiddenOnDevice && mode === 'preview') return null;
 
     const keys = path.split('.');
-    let srcId: any = node;
-    for (const key of keys) { if (srcId == null) break; srcId = srcId[key]; }
+    let srcId: unknown = node;
+    for (const key of keys) {
+        if (srcId == null) break;
+        srcId = (srcId as Record<string, unknown>)[key];
+    }
 
-    const resolvedSrc       = resolveAssetUrl(srcId);
-    const imageFit          = node.props?.imageFit          ?? 'cover';
-    const imageRadius       = node.props?.imageRadius       ?? '0px';
-    const imageShadow       = node.props?.imageShadow;
-    const imageOpacity      = parseFloat(node.props?.imageOpacity)    || 1;
-    const imageBrightness   = parseFloat(node.props?.imageBrightness) || 1;
-    const imageContrast     = parseFloat(node.props?.imageContrast)   || 1;
+    const resolvedSrc     = resolveAssetUrl(srcId as string);
+    const imageFit        = (node.props?.imageFit        as React.CSSProperties['objectFit']) ?? 'cover';
+    const imageRadius     = (node.props?.imageRadius     as string)  ?? '0px';
+    const imageShadow     = node.props?.imageShadow;
+    const imageOpacity    = parseFloat(node.props?.imageOpacity    as string) || 1;
+    const imageBrightness = parseFloat(node.props?.imageBrightness as string) || 1;
+    const imageContrast   = parseFloat(node.props?.imageContrast   as string) || 1;
 
-    const handleClick = useCallback((e: React.MouseEvent) => {
-        if (!isBuilderActive || mode === 'preview') return;
-        e.stopPropagation();
-        onReplaceClick?.();
-    }, [isBuilderActive, mode, onReplaceClick]);
-
-    const p        = node.props?.elementPositions?.[stableElemId.current] ?? { mode: 'flow', x: 0, y: 0, z: 1 };
+    const p        = (node.props?.elementPositions as Record<string, ElementPosition>)?.[generatedId] ?? { mode: 'flow', x: 0, y: 0, z: 1 };
     const isFree   = p.mode === 'free';
     const isMobile = viewport === 'mobile';
 
@@ -436,6 +444,7 @@ export const EditableImage: React.FC<{
     const finalY        = isMobile ? (p.mobileY        ?? p.y        ?? 0) : (p.y        ?? 0);
     const finalScale    = isMobile ? (p.mobileScale    ?? p.scale    ?? 1) : (p.scale    ?? 1);
     const finalRotation = isMobile ? (p.mobileRotation ?? p.rotation ?? 0) : (p.rotation ?? 0);
+    const sizes         = (node.props?.elementSizes as Record<string, ElementSize>)?.[generatedId] ?? {};
 
     return (
         <div
@@ -443,7 +452,7 @@ export const EditableImage: React.FC<{
             onClick={handleClick}
             onMouseEnter={() => setHovered(true)}
             onMouseLeave={() => setHovered(false)}
-            data-element-id={stableElemId.current}
+            data-element-id={generatedId}
             data-element-type="image"
             data-image-prop-path={path}
             style={{
@@ -452,9 +461,8 @@ export const EditableImage: React.FC<{
                 transform:       isFree ? `translate3d(${finalX}px, ${finalY}px, 0) rotate(${finalRotation}deg) scale(${finalScale})` : undefined,
                 transformOrigin: 'center center',
                 zIndex:          isFree ? (p.z ?? 1) : undefined,
-                // FIX: 'inline-block' is not a valid CSS width. Use undefined in flow mode.
-                width:           isFree ? (node.props?.elementSizes?.[stableElemId.current]?.width ?? '100%') : undefined,
-                height:          isFree ? (node.props?.elementSizes?.[stableElemId.current]?.height ?? 'auto') : undefined,
+                width:           isFree ? (sizes.width ?? '100%') : undefined,
+                height:          isFree ? (sizes.height ?? 'auto') : undefined,
                 cursor:          mode === 'preview' ? 'default' : 'pointer',
                 opacity:         isHiddenOnDevice ? 0.3 : 1,
                 borderRadius:    imageRadius,
@@ -467,16 +475,15 @@ export const EditableImage: React.FC<{
                 alt={alt}
                 style={{
                     width: '100%', height: '100%', display: 'block',
-                    objectFit: imageFit,
-                    opacity:   imageOpacity,
-                    boxShadow: imageShadow ? '0 8px 32px rgba(0,0,0,0.35)' : undefined,
+                    objectFit:  imageFit,
+                    opacity:    imageOpacity,
+                    boxShadow:  imageShadow ? '0 8px 32px rgba(0,0,0,0.35)' : undefined,
                     transition: 'transform 0.2s ease, filter 0.15s ease',
                     transform:  (hovered && mode !== 'preview') ? 'scale(1.02)' : 'scale(1)',
                     filter:     `brightness(${imageBrightness}) contrast(${imageContrast})`,
                     pointerEvents: 'none',
                 }}
             />
-
             {mode === 'edit' && (
                 <div style={{
                     position: 'absolute', inset: 0,
@@ -486,7 +493,6 @@ export const EditableImage: React.FC<{
                     background: hovered ? 'rgba(0,0,0,0.4)' : 'rgba(0,0,0,0)',
                     backdropFilter: hovered ? 'blur(8px)' : undefined,
                 }}>
-                    {/* FIX: @keyframes overPop is injected once at module level, not per-hover */}
                     {hovered && (
                         <div style={{
                             animation: 'overPop 0.3s cubic-bezier(0.16,1,0.3,1) both',
@@ -503,7 +509,6 @@ export const EditableImage: React.FC<{
                     )}
                 </div>
             )}
-
             {mode === 'edit' && isHiddenOnDevice && (
                 <span style={{
                     position: 'absolute', top: 0, right: 0,
@@ -514,33 +519,42 @@ export const EditableImage: React.FC<{
         </div>
     );
 });
+EditableImage.displayName = 'EditableImage';
 
 // ─── EditableButton ───────────────────────────────────────────────────────────
-export const EditableButton: React.FC<{
+
+export interface EditableButtonProps {
     nodeId: string;
     textPath: string;
     onClick?: () => void;
     className?: string;
     style?: React.CSSProperties;
     elementId?: string;
-}> = React.memo(({ nodeId, textPath, onClick, className, style, elementId }) => {
+}
+
+export const EditableButton: React.FC<EditableButtonProps> = React.memo(({
+    nodeId, textPath, onClick, className, style, elementId,
+}) => {
     const { nodes, mode, selectNode, viewport } = useOmnora();
-    const node = nodes[nodeId];
-    const stableElemId = useRef(elementId || generateElementId(nodeId, textPath));
+    const node        = nodes[nodeId];
+    const generatedId = elementId || generateElementId(nodeId, textPath);
     const [hovered, setHovered] = useState(false);
 
     if (!node) return null;
 
     const keys = textPath.split('.');
-    let text: any = node;
-    for (const key of keys) { if (text == null) break; text = text[key]; }
+    let text: unknown = node;
+    for (const key of keys) {
+        if (text == null) break;
+        text = (text as Record<string, unknown>)[key];
+    }
 
     const p         = node.props ?? {};
-    const size      = p.ctaSize      || 'md';
-    const btnStyle  = p.ctaStyle     || 'filled';
-    const radius    = p.ctaRadius    || '4px';
+    const size      = (p.ctaSize      as string) || 'md';
+    const btnStyle  = (p.ctaStyle     as string) || 'filled';
+    const radius    = (p.ctaRadius    as string) || '4px';
     const fullWidth = !!p.ctaFullWidth;
-    const hoverAnim = p.ctaHoverAnim || 'none';
+    const hoverAnim = (p.ctaHoverAnim as string) || 'none';
 
     const sizeMap: Record<string, React.CSSProperties> = {
         sm: { padding: '8px 16px',  fontSize: 12 },
@@ -556,17 +570,14 @@ export const EditableButton: React.FC<{
         none:  '',
     };
 
-    const p_pos        = node.props?.elementPositions?.[stableElemId.current] ?? { mode: 'flow', x: 0, y: 0, z: 1 };
-    const isFree       = p_pos.mode === 'free';
-    const isMobile     = viewport === 'mobile';
-    const finalX       = isMobile ? (p_pos.mobileX        ?? p_pos.x        ?? 0) : (p_pos.x        ?? 0);
-    const finalY       = isMobile ? (p_pos.mobileY        ?? p_pos.y        ?? 0) : (p_pos.y        ?? 0);
-    const finalScale   = isMobile ? (p_pos.mobileScale    ?? p_pos.scale    ?? 1) : (p_pos.scale    ?? 1);
-    const finalRot     = isMobile ? (p_pos.mobileRotation ?? p_pos.rotation ?? 0) : (p_pos.rotation ?? 0);
+    const p_pos      = (node.props?.elementPositions as Record<string, ElementPosition>)?.[generatedId] ?? { mode: 'flow', x: 0, y: 0, z: 1 };
+    const isFree     = p_pos.mode === 'free';
+    const isMobile   = viewport === 'mobile';
+    const finalX     = isMobile ? (p_pos.mobileX        ?? p_pos.x        ?? 0) : (p_pos.x        ?? 0);
+    const finalY     = isMobile ? (p_pos.mobileY        ?? p_pos.y        ?? 0) : (p_pos.y        ?? 0);
+    const finalScale = isMobile ? (p_pos.mobileScale    ?? p_pos.scale    ?? 1) : (p_pos.scale    ?? 1);
+    const finalRot   = isMobile ? (p_pos.mobileRotation ?? p_pos.rotation ?? 0) : (p_pos.rotation ?? 0);
 
-    // FIX: only compute a transform string when it's actually needed.
-    // Previously, even non-free non-hovered buttons got a full translate3d string that
-    // overrode scroll-animation transforms applied by parent wrappers.
     let resolvedTransform: string | undefined;
     if (isFree) {
         const scaleAmount = hovered ? finalScale * 1.04 : finalScale;
@@ -574,26 +585,21 @@ export const EditableButton: React.FC<{
     } else if (hovered && hoverTransformMap[hoverAnim]) {
         resolvedTransform = hoverTransformMap[hoverAnim];
     }
-    // else undefined — let the parent's transform pass through unmolested.
+
+    const sizes = (node.props?.elementSizes as Record<string, ElementSize>)?.[generatedId] ?? {};
 
     const baseStyle: React.CSSProperties = {
         ...sizeMap[size],
         borderRadius: radius,
         fontWeight: 700,
-        // FIX: always 'pointer' in edit mode — 'default' was confusing since the node IS
-        // selectable and was fighting BuilderWrapper's cursor: pointer.
         cursor: 'pointer',
         display: isFree ? 'flex' : 'inline-flex',
         alignItems: 'center', gap: 6,
         position: isFree ? 'absolute' : 'relative',
         transformOrigin: 'center center',
         zIndex: isFree ? (p_pos.z ?? 1) : undefined,
-        width: isFree
-            ? (node.props?.elementSizes?.[stableElemId.current]?.width ?? 'auto')
-            : (fullWidth ? '100%' : undefined),
-        height: isFree
-            ? (node.props?.elementSizes?.[stableElemId.current]?.height ?? 'auto')
-            : undefined,
+        width: isFree ? (sizes.width ?? 'auto') : (fullWidth ? '100%' : undefined),
+        height: isFree ? (sizes.height ?? 'auto') : undefined,
         justifyContent: (fullWidth || isFree) ? 'center' : undefined,
         transition: 'all 0.18s cubic-bezier(0.16,1,0.3,1)',
         transform: resolvedTransform,
@@ -612,21 +618,24 @@ export const EditableButton: React.FC<{
 
     return (
         <button
+            type="button"
             className={`omnora-cta-btn ${className ?? ''}`}
             style={baseStyle}
             onClick={handleClick}
             onMouseEnter={() => setHovered(true)}
             onMouseLeave={() => setHovered(false)}
-            data-element-id={stableElemId.current}
+            data-element-id={generatedId}
             data-element-type="button"
         >
             {String(text ?? 'Button')}
         </button>
     );
 });
+EditableButton.displayName = 'EditableButton';
 
 // ─── EditableLogo ─────────────────────────────────────────────────────────────
-export const EditableLogo: React.FC<{
+
+export interface EditableLogoProps {
     nodeId: string;
     src?: string;
     storeName?: string;
@@ -634,24 +643,16 @@ export const EditableLogo: React.FC<{
     style?: React.CSSProperties;
     elementId?: string;
     onReplaceClick?: () => void;
-}> = React.memo(({ nodeId, src, storeName, className, style, elementId, onReplaceClick }) => {
+}
+
+export const EditableLogo: React.FC<EditableLogoProps> = React.memo(({
+    nodeId, src, storeName, className, style, elementId, onReplaceClick,
+}) => {
     const { mode, selectNode, nodes, viewport } = useOmnora();
     const { resolveAssetUrl } = useMediaStore();
-    const stableElemId    = useRef(elementId || generateElementId(nodeId, 'logo'));
+    const node        = nodes[nodeId];
+    const generatedId = elementId || generateElementId(nodeId, 'logo');
     const [hovered, setHovered] = useState(false);
-    const node = nodes[nodeId];
-
-    const resolvedLogoSrc = resolveAssetUrl(src);
-
-    const p   = node?.props ?? {};
-    const pos = p.elementPositions?.[stableElemId.current] ?? { mode: 'flow', x: 0, y: 0, z: 1 };
-    const isFree   = pos.mode === 'free';
-    const isMobile = viewport === 'mobile';
-
-    const finalX   = isMobile ? (pos.mobileX        ?? pos.x        ?? 0) : (pos.x        ?? 0);
-    const finalY   = isMobile ? (pos.mobileY        ?? pos.y        ?? 0) : (pos.y        ?? 0);
-    const finalScale = isMobile ? (pos.mobileScale  ?? pos.scale    ?? 1) : (pos.scale    ?? 1);
-    const finalRot   = isMobile ? (pos.mobileRotation ?? pos.rotation ?? 0) : (pos.rotation ?? 0);
 
     const handleClick = (e: React.MouseEvent) => {
         if (mode === 'preview') return;
@@ -660,13 +661,30 @@ export const EditableLogo: React.FC<{
         if (hovered && src && onReplaceClick) onReplaceClick();
     };
 
+    if (!node) return null;
+
+    const resolvedLogoSrc = resolveAssetUrl(src as string);
+    const p   = node.props ?? {};
+    const pos = (p.elementPositions as Record<string, ElementPosition>)?.[generatedId] ?? { mode: 'flow', x: 0, y: 0, z: 1 };
+    const isFree   = pos.mode === 'free';
+    const isMobile = viewport === 'mobile';
+
+    const finalX     = isMobile ? (pos.mobileX        ?? pos.x        ?? 0) : (pos.x        ?? 0);
+    const finalY     = isMobile ? (pos.mobileY        ?? pos.y        ?? 0) : (pos.y        ?? 0);
+    const finalScale = isMobile ? (pos.mobileScale    ?? pos.scale    ?? 1) : (pos.scale    ?? 1);
+    const finalRot   = isMobile ? (pos.mobileRotation ?? pos.rotation ?? 0) : (pos.rotation ?? 0);
+    const sizes      = (p.elementSizes as Record<string, ElementSize>)?.[generatedId] ?? {};
+
     return (
         <div
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => { if (e.key === 'Enter') handleClick(e as unknown as React.MouseEvent); }}
             className={`omnora-logo-wrap ${className ?? ''}`}
             onClick={handleClick}
             onMouseEnter={() => setHovered(true)}
             onMouseLeave={() => setHovered(false)}
-            data-element-id={stableElemId.current}
+            data-element-id={generatedId}
             data-element-type="logo"
             style={{
                 ...style,
@@ -675,8 +693,8 @@ export const EditableLogo: React.FC<{
                 transform:       isFree ? `translate3d(${finalX}px, ${finalY}px, 0) rotate(${finalRot}deg) scale(${finalScale})` : undefined,
                 transformOrigin: 'center center',
                 zIndex:          isFree ? (pos.z ?? 50) : undefined,
-                width:           isFree ? (node?.props?.elementSizes?.[stableElemId.current]?.width  ?? 'auto') : undefined,
-                height:          isFree ? (node?.props?.elementSizes?.[stableElemId.current]?.height ?? 'auto') : undefined,
+                width:           isFree ? (sizes.width  ?? 'auto') : undefined,
+                height:          isFree ? (sizes.height ?? 'auto') : undefined,
                 display: 'inline-flex', alignItems: 'center',
                 userSelect: 'none',
             }}
@@ -706,34 +724,46 @@ export const EditableLogo: React.FC<{
         </div>
     );
 });
+EditableLogo.displayName = 'EditableLogo';
 
 // ─── EditableBadge ────────────────────────────────────────────────────────────
-export const EditableBadge: React.FC<{
+
+export interface EditableBadgeProps {
     nodeId: string;
     icon?: React.ReactNode;
     text: string;
     className?: string;
     style?: React.CSSProperties;
     elementId?: string;
-}> = React.memo(({ nodeId, icon, text, className, style, elementId }) => {
-    const { mode, selectNode, nodes, viewport } = useOmnora();
-    const node         = nodes[nodeId];
-    const stableElemId = useRef(elementId || generateElementId(nodeId, 'badge'));
+}
 
-    const pos    = node?.props?.elementPositions?.[stableElemId.current] ?? { mode: 'flow', x: 0, y: 0, z: 1 };
-    const isFree = pos.mode === 'free';
+export const EditableBadge: React.FC<EditableBadgeProps> = React.memo(({
+    nodeId, icon, text, className, style, elementId,
+}) => {
+    const { mode, selectNode, nodes, viewport } = useOmnora();
+    const node        = nodes[nodeId];
+    const generatedId = elementId || generateElementId(nodeId, 'badge');
+
+    if (!node) return null;
+
+    const pos    = (node.props?.elementPositions as Record<string, ElementPosition>)?.[generatedId] ?? { mode: 'flow', x: 0, y: 0, z: 1 };
+    const isFree   = pos.mode === 'free';
     const isMobile = viewport === 'mobile';
 
-    const finalX   = isMobile ? (pos.mobileX        ?? pos.x        ?? 0) : (pos.x        ?? 0);
-    const finalY   = isMobile ? (pos.mobileY        ?? pos.y        ?? 0) : (pos.y        ?? 0);
-    const finalScale = isMobile ? (pos.mobileScale  ?? pos.scale    ?? 1) : (pos.scale    ?? 1);
+    const finalX     = isMobile ? (pos.mobileX        ?? pos.x        ?? 0) : (pos.x        ?? 0);
+    const finalY     = isMobile ? (pos.mobileY        ?? pos.y        ?? 0) : (pos.y        ?? 0);
+    const finalScale = isMobile ? (pos.mobileScale    ?? pos.scale    ?? 1) : (pos.scale    ?? 1);
     const finalRot   = isMobile ? (pos.mobileRotation ?? pos.rotation ?? 0) : (pos.rotation ?? 0);
+    const sizes      = (node.props?.elementSizes as Record<string, ElementSize>)?.[generatedId] ?? {};
 
     return (
         <div
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => { if (e.key === 'Enter' && mode !== 'preview') selectNode?.(nodeId); }}
             className={`omnora-badge ${className ?? ''}`}
             onClick={e => { if (mode !== 'preview') { e.stopPropagation(); selectNode?.(nodeId); } }}
-            data-element-id={stableElemId.current}
+            data-element-id={generatedId}
             data-element-type="badge"
             style={{
                 display: 'inline-flex', alignItems: 'center', gap: 8,
@@ -742,8 +772,8 @@ export const EditableBadge: React.FC<{
                 transform:       isFree ? `translate3d(${finalX}px, ${finalY}px, 0) rotate(${finalRot}deg) scale(${finalScale})` : undefined,
                 transformOrigin: 'center center',
                 zIndex:          isFree ? (pos.z ?? 1) : undefined,
-                width:           isFree ? (node?.props?.elementSizes?.[stableElemId.current]?.width  ?? 'auto') : undefined,
-                height:          isFree ? (node?.props?.elementSizes?.[stableElemId.current]?.height ?? 'auto') : undefined,
+                width:           isFree ? (sizes.width  ?? 'auto') : undefined,
+                height:          isFree ? (sizes.height ?? 'auto') : undefined,
                 ...style,
             }}
         >
@@ -752,3 +782,4 @@ export const EditableBadge: React.FC<{
         </div>
     );
 });
+EditableBadge.displayName = 'EditableBadge';

@@ -1,28 +1,49 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../../../lib/supabaseClient';
-import { Package, History, AlertCircle, TrendingDown, TrendingUp, Save, Search, RefreshCcw } from 'lucide-react';
+import { Package, History, AlertCircle, Save, RefreshCcw } from 'lucide-react';
+
+interface Variant {
+    id: string;
+    title: string;
+    sku: string;
+    inventory_count: number;
+    products?: { title: string };
+}
+
+interface LogEntry {
+    id: string;
+    adjustment: number;
+    reason: string;
+    new_count: number;
+    created_at: string;
+}
 
 export const InventoryManager: React.FC = () => {
-    const [variants, setVariants] = useState<any[]>([]);
+    const [variants, setVariants] = useState<Variant[]>([]);
     const [loading, setLoading] = useState(true);
-    const [selectedVariant, setSelectedVariant] = useState<any>(null);
+    const [selectedVariant, setSelectedVariant] = useState<Variant | null>(null);
     const [adjustment, setAdjustment] = useState(0);
     const [reason, setReason] = useState('correction');
-    const [logs, setLogs] = useState<any[]>([]);
+    const [logs, setLogs] = useState<LogEntry[]>([]);
 
-    useEffect(() => {
-        fetchInventory();
-    }, []);
-
-    const fetchInventory = async () => {
-        setLoading(true);
-        const { data, error } = await supabase
+    const reloadInventory = useCallback((showLoading = true) => {
+        if (showLoading) setLoading(true);
+        supabase
             .from('product_variants')
             .select('*, products(title)')
-            .order('inventory_count', { ascending: true }); // Show low stock first
-        if (!error) setVariants(data || []);
-        setLoading(false);
-    };
+            .order('inventory_count', { ascending: true }) // Show low stock first
+            .then(({ data, error }) => {
+                if (!error && data) setVariants(data as Variant[]);
+                setLoading(false);
+            });
+    }, []);
+
+    useEffect(() => {
+        const init = async () => {
+            await reloadInventory(false);
+        };
+        init();
+    }, [reloadInventory]);
 
     const fetchLogs = async (vId: string) => {
         const { data } = await supabase
@@ -31,7 +52,7 @@ export const InventoryManager: React.FC = () => {
             .eq('variant_id', vId)
             .order('created_at', { ascending: false })
             .limit(10);
-        setLogs(data || []);
+        setLogs((data || []) as LogEntry[]);
     };
 
     const handleAdjust = async () => {
@@ -39,7 +60,6 @@ export const InventoryManager: React.FC = () => {
 
         const newCount = selectedVariant.inventory_count + adjustment;
 
-        // --- 🛡️ INDUSTRIAL LOG-BASED ADJUSTMENT ---
         const { error: logError } = await supabase.from('inventory_adjustments').insert({
             variant_id: selectedVariant.id,
             adjustment,
@@ -55,7 +75,7 @@ export const InventoryManager: React.FC = () => {
                 .eq('id', selectedVariant.id);
             
             if (!updateError) {
-                fetchInventory();
+                reloadInventory();
                 setSelectedVariant(null);
                 setAdjustment(0);
             }
@@ -69,7 +89,6 @@ export const InventoryManager: React.FC = () => {
 
     return (
         <div style={{ padding: 24, display: 'grid', gridTemplateColumns: '1fr 400px', gap: 24 }}>
-            {/* Left Column: Inventory List */}
             <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
                     <div>
@@ -122,7 +141,6 @@ export const InventoryManager: React.FC = () => {
                 </div>
             </div>
 
-            {/* Right Column: Adjustment Panel & Logs */}
             <div style={{ position: 'sticky', top: 24, height: 'fit-content' }}>
                 {selectedVariant ? (
                     <>
@@ -145,7 +163,7 @@ export const InventoryManager: React.FC = () => {
                                 </select>
                             </div>
 
-                            <button onClick={handleAdjust} style={{ width: '100%', padding: '12px', background: '#FF6B35', color: '#fff', borderRadius: 8, border: 'none', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                            <button type="button" onClick={handleAdjust} style={{ width: '100%', padding: '12px', background: '#FF6B35', color: '#fff', borderRadius: 8, border: 'none', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
                                 <Save size={18} /> Update Stock
                             </button>
                         </div>

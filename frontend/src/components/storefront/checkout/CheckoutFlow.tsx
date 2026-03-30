@@ -1,17 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
-import { supabase } from '../../../lib/supabaseClient';
 import { PixelManager } from '../../../api/PixelManager';
-import { Shield, Lock, CreditCard, Truck, ChevronRight, Package, AlertTriangle } from 'lucide-react';
+import { Lock, ChevronRight } from 'lucide-react';
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
-export const CheckoutFlow: React.FC<{ cart: any[] }> = ({ cart }) => {
+interface CartItem {
+    title: string;
+    quantity: number;
+    price_cents: number;
+    variant_id: string;
+}
+
+export const CheckoutFlow: React.FC<{ cart: CartItem[] }> = ({ cart }) => {
     const [step, setStep] = useState<'info' | 'shipping' | 'payment'>('info');
     const [info, setInfo] = useState({ email: '', first_name: '', last_name: '', address: '', city: '', zip: '', country: 'US' });
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
 
     const totalCents = cart.reduce((sum, item) => sum + (item.price_cents * item.quantity), 0);
 
@@ -69,7 +73,13 @@ export const CheckoutFlow: React.FC<{ cart: any[] }> = ({ cart }) => {
     );
 };
 
-const InfoStep = ({ info, setInfo, onNext }: any) => (
+interface InfoStepProps {
+    info: { email: string; first_name: string; last_name: string; address: string; city: string; zip: string; country: string };
+    setInfo: (info: Record<string, unknown>) => void;
+    onNext: () => void;
+}
+
+const InfoStep = ({ info, setInfo, onNext }: InfoStepProps) => (
     <div>
         <h2 style={{ fontSize: 20, fontWeight: 700, color: '#fff', marginBottom: 32 }}>Shipping Address</h2>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
@@ -90,7 +100,7 @@ const InfoStep = ({ info, setInfo, onNext }: any) => (
     </div>
 );
 
-const ShippingStep = ({ onNext }: any) => (
+const ShippingStep = ({ onNext }: { onNext: () => void }) => (
     <div>
         <h2 style={{ fontSize: 20, fontWeight: 700, color: '#fff', marginBottom: 32 }}>Shipping Method</h2>
         <div style={{ padding: 24, border: '1px solid #FF6B35', background: 'rgba(255, 107, 53, 0.05)', borderRadius: 12, marginBottom: 40 }}>
@@ -106,12 +116,18 @@ const ShippingStep = ({ onNext }: any) => (
     </div>
 );
 
-const PaymentStep = ({ cart, info, totalCents }: any) => {
+interface PaymentStepProps {
+    cart: CartItem[];
+    info: Record<string, unknown>;
+    totalCents: number;
+}
+
+const PaymentStep = ({ cart, info, totalCents }: PaymentStepProps) => {
     const stripe = useStripe();
     const elements = useElements();
     const [loading, setLoading] = useState(false);
 
-    const handlePayment = async (e: any) => {
+    const handlePayment = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!stripe || !elements) return;
 

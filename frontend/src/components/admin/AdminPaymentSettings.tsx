@@ -28,7 +28,7 @@ export default function AdminPaymentSettings() {
         setIsSaving(true);
         setStatus('idle');
         try {
-            const updates: any = {};
+            const updates: Record<string, string> = {};
             if (publicKey) updates.stripePublicKey = publicKey;
             if (secretKey && !secretKey.startsWith('••••')) updates.stripeSecretKey = secretKey;
             if (webhookSecret && !webhookSecret.startsWith('••••')) updates.stripeWebhookSecret = webhookSecret;
@@ -38,7 +38,7 @@ export default function AdminPaymentSettings() {
             setStatus('success');
             if (updates.stripeSecretKey) setSecretKey('••••••••••••••••••••');
             if (updates.stripeWebhookSecret) setWebhookSecret('••••••••••••••••••••');
-        } catch (error) {
+        } catch (error: unknown) {
             console.error('Failed to save payment settings:', error);
             setStatus('error');
         } finally {

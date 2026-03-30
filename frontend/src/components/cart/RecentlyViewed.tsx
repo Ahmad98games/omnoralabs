@@ -10,6 +10,13 @@ export interface RecentlyViewedProps {
     persistAcrossSessions?: boolean;
 }
 
+interface RecentProduct {
+    id: string;
+    title?: string;
+    price?: number;
+    featured_image?: string;
+}
+
 export const RecentlyViewed: React.FC<RecentlyViewedProps> = ({
     nodeId,
     isBuilder = false,
@@ -18,20 +25,36 @@ export const RecentlyViewed: React.FC<RecentlyViewedProps> = ({
     emptyStateText = 'No history found...',
     persistAcrossSessions = true,
 }) => {
-    const [history, setHistory] = useState<any[]>([]);
+    // OSTT FIX: Initializing from storage in state initializer to avoid set-state-in-effect
+    const [history, setHistory] = useState<RecentProduct[]>(() => {
+        if (typeof window === 'undefined' || isBuilder) return [];
+        try {
+            const storage = persistAcrossSessions ? localStorage : sessionStorage;
+            const data = storage.getItem('omnora_v_history');
+            if (data) {
+                const parsed = JSON.parse(data);
+                return Array.isArray(parsed) ? parsed.slice(0, limit) : [];
+            }
+        } catch {
+            return [];
+        }
+        return [];
+    });
 
     useEffect(() => {
-        if (isBuilder) return;
-        const storage = persistAcrossSessions ? localStorage : sessionStorage;
-        const data = storage.getItem('omnora_v_history');
-        if (data) {
+        const syncHistory = async () => {
+            if (isBuilder) return;
+            const storage = persistAcrossSessions ? localStorage : sessionStorage;
+            const data = storage.getItem('omnora_v_history');
             try {
-                const parsed = JSON.parse(data);
+                const parsed = data ? JSON.parse(data) : [];
                 setHistory(Array.isArray(parsed) ? parsed.slice(0, limit) : []);
-            } catch (err) {
+            } catch {
                 setHistory([]);
             }
-        }
+        };
+        
+        syncHistory();
     }, [isBuilder, limit, persistAcrossSessions]);
 
     const mockHistory = [
@@ -55,7 +78,7 @@ export const RecentlyViewed: React.FC<RecentlyViewedProps> = ({
         <section data-node-id={nodeId} style={{ fontFamily: "'Inter', sans-serif" }}>
             {title && <h2 style={{ fontSize: '22px', fontWeight: 800, color: '#fff', marginBottom: '24px', letterSpacing: '-0.02em' }}>{title}</h2>}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px' }}>
-                {activeHistory.map((item, index) => (
+                {activeHistory.map((item) => (
                     <div key={item.id} style={{ position: 'relative' }}>
                         <ProductCard product={{ ...item, price: item.price || 0, title: item.title || '' }} />
                         {isBuilder && (

@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { MessageCircle, AlertTriangle, X, CheckCircle } from 'lucide-react';
+import { MessageCircle, AlertTriangle, X } from 'lucide-react';
 import './WhatsAppConfirmationDialog.css';
 
 interface WhatsAppConfirmationDialogProps {
@@ -62,7 +62,7 @@ export default function WhatsAppConfirmationDialog({
                     <div className="steps-list">
                         <div className="step-item">
                             <span className="step-num">01</span>
-                            <span>Click "Transmit via WhatsApp" below.</span>
+                            <span>Click &quot;Transmit via WhatsApp&quot; below.</span>
                         </div>
                         <div className="step-item">
                             <span className="step-num">02</span>

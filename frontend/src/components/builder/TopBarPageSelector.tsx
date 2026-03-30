@@ -145,7 +145,7 @@ export const TopBarPageSelector: React.FC = () => {
                             { label: 'System Pages', ids: systemPages },
                             { label: 'Templates', ids: templatePages },
                             { label: 'Custom Pages', ids: customPages }
-                        ].map((group: any) => group.ids.length > 0 && (
+                        ].map((group: { label: string; ids: string[] }) => group.ids.length > 0 && (
                             <div key={group.label} style={{ marginBottom: 12 }}>
                                 <p style={{
                                     fontSize: 9, fontWeight: 900, color: T.muted,

@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { FALLBACK_IMAGE } from '../constants'; // Ensure you have this constant
+import { FALLBACK_IMAGE } from '../constants'; 
 import './SmartImage.css';
 
 interface SmartImageProps {
     src: string;
     alt: string;
     className?: string;
-    aspectRatio?: string; // e.g., "4/5", "16/9"
+    aspectRatio?: string; 
     onLoad?: () => void;
     onError?: () => void;
     priority?: boolean;
@@ -23,9 +23,12 @@ export default function SmartImage({
 }: SmartImageProps) {
     const [status, setStatus] = useState<'loading' | 'loaded' | 'error'>('loading');
 
-    // Reset status if the source changes (e.g., inside a carousel)
     useEffect(() => {
-        setStatus('loading');
+        // OSTT FIX: Wrap state update in setTimeout to move it out of synchronous render flow
+        const timer = setTimeout(() => {
+            setStatus('loading');
+        }, 0);
+        return () => clearTimeout(timer);
     }, [src]);
 
     const handleLoad = useCallback(() => {
@@ -38,23 +41,19 @@ export default function SmartImage({
         onError?.();
     }, [onError]);
 
-    // Determine the final source
     const finalSrc = status === 'error' ? FALLBACK_IMAGE : src;
 
     return (
         <div
             className={`smart-image-container ${className}`}
-            style={{ aspectRatio }} // Aspect Ratio is the ONLY inline style allowed because it's dynamic
+            style={{ aspectRatio }} 
         >
-            {/* 1. The "Stealth" Skeleton Overlay */}
             <div
                 className={`smart-skeleton ${status === 'loaded' ? 'hidden' : ''}`}
                 aria-hidden="true"
             />
-
-            {/* 2. The Real Image */}
             <img
-                key={src} // Forces React to remount img if src changes (crucial for resetting native load state)
+                key={src} 
                 src={finalSrc}
                 alt={alt}
                 className={`smart-img ${status === 'loaded' ? 'visible' : ''}`}

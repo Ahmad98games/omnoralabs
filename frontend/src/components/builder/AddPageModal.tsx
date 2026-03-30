@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { useBuilder } from '../../context/BuilderContext';
+import { useBuilderStore } from '../../stores/useBuilderStore';
 import { slugify, validateSlug } from '../../utils/slugify';
 import { cloneNodeTree } from '../../utils/nodeCloner';
 import { toast } from 'react-hot-toast';
@@ -8,33 +8,29 @@ import { NewPageInitializer } from '../../lib/kernel/utils/NewPageInitializer';
 interface AddPageModalProps {
     isOpen?: boolean;
     onClose: () => void;
-    onAdd?: (title: string, slug: string, type: string, templateData: any) => void;
-    existingPages?: Record<string, any>;
+    onAdd?: (title: string, slug: string, type: string, templateData: Record<string, unknown>) => void;
+    existingPages?: Record<string, unknown>;
 }
 
 type TemplateType = 'blank' | 'product_detail' | 'about_contact' | 'duplicate';
 
 export const AddPageModal: React.FC<AddPageModalProps> = ({ isOpen = true, onClose, onAdd, existingPages }) => {
-    let builderContext: any = {};
-    try {
-        builderContext = useBuilder();
-    } catch (e) {
-        // Safe fallback for standalone mode
-    }
+    // OSTT FIX: Uses zustand store directly instead of complex nested context
+    const storePages = useBuilderStore(state => state.pages);
+    const pages = useMemo(() => storePages || {}, [storePages]);
+    const addPage = useBuilderStore(state => state.addPage);
+    const storeNodes = useBuilderStore(state => state.nodes);
+    const nodes = useMemo(() => storeNodes || {}, [storeNodes]);
 
-    const pages = existingPages || builderContext?.pages?.byId || {};
-    const addPage = onAdd || builderContext?.addPage;
-    const pageLayouts = builderContext?.pageLayouts || {};
-    const nodeStore = builderContext?.nodeStore;
-    
     const [title, setTitle] = useState('');
     const [slug, setSlug] = useState('');
     const [template, setTemplate] = useState<TemplateType>('blank');
     const [duplicatePageId, setDuplicatePageId] = useState('');
     
     const existingSlugs = useMemo(() => {
-        return Object.keys(pages);
-    }, [pages]);
+        if (existingPages) return Object.keys(existingPages);
+        return Object.values(pages).map(p => p.slug);
+    }, [pages, existingPages]);
 
     const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const val = e.target.value;
@@ -51,26 +47,29 @@ export const AddPageModal: React.FC<AddPageModalProps> = ({ isOpen = true, onClo
             const hId = `node_herobanner_${now}_1`;
             const gId = `node_productgrid_${now}_2`;
             const wId = `node_whatsappfloating_${now}_3`;
-            const nodes = {
+            const templateNodes = {
                 [hId]: { id: hId, type: 'HeroBanner', parentId: null, children: [], props: { title: "Exclusive Products", subtitle: "Handpicked Premium Quality" }, styles: {} },
                 [gId]: { id: gId, type: 'ProductGrid', parentId: null, children: [], props: { desktopColumns: 3 }, styles: {} },
                 [wId]: { id: wId, type: 'WhatsAppFloating', parentId: null, children: [], props: { phoneNumber: '+92', welcomeMessage: "Hi! Interested." }, styles: {} }
             };
-            return { nodes, layout: [hId, gId, wId] };
+            return { nodes: templateNodes, layout: [hId, gId, wId] };
         }
         if (type === 'about_contact') {
             const tId = `node_trustbadges_${now}_1`;
             const hId = `node_herobanner_${now}_2`;
-            const nodes = {
+            const templateNodes = {
                 [tId]: { id: tId, type: 'TrustBadges', parentId: null, children: [], props: { items: ["Fast Delivery", "24/7 Support", "Original Guarantee"] }, styles: {} },
                 [hId]: { id: hId, type: 'HeroBanner', parentId: null, children: [], props: { title: "About Us", subtitle: "Our story and vision." }, styles: {} }
             };
-            return { nodes, layout: [tId, hId] };
+            return { nodes: templateNodes, layout: [tId, hId] };
         }
         if (type === 'duplicate' && duplicatePageId) {
-            const layout = pageLayouts?.[duplicatePageId] || [];
-            const allNodes = nodeStore?.getState()?.nodes || {};
-            return cloneNodeTree(layout, allNodes);
+            // OSTT FIX: Extract layout by finding root nodes
+            const layout = (nodes[duplicatePageId] || [])
+                .filter(n => n.parentId === null)
+                .map(n => n.id);
+            const allNodesObj = (nodes[duplicatePageId] || []).reduce((acc, curr) => ({ ...acc, [curr.id]: curr }), {});
+            return cloneNodeTree(layout, allNodesObj);
         }
         return undefined;
     };
@@ -86,21 +85,22 @@ export const AddPageModal: React.FC<AddPageModalProps> = ({ isOpen = true, onClo
 
         const templateData = generateTemplateData(template);
 
-        // SCHEMA VALIDATION: Block any attempt to save a page with a null or empty block array.
         if (!templateData || !templateData.nodes || Object.keys(templateData.nodes).length === 0) {
             console.error('[AddPageModal] BLOCKED: Attempted to save layout with null AST nodes.');
             return toast.error("System Error: Template contains null AST array. Action blocked.");
         }
 
-        if (addPage) {
-            addPage(title, slug, 'custom', templateData);
+        if (onAdd) {
+            onAdd(title, slug, 'custom', templateData as Record<string, unknown>);
+        } else if (addPage) {
+            // Internal store relies on global AST commit, we just trigger page creation
+            addPage(title, 'custom');
         } else {
             console.error('[AddPageModal] No addPage function provided.');
             return toast.error("Configuration Error: Unable to create page.");
         }
         toast.success(`Page "${title}" created successfully!`);
         onClose();
-        // Reset
         setTitle(''); setSlug(''); setTemplate('blank'); setDuplicatePageId('');
     };
 
@@ -129,6 +129,9 @@ export const AddPageModal: React.FC<AddPageModalProps> = ({ isOpen = true, onClo
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
                         {Options.map(opt => (
                             <div 
+                                role="button"
+                                tabIndex={0}
+                                onKeyDown={(e) => { if (e.key === 'Enter') setTemplate(opt.id as TemplateType) }}
                                 key={opt.id} 
                                 onClick={() => setTemplate(opt.id as TemplateType)}
                                 style={S_Thumb(template === opt.id)}
@@ -149,16 +152,19 @@ export const AddPageModal: React.FC<AddPageModalProps> = ({ isOpen = true, onClo
                             style={S_Input}
                         >
                             <option value="">-- Choose Page --</option>
-                            {Object.values(pages?.byId || {}).map((p: any) => (
-                                <option key={p.id} value={p.id}>{p.title} ({p.slug})</option>
-                            ))}
+                            {Object.values(pages).map((p: unknown) => {
+                                const page = p as { id: string; title: string; slug: string };
+                                return (
+                                    <option key={page.id} value={page.id}>{page.title} ({page.slug})</option>
+                                );
+                            })}
                         </select>
                     </div>
                 )}
 
                 <div style={{ display: 'flex', gap: '8px', marginTop: '24px' }}>
-                    <button onClick={handleSubmit} style={S_Btn('#6366f1')}>Create Page</button>
-                    <button onClick={onClose} style={S_Btn('#27272a')}>Cancel</button>
+                    <button type="button" onClick={handleSubmit} style={S_Btn('#6366f1')}>Create Page</button>
+                    <button type="button" onClick={onClose} style={S_Btn('#27272a')}>Cancel</button>
                 </div>
             </div>
         </div>

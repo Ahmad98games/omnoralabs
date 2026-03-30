@@ -13,13 +13,15 @@ interface TrustBadge {
     icon: string;
     label: string;
     sublabel?: string;
+    text?: string; 
+    subtext?: string; 
 }
 
 const DEFAULT_BADGES: TrustBadge[] = [
-    { icon: '🚚', label: 'Free Shipping', sublabel: 'On orders over $50' },
-    { icon: '🔒', label: 'Secure Checkout', sublabel: '256-bit SSL encrypted' },
-    { icon: '↩️', label: 'Easy Returns', sublabel: '30-day return policy' },
-    { icon: '⭐', label: 'Premium Quality', sublabel: 'Handcrafted materials' },
+    { icon: '🚚', label: 'Free Shipping', text: 'Free Shipping', sublabel: 'On orders over $50', subtext: 'On orders over $50' },
+    { icon: '🔒', label: 'Secure Checkout', text: 'Secure Checkout', sublabel: '256-bit SSL encrypted', subtext: '256-bit SSL encrypted' },
+    { icon: '↩️', label: 'Easy Returns', text: 'Easy Returns', sublabel: '30-day return policy', subtext: '30-day return policy' },
+    { icon: '⭐', label: 'Premium Quality', text: 'Premium Quality', sublabel: 'Handcrafted materials', subtext: 'Handcrafted materials' },
 ];
 
 // ─── Props ────────────────────────────────────────────────────────────────────
@@ -55,7 +57,6 @@ const SVG_ICONS: Record<string, React.ReactNode> = {
 
 export const TrustBadges: React.FC<TrustBadgesProps> = ({
     nodeId,
-    isBuilder = false,
     badgeStyle = 'icon-text',
     iconColor = '#7c6dfa',
     textColor = '#f0f0f5',
@@ -68,6 +69,14 @@ export const TrustBadges: React.FC<TrustBadgesProps> = ({
 }) => {
 
     const isGrid = layout === 'grid';
+
+    // OSTT FIX: Enforce correct badge styling variants
+    const getNormalizedStyle = (style: string): 'minimal' | 'filled' | 'outline' | 'text-only' | 'icon-only' => {
+        if (style === 'minimal' || style === 'filled' || style === 'outline' || style === 'text-only' || style === 'icon-only') {
+            return style;
+        }
+        return 'filled'; // default fallback
+    };
 
     return (
         <div
@@ -86,7 +95,7 @@ export const TrustBadges: React.FC<TrustBadgesProps> = ({
                 <BadgeItem
                     key={i}
                     badge={badge}
-                    style={badgeStyle === 'minimal' ? 'minimal' : badgeStyle === 'outline' ? 'outline' : 'filled'}
+                    style={getNormalizedStyle(badgeStyle)}
                     iconColor={iconColor}
                     textColor={textColor}
                     bgColor={bgColor}
@@ -103,7 +112,7 @@ export const TrustBadges: React.FC<TrustBadgesProps> = ({
 
 const BadgeItem: React.FC<{
     badge: TrustBadge;
-    style: 'minimal' | 'filled' | 'outline';
+    style: 'minimal' | 'filled' | 'outline' | 'text-only' | 'icon-only';
     iconColor: string;
     textColor: string;
     bgColor: string;
@@ -142,12 +151,18 @@ const BadgeItem: React.FC<{
             });
             break;
         case 'minimal':
+        case 'text-only':
+        case 'icon-only':
             Object.assign(baseStyle, {
                 background: 'transparent',
                 border: 'none',
             });
             break;
     }
+
+    // Support both label/sublabel (new format) and text/subtext (old format)
+    const primaryText = badge.label || badge.text;
+    const secondaryText = badge.sublabel || badge.subtext;
 
     return (
         <div
@@ -172,7 +187,10 @@ const BadgeItem: React.FC<{
                     transform: hov ? 'scale(1.08)' : 'scale(1)',
                 }}>
                     {React.isValidElement(SVG_ICONS[badge.icon]) ? 
-                        React.cloneElement(SVG_ICONS[badge.icon] as React.ReactElement, { width: iconSize, height: iconSize }) 
+                        // OSTT FIX: Removed invalid height/width injection. Relied on pure style wrapper
+                        <div style={{width: iconSize, height: iconSize, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                            {SVG_ICONS[badge.icon]}
+                        </div>
                         : badge.icon}
                 </div>
             )}
@@ -188,9 +206,9 @@ const BadgeItem: React.FC<{
                         lineHeight: 1.3,
                         letterSpacing: '-0.01em',
                     }}>
-                        {badge.text}
+                        {primaryText}
                     </p>
-                    {showSublabel && badge.subtext && (
+                    {showSublabel && secondaryText && (
                         <p style={{
                             fontSize: 11,
                             color: '#8b8ba0',
@@ -198,7 +216,7 @@ const BadgeItem: React.FC<{
                             lineHeight: 1.3,
                             fontWeight: 500,
                         }}>
-                            {badge.subtext}
+                            {secondaryText}
                         </p>
                     )}
                 </div>

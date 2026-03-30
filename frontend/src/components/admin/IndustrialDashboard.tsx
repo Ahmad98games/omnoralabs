@@ -5,7 +5,6 @@ import {
     TrendingUp, 
     Package, 
     Users, 
-    ArrowUpRight, 
     MoreHorizontal,
     Search,
     Filter
@@ -94,7 +93,14 @@ export const IndustrialDashboard: React.FC = () => {
     );
 };
 
-const StatCard = ({ label, value, trend, icon }: any) => (
+interface StatCardProps {
+    label: string;
+    value: string;
+    trend: string;
+    icon: React.ReactNode;
+}
+
+const StatCard = ({ label, value, trend, icon }: StatCardProps) => (
     <Card className="p-5 flex flex-col gap-1 group">
         <div className="flex justify-between items-center">
             <span className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">{label}</span>

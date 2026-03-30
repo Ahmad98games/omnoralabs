@@ -45,7 +45,6 @@ export const UpsellWidget: React.FC<UpsellWidgetProps> = ({
     isBuilder = false,
     title = 'Frequently Bought Together',
     maxProducts = 2,
-    position = 'pre-checkout',
     displayStyle = 'inline',
     discountPercent = 10,
     accentColor = '#7c6dfa',

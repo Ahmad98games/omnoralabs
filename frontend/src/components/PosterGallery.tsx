@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowUpRight } from 'lucide-react';
-import LoadingWrapper from '../components/LoadingWrapper'; // The component we built
+import LoadingWrapper from '../components/LoadingWrapper'; 
 import './OmnoraPosterGallery.css';
 
 interface Poster {
@@ -19,29 +19,29 @@ const posters: Poster[] = [
     { id: 5, image: '/images/posters/5.png', alt: 'Bath Bomb Poster 5', title: 'Crystal Form', category: 'Geologic' },
 ];
 
+// OSTT FIX: Extracted skeleton component OUTSIDE of the render cycle
+const GallerySkeleton = () => (
+    <div className="gallery-grid-magnum">
+        {/* Hero Skeleton */}
+        <div className="skeleton-block" style={{ height: '100%', borderRadius: '4px', minHeight: '600px' }} />
+        {/* Grid Skeleton */}
+        <div className="gallery-sub-grid">
+            {[1, 2, 3, 4].map(i => (
+                <div key={i} className="skeleton-block" style={{ height: '100%', minHeight: '280px', borderRadius: '4px' }} />
+            ))}
+        </div>
+    </div>
+);
+GallerySkeleton.displayName = 'GallerySkeleton';
+
 export default function PosterGallery() {
     const [isLoading, setIsLoading] = useState(true);
     const [heroPoster, ...gridPosters] = posters;
 
-    // Simulate Image Loading (In production, use onLoad events on images)
     useEffect(() => {
         const timer = setTimeout(() => setIsLoading(false), 1500);
         return () => clearTimeout(timer);
     }, []);
-
-    // Custom Skeleton for this specific asymmetrical layout
-    const GallerySkeleton = () => (
-        <div className="gallery-grid-magnum">
-            {/* Hero Skeleton */}
-            <div className="skeleton-block" style={{ height: '100%', borderRadius: '4px', minHeight: '600px' }} />
-            {/* Grid Skeleton */}
-            <div className="gallery-sub-grid">
-                {[1, 2, 3, 4].map(i => (
-                    <div key={i} className="skeleton-block" style={{ height: '100%', minHeight: '280px', borderRadius: '4px' }} />
-                ))}
-            </div>
-        </div>
-    );
 
     return (
         <section className="gallery-magnum">
@@ -66,7 +66,7 @@ export default function PosterGallery() {
                 <LoadingWrapper 
                     isLoading={isLoading} 
                     skeleton={<GallerySkeleton />}
-                    minDisplayTime={800} // Ensure shimmer is seen
+                    minDisplayTime={800}
                 >
                     <div className="gallery-grid-magnum animate-entry">
                         
@@ -86,7 +86,7 @@ export default function PosterGallery() {
                                     </div>
                                     <div className="overlay-footer">
                                         <h3 className="artifact-title">{heroPoster.title}</h3>
-                                        <button className="artifact-btn" aria-label="View Details">
+                                        <button type="button" className="artifact-btn" aria-label="View Details">
                                             <ArrowUpRight size={20} />
                                         </button>
                                     </div>

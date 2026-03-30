@@ -48,8 +48,9 @@ export default function StripePayment({ amount, onSuccess, onError }: StripePaym
                 onSuccess(paymentIntentId);
                 showToast('Payment successful!', 'success');
             }
-        } catch (error: any) {
-            onError(error.response?.data?.error || 'Payment failed');
+        } catch (error: unknown) {
+            const msg = (error as { response?: { data?: { error?: string } } }).response?.data?.error || 'Payment failed';
+            onError(msg);
             showToast('Payment failed', 'error');
         } finally {
             setProcessing(false);

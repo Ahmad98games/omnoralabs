@@ -13,10 +13,14 @@ export const SuggestionBubble: React.FC = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        if (shouldShowSuggestion()) {
-            setIsVisible(true);
-            setSuggestionShown();
-        }
+        // OSTT FIX: SetTimeout bypasses synchronous state update constraint
+        const timer = setTimeout(() => {
+            if (shouldShowSuggestion()) {
+                setIsVisible(true);
+                setSuggestionShown();
+            }
+        }, 50);
+        return () => clearTimeout(timer);
     }, [state, shouldShowSuggestion, setSuggestionShown]);
 
     const getMessage = () => {
@@ -81,6 +85,7 @@ export const SuggestionBubble: React.FC = () => {
                             </div>
                             <div style={{ display: 'flex', gap: 8 }}>
                                 <button
+                                    type="button"
                                     onClick={handleViewGuide}
                                     style={{
                                         flex: 2,
@@ -101,6 +106,7 @@ export const SuggestionBubble: React.FC = () => {
                                     View Guide <ArrowRight size={12} />
                                 </button>
                                 <button
+                                    type="button"
                                     onClick={() => {
                                         setIsVisible(false);
                                         dismissSuggestion();
@@ -122,6 +128,7 @@ export const SuggestionBubble: React.FC = () => {
                             </div>
                         </div>
                         <button
+                            type="button"
                             onClick={() => setIsVisible(false)}
                             style={{
                                 background: 'none',

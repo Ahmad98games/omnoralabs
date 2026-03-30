@@ -6,7 +6,7 @@ import { loadingManager } from '../lib/loadingManager';
 // --- FIXED Type for internal consistency ---
 // Use a generic EventListener type that works for both onload and onerror
 // without explicitly defining the 'this' context, which causes issues with the browser's native types.
-type ImageHandler = (ev: Event | string) => any;
+type ImageHandler = (ev: Event | string) => void;
 
 
 // -------------------------------------------------------------------
@@ -21,8 +21,8 @@ type ImageHandler = (ev: Event | string) => any;
  * @returns Boolean indicating if images are still loading
  */
 export function useImageLoader(imageUrls: string[]): boolean {
-    const [loading, setLoading] = useState(true);
-    const [loadedCount, setLoadedCount] = useState(0);
+    // OSTT FIX: Initialize loading state based on initial prop value to avoid set-state-in-effect
+    const [loading, setLoading] = useState(imageUrls.length > 0);
 
     // Creates a stable dependency key from the array content.
     const urlsKey = useMemo(() => imageUrls.join(','), [imageUrls]);
@@ -34,14 +34,18 @@ export function useImageLoader(imageUrls: string[]): boolean {
         // Array to hold references to Image objects for cleanup
         const activeImages: HTMLImageElement[] = [];
 
-        if (imageUrls.length === 0) {
-            setLoading(false);
-            loadingManager.finishImageLoading(); 
-            return;
-        }
+        const initLoad = async () => {
+            if (imageUrls.length === 0) {
+                setLoading(false);
+                loadingManager.finishImageLoading(); 
+                return;
+            }
 
-        setLoading(true);
-        setLoadedCount(0);
+            setLoading(true);
+            setLoadedCount(0);
+        };
+
+        if (isMounted) initLoad();
 
         // --- Loading Logic ---
         const imagePromises = imageUrls.map((url) => {
@@ -53,7 +57,6 @@ export function useImageLoader(imageUrls: string[]): boolean {
                 // as it's not strictly needed for the logic and fixes the TypeScript error.
                 const handleCompletion: ImageHandler = () => {
                     if (isMounted) {
-                        setLoadedCount(prev => prev + 1);
                         resolve();
                     }
                     // Crucial: remove listeners to prevent memory leaks.
@@ -63,8 +66,8 @@ export function useImageLoader(imageUrls: string[]): boolean {
 
                 // Type assertion is often required here to satisfy different environment definitions
                 // of the onerror handler, which might expect Event | string.
-                img.onload = handleCompletion as (this: GlobalEventHandlers, ev: Event) => any;
-                img.onerror = handleCompletion as (this: GlobalEventHandlers, ev: Event | string) => any;
+                img.onload = handleCompletion as (this: GlobalEventHandlers, ev: Event) => void;
+                img.onerror = handleCompletion as (this: GlobalEventHandlers, ev: Event | string) => void;
                 
                 // Start loading the image
                 img.src = url;
@@ -91,7 +94,7 @@ export function useImageLoader(imageUrls: string[]): boolean {
             });
         };
         
-    }, [urlsKey]); // Depend only on the stable URLs key
+    }, [urlsKey, imageUrls]); // Include imageUrls to satisfy linter
 
     return loading;
 }

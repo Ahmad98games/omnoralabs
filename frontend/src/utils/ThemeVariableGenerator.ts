@@ -1,7 +1,7 @@
 /**
  * ThemeVariableGenerator: Scoped CSS & Dynamic Theming Systems
- * 
- * Transforms database theme_vars into CSS values and resolves adaptive contrasts.
+ * * Transforms database theme_vars into CSS values and resolves adaptive contrasts.
+ * Refactored for OSTT: Unused args prefixed with underscore.
  */
 
 export interface ThemeVars {
@@ -47,8 +47,9 @@ export function loadGoogleFont(fontFamily: string) {
 
 /**
  * generates scoped component inline variables merging adaptive variables flawless
+ * FIX: Prefixed unused 'nodeType' with '_' to satisfy ESLint.
  */
-export function generateScopedTheme(themeVars: ThemeVars, nodeType?: string): Record<string, string> {
+export function generateScopedTheme(themeVars: ThemeVars, _nodeType?: string): Record<string, string> {
     const bg = themeVars.backgroundColor || '#ffffff';
     const textContrast = getContrastColor(bg);
 

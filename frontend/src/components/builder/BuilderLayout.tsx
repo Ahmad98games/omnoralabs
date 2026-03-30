@@ -42,27 +42,107 @@ class BuilderLayoutErrorBoundary extends React.Component<
     render() {
         if (this.state.hasError) {
             return (
-                <div className="flex flex-col h-screen w-full items-center justify-center bg-black p-8">
-                    <div className="w-full max-w-lg border border-red-500/20 bg-[#050505] p-10 text-center">
-                        <div className="text-red-500/60 mb-4 tracking-tighter font-mono text-[10px] uppercase">
-                           [ ERR_RENDER_FATAL ]
+                <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    minHeight: '100vh',
+                    padding: '40px',
+                    width: '100%',
+                    background: 'var(--obsidian-bg)',
+                    color: 'white',
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    zIndex: 9999
+                }}>
+                        <div style={{
+                            background: 'var(--surface-high)',
+                            border: '1px solid var(--border-low)',
+                            borderRadius: '16px',
+                            padding: '40px',
+                            maxWidth: '520px',
+                            width: '100%',
+                            textAlign: 'center',
+                        }}>
+                        <div style={{
+                            fontSize: '10px',
+                            color: 'var(--accent-gold)',
+                            letterSpacing: '0.15em',
+                            textTransform: 'uppercase',
+                            marginBottom: '16px',
+                            fontWeight: 900,
+                        }}>
+                            Builder State Discrepancy
                         </div>
-                        <h2 className="text-white text-[15px] font-medium tracking-tight mb-2">Fatal Error. Supply chain compromised.</h2>
-                        <p className="text-white/40 text-[13px] tracking-tight mb-8">
-                            Structural integrity of the current layout has failed.
+                        <h3 style={{
+                            color: '#fff',
+                            fontSize: '20px',
+                            fontWeight: 900,
+                            marginBottom: '12px',
+                            letterSpacing: '-0.02em'
+                        }}>
+                            Vault Access Interrupted
+                        </h3>
+                        <p style={{
+                            color: 'var(--text-ghost)',
+                            fontSize: '13px',
+                            lineHeight: 1.6,
+                            marginBottom: '24px',
+                        }}>
+                            The builder engine encountered an unexpected render cycle. 
+                            Your work manifests have been cached in the session vault.
                         </p>
-                        <button 
-                            onClick={() => {
-                                const store = useBuilderStore.getState() as unknown as { activePageId: string | null; resetPageNodes?: (id: string) => void };
-                                if (store.activePageId && store.resetPageNodes) {
-                                    store.resetPageNodes(store.activePageId);
-                                }
-                                this.setState({ hasError: false, errorMessage: null });
-                            }} 
-                            className="bg-white text-black px-6 py-2 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors"
-                        >
-                            Recover and Re-route
-                        </button>
+                        <p style={{
+                            color: 'var(--text-tertiary, #52565E)',
+                            fontSize: '11px',
+                            fontFamily: 'monospace',
+                            background: 'rgba(0,0,0,0.3)',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
+                            marginBottom: '24px',
+                            textAlign: 'left',
+                            wordBreak: 'break-all',
+                        }}>
+                            {this.state.errorMessage || 'Internal Sync Failure'}
+                        </p>
+                        <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+                            <button
+                                onClick={() => {
+                                    this.setState({ hasError: false, errorMessage: null });
+                                }}
+                                style={{
+                                    padding: '8px 16px',
+                                    background: 'var(--surface-3, #1C1E21)',
+                                    border: '1px solid var(--border-medium, #2A2D31)',
+                                    borderRadius: '8px',
+                                    color: 'var(--text-primary, #F2F3F5)',
+                                    fontSize: '13px',
+                                    fontWeight: 500,
+                                    cursor: 'pointer',
+                                }}
+                            >
+                                Retry Component
+                            </button>
+                            <button
+                                onClick={() => {
+                                    localStorage.clear();
+                                    window.location.reload();
+                                }}
+                                style={{
+                                    padding: '8px 16px',
+                                    background: 'transparent',
+                                    border: '1px solid rgba(239, 68, 68, 0.3)',
+                                    borderRadius: '8px',
+                                    color: '#EF4444',
+                                    fontSize: '13px',
+                                    fontWeight: 500,
+                                    cursor: 'pointer',
+                                }}
+                            >
+                                Hard Reset
+                            </button>
+                        </div>
                     </div>
                 </div>
             );
@@ -77,6 +157,8 @@ const BuilderLayoutContent: React.FC = () => {
     const isSidebarOpenGlobal = useBuilderStore(state => state.isSidebarOpen);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [snapIndex, setSnapIndex] = useState(1); // 0=hidden, 1=40%, 2=90%
+    
+    const [isZombie, setIsZombie] = useState(false);
     
     const libraryOpen = isSidebarOpenGlobal;
     const setLibraryOpen = (val: boolean | ((prev: boolean) => boolean)) => {
@@ -152,15 +234,33 @@ const BuilderLayoutContent: React.FC = () => {
         window.addEventListener('resize', handleResize);
         
         // 🛡️ Safe rehydration — only if persist middleware is configured
-        try {
-            if (useBuilderStore.persist?.rehydrate) {
-                useBuilderStore.persist.rehydrate();
+        const rehydrate = async () => {
+            try {
+                if (useBuilderStore.persist?.rehydrate) {
+                    await useBuilderStore.persist.rehydrate();
+                }
+            } catch (e) {
+                console.error('[BuilderLayout] Hydration failed:', e);
+                useBuilderStore.getState().setIsHydrating(false);
+            } finally {
+                useBuilderStore.getState().setIsHydrating(false);
             }
-        } catch (e) {
-            console.error('[BuilderLayout] Hydration error caught:', e);
-        }
+        };
+        rehydrate();
 
-        return () => window.removeEventListener('resize', handleResize);
+        // 🛡️ Zombie Detection (4s Safety Net)
+        const zombieTimer = setTimeout(() => {
+            if (useBuilderStore.getState().isHydrating) {
+                console.warn('[BuilderLayout] Zombie hydration detected. Forcing clear.');
+                setIsZombie(true);
+                // We don't force clear yet, let the user decide via UI
+            }
+        }, 4000);
+
+        return () => {
+            window.removeEventListener('resize', handleResize);
+            clearTimeout(zombieTimer);
+        };
     }, []);
 
     // ── Not-Supported Guard Removed ───────────────────────────────────────
@@ -168,6 +268,63 @@ const BuilderLayoutContent: React.FC = () => {
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden', position: 'relative' }}>
+            {/* 🧟 Zombie State UI Overlay */}
+            <AnimatePresence>
+                {isZombie && (
+                    <motion.div 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        style={{ 
+                            position: 'fixed', inset: 0, zIndex: 1000, 
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                            background: 'rgba(0,0,0,0.9)', backdropFilter: 'blur(20px)', padding: '24px' 
+                        }}
+                    >
+                        <div style={{ 
+                            maxWidth: '400px', width: '100%', background: '#0A0A0A', 
+                            border: '1px solid rgba(239, 68, 68, 0.2)', padding: '32px', 
+                            borderRadius: '16px', textAlign: 'center', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)' 
+                        }}>
+                            <div style={{ color: '#EF4444', fontSize: '10px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '16px' }}>
+                                [ SYSTEM_ZOMBIE_STATE ]
+                            </div>
+                            <h2 style={{ color: 'white', fontSize: '20px', fontWeight: 'bold', marginBottom: '8px' }}>Hydration Synchronicity Failed</h2>
+                            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '14px', marginBottom: '32px', lineHeight: '1.5' }}>
+                                The persistence engine is hanging. This usually happens if the local state schema 
+                                conflicts with the current kernel version.
+                            </p>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                <button 
+                                    onClick={() => {
+                                        useBuilderStore.getState().setIsHydrating(false);
+                                        setIsZombie(false);
+                                    }}
+                                    style={{ 
+                                        width: '100%', padding: '12px', background: 'white', color: 'black', 
+                                        fontWeight: 'bold', fontSize: '14px', borderRadius: '12px', cursor: 'pointer', border: 'none' 
+                                    }}
+                                >
+                                    Force Bypass Hydration
+                                </button>
+                                <button 
+                                    onClick={() => {
+                                        localStorage.clear();
+                                        window.location.reload();
+                                    }}
+                                    style={{ 
+                                        width: '100%', padding: '12px', background: 'transparent', 
+                                        border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)', 
+                                        fontWeight: 500, fontSize: '12px', borderRadius: '12px', cursor: 'pointer' 
+                                    }}
+                                >
+                                    Hard Reset (Purge Local Sync)
+                                </button>
+                            </div>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
             {/* Toolbar always on top (Z-INDEX 100) */}
             <div style={{ zIndex: 100 }}>
                 <BuilderToolbar onToggleLibrary={() => setLibraryOpen(o => !o)} libraryOpen={libraryOpen} />

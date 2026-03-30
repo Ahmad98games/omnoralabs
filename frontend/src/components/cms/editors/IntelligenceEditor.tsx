@@ -1,6 +1,6 @@
 import React from 'react';
 import { useBuilder } from '../../../context/BuilderContext';
-import { Brain, Sparkles, Globe } from 'lucide-react';
+import { Brain, Sparkles } from 'lucide-react';
 
 /**
  * IntelligenceEditor: Property configuration for AI/Intelligence blocks.
@@ -12,7 +12,7 @@ export const IntelligenceEditor: React.FC = () => {
 
     if (!node) return null;
 
-    const updateProp = (key: string, value: any) => {
+    const updateProp = (key: string, value: unknown) => {
         updateNode(node.id, `props.${key}`, value);
     };
 

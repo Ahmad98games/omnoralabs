@@ -29,7 +29,7 @@ export const PrintView: React.FC<{ order: Order | null, storeName: string }> = (
                     </tr>
                 </thead>
                 <tbody>
-                    {order.lineItems.map((item: any, idx: number) => (
+                    {order.lineItems.map((item: { title: string, quantity: number, price: number }, idx: number) => (
                         <tr key={idx}>
                             <td className="py-1 pr-2 truncate max-w-[40mm]">{item.title}</td>
                             <td className="text-center py-1">{item.quantity}</td>

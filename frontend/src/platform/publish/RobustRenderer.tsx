@@ -1,45 +1,67 @@
-import React, { useMemo, useRef, useState, useEffect, createContext, useContext } from 'react';
+/**
+ * 🛠️ OMNORA PLATFORM | [ROBUST RENDERER]
+ * ---------------------------------------------------------
+ * OSTT Update: Fixed Prop-Types validation errors for React.FC components.
+ * ---------------------------------------------------------
+ */
+
+import React, { useMemo, useEffect, createContext, useContext } from 'react';
 import { getRegistryEntry } from '../core/Registry';
 import { PlatformBlock } from '../core/types';
 import { precomputeAdjacencyMap } from '../core/normalize';
 import { useGlobalThemeStore } from '../../stores/useGlobalThemeStore';
 import { supabase } from '../../lib/supabaseClient';
 
-class BlockErrorBoundary extends React.Component<
-    { children: React.ReactNode; blockId: string },
-    { hasError: boolean }
-> {
-    constructor(props: any) { super(props); this.state = { hasError: false }; }
-    
-    static getDerivedStateFromError() { return { hasError: true }; }
-    
-    componentDidCatch(error: Error, info: React.ErrorInfo) {
-         console.error(`[SRE Block Crash] ${this.props.blockId}:`, error);
-         try {
-             // Log to supabase Telemetry
-             supabase.from('telemetry').insert({
-                 type: 'component_crash',
-                 block_id: this.props.blockId,
-                 message: error.message,
-                 stack: info.componentStack,
-                 created_at: new Date().toISOString()
-             }).then();
-         } catch (e) {}
+// ─── Error Boundary ──────────────────────────────────────────────────────────
+interface ErrorBoundaryProps {
+    children: React.ReactNode;
+    blockId: string;
+}
+
+interface ErrorBoundaryState {
+    hasError: boolean;
+}
+
+class BlockErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+    constructor(props: ErrorBoundaryProps) {
+        super(props);
+        this.state = { hasError: false };
+    }
+
+    static getDerivedStateFromError(): ErrorBoundaryState {
+        return { hasError: true };
+    }
+
+    componentDidCatch(error: Error, info: React.ErrorInfo): void {
+        console.error(`[SRE Block Crash] ${this.props.blockId}:`, error);
+        
+        // OSTT FIX: Using correctly typed promise chaining instead of `.catch` on `insert`
+        supabase.from('telemetry').insert({
+            type: 'component_crash',
+            block_id: this.props.blockId,
+            message: error.message,
+            stack: info.componentStack,
+            created_at: new Date().toISOString()
+        }).then(({ error: insertError }) => {
+            if (insertError) {
+                console.warn('[Telemetry] Failed to log crash', insertError);
+            }
+        });
     }
 
     render() {
-         if (this.state.hasError) {
-              return (
-                  <div style={{ padding: '20px', background: 'rgba(220, 38, 38, 0.05)', border: '1px dashed #dc2626', color: '#ef4444', fontSize: '12px', textAlign: 'center', margin: '8px', borderRadius: '6px' }}>
-                       ⚠️ Component failed to load on this page
-                  </div>
-              );
-         }
-         return this.props.children;
+        if (this.state.hasError) {
+            return (
+                <div style={{ padding: '20px', background: 'rgba(220, 38, 38, 0.05)', border: '1px dashed #dc2626', color: '#ef4444', fontSize: '12px', textAlign: 'center', margin: '8px', borderRadius: '6px' }}>
+                    ⚠️ Component failed to load
+                </div>
+            );
+        }
+        return this.props.children;
     }
 }
 
-// ─── Clean Render Context ─────────────────────────────────────────────────────
+// ─── Render Context ──────────────────────────────────────────────────────────
 interface CleanRenderContextType {
     nodes: Record<string, PlatformBlock>;
     adjacencyMap: Record<string, string[]>;
@@ -54,18 +76,16 @@ const useCleanRender = () => {
     return ctx;
 };
 
+// ─── Main Renderer ───────────────────────────────────────────────────────────
 export interface RobustRendererProps {
     nodes: Record<string, PlatformBlock>;
     rootIds: string[];
     viewport?: 'desktop' | 'tablet' | 'mobile';
 }
 
-export const RobustRenderer: React.FC<RobustRendererProps> = React.memo(({
-    nodes,
-    rootIds,
-    viewport = 'desktop',
-}) => {
-    // 🛡️ Data Validation with Defaults
+export const RobustRenderer = React.memo((props: RobustRendererProps) => {
+    const { nodes, rootIds, viewport = 'desktop' } = props;
+
     const validatedNodes = useMemo(() => {
         const out: Record<string, PlatformBlock> = {};
         Object.entries(nodes || {}).forEach(([id, node]) => {
@@ -99,7 +119,9 @@ export const RobustRenderer: React.FC<RobustRendererProps> = React.memo(({
         viewport,
     }), [validatedNodes, adjacencyMap, viewport]);
 
-    if (!rootIds || rootIds.length === 0) return <div style={{ textAlign: 'center', padding: '40px', color: '#52525b' }}>Empty storefront.</div>;
+    if (!rootIds || rootIds.length === 0) {
+        return <div style={{ textAlign: 'center', padding: '40px', color: '#52525b' }}>Empty storefront.</div>;
+    }
 
     return (
         <CleanRenderContext.Provider value={contextValue}>
@@ -108,11 +130,27 @@ export const RobustRenderer: React.FC<RobustRendererProps> = React.memo(({
     );
 });
 
-const CleanNode: React.FC<{ id: string }> = React.memo(({ id }) => {
+RobustRenderer.displayName = 'RobustRenderer';
+
+// ─── Atomic Node ─────────────────────────────────────────────────────────────
+interface CleanNodeProps {
+    id: string;
+}
+
+const CleanNode = React.memo((props: CleanNodeProps) => {
+    const { id } = props;
     const { nodes, adjacencyMap, viewport } = useCleanRender();
     const node = nodes[id];
-    if (!node) return null;
 
+    const activeStyles = useMemo(() => {
+        if (!node) return {};
+        return {
+            ...(node.styles || {}),
+            ...(viewport === 'desktop' ? {} : (node.responsive?.[viewport] || {}))
+        };
+    }, [node, viewport]);
+
+    if (!node) return null;
     if (node.hidden?.[viewport]) return null;
 
     const entry = getRegistryEntry(node.type);
@@ -120,19 +158,18 @@ const CleanNode: React.FC<{ id: string }> = React.memo(({ id }) => {
 
     const { component: Component, capabilities = [] } = entry;
     const canHaveChildren = capabilities.includes('layout');
-
     const childIds = adjacencyMap[id];
+
     const children = (canHaveChildren && childIds && childIds.length > 0) ? (
         <>{childIds.map((childId: string) => <CleanNode key={`clean-${childId}`} id={childId} />)}</>
     ) : null;
 
-    const activeStyles = useMemo(() => ({
-        ...(node.styles || {}),
-        ...(viewport === 'desktop' ? {} : (node.responsive?.[viewport] || {}))
-    }), [node.styles, node.responsive, viewport]);
-
     return (
-        <div id={id} className={`omnora-live ${node.type.toLowerCase()}`} style={{ position: 'relative', width: '100%', ...activeStyles }}>
+        <div 
+            id={id} 
+            className={`omnora-live ${node.type.toLowerCase()}`} 
+            style={{ position: 'relative', width: '100%', ...(activeStyles as React.CSSProperties) }}
+        >
             <BlockErrorBoundary blockId={id}>
                 <Component {...node.props} nodeId={id}>
                     {children}
@@ -141,3 +178,5 @@ const CleanNode: React.FC<{ id: string }> = React.memo(({ id }) => {
         </div>
     );
 });
+
+CleanNode.displayName = 'CleanNode';

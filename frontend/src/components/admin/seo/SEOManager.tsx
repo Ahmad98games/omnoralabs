@@ -1,25 +1,35 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../../../lib/supabaseClient';
-import { Search, Globe, MoveRight, Plus, Trash2, CheckCircle, AlertTriangle, ExternalLink } from 'lucide-react';
+import { MoveRight, Trash2 } from 'lucide-react';
+
+interface RedirectRule {
+    id: string;
+    old_path: string;
+    new_path: string;
+}
 
 export const SEOManager: React.FC = () => {
-    const [redirects, setRedirects] = useState<any[]>([]);
+    const [redirects, setRedirects] = useState<RedirectRule[]>([]);
     const [loading, setLoading] = useState(true);
     const [preview, setPreview] = useState({ title: 'Omnora OS | Luxury Commerce', description: 'The high-performance universal commerce operating system.', slug: 'home' });
 
-    useEffect(() => {
-        fetchRedirects();
-    }, []);
-
-    const fetchRedirects = async () => {
+    const fetchRedirects = useCallback(async () => {
         setLoading(true);
         const { data, error } = await supabase
             .from('url_redirects')
             .select('*')
             .order('created_at', { ascending: false });
-        if (!error) setRedirects(data || []);
+        if (!error && data) {
+            setRedirects(data as RedirectRule[]);
+        }
         setLoading(false);
-    };
+    }, []);
+
+    useEffect(() => {
+        // OSTT FIX: Use timeout to prevent synchronous 'set-state-in-effect' error
+        const timer = setTimeout(() => fetchRedirects(), 0);
+        return () => clearTimeout(timer);
+    }, [fetchRedirects]);
 
     const InputStyle = { 
         width: '100%', padding: '10px 12px', background: '#09090b', border: '1px solid #27272a', 
@@ -28,7 +38,6 @@ export const SEOManager: React.FC = () => {
 
     return (
         <div style={{ padding: 24 }}>
-            {/* Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
                 <div>
                     <h1 style={{ fontSize: 24, fontWeight: 700, color: '#fff', marginBottom: 4 }}>SEO & Search</h1>
@@ -37,7 +46,6 @@ export const SEOManager: React.FC = () => {
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 400px', gap: 40, marginBottom: 48 }}>
-                {/* Left: SEO Editor */}
                 <div style={{ background: '#131316', border: '1px solid #27272a', borderRadius: 16, padding: 32 }}>
                     <h2 style={{ fontSize: 16, fontWeight: 700, color: '#fff', marginBottom: 24 }}>Homepage SEO</h2>
                     <div style={{ marginBottom: 20 }}>
@@ -54,12 +62,11 @@ export const SEOManager: React.FC = () => {
                         </div>
                         <textarea rows={3} value={preview.description} onChange={e => setPreview({...preview, description: e.target.value})} style={{...InputStyle, resize: 'none'}} />
                     </div>
-                    <button style={{ padding: '10px 24px', background: '#FF6B35', border: 'none', borderRadius: 8, color: '#fff', fontWeight: 700, cursor: 'pointer' }}>Update SEO</button>
+                    <button type="button" style={{ padding: '10px 24px', background: '#FF6B35', border: 'none', borderRadius: 8, color: '#fff', fontWeight: 700, cursor: 'pointer' }}>Update SEO</button>
                 </div>
 
-                {/* Right: Google Preview */}
                 <div style={{ background: '#fff', borderRadius: 16, padding: 24, height: 'fit-content' }}>
-                    <div style={{ display: 'flex', items: 'center', gap: 12, marginBottom: 16 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
                         <div style={{ width: 12, height: 12, borderRadius: 6, background: '#ea4335' }} />
                         <span style={{ fontSize: 11, color: '#70757a', fontWeight: 500 }}>Google Search Preview</span>
                     </div>
@@ -69,11 +76,10 @@ export const SEOManager: React.FC = () => {
                 </div>
             </div>
 
-            {/* 301 Redirects */}
             <div style={{ background: '#131316', border: '1px solid #27272a', borderRadius: 16, overflow: 'hidden' }}>
                 <div style={{ padding: 24, borderBottom: '1px solid #27272a', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <h2 style={{ fontSize: 16, fontWeight: 700, color: '#fff' }}>301 Redirects</h2>
-                    <button style={{ padding: '6px 12px', background: 'transparent', color: '#FF6B35', border: '1px solid #FF6B35', borderRadius: 6, fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>+ Add Redirect</button>
+                    <button type="button" style={{ padding: '6px 12px', background: 'transparent', color: '#FF6B35', border: '1px solid #FF6B35', borderRadius: 6, fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>+ Add Redirect</button>
                 </div>
                 <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                     <thead style={{ background: '#09090b', borderBottom: '1px solid #27272a' }}>
@@ -95,7 +101,7 @@ export const SEOManager: React.FC = () => {
                                 <td style={{ padding: '16px' }}><MoveRight size={14} color="#71717a" /></td>
                                 <td style={{ padding: '16px', color: '#FF6B35', fontSize: 13, fontWeight: 600 }}>{r.new_path}</td>
                                 <td style={{ padding: '16px', textAlign: 'right' }}>
-                                    <button style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer' }}><Trash2 size={16} /></button>
+                                    <button type="button" title="Delete" style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer' }}><Trash2 size={16} /></button>
                                 </td>
                             </tr>
                         ))}

@@ -14,6 +14,19 @@ const STEPS: { id: Step; label: string; icon: string }[] = [
     { id: 'launch', label: 'Launch', icon: '🚀' },
 ];
 
+interface WizardData {
+    storeName: string;
+    niche: string;
+    logoUrl: string;
+    slogan: string;
+    primaryColor: string;
+    accentColor: string;
+    cod: boolean;
+    easypaisa: boolean;
+    jazzcash: boolean;
+    bankTransfer: boolean;
+}
+
 const NICHES = [
     { id: 'fashion', label: 'Fashion & Clothing', icon: '👗' },
     { id: 'electronics', label: 'Electronics', icon: '📱' },
@@ -42,7 +55,7 @@ const S = {
 
 // ─── Step panels ──────────────────────────────────────────────────────────────
 
-const StoreStep: React.FC<{ data: any; onChange: (d: any) => void }> = ({ data, onChange }) => (
+const StoreStep: React.FC<{ data: Partial<WizardData>; onChange: (d: Partial<WizardData>) => void }> = ({ data, onChange }) => (
     <div>
         <label style={S.label}>Store Name *</label>
         <input style={S.input} placeholder="e.g. Fatima's Boutique" value={data.storeName || ''}
@@ -61,7 +74,7 @@ const StoreStep: React.FC<{ data: any; onChange: (d: any) => void }> = ({ data, 
     </div>
 );
 
-const BrandingStep: React.FC<{ data: any; onChange: (d: any) => void }> = ({ data, onChange }) => (
+const BrandingStep: React.FC<{ data: Partial<WizardData>; onChange: (d: Partial<WizardData>) => void }> = ({ data, onChange }) => (
     <div>
         <LogoPicker
             value={data.logoUrl}
@@ -83,8 +96,8 @@ const BrandingStep: React.FC<{ data: any; onChange: (d: any) => void }> = ({ dat
     </div>
 );
 
-const PaymentsStep: React.FC<{ data: any; onChange: (d: any) => void }> = ({ data, onChange }) => {
-    const toggle = (k: string) => onChange({ ...data, [k]: !data[k] });
+const PaymentsStep: React.FC<{ data: Partial<WizardData>; onChange: (d: Partial<WizardData>) => void }> = ({ data, onChange }) => {
+    const toggle = (k: keyof WizardData) => onChange({ ...data, [k]: !data[k as keyof WizardData] });
     const methods = [
         { key: 'cod', label: 'Cash on Delivery', desc: 'Recommended — most popular in Pakistan', icon: '💵' },
         { key: 'easypaisa', label: 'Easypaisa', desc: 'Mobile wallet payments', icon: '📲' },
@@ -112,7 +125,7 @@ const PaymentsStep: React.FC<{ data: any; onChange: (d: any) => void }> = ({ dat
     );
 };
 
-const LaunchStep: React.FC<{ storeData: any; launching: boolean }> = ({ storeData, launching }) => (
+const LaunchStep: React.FC<{ storeData: Partial<WizardData>; launching: boolean }> = ({ storeData, launching }) => (
     <div style={{ textAlign: 'center', padding: '20px 0' }}>
         {launching ? (
             <div>
@@ -150,14 +163,25 @@ const StoreSetupWizard: React.FC<Props> = ({ onComplete, onClose }) => {
     const [launching, setLaunching] = useState(false);
     const [error, setError] = useState('');
 
-    const [storeData, setStoreData] = useState({ storeName: '', niche: 'fashion' });
-    const [brandData, setBrandData] = useState({ logoUrl: '', slogan: '', primaryColor: '#0e0e1a', accentColor: '#C5A059' });
-    const [paymentData, setPaymentData] = useState({ cod: true, easypaisa: false, jazzcash: false, bankTransfer: false });
+    const [fullData, setFullData] = useState<WizardData>({
+        storeName: '',
+        niche: 'fashion',
+        logoUrl: '',
+        slogan: '',
+        primaryColor: '#0e0e1a',
+        accentColor: '#C5A059',
+        cod: true,
+        easypaisa: false,
+        jazzcash: false,
+        bankTransfer: false
+    });
+
+    const updateData = (updates: Partial<WizardData>) => setFullData(prev => ({ ...prev, ...updates }));
 
     const currentStep = stepIds[currentIdx];
 
     const canAdvance = () => {
-        if (currentStep === 'store') return !!storeData.storeName.trim();
+        if (currentStep === 'store') return !!fullData.storeName.trim();
         return true;
     };
 
@@ -166,15 +190,15 @@ const StoreSetupWizard: React.FC<Props> = ({ onComplete, onClose }) => {
         setError('');
 
         try {
-            if (currentStep === 'store') await apiClient.post('/onboarding/store', storeData);
-            if (currentStep === 'branding') await apiClient.post('/onboarding/branding', brandData);
-            if (currentStep === 'payments') await apiClient.post('/onboarding/payments', paymentData);
+            if (currentStep === 'store') await apiClient.post('/onboarding/store', { storeName: fullData.storeName, niche: fullData.niche });
+            if (currentStep === 'branding') await apiClient.post('/onboarding/branding', { logoUrl: fullData.logoUrl, slogan: fullData.slogan, primaryColor: fullData.primaryColor, accentColor: fullData.accentColor });
+            if (currentStep === 'payments') await apiClient.post('/onboarding/payments', { cod: fullData.cod, easypaisa: fullData.easypaisa, jazzcash: fullData.jazzcash, bankTransfer: fullData.bankTransfer });
 
             if (currentStep === 'launch') {
                 setLaunching(true);
                 const response = await apiClient.post('/onboarding/launch', { 
-                    niche: storeData.niche, 
-                    storeName: storeData.storeName 
+                    niche: fullData.niche, 
+                    storeName: fullData.storeName 
                 });
                 
                 if (response.status === 202) {
@@ -192,7 +216,7 @@ const StoreSetupWizard: React.FC<Props> = ({ onComplete, onClose }) => {
                                 setError('Launch failed: ' + res.data.error);
                                 setLaunching(false);
                             }
-                        } catch (e) {
+                        } catch {
                             clearInterval(poll);
                             setLaunching(false);
                         }
@@ -204,8 +228,9 @@ const StoreSetupWizard: React.FC<Props> = ({ onComplete, onClose }) => {
                 onComplete?.();
                 return;
             }
-        } catch (e: any) {
-            setError(e?.response?.data?.error || 'Something went wrong');
+        } catch (e: unknown) {
+            const errorMsg = (e as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Something went wrong';
+            setError(errorMsg);
             setLaunching(false);
             return;
         }
@@ -215,7 +240,7 @@ const StoreSetupWizard: React.FC<Props> = ({ onComplete, onClose }) => {
     };
 
     return (
-        <div style={S.overlay} onClick={e => e.target === e.currentTarget && onClose?.()}>
+        <div style={S.overlay} onClick={evt => evt.target === evt.currentTarget && onClose?.()}>
             <div style={S.modal}>
                 {/* Header */}
                 <div style={S.header}>
@@ -242,10 +267,10 @@ const StoreSetupWizard: React.FC<Props> = ({ onComplete, onClose }) => {
                 <div style={S.body}>
                     {error && <div style={{ background: 'rgba(248,113,113,0.1)', border: '1px solid rgba(248,113,113,0.2)', borderRadius: 8, padding: '10px 14px', color: '#fca5a5', fontSize: 13, marginBottom: 16 }}>{error}</div>}
 
-                    {currentStep === 'store' && <StoreStep data={storeData} onChange={setStoreData} />}
-                    {currentStep === 'branding' && <BrandingStep data={brandData} onChange={setBrandData} />}
-                    {currentStep === 'payments' && <PaymentsStep data={paymentData} onChange={setPaymentData} />}
-                    {currentStep === 'launch' && <LaunchStep storeData={storeData} launching={launching} />}
+                    {currentStep === 'store' && <StoreStep data={fullData} onChange={updateData} />}
+                    {currentStep === 'branding' && <BrandingStep data={fullData} onChange={updateData} />}
+                    {currentStep === 'payments' && <PaymentsStep data={fullData} onChange={updateData} />}
+                    {currentStep === 'launch' && <LaunchStep storeData={fullData} launching={launching} />}
                 </div>
 
                 {/* Footer */}

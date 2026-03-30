@@ -3,6 +3,19 @@ import { useQuery } from '@tanstack/react-query';
 import { databaseClient } from '../../platform/core/DatabaseClient';
 import { useStorefront } from '../../context/StorefrontContext';
 
+// OSTT FIX: Local strict representation of product to bypass generic import issues
+interface FeaturedProductModel {
+    id: string;
+    title: string;
+    price: number;
+    compareAtPrice?: number;
+    description: string;
+    image?: string;
+    featured_image?: string;
+    product_type?: string;
+    base_price?: number;
+}
+
 export interface FeaturedProductProps {
     nodeId: string;
     isBuilder?: boolean;
@@ -24,10 +37,11 @@ export const FeaturedProduct: React.FC<FeaturedProductProps> = ({
     showVariants = true,
     showReviews = true,
 }) => {
-    const { state } = useStorefront();
+    // OSTT FIX: Removed unused 'state' variable
+    useStorefront();
     const [selectedSize, setSelectedSize] = useState('M');
 
-    const { data: product = null } = useQuery({
+    const { data: productData = null } = useQuery({
         queryKey: ['product', productId],
         queryFn: async () => {
             if (!productId) return null;
@@ -36,12 +50,18 @@ export const FeaturedProduct: React.FC<FeaturedProductProps> = ({
         enabled: !!productId && !isBuilder
     });
 
-    const mockProduct = {
+    const product = productData as unknown as FeaturedProductModel | null;
+
+    const mockProduct: FeaturedProductModel = {
+        id: 'mock-1',
         title: 'Premium Chronograph Watch',
         price: 249.99,
         compareAtPrice: 320.00,
         description: 'A timeless timepiece combining precision engineering with elegant aesthetics.',
         image: 'https://images.unsplash.com/photo-1524592093837-8f3893e792fb?w=800&q=80',
+        featured_image: 'https://images.unsplash.com/photo-1524592093837-8f3893e792fb?w=800&q=80',
+        base_price: 249.99,
+        product_type: 'WATCH'
     };
 
     const isTop = layout === 'media-top';
@@ -63,7 +83,7 @@ export const FeaturedProduct: React.FC<FeaturedProductProps> = ({
             )}
             <h2 style={{ fontSize: '28px', fontWeight: 800, color: '#fff', margin: 0 }}>{activeProduct?.title}</h2>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ fontSize: '22px', fontWeight: 700, color: '#fff' }}>${activeProduct?.price?.toFixed(2)}</span>
+                <span style={{ fontSize: '22px', fontWeight: 700, color: '#fff' }}>${activeProduct?.price?.toFixed(2) || activeProduct?.base_price?.toFixed(2)}</span>
                 {activeProduct?.compareAtPrice && (
                     <span style={{ textDecoration: 'line-through', color: '#5a5a70', fontSize: '14px' }}>${activeProduct.compareAtPrice.toFixed(2)}</span>
                 )}
@@ -78,6 +98,7 @@ export const FeaturedProduct: React.FC<FeaturedProductProps> = ({
                     <div style={{ display: 'flex', gap: '8px' }}>
                         {['S', 'M', 'L'].map(size => (
                             <button 
+                                type="button"
                                 key={size}
                                 onClick={() => setSelectedSize(size)}
                                 style={{
@@ -93,7 +114,7 @@ export const FeaturedProduct: React.FC<FeaturedProductProps> = ({
                 </div>
             )}
 
-            <button style={{ marginTop: '20px', padding: '14px', background: '#7c6dfa', border: 'none', borderRadius: '8px', color: '#fff', fontWeight: 700, cursor: 'pointer' }}>
+            <button type="button" style={{ marginTop: '20px', padding: '14px', background: '#7c6dfa', border: 'none', borderRadius: '8px', color: '#fff', fontWeight: 700, cursor: 'pointer' }}>
                 Buy Now
             </button>
         </div>
@@ -102,7 +123,7 @@ export const FeaturedProduct: React.FC<FeaturedProductProps> = ({
     const renderMedia = () => (
         <div style={{ flex: `0 0 ${mediaWidth}`, position: 'relative', overflow: 'hidden', minHeight: isTop ? '300px' : 'auto' }}>
             <img 
-                src={isBuilder ? mockProduct.image : activeProduct?.image} 
+                src={activeProduct?.featured_image || activeProduct?.image} 
                 alt="Product" 
                 style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} 
             />

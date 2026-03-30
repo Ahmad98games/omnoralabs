@@ -19,9 +19,11 @@ export interface MerchantProfile {
     theme_settings?: Record<string, unknown>;
     role: 'seller' | 'admin' | 'super-admin';
     created_at: string;
+    full_name?: string; 
+    avatar_url?: string; 
 }
 
-interface AuthContextValue {
+export interface AuthContextValue {
     user: User | null;
     profile: MerchantProfile | CustomerProfile | null;
     isInitializing: boolean;
@@ -38,6 +40,7 @@ interface AuthContextValue {
     register: (name: string, email: string, password: string, role?: string, storeName?: string) => Promise<unknown>;
     loginWithGoogle: () => Promise<void>;
     signOut: () => Promise<void>;
+    logout: () => Promise<void>; 
     resetPassword: (email: string) => Promise<void>;
     updateProfile: (data: Partial<MerchantProfile>) => Promise<void>;
     resetAuth: () => void;
@@ -52,7 +55,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
     const [authModalMode, setAuthModalMode] = useState<'login' | 'signup'>('login');
 
-    const setAuthModalOpen = useCallback((open: boolean, mode: 'login' | 'signup' = 'login') => {
+    const setAuthModalOpenCallback = useCallback((open: boolean, mode: 'login' | 'signup' = 'login') => {
         setAuthModalMode(mode);
         setIsAuthModalOpen(open);
     }, []);
@@ -65,17 +68,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         window.location.href = '/login';
     }, []);
 
-    const ensureProfile = useCallback(async (sbUser: User | { id: string; email?: string; user_metadata: Record<string, unknown> }, name?: string, role: string | null = null, storeName?: string) => {
+    const ensureProfile = useCallback(async (
+        sbUser: User | { id: string; email?: string; user_metadata: Record<string, unknown> }, 
+        name?: string, 
+        role: string | null = null, 
+        storeName?: string
+    ) => {
         try {
-            // 🛡️ RECOVERY: Read role from localStorage if it was saved during Login.tsx handleGoogleSignIn
             const savedRole = localStorage.getItem('omnora_selected_role');
             const targetRole = role || sbUser.user_metadata?.role || savedRole || 'customer';
             
             console.log(`[Auth Profile] Commencing Convergence for ${sbUser.email} as ${targetRole}`);
 
-            const fallbackName = name || sbUser.user_metadata?.full_name || sbUser.email?.split('@')[0];
+            const fallbackName = name || (sbUser.user_metadata?.full_name as string) || sbUser.email?.split('@')[0] || '';
 
-            // 1. Try fetching from Merchants first if seller/admin
             if (targetRole === 'seller' || targetRole === 'admin' || targetRole === 'super-admin') {
                 const { data: merchant } = await supabase.from('merchants').select('*').eq('id', sbUser.id).maybeSingle();
                 if (merchant) {
@@ -84,7 +90,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     return merchant;
                 }
             } else {
-                // 2. Try fetching from Customers
                 const { data: customer } = await supabase.from('customers').select('*').eq('id', sbUser.id).maybeSingle();
                 if (customer) {
                     console.log(`[Auth Profile] Customer Record Found: ${customer.full_name}`);
@@ -93,7 +98,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 }
             }
 
-            // 3. Identification Phase (Manual record cross-check)
             console.log('[Auth Profile] No record found in target table. Performing global cross-check...');
             const { data: altMerchant } = await supabase.from('merchants').select('*').eq('id', sbUser.id).maybeSingle();
             if (altMerchant) { 
@@ -107,10 +111,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 setProfile({ ...altCustomer, role: 'customer' } as CustomerProfile); return altCustomer; 
             }
 
-            // 4. Initial Provisioning (First-time users)
             console.log(`[Auth Profile] Initializing new ${targetRole} record for ${sbUser.id}...`);
             if (targetRole === 'seller' || targetRole === 'admin' || targetRole === 'super-admin') {
-                const finalStoreName = storeName || sbUser.user_metadata?.store_name || `${fallbackName}'s Store`;
+                const finalStoreName = storeName || (sbUser.user_metadata?.store_name as string) || `${fallbackName}'s Store`;
                 const { data: newMerchant, error } = await supabase.from('merchants').insert({
                     id: sbUser.id,
                     email: sbUser.email,
@@ -152,15 +155,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (error) throw error;
     };
 
-    // 🛡️ REMOVED GLOBAL REDIRECTION:
-    // Global redirects inside AuthProvider cause infinite loops with ProtectedRoute.
-    // Redirection is now handled by Login.tsx / AuthCallback.tsx on sign-in,
-    // and ProtectedRoute.tsx for access control.
-
     useEffect(() => {
         let isMounted = true; 
 
-        // 🛡️ EMERGENCY SETTLEMENT: Loader MUST clear after 8s
         const emergencyTimeout = setTimeout(() => {
             if (isMounted) {
                 console.warn('[Auth Shield] EMERGENCY_RESET: Forcing Kernel to settle.');
@@ -170,7 +167,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         const initialize = async () => {
             try {
-                // 1. Get Initial Session
                 const { data: { session }, error } = await supabase.auth.getSession();
                 if (error) throw error;
                 
@@ -195,14 +191,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         initialize();
 
-        // 2. Listen for Auth Changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
             console.log(`[Auth Pulse] ${event} detected.`);
             
             if (isMounted) {
                 if (session?.user) {
                     setUser(session.user);
-                    // Only converge if we don't have a profile yet or it's a fresh sign-in
                     await ensureProfile(session.user);
                 } else if (event === 'SIGNED_OUT') {
                     setUser(null);
@@ -216,20 +210,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             clearTimeout(emergencyTimeout);
             subscription.unsubscribe();
         };
-    }, [ensureProfile]); // Removed isInitializing from dependencies to prevent unmount cycle
+    }, [ensureProfile]);
 
-    const login = async (email, password) => {
+    const login = async (email: string, password: string) => {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         if (data.user) {
             setUser(data.user);
             const prof = await ensureProfile(data.user);
-            return { ...data.user, ...prof };
+            return { ...data.user, ...(prof as Record<string, unknown>) };
         }
         return data.user;
     };
 
-    const register = async (name, email, password, role = 'customer', storeName) => {
+    const register = async (name: string, email: string, password: string, role = 'customer', storeName?: string) => {
         const { data, error } = await supabase.auth.signUp({
             email,
             password,
@@ -245,7 +239,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (data.user) {
             setUser(data.user);
             const prof = await ensureProfile(data.user, name, role, storeName);
-            return { ...data.user, ...prof };
+            return { ...data.user, ...(prof as Record<string, unknown>) };
         }
         return data.user;
     };
@@ -268,7 +262,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             .update(data)
             .eq('id', user.id);
         if (error) throw error;
-        setProfile(prev => prev ? { ...prev, ...data } : null);
+        
+        setProfile(prev => {
+            if (!prev) return null;
+            if (prev.role === 'customer') return prev;
+            return { ...prev, ...data } as MerchantProfile;
+        });
     };
 
     if (isInitializing) return <CinematicLoader />;
@@ -285,8 +284,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             isCustomer: !profile || profile?.role === 'customer',
             isAuthModalOpen,
             authModalMode,
-            setAuthModalOpen,
-            login, loginWithGoogle, register, signOut, resetPassword, updateProfile, resetAuth 
+            setAuthModalOpen: setAuthModalOpenCallback,
+            login, loginWithGoogle, register, signOut, 
+            logout: signOut, 
+            resetPassword, updateProfile, resetAuth 
         }}>
             {children}
         </AuthContext.Provider>

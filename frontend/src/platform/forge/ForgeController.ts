@@ -1,9 +1,24 @@
 import { supabase } from '../../lib/supabaseClient';
 
+export interface ForgeBlock {
+    type: string;
+    props: Record<string, unknown>;
+}
+
 export interface AIStoreJson {
   slug: string;
-  ast_manifest: Array<{ type: string; props: any }>;
+  ast_manifest: ForgeBlock[];
   theme_vars: Record<string, string>;
+}
+
+export interface BuilderPayload {
+    nodes: Record<string, unknown>;
+    pageLayouts: Record<string, string[]>;
+    activePageId: string;
+    designSystem: {
+        theme_vars: Record<string, string>;
+        lastUpdated: string;
+    };
 }
 
 const SYSTEM_PROMPT = `
@@ -56,7 +71,7 @@ EXPECTED JSON STRUCTURE:
 }
 `;
 
-export const handleForgeGeneration = async (userPrompt: string): Promise<{ aiJson: AIStoreJson, builderPayload: any }> => {
+export const handleForgeGeneration = async (userPrompt: string): Promise<{ aiJson: AIStoreJson, builderPayload: BuilderPayload }> => {
   try {
     // 1. Get current session for merchant_id
     const { data: { session }, error: authError } = await supabase.auth.getSession();
@@ -100,7 +115,7 @@ export const handleForgeGeneration = async (userPrompt: string): Promise<{ aiJso
     let aiJson: AIStoreJson;
     try {
       aiJson = JSON.parse(jsonMatch[0]) as AIStoreJson;
-    } catch (parseError) {
+    } catch {
       throw new Error("AI layout was malformed. Retrying...");
     }
 
@@ -129,7 +144,7 @@ export const handleForgeGeneration = async (userPrompt: string): Promise<{ aiJso
     }
 
     // 5. CANVAS SYNC: Prepare payload for injectAST so the UI instantly re-renders
-    const nodes: Record<string, any> = {};
+    const nodes: Record<string, unknown> = {};
     const layout: string[] = [];
     
     aiJson.ast_manifest.forEach((block, index) => {
@@ -147,7 +162,7 @@ export const handleForgeGeneration = async (userPrompt: string): Promise<{ aiJso
         layout.push(id);
     });
 
-    const builderPayload = {
+    const builderPayload: BuilderPayload = {
         nodes,
         pageLayouts: { [aiJson.slug || 'home']: layout },
         activePageId: aiJson.slug || 'home',
@@ -156,7 +171,7 @@ export const handleForgeGeneration = async (userPrompt: string): Promise<{ aiJso
 
     return { aiJson, builderPayload };
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("[Omnora Forge Error]", error);
     throw error;
   }
@@ -179,9 +194,10 @@ export const useForgeController = () => {
                 console.error("Builder context not found or injectAST missing");
                 return false;
             }
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error("[useForgeController error]", err);
-            if (err.message.includes('malformed') || err.message.includes('JSON')) {
+            const message = (err as Error).message || "Forge failed";
+            if (message.includes('malformed') || message.includes('JSON')) {
                 toast.error("AI Logic error. Retrying with a cleaner prompt...");
             } else {
                 toast.error(err.message || "Forge failed");
@@ -217,10 +233,11 @@ export const useForgeController = () => {
 
             const url = `${window.location.origin}/store/${merchant_slug}/${slug === 'home' ? '' : slug}`;
             return { success: true, url };
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error("Publish failed:", err);
-            toast.error(err.message || "Publish failed");
-            return { success: false, error: err.message || "Publish failed" };
+            const message = (err as Error).message || "Publish failed";
+            toast.error(message);
+            return { success: false, error: message };
         }
     };
 

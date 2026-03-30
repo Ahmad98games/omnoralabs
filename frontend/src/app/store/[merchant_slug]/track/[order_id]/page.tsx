@@ -20,8 +20,17 @@ const steps = [
     { key: 'Delivered', label: 'Delivered' }
 ];
 
+// OSTT FIX: Replaced 'any' with a strict interface for Payment Methods
+interface PaymentMethod {
+    id?: string;
+    name: string;
+    accountTitle: string;
+    accountNumber: string;
+    instruction?: string;
+}
 export default async function TrackingPage({ params }: TrackingPageProps) {
-    const { merchant_slug, order_id } = params;
+    // FIX: Completely removed the extraction of merchant_slug to satisfy the ruthless linter
+    const { order_id } = params;
 
     // 1. Fetch Order details along with Merchant Methods
     const { data: order, error: orderError } = await supabase
@@ -52,7 +61,8 @@ export default async function TrackingPage({ params }: TrackingPageProps) {
 
     const isActive = (index: number) => index <= currentStepIndex;
 
-    const paymentMethods: any[] = order.merchants.payment_methods || [];
+    // OSTT FIX: Applied PaymentMethod interface
+    const paymentMethods: PaymentMethod[] = (order.merchants as unknown as { payment_methods: PaymentMethod[] })?.payment_methods || [];
 
     return (
         <div style={{ minHeight: '100vh', background: '#0a0a0f', color: '#fff', padding: '40px 20px', fontFamily: 'sans-serif' }}>
@@ -109,10 +119,6 @@ export default async function TrackingPage({ params }: TrackingPageProps) {
                                     <p style={{ fontSize: '13px', color: '#fff', fontFamily: 'monospace' }}>{m.accountNumber}</p>
                                     <button 
                                         style={{ background: '#2a2a3a', color: '#ccc', border: 'none', padding: '3px 8px', borderRadius: 4, fontSize: '11px', cursor: 'pointer' }}
-                                        onClick={() => {
-                                            // Next.js Server Components don't support onClick easily in plain tree without hydrations
-                                            // This is mostly server rendered output, absolute safely
-                                        }}
                                     >
                                         Copy
                                     </button>

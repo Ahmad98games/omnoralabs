@@ -21,7 +21,7 @@ interface OrderData {
     totalAmount?: number;
     total?: number;
     paymentMethod: string;
-    items?: any[];
+    items?: unknown[];
 }
 
 export default function OrderConfirmation() {
@@ -42,7 +42,7 @@ export default function OrderConfirmation() {
                 if (res.data.success) {
                     setOrder(res.data.order);
                 }
-            } catch (error: any) {
+            } catch (error: unknown) {
                 console.warn('Order fetch issue (Guest/Network):', error);
             } finally {
                 setLoading(false);
@@ -62,9 +62,8 @@ export default function OrderConfirmation() {
                 total: order.totalAmount || order.total || 0
             };
 
-            // Cast to 'any' to bypass strict interface mismatch in the utility, 
-            // since we manually ensured the data is correct above.
-            openWhatsApp(safePayload as any, 'automation');
+            // Cast via unknown to ensure safety while bypassing strict interface mismatch
+            openWhatsApp(safePayload as unknown as OrderData, 'automation'); 
         } else if (id) {
             // Fallback if we only have ID
             const fallbackUrl = `https://wa.me/923097613611?text=${encodeURIComponent(`Hello, I placed order #${id}. Please confirm details.`)}`;

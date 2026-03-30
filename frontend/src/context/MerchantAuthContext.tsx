@@ -55,8 +55,8 @@ export const MerchantAuthProvider: React.FC<{ children: React.ReactNode }> = ({ 
         try {
             const u = await databaseClient.signUp(email, password, displayName);
             setMerchant(u);
-        } catch (err: any) {
-            const msg = err?.message || 'Sign up failed';
+        } catch (err: unknown) {
+            const msg = (err instanceof Error) ? err.message : 'Sign up failed';
             setError(msg);
             throw err;
         } finally {
@@ -70,8 +70,8 @@ export const MerchantAuthProvider: React.FC<{ children: React.ReactNode }> = ({ 
         try {
             const u = await databaseClient.signIn(email, password);
             setMerchant(u);
-        } catch (err: any) {
-            const msg = err?.message || 'Sign in failed';
+        } catch (err: unknown) {
+            const msg = (err as { message?: string })?.message || 'Sign in failed';
             setError(msg);
             throw err;
         } finally {

@@ -17,7 +17,6 @@ export const AdSenseSlot: React.FC<AdSenseSlotProps> = ({
     responsive = true,
     style = {},
 }) => {
-    const isBuilderEnv = !!useBuilder;
     const isBuilderActive = useBuilder?.()?.mode === 'edit';
     const finalClientId = client_id || 'ca-pub-XXXXXXXXXXXXXXXX'; 
 
@@ -28,8 +27,9 @@ export const AdSenseSlot: React.FC<AdSenseSlotProps> = ({
         if (isBuilderActive || initialized.current) return;
         
         try {
-            const win = window as any;
-            (win.adsbygoogle = win.adsbygoogle || []).push({});
+            const win = window as unknown as { adsbygoogle?: Record<string, unknown>[] };
+            win.adsbygoogle = win.adsbygoogle || [];
+            win.adsbygoogle.push({});
             initialized.current = true;
         } catch (e) {
             console.error('AdSense initialization error:', e);

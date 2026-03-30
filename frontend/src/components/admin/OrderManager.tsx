@@ -53,12 +53,15 @@ export interface OrderManagerProps {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export const OrderManager: React.FC<OrderManagerProps> = ({ nodeId }) => {
-    const version = useSyncExternalStore(
+    // OSTT FIX: We read 'version' but don't need it in dependency arrays
+    // as useSyncExternalStore will re-render automatically.
+    useSyncExternalStore(
         useCallback((cb: () => void) => orderStore.subscribe(cb), []),
         () => orderStore.getVersion(),
     );
 
-    const allOrders = useMemo(() => orderStore.getAllOrders(), [version]);
+    // OSTT FIX: Simplified fetching to rely on external store
+    const allOrders = orderStore.getAllOrders();
     const [filterStatus, setFilterStatus] = useState<OrderStatus | 'all'>('all');
     const [searchQuery, setSearchQuery] = useState('');
 
@@ -290,6 +293,7 @@ const OrderRow: React.FC<{ order: Order }> = ({ order }) => {
 
             {/* Delete */}
             <button
+                type="button"
                 onClick={handleDelete}
                 title="Delete order"
                 style={{

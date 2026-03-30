@@ -1,20 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../../lib/supabaseClient';
-import { Mail, Send, Calendar, Users, BarChart2, Plus, Layout, Type, Image as ImageIcon, Minus, Trash2 } from 'lucide-react';
+import { Plus, Type, Image as ImageIcon, Minus } from 'lucide-react';
+
+interface Campaign {
+    id: string;
+    name: string;
+    subject: string;
+    recipient_type: string;
+    status: string;
+    created_at: string;
+    sent_at?: string;
+    sent_count?: number;
+    open_count?: number;
+    click_count?: number;
+}
 
 export const EmailMarketing: React.FC = () => {
-    const [campaigns, setCampaigns] = useState<any[]>([]);
+    const [campaigns, setCampaigns] = useState<Campaign[]>([]);
     const [loading, setLoading] = useState(true);
     const [isCreating, setIsCreating] = useState(false);
     const [newCampaign, setNewCampaign] = useState({
         name: '', subject: '', recipient_type: 'all', status: 'draft'
     });
 
-    useEffect(() => {
-        fetchCampaigns();
-    }, []);
-
-    const fetchCampaigns = async () => {
+    const fetchCampaigns = React.useCallback(async () => {
         setLoading(true);
         const { data, error } = await supabase
             .from('email_campaigns')
@@ -22,7 +31,14 @@ export const EmailMarketing: React.FC = () => {
             .order('created_at', { ascending: false });
         if (!error) setCampaigns(data || []);
         setLoading(false);
-    };
+    }, []);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            fetchCampaigns();
+        }, 0);
+        return () => clearTimeout(timer);
+    }, [fetchCampaigns]);
 
     const handleCreate = async () => {
         const { error } = await supabase
@@ -34,21 +50,29 @@ export const EmailMarketing: React.FC = () => {
         }
     };
 
-    const InputStyle = { 
+    const InputStyle: React.CSSProperties = { 
         width: '100%', padding: '12px 16px', background: '#09090b', border: '1px solid #27272a', 
         borderRadius: 10, color: '#fff', fontSize: '14px', outline: 'none' 
     };
 
     return (
         <div style={{ padding: 24 }}>
-            {/* Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
                 <div>
                     <h1 style={{ fontSize: 24, fontWeight: 700, color: '#fff', marginBottom: 4 }}>Email Marketing</h1>
                     <p style={{ fontSize: 13, color: '#71717a' }}>Build campaigns and automated customer flows</p>
                 </div>
                 {!isCreating && (
-                    <button onClick={() => setIsCreating(true)} style={{ padding: '10px 20px', background: '#FF6B35', color: '#fff', borderRadius: 8, border: 'none', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <button 
+                        onClick={() => setIsCreating(true)} 
+                        style={{ 
+                            padding: '10px 20px', background: '#FF6B35', color: '#fff', borderRadius: 8, 
+                            border: 'none', fontWeight: 600, cursor: 'pointer', display: 'flex', 
+                            alignItems: 'center', gap: 8,
+                            mixBlendMode: 'normal' as React.CSSProperties['mixBlendMode'],
+                            opacity: 1 
+                        }}
+                    >
                         <Plus size={18} /> Create Campaign
                     </button>
                 )}
@@ -70,13 +94,12 @@ export const EmailMarketing: React.FC = () => {
                             <label style={{ fontSize: 12, color: '#71717a', fontWeight: 700, display: 'block', marginBottom: 12 }}>RECIPIENTS</label>
                             <select value={newCampaign.recipient_type} onChange={e => setNewCampaign({...newCampaign, recipient_type: e.target.value})} style={InputStyle}>
                                 <option value="all">All Subscribers</option>
-                                <option value="high_value">High Value (Spent > $500)</option>
+                                <option value="high_value">High Value (Spent &gt; $500)</option>
                                 <option value="inactive">Inactive 90 Days</option>
                             </select>
                         </div>
                      </div>
 
-                     {/* Builder Mockup */}
                      <div style={{ marginTop: 40, padding: 32, background: '#09090b', border: '1px dashed #27272a', borderRadius: 12, textAlign: 'center' }}>
                         <div style={{ display: 'flex', justifyContent: 'center', gap: 24, marginBottom: 24 }}>
                             <div style={{ padding: 12, background: '#131316', borderRadius: 8, color: '#71717a' }}><Type size={20} /></div>
@@ -93,7 +116,6 @@ export const EmailMarketing: React.FC = () => {
                 </div>
             )}
 
-            {/* List */}
             <div style={{ background: '#131316', border: '1px solid #27272a', borderRadius: 16, overflow: 'hidden' }}>
                  <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                     <thead style={{ background: '#09090b', borderBottom: '1px solid #27272a' }}>

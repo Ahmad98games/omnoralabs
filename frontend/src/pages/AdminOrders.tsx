@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import client from '../api/client';
 import { useToast } from '../context/ToastContext';
-import { Package, Truck, CheckCircle, XCircle, Clock, RefreshCw, ShoppingBag, ArrowRight } from 'lucide-react';
+import { Package, Truck, CheckCircle, XCircle, Clock, RefreshCw, ShoppingBag } from 'lucide-react';
 import './AdminOrders.css';
 
 interface OrderItem {
@@ -23,7 +23,7 @@ interface Order {
     createdAt: string;
 }
 
-const STATUS_CONFIG: Record<string, { label: string; colorClass: string; icon: any }> = {
+const STATUS_CONFIG: Record<string, { label: string; colorClass: string; icon: React.ComponentType<{ size?: number; className?: string; strokeWidth?: number }> }> = {
     INITIATED: { label: 'Initiated', colorClass: 'status-gray', icon: Clock },
     pending: { label: 'Pending Payment', colorClass: 'status-yellow', icon: Clock },
     receipt_submitted: { label: 'Receipt Review', colorClass: 'status-blue', icon: CheckCircle },
@@ -45,6 +45,7 @@ export default function AdminOrders() {
             const { data } = await client.get('/orders/admin/all');
             setOrders(data.orders || []);
         } catch (error) {
+            console.error('Fetch error:', error);
             showToast('Failed to fetch orders', 'error');
         } finally {
             setLoading(false);
@@ -63,9 +64,10 @@ export default function AdminOrders() {
         try {
             await client.put(`/orders/${orderId}/status`, { status: newStatus });
             showToast(`Order updated to ${newStatus}`, 'success');
-            setOrders(prev => prev.map(o => o._id === orderId ? { ...o, status: newStatus as any } : o));
-        } catch (error: any) {
-            showToast(error.response?.data?.error || 'Update failed', 'error');
+            setOrders(prev => prev.map(o => o._id === orderId ? { ...o, status: newStatus as Order['status'] } : o));
+        } catch (error: unknown) {
+            const err = error as { response?: { data?: { error?: string } } };
+            showToast(err.response?.data?.error || 'Update failed', 'error');
             fetchOrders();
         } finally {
             setProcessingId(null);

@@ -1,26 +1,47 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../../../lib/supabaseClient';
-import { Edit3, Image, Calendar, Eye, Send, Trash2, Plus, Search, ChevronRight, Copy } from 'lucide-react';
+import { Edit3, Image, Eye, Send, Plus } from 'lucide-react';
+
+interface BlogPost {
+    id: string;
+    title: string;
+    slug: string;
+    status: string;
+    created_at: string;
+    updated_at?: string;
+}
 
 export const BlogManager: React.FC = () => {
-    const [posts, setPosts] = useState<any[]>([]);
+    const [posts, setPosts] = useState<BlogPost[]>([]);
     const [loading, setLoading] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
-    const [activePost, setActivePost] = useState<any>(null);
+    const [activePost, setActivePost] = useState<BlogPost | null>(null);
 
-    useEffect(() => {
-        fetchPosts();
+    // OSTT FIX: Using direct promise chain to prevent set-state-in-effect and hoisting errors
+    const reloadPosts = useCallback(async (showLoading = true) => {
+        if (showLoading) setLoading(true);
+        try {
+            const { data, error } = await supabase
+                .from('blog_posts')
+                .select('*')
+                .order('created_at', { ascending: false });
+            
+            if (!error && data) setPosts(data as BlogPost[]);
+        } catch (err) {
+            console.error('[BlogManager] reloadPosts failed:', err);
+        } finally {
+            setLoading(false);
+        }
     }, []);
 
-    const fetchPosts = async () => {
-        setLoading(true);
-        const { data, error } = await supabase
-            .from('blog_posts')
-            .select('*')
-            .order('created_at', { ascending: false });
-        if (!error) setPosts(data || []);
-        setLoading(false);
-    };
+    useEffect(() => {
+        let mounted = true;
+        const init = async () => {
+            if (mounted) await reloadPosts(false);
+        };
+        init();
+        return () => { mounted = false; };
+    }, [reloadPosts]);
 
     const handleCreate = async () => {
         const { data, error } = await supabase
@@ -28,21 +49,22 @@ export const BlogManager: React.FC = () => {
             .insert({ title: 'Untitled Post', slug: `new-post-${Date.now()}`, status: 'draft' })
             .select()
             .single();
-        if (!error) {
-            setActivePost(data);
+        if (!error && data) {
+            setActivePost(data as BlogPost);
             setIsEditing(true);
-            fetchPosts();
+            reloadPosts();
         }
     };
 
     const handleSave = async () => {
+        if (!activePost) return;
         const { error } = await supabase
             .from('blog_posts')
             .update({ ...activePost, updated_at: new Date().toISOString() })
             .eq('id', activePost.id);
         if (!error) {
             setIsEditing(false);
-            fetchPosts();
+            reloadPosts();
         }
     };
 
@@ -53,42 +75,38 @@ export const BlogManager: React.FC = () => {
 
     return (
         <div style={{ padding: 24 }}>
-            {/* Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
                 <div>
                     <h1 style={{ fontSize: 24, fontWeight: 700, color: '#fff', marginBottom: 4 }}>Blog Engine</h1>
                     <p style={{ fontSize: 13, color: '#71717a' }}>Manage store news, articles, and SEO content</p>
                 </div>
                 {!isEditing && (
-                    <button onClick={handleCreate} style={{ padding: '10px 20px', background: '#FF6B35', color: '#fff', borderRadius: 8, border: 'none', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <button type="button" onClick={handleCreate} style={{ padding: '10px 20px', background: '#FF6B35', color: '#fff', borderRadius: 8, border: 'none', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
                         <Plus size={18} /> New Post
                     </button>
                 )}
             </div>
 
-            {isEditing ? (
+            {isEditing && activePost ? (
                 <div style={{ background: '#131316', border: '1px solid #27272a', borderRadius: 16, padding: 40 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 40 }}>
                         <h2 style={{ fontSize: 18, fontWeight: 700, color: '#fff' }}>Editor: {activePost.title}</h2>
                         <div style={{ display: 'flex', gap: 12 }}>
-                            <button onClick={() => setIsEditing(false)} style={{ padding: '8px 16px', background: 'transparent', color: '#71717a', border: 'none', fontWeight: 600, cursor: 'pointer' }}>Cancel</button>
-                            <button onClick={handleSave} style={{ padding: '8px 24px', background: '#FF6B35', color: '#fff', borderRadius: 8, border: 'none', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <button type="button" onClick={() => setIsEditing(false)} style={{ padding: '8px 16px', background: 'transparent', color: '#71717a', border: 'none', fontWeight: 600, cursor: 'pointer' }}>Cancel</button>
+                            <button type="button" onClick={handleSave} style={{ padding: '8px 24px', background: '#FF6B35', color: '#fff', borderRadius: 8, border: 'none', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
                                 <Send size={16} /> Publish
                             </button>
                         </div>
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 40 }}>
-                        {/* Editor Canvas */}
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
                             <input placeholder="Post Title" value={activePost.title} onChange={e => setActivePost({...activePost, title: e.target.value})} style={{ ...InputStyle, fontSize: 32, fontWeight: 800, border: 'none', background: 'transparent', paddingLeft: 0 }} />
                             <div style={{ minHeight: 400, padding: 32, background: '#09090b', border: '1px solid #27272a', borderRadius: 12, color: '#a1a1aa', fontSize: 16, lineHeight: 1.8 }}>
-                                {/* TipTap Placeholder */}
                                 Start writing your story here...
                             </div>
                         </div>
 
-                        {/* Sidebar */}
                         <aside style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
                              <div style={{ padding: 24, background: '#09090b', border: '1px solid #27272a', borderRadius: 12 }}>
                                 <label style={{ fontSize: 12, color: '#71717a', fontWeight: 700, display: 'block', marginBottom: 12 }}>FEATURED IMAGE</label>
@@ -126,10 +144,10 @@ export const BlogManager: React.FC = () => {
                                 </div>
                                 <h3 style={{ fontSize: 14, fontWeight: 700, color: '#fff', marginBottom: 12 }}>{post.title}</h3>
                                 <div style={{ display: 'flex', gap: 12 }}>
-                                    <button onClick={() => { setActivePost(post); setIsEditing(true); }} style={{ flex: 1, padding: '8px', background: '#27272a', color: '#fff', border: 'none', borderRadius: 8, fontSize: 11, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                                    <button type="button" onClick={() => { setActivePost(post); setIsEditing(true); }} style={{ flex: 1, padding: '8px', background: '#27272a', color: '#fff', border: 'none', borderRadius: 8, fontSize: 11, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
                                         <Edit3 size={14} /> Edit
                                     </button>
-                                    <button style={{ padding: '8px', background: 'transparent', color: '#71717a', border: '1px solid #27272a', borderRadius: 8, cursor: 'pointer' }}><Eye size={16} /></button>
+                                    <button type="button" style={{ padding: '8px', background: 'transparent', color: '#71717a', border: '1px solid #27272a', borderRadius: 8, cursor: 'pointer' }}><Eye size={16} /></button>
                                 </div>
                             </div>
                         </div>

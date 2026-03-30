@@ -1,5 +1,10 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Search, ChevronDown, Plus } from 'lucide-react';
+/**
+ * DiscoveryEngine.tsx
+ * Refactored for OSTT: Cleaned up all unused imports and variables to eliminate dead code.
+ */
+
+import React, { useState } from 'react';
+import { Search, ChevronDown } from 'lucide-react'; // Removed unused 'Plus'
 import { useOmnora } from '../../client/OmnoraContext';
 import { EditableText } from '../EditableComponents';
 import { PureRecursiveNode } from '../../client/OmnoraRenderer';
@@ -10,11 +15,12 @@ import { PureRecursiveNode } from '../../client/OmnoraRenderer';
 export const OmnoraMegaMenu: React.FC<{ nodeId: string }> = ({ nodeId }) => {
     const { nodes } = useOmnora();
     const node = nodes[nodeId];
-    const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+    
+    // Removed unused activeDropdown state
 
     if (!node) return null;
 
-    const navLinks = node.children || [];
+    // Removed unused navLinks variable
 
     return (
         <nav className="omnora-megamenu" style={{
@@ -34,7 +40,8 @@ export const OmnoraMegaMenu: React.FC<{ nodeId: string }> = ({ nodeId }) => {
 };
 
 const MenuLink: React.FC<{ nodeId: string, parentId: string }> = ({ nodeId }) => {
-    const { nodes, mode, selectNode } = useOmnora();
+    // Removed unused 'mode' and 'selectNode' from destructured useOmnora()
+    const { nodes } = useOmnora();
     const [isHovered, setIsHovered] = useState(false);
     const node = nodes[nodeId];
 
@@ -112,7 +119,8 @@ const MenuLink: React.FC<{ nodeId: string, parentId: string }> = ({ nodeId }) =>
  * OmnoraSmartSearch: Autocomplete search bar with manifest-controlled focus state.
  */
 export const OmnoraSmartSearch: React.FC<{ nodeId: string }> = ({ nodeId }) => {
-    const { nodes, mode } = useOmnora();
+    // Removed unused 'mode' from useOmnora()
+    const { nodes } = useOmnora();
     const [isFocused, setIsFocused] = useState(false);
     const node = nodes[nodeId];
 

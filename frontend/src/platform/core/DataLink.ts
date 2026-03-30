@@ -1,18 +1,17 @@
 /**
  * OMNORA v5 DATALINK CONTRACT
- * 
- * Defines the orchestration layer for async data resolution.
+ * * Defines the orchestration layer for async data resolution.
  * Transitions blocks from "Passive Prop Recipients" to "Data-Aware Entities".
  */
 
 export type DataPriority = 'critical' | 'normal' | 'background';
 export type ResolutionStrategy = 'cache-first' | 'network-first' | 'stale-while-revalidate';
 
-export interface DataBinding<T = any> {
+export interface DataBinding<T = unknown> {
     key: string;            // Canonical cache key for deduplication
     source: string;         // e.g., 'commerce', 'marketing', 'user'
-    params: Record<string, any>;
-    select?: (raw: any) => T;
+    params: Record<string, unknown>;
+    select?: (raw: unknown) => T;
     strategy: ResolutionStrategy;
     priority: DataPriority;
     ttl?: number;           // Cache expiry in seconds
@@ -20,7 +19,7 @@ export interface DataBinding<T = any> {
 
 export interface DataLinkState {
     bindings: Record<string, DataBinding>;
-    results: Record<string, any>;
+    results: Record<string, unknown>;
     loading: Record<string, boolean>;
     errors: Record<string, string>;
 }

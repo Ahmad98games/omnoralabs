@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { RefreshCw } from 'lucide-react';
 import { supabase } from '../../lib/supabaseClient';
 
 interface MerchantStatsProps {
@@ -70,6 +71,15 @@ export const MerchantStats: React.FC<MerchantStatsProps> = ({ merchantId }) => {
     }, [merchantId]);
 
     const conversionRate = ((stats.ordersCount / stats.visitorsCount) * 100).toFixed(1);
+
+    if (loading) {
+        return (
+            <div style={{ padding: 40, textAlign: 'center', color: '#666' }}>
+                <RefreshCw className="animate-spin" style={{ margin: '0 auto 12px' }} size={24} />
+                <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.1em' }}>CALCULATING ANALYTICS...</p>
+            </div>
+        );
+    }
 
     return (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 24 }}>

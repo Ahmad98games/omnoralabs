@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../../lib/supabaseClient';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import client from '../../api/client';
 import { 
-    Store, AlertTriangle, Loader2, Upload, Globe, CreditCard, 
-    RefreshCw, CheckCircle2, DollarSign, Languages 
+    Store, AlertTriangle, Upload, 
+    RefreshCw, DollarSign, Languages 
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { DomainSettings } from '../../components/seller/DomainSettings';
 import { useSettingsStore } from '../../stores/useSettingsStore';
 import { RadixSelect } from '../../components/ui/RadixSelect';
@@ -15,7 +13,7 @@ import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 
 export default function SellerProfile() {
-    const { user } = useAuth();
+    const { user, profile, isInitialized } = useAuth();
     const { showToast } = useToast();
     const { settings, loading, saving, loadSettings, updateSettings } = useSettingsStore();
 
@@ -58,6 +56,25 @@ export default function SellerProfile() {
         }
     }, [settings]);
 
+    // 🛡️ Loading Gate: Prevent rendering before auth/profile resolving
+    if (!isInitialized || (user && !profile)) {
+        return (
+            <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-tertiary, #52565E)' }}>
+                <RefreshCw className="animate-spin mx-auto mb-4" size={24} />
+                Loading store settings...
+            </div>
+        );
+    }
+
+    // 🛡️ Auth Gate: Only authorized users can see this
+    if (!user) {
+        return (
+            <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-tertiary, #52565E)' }}>
+                Session expired. Please refresh.
+            </div>
+        );
+    }
+
     const handleImageUpload = async (file: File, type: 'logo' | 'favicon') => {
         if (type === 'logo') setUploadingLogo(true);
         else setUploadingFavicon(true);
@@ -77,8 +94,9 @@ export default function SellerProfile() {
             } else {
                 throw new Error('Upload failed');
             }
-        } catch (err: any) {
-            showToast(err.message || 'Upload failed due to network conflict', 'error');
+        } catch (err) {
+            const message = err instanceof Error ? err.message : 'Upload failed due to network conflict';
+            showToast(message, 'error');
         } finally {
             if (type === 'logo') setUploadingLogo(false);
             else setUploadingFavicon(false);

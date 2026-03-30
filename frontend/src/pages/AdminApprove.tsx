@@ -17,7 +17,7 @@ const AdminApprove: React.FC = () => {
     // Prevent double-firing in Strict Mode
     const hasFetched = useRef(false);
 
-    const performApproval = async () => {
+    const performApproval = useCallback(async () => {
         if (!id || !token) {
             setStatus('error');
             setMessage('Security Token Missing or Malformed.');
@@ -29,18 +29,22 @@ const AdminApprove: React.FC = () => {
         try {
             await client.get(`/orders/${id}/approve?token=${token}`);
             setStatus('success');
-        } catch (error: any) {
+        } catch (error: unknown) {
             setStatus('error');
-            const errorMsg = error.response?.data?.message || 'Authorization Protocol Failed';
+            const errorMsg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Authorization Protocol Failed';
             setMessage(errorMsg);
         }
-    };
+    }, [id, token]);
 
     useEffect(() => {
         if (hasFetched.current) return;
         hasFetched.current = true;
-        performApproval();
-    }, [id, token]);
+        
+        // Ensure this runs after the first render to avoid cascading state updates
+        setTimeout(() => {
+            performApproval();
+        }, 0);
+    }, [performApproval]);
 
     return (
         <div className="approval-container">

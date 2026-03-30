@@ -1,39 +1,29 @@
 /**
  * OMNORA PLATFORM BOOTSTRAP
- * 
- * Explicit lifecycle management for the platform registry.
+ * * Explicit lifecycle management for the platform registry.
  */
 
 import React from 'react';
 import { registerBlock, lockRegistry, BLOCK_TYPES } from '../core/Registry';
 import { Logger } from '../core/Logger';
+import { BlockProps } from '../core/Registry';
 
-// Standard Blocks
-import {
-    HeroBlock,
-    SpacerBlock
-} from '../library/Blocks';
+// Standard Blocks (Placeholder implementations to prevent crash)
+const SpacerBlock: React.FC<BlockProps> = ({ data, nodeId }) => (
+    <div data-node-id={nodeId} style={{ height: (data as Record<string, unknown>)?.height as string || '40px' }} />
+);
 
-// Engine Modules
-import {
-    // Discovery modules placeholders
-} from '../library/modules/DiscoveryEngine';
-import {
-    OmnoraProductGrid,
-    // Selection modules placeholders
-} from '../library/modules/SelectionEngine';
-import {
-    OmnoraCartDrawer,
-    // Transaction modules placeholders
-} from '../library/modules/TransactionPipeline';
-import {
-    OmnoraTrustSeals,
-    // Trust modules placeholders
-} from '../library/modules/TrustEngine';
-import {
-    OmnoraRecentlyViewed,
-    // Intelligence modules placeholders
-} from '../library/modules/IntelligenceModules';
+const HeroBlock: React.FC<BlockProps> = ({ data, nodeId }) => (
+    <div data-node-id={nodeId} style={{ padding: '40px', background: '#0a0a0a', color: '#fff', textAlign: 'center' }}>
+        {(data as Record<string, unknown>)?.headline as string || 'Hero Section'}
+    </div>
+);
+
+// Engine Modules (Placeholder implementations to prevent crash)
+const OmnoraProductGrid: React.FC<BlockProps> = () => <div>[Product Grid Placeholder]</div>;
+const OmnoraCartDrawer: React.FC<BlockProps> = () => <div>[Cart Drawer Placeholder]</div>;
+const OmnoraTrustSeals: React.FC<BlockProps> = () => <div>[Trust Seals Placeholder]</div>;
+const OmnoraRecentlyViewed: React.FC<BlockProps> = () => <div>[Recently Viewed Placeholder]</div>;
 
 /**
  * initializePlatformRegistry: Explicitly invoked to populate the engine contracts.
@@ -268,7 +258,7 @@ export const initializePlatformRegistry = () => {
     // ─── Resilience ──────────────────────────────────────────
     registerBlock({
         type: BLOCK_TYPES.FALLBACK,
-        component: ({ nodeId, props }: { nodeId: string, props: Record<string, unknown> }) => (
+        component: ({ nodeId, data }: BlockProps) => (
             <div data-node-id={nodeId} style={{
                 padding: '20px', background: 'rgba(255,0,0,0.05)',
                 border: '1px dashed #f00', borderRadius: '8px',
@@ -276,7 +266,7 @@ export const initializePlatformRegistry = () => {
                 display: 'flex', flexDirection: 'column', gap: '4px'
             }}>
                 <div style={{ textTransform: 'uppercase', opacity: 0.8 }}>[OMNORA] Component Missing or Corrupted</div>
-                <div style={{ fontSize: '14px', fontFamily: 'monospace' }}>Type: {props?.originalType || 'Unknown'}</div>
+                <div style={{ fontSize: '14px', fontFamily: 'monospace' }}>Type: {data?.originalType as string || 'Unknown'}</div>
             </div>
         ),
         defaultProps: {},

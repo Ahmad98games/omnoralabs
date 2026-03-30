@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { Link } from 'react-router-dom';
@@ -10,8 +10,6 @@ import {
     Key,
     LogOut,
     ChevronRight,
-    Clock,
-    Loader2
 } from 'lucide-react';
 import './Profile.css';
 
@@ -21,19 +19,22 @@ type Order = {
     total: number;
     status: string;
     createdAt: string;
-    items: any[];
+    items: Record<string, unknown>[];
 };
 
 export default function Profile() {
-    const { user, logout } = useAuth();
+    const { user, profile, logout } = useAuth();
     const { showToast } = useToast();
     const [activeTab, setActiveTab] = useState('account');
     const [loading, setLoading] = useState(false);
     const [orders, setOrders] = useState<Order[]>([]);
 
+    // OSTT FIX: Safely fallback on user's full name since 'name' is not a property on Supabase User
+    const fallbackName = profile?.full_name || user?.user_metadata?.full_name || '';
+
     // Form States
     const [formData, setFormData] = useState({
-        name: user?.name || '',
+        name: fallbackName,
         email: user?.email || ''
     });
 
@@ -45,21 +46,20 @@ export default function Profile() {
 
     useEffect(() => {
         if (activeTab === 'orders') {
+            const fetchOrders = async () => {
+                try {
+                    setLoading(true);
+                    const res = await client.get('/orders');
+                    setOrders(res.data);
+                } catch (error) {
+                    console.error('Failed to fetch orders', error);
+                } finally {
+                    setLoading(false);
+                }
+            };
             fetchOrders();
         }
     }, [activeTab]);
-
-    const fetchOrders = async () => {
-        try {
-            setLoading(true);
-            const res = await client.get('/orders');
-            setOrders(res.data);
-        } catch (error) {
-            console.error('Failed to fetch orders');
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const handleUpdateProfile = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -67,8 +67,8 @@ export default function Profile() {
         try {
             await client.put('/users/profile', formData);
             showToast('Profile data updated', 'success');
-        } catch (error: any) {
-            showToast(error.response?.data?.error || 'Update failed', 'error');
+        } catch (error: unknown) {
+            showToast((error as { response?: { data?: { error?: string } } }).response?.data?.error || 'Update failed', 'error');
         } finally {
             setLoading(false);
         }
@@ -88,8 +88,8 @@ export default function Profile() {
             });
             showToast('Security protocols updated', 'success');
             setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
-        } catch (error: any) {
-            showToast(error.response?.data?.error || 'Password update failed', 'error');
+        } catch (error: unknown) {
+            showToast((error as { response?: { data?: { error?: string } } }).response?.data?.error || 'Password update failed', 'error');
         } finally {
             setLoading(false);
         }
@@ -108,34 +108,38 @@ export default function Profile() {
                     <aside className="profile-sidebar-luxury">
                         <div className="user-profile-card">
                             <div className="avatar-gold">
-                                {getInitials(user?.name || 'User')}
+                                {getInitials(fallbackName || 'User')}
                             </div>
                             <div className="user-info">
-                                <h3 className="font-serif">{user?.name}</h3>
-                                <span className="user-rank">{(user as any)?.isAdmin ? 'ATELIER ADMIN' : 'VALUED CLIENT'}</span>
+                                <h3 className="font-serif">{fallbackName}</h3>
+                                <span className="user-rank">{profile?.role === 'admin' || profile?.role === 'super-admin' ? 'ATELIER ADMIN' : 'VALUED CLIENT'}</span>
                             </div>
                         </div>
 
                         <nav className="sidebar-nav">
                             <button
+                                type="button"
                                 className={`nav-btn ${activeTab === 'account' ? 'active' : ''}`}
                                 onClick={() => setActiveTab('account')}
                             >
                                 <User size={18} /> Account Settings
                             </button>
                             <button
+                                type="button"
                                 className={`nav-btn ${activeTab === 'orders' ? 'active' : ''}`}
                                 onClick={() => setActiveTab('orders')}
                             >
                                 <Package size={18} /> Order History
                             </button>
                             <button
+                                type="button"
                                 className={`nav-btn ${activeTab === 'addresses' ? 'active' : ''}`}
                                 onClick={() => setActiveTab('addresses')}
                             >
                                 <MapPin size={18} /> Locations
                             </button>
                             <button
+                                type="button"
                                 className={`nav-btn ${activeTab === 'password' ? 'active' : ''}`}
                                 onClick={() => setActiveTab('password')}
                             >
@@ -143,7 +147,7 @@ export default function Profile() {
                             </button>
                         </nav>
 
-                        <button onClick={logout} className="logout-btn">
+                        <button type="button" onClick={logout} className="logout-btn">
                             <LogOut size={18} /> Disconnect
                         </button>
                     </aside>

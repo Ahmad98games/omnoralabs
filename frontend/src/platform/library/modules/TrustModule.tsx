@@ -2,7 +2,7 @@ import React from 'react';
 import { useBuilder } from '../../../context/BuilderContext';
 import {
     ShieldCheck, Lock, Truck, RefreshCcw, Mail, Award,
-    AlignLeft, AlignCenter, Maximize2, LayoutGrid, Rows
+    AlignLeft, AlignCenter, LayoutGrid, Rows
 } from 'lucide-react';
 
 // ─── Shared UI ────────────────────────────────────────────────────────────────
@@ -16,7 +16,17 @@ const Label = ({ children }: { children: React.ReactNode }) => (
     <span style={{ fontSize: 11, color: '#6B7280', fontWeight: 500, display: 'block', marginBottom: 6 }}>{children}</span>
 );
 
-const Slider = ({ label, value, min = 0, max = 100, unit = 'px', onChange }: any) => (
+interface SliderProps {
+    label: string;
+    value: number | string;
+    // Actually, value seems to be a number or string based on usage. 
+    min?: number;
+    max?: number;
+    unit?: string;
+    onChange: (v: string) => void;
+}
+
+const Slider = ({ label, value, min = 0, max = 100, unit = 'px', onChange }: SliderProps) => (
     <div style={{ marginBottom: 14 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
             <Label>{label}</Label>
@@ -56,7 +66,14 @@ const SegmentedButton = ({ options, value, onChange }: { options: { id: string; 
     </div>
 );
 
-const TextInput = ({ label, value, onChange, onBlur }: any) => (
+interface TextInputProps {
+    label: string;
+    value: string;
+    onChange: (v: string) => void;
+    onBlur?: () => void;
+}
+
+const TextInput = ({ label, value, onChange, onBlur }: TextInputProps) => (
     <div style={{ marginBottom: 12 }}>
         <Label>{label}</Label>
         <input type="text" value={value || ''} onChange={e => onChange(e.target.value)} onBlur={onBlur}
@@ -72,7 +89,7 @@ export const TrustModule: React.FC = () => {
     if (!node || !['trust_badges', 'trust_section', 'policy_block'].includes(node.type)) return null;
 
     const p = node.props || {};
-    const set = (key: string, value: any) => updateNode(node.id, `props.${key}`, value);
+    const set = (key: string, value: unknown) => updateNode(node.id, `props.${key}`, value);
 
     const BADGES = [
         { icon: <Lock size={14} />, label: 'Secure', key: 'badgeSecure' },

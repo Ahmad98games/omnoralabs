@@ -42,7 +42,17 @@ const TemplateCard: React.FC<{ ev: typeof EVENTS[0]; template: Template | undefi
     const [saved, setSaved] = useState(false);
 
     useEffect(() => {
-        if (template) { setText(template.templateText); setActive(template.isActive); setWinStart(template.timingWindowStart); setWinEnd(template.timingWindowEnd); setGap(template.minGapHours); }
+        // OSTT FIX: Synchronize internal state asynchronously to avoid synchronous setState inside effect
+        const sync = async () => {
+            if (template) {
+                setText(template.templateText);
+                setActive(template.isActive);
+                setWinStart(template.timingWindowStart);
+                setWinEnd(template.timingWindowEnd);
+                setGap(template.minGapHours);
+            }
+        };
+        sync();
     }, [template]);
 
     const insertVar = (v: string) => { setText(t => t + v); };
@@ -128,7 +138,9 @@ const WhatsAppTemplatesPanel: React.FC = () => {
         try {
             await apiClient.put(`/whatsapp-templates/${eventName}`, data);
             setTemplates(ts => ts.map(t => t.eventName === eventName ? { ...t, ...data } : t));
-        } catch (e) { console.error(e); }
+        } catch (e) {
+            console.error('[WhatsAppTemplates] Save failed:', e);
+        }
     };
 
     if (loading) return <div style={{ padding: 40, color: '#6B7280', textAlign: 'center' }}>Loading templates…</div>;

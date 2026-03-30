@@ -1,24 +1,15 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import { Layout } from './Layout';
-import Home from '../pages/HomeWithAds';
-import Collection from '../pages/Collection';
-import Product from '../pages/Product';
-import Cart from '../pages/Cart';
-import Checkout from '../pages/Checkout';
-import About from '../pages/About';
-import { ThankYouPage } from './storefront/ThankYouPage';
-import { CustomerDashboard } from './storefront/CustomerDashboard';
-import OmnoraContact from '../pages/OmnoraContact';
-import { Routes, Route, useLocation, Outlet } from 'react-router-dom';
-import { CustomerAuthProvider } from '../context/CustomerAuthContext';
 import { Store, Globe } from 'lucide-react';
-import { StorefrontAnalytics } from './cms/StorefrontAnalytics';
 import { SEOHead } from './cms/SEOHead';
-import { useStorefront } from '../hooks/useStorefront';
-import { useQuery } from '@tanstack/react-query';
-import { databaseClient } from '../platform/core/DatabaseClient';
-import { ROUTES } from '../routes';
+import { StorefrontApp } from '../platform/publish/StorefrontApp';
+
+// OSTT FIX: Defining global window extension to avoid 'any'
+declare global {
+    interface Window {
+        __OMNORA_TENANT_ID__?: string;
+    }
+}
 
 const PLATFORM_DOMAINS = [
     'localhost', 
@@ -43,7 +34,7 @@ export const HostnameInterceptor: React.FC<{ children: React.ReactNode }> = ({ c
         const pathname = window.location.pathname;
         
         // Internal Vercel Rewrite detection (if applicable via path)
-        const siteMatch = pathname.match(/^\/_sites\/([^\/]+)/);
+        const siteMatch = pathname.match(/^\/_sites\/([^/]+)/);
         const resolvedHost = siteMatch ? siteMatch[1] : hostname;
 
         const isPlatformPath = pathname.startsWith('/auth') || 
@@ -63,8 +54,8 @@ export const HostnameInterceptor: React.FC<{ children: React.ReactNode }> = ({ c
         const fetchStore = async () => {
             try {
                 // Check if already resolved by another layer
-                if ((window as any).__OMNORA_TENANT_ID__) {
-                    setStoreId((window as any).__OMNORA_TENANT_ID__);
+                if (window.__OMNORA_TENANT_ID__) {
+                    setStoreId(window.__OMNORA_TENANT_ID__);
                     setLoading(false);
                     return;
                 }
@@ -78,7 +69,7 @@ export const HostnameInterceptor: React.FC<{ children: React.ReactNode }> = ({ c
 
                 if (data && !error) {
                     const activeTenant = data.store_slug || data.id;
-                    (window as any).__OMNORA_TENANT_ID__ = activeTenant;
+                    window.__OMNORA_TENANT_ID__ = activeTenant;
                     setStoreId(activeTenant);
                 }
             } catch (err) {
@@ -130,6 +121,3 @@ export const HostnameInterceptor: React.FC<{ children: React.ReactNode }> = ({ c
 
     return <>{children}</>;
 };
-
-// ─── LEGACY ROUTER REMOVED IN FAVOR OF PLATFORM/PUBLISH/STOREFRONTAPP ───
-import { StorefrontApp } from '../platform/publish/StorefrontApp';

@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useBuilderStore } from '../../stores/useBuilderStore';
-import { ChevronDown, GripHorizontal, X } from 'lucide-react';
+import { X } from 'lucide-react';
 
 /**
  * 📱 MOBILE PROPERTIES SHEET (Task 3.7 / Law 3)

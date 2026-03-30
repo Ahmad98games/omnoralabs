@@ -1,24 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ShoppingBag, ArrowLeft, ShieldCheck, Truck, MessageCircle, Minus, Plus } from 'lucide-react';
+import { ArrowLeft, Minus, Plus, MessageCircle, ShoppingBag, ShieldCheck, Truck } from 'lucide-react';
 import client from '../api/client';
 import { useToast } from '../context/ToastContext';
 import { useTheme } from '../context/ThemeContext';
 import { BuilderProvider } from '../context/BuilderContext';
 import { useCartStore } from '../store/cartStore';
 import '../styles/product.css';
-import { transformProduct, IGSGProduct as IProduct } from '../utils/productTransformer';
-import { ROUTES } from '../routes';
+
+// OSTT FIX: Extract type correctly without importing unused function
+import type { IGSGProduct as IProduct } from '../utils/productTransformer';
+import { transformProduct } from '../utils/productTransformer';
 
 const BRAND_PLACEHOLDER = '/images/placeholder_omnora.png';
-
-interface Variant {
-    label: string;
-    stock: number;
-    priceOverride?: number;
-}
 
 const ProductPage: React.FC = () => {
     const { slug } = useParams<{ slug: string }>();
@@ -27,10 +22,8 @@ const ProductPage: React.FC = () => {
     const { addItem } = useCartStore();
 
     const [product, setProduct] = useState<IProduct | null>(null);
-    const [loadingLegacy, setLoadingLegacy] = useState(true);
-    const [siteContent, setSiteContent] = useState<any>(null);
+    const [siteContent, setSiteContent] = useState<Record<string, unknown> | null>(null);
     const { updateSellerStyles } = useTheme();
-    const [error, setError] = useState<{ message: string; code?: string } | null>(null);
     const [quantity, setQuantity] = useState(1);
     const [selectedSize, setSelectedSize] = useState<string>('M');
     const [isProcessing, setIsProcessing] = useState(false);
@@ -52,7 +45,7 @@ const ProductPage: React.FC = () => {
     });
 
     const { data: cmsData } = useQuery({
-        queryKey: ['storefront', 'global'], // Generic global content
+        queryKey: ['storefront', 'global'],
         queryFn: async () => {
             const { data } = await client.get('/cms/content');
             return data;
@@ -62,9 +55,10 @@ const ProductPage: React.FC = () => {
 
     useEffect(() => {
         if (productData) {
-            setProduct(transformProduct(productData));
-            if (productData.variants?.length > 0 && !selectedSize) {
-                setSelectedSize(productData.variants[0].label);
+            const transformed = transformProduct(productData);
+            setProduct(transformed);
+            if (transformed.variants && transformed.variants.length > 0 && !selectedSize) {
+                setSelectedSize(transformed.variants[0].label);
             }
         }
         if (cmsData?.success && cmsData?.content) {
@@ -73,9 +67,8 @@ const ProductPage: React.FC = () => {
         }
     }, [productData, cmsData, updateSellerStyles, selectedSize]);
 
-    // Use unified loading/error states from Query
     const loading = productLoading;
-    const errorState = productError ? { message: (productError as any).message } : null;
+    const errorState = productError ? { message: (productError as Error).message } : null;
 
     const handleAddToCart = () => {
         if (!product) return;
@@ -95,7 +88,6 @@ const ProductPage: React.FC = () => {
 
         setIsProcessing(true);
         try {
-            // Save order as PENDING_CONFIRMATION before redirect
             const payload = {
                 items: [{
                     productId: product.id,
@@ -126,7 +118,7 @@ Order from: ${window.location.origin}
 Please confirm availability and shipping timeline.`;
 
             window.open(`https://wa.me/923097613611?text=${encodeURIComponent(message.trim())}`, '_blank');
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error('WhatsApp Persistence Failed', err);
             showToast('Unable to initiate secure order. Please try again.', 'error');
         } finally {
@@ -141,17 +133,16 @@ Please confirm availability and shipping timeline.`;
             <div className="container" style={{ textAlign: 'center', padding: '10rem 0' }}>
                 <h2>Something went wrong</h2>
                 <p style={{ color: 'red', fontWeight: 'bold' }}>{errorState?.message || 'We could not find the entity you are looking for.'}</p>
-                <button onClick={() => navigate('/collection')} className="btn-luxury-outline">Back to Collection</button>
+                <button type="button" onClick={() => navigate('/collection')} className="btn-luxury-outline">Back to Collection</button>
             </div>
         </div>
     );
 
     const availableStock = (product.variants?.length ?? 0) > 0
-        ? (product.variants?.find(v => v.label === selectedSize)?.stock ?? 0)
+        ? (product.variants?.find((v: { label: string; stock: number }) => v.label === selectedSize)?.stock ?? 0)
         : (product.stock ?? 0);
 
     const isOutOfStock = availableStock === 0;
-
     const isPreview = window.location.search.includes('preview=true');
 
     return (
@@ -184,8 +175,9 @@ Please confirm availability and shipping timeline.`;
                                 <div className="selection-group">
                                     <span className="group-label">SELECT VARIANT</span>
                                     <div className="size-grid">
-                                        {product.variants?.map(v => (
+                                        {product.variants?.map((v: { label: string; stock: number }) => (
                                             <button
+                                                type="button"
                                                 key={v.label}
                                                 className={`size-option ${selectedSize === v.label ? 'active' : ''}`}
                                                 onClick={() => setSelectedSize(v.label)}
@@ -200,7 +192,7 @@ Please confirm availability and shipping timeline.`;
                             {/* Stock Indicator */}
                             {product.showLowStockWarning && availableStock > 0 && availableStock < 5 && (
                                 <div className="stock-pulse">
-                                    <span className="pulse-dot"></span>
+                                    <span className="pulse-dot" />
                                     CRITICAL! ONLY {availableStock} NODES REMAINING
                                 </div>
                             )}
@@ -211,36 +203,38 @@ Please confirm availability and shipping timeline.`;
 
                             {/* Quantity */}
                             {!isOutOfStock && (
-                             <div className="selection-group" style={{ marginTop: '2rem' }}>
-    <span className="group-label">QUANTITY</span>
-    <div className="qty-control">
-        <button 
-            aria-label="Decrease quantity"
-            title="Decrease"
-            onClick={() => setQuantity(Math.max(1, quantity - 1))}
-        >
-            <Minus size={14} aria-hidden="true" />
-        </button>
-        <span>{quantity}</span>
-        <button 
-            aria-label="Increase quantity"
-            title="Increase"
-            onClick={() => setQuantity(quantity + 1)}
-        >
-            <Plus size={14} aria-hidden="true" />
-        </button>
-    </div>
-</div>
+                                <div className="selection-group" style={{ marginTop: '2rem' }}>
+                                    <span className="group-label">QUANTITY</span>
+                                    <div className="qty-control">
+                                        <button 
+                                            type="button"
+                                            aria-label="Decrease quantity"
+                                            title="Decrease"
+                                            onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                                        >
+                                            <Minus size={14} aria-hidden="true" />
+                                        </button>
+                                        <span>{quantity}</span>
+                                        <button 
+                                            type="button"
+                                            aria-label="Increase quantity"
+                                            title="Increase"
+                                            onClick={() => setQuantity(quantity + 1)}
+                                        >
+                                            <Plus size={14} aria-hidden="true" />
+                                        </button>
+                                    </div>
+                                </div>
                             )}
 
                             {/* Actions */}
                             <div className="p-actions-lux">
                                 {!isOutOfStock && (
                                     <>
-                                        <button className="btn-luxury-action" onClick={handleAddToCart}>
+                                        <button type="button" className="btn-luxury-action" onClick={handleAddToCart}>
                                             <ShoppingBag size={18} /> ADD TO DEPLOYMENT QUEUE
                                         </button>
-                                        <button className="btn-luxury-outline" onClick={handleWhatsAppOrder}>
+                                        <button type="button" className="btn-luxury-outline" onClick={handleWhatsAppOrder}>
                                             <MessageCircle size={18} /> BUY NOW VIA WHATSAPP
                                         </button>
                                     </>

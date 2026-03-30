@@ -1,5 +1,4 @@
 /* eslint-disable react/prop-types */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * 🛠️ OMNORA LABS | [OMNORA RENDERER]
  * ---------------------------------------------------------
@@ -16,11 +15,20 @@ import { useOmnoraBase } from '../../context/OmnoraContext';
 import { useNodeSelector } from '../../hooks/useNodeSelector';
 import { StorefrontProvider } from '../../context/StorefrontContext';
 
+export interface CMSNode {
+    id: string;
+    type: string;
+    props?: Record<string, unknown>;
+    children?: string[];
+    hidden?: Record<string, boolean>;
+    styles?: React.CSSProperties;
+}
+
 export interface RenderContextType {
-    registry: Record<string, any>;
+    registry: Record<string, { component: React.ComponentType<BlockProps> }>;
     mode: string;
     viewport: string;
-    renderWrapper?: (node: any, children: React.ReactNode) => React.ReactNode;
+    renderWrapper?: (node: CMSNode, children: React.ReactNode) => React.ReactNode;
 }
 
 const RenderContext = createContext<RenderContextType | null>(null);
@@ -33,9 +41,9 @@ export interface OmnoraRendererProps {
     /** Current mode for visual adjustments (No logic dependency) */
     mode?: 'edit' | 'preview' | 'production';
     /** Optional registry override for custom component sets */
-    registryOverride?: Record<string, any>;
+    registryOverride?: Record<string, { component: React.ComponentType<BlockProps> }>;
     /** Optional renderer for specialized wrapping (Editor overlays, etc) */
-    renderWrapper?: (node: any, children: React.ReactNode) => React.ReactNode;
+    renderWrapper?: (node: CMSNode, children: React.ReactNode) => React.ReactNode;
 }
 
 /**
@@ -80,7 +88,7 @@ interface RecursiveNodeProps {
 
 export const PureRecursiveNode: React.FC<RecursiveNodeProps> = ({ id }) => {
     const context = useRenderContext();
-    const node = useNodeSelector(id, (n) => n); // High-scale granular subscription
+    const node = useNodeSelector(id, (n) => n) as CMSNode | undefined; // High-scale granular subscription
 
     if (!context || !node) return null;
     const { registry, mode, viewport, renderWrapper } = context;

@@ -8,7 +8,6 @@ import {
     BarChart3, 
     Settings, 
     Package, 
-    ShieldCheck, 
     Zap,
     ExternalLink
 } from 'lucide-react';
@@ -63,7 +62,13 @@ export const Sidebar: React.FC = () => {
     );
 };
 
-const SidebarItem = ({ to, icon, label }: any) => (
+interface SidebarItemProps {
+    to: string;
+    icon: React.ReactNode;
+    label: string;
+}
+
+const SidebarItem = ({ to, icon, label }: SidebarItemProps) => (
     <NavLink 
         to={to}
         className={({ isActive }) => `

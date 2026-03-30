@@ -71,11 +71,12 @@ export interface BuilderState {
     isDragging: boolean;
     isHydrating: boolean;
     isSidebarOpen: boolean;
-    saveStatus: 'idle' | 'saving' | 'saved' | 'error';
+    saveStatus: 'idle' | 'saving' | 'saved' | 'error' | 'offline'; // OSTT FIX: Included offline
     hasUnsavedChanges: boolean;
     publishStatus: 'idle' | 'publishing' | 'success' | 'error';
     publishError: string | null;
     lastPublishedAt: string | null;
+    lastUpdatedRemote: string | null; // OSTT FIX: Added missing property
     isPreviewMode: boolean;
     previewDevice: 'desktop' | 'tablet' | 'mobile';
 
@@ -101,6 +102,7 @@ export interface BuilderState {
     moveNode: (nodeId: string, direction: 'up' | 'down') => void;
     reorderNodes: (fromIndex: number, toIndex: number) => void;
     updateNodeProperty: (nodeId: string, path: string, value: unknown) => void;
+    setNodes: (nodesObj: Record<string, unknown>) => void; // OSTT FIX: Added missing method
     
     // UI & Status
     setSelectedNodeId: (id: string | null) => void;
@@ -108,8 +110,12 @@ export interface BuilderState {
     setPreviewDevice: (device: BuilderState['previewDevice']) => void;
     setSidebarOpen: (val: boolean) => void;
     setIsHydrating: (val: boolean) => void;
+    setSaveStatus: (status: BuilderState['saveStatus']) => void; // OSTT FIX: Added missing method
+    setHasUnsavedChanges: (val: boolean) => void; // OSTT FIX: Added missing method
     setPublishStatus: (status: BuilderState['publishStatus']) => void;
     setPublishError: (error: string | null) => void;
+    setLastUpdatedRemote: (val: string | null) => void; // OSTT FIX: Added missing method
+    setIsDragging: (val: boolean) => void; // OSTT FIX: Added missing method
     
     // Theme & History
     updateTheme: (path: string, value: unknown) => void;
@@ -174,20 +180,19 @@ export const useBuilderStore = create<BuilderState>()(
             publishStatus: 'idle',
             publishError: null,
             lastPublishedAt: null,
+            lastUpdatedRemote: null,
             isPreviewMode: false,
             previewDevice: 'desktop',
             themeSettings: DEFAULT_THEME,
             historyStack: [],
             historyIndex: -1,
 
-            // --- HELPER: Execute Command with History ---
             _execute: (fn: (draft: BuilderState) => void) => {
                 const state = get();
                 const next = produce(state, (draft) => {
-                    fn(draft);
+                    fn(draft as BuilderState); // OSTT FIX: Strict cast for immer draft
                     draft.hasUnsavedChanges = true;
                 }, (patches, inversePatches) => {
-                    // History Tracking
                     const newStack = state.historyStack.slice(0, state.historyIndex + 1);
                     newStack.push({ undo: inversePatches, redo: patches });
                     if (newStack.length > 50) newStack.shift();
@@ -200,7 +205,6 @@ export const useBuilderStore = create<BuilderState>()(
                 set(next);
             },
 
-            // --- PAGE ACTIONS ---
             addPage: (title, type = 'custom') => {
                 const id = crypto.randomUUID();
                 const existingSlugs = Object.values(get().pages).map(p => p.slug);
@@ -234,7 +238,6 @@ export const useBuilderStore = create<BuilderState>()(
                     delete draft.nodes[pageId];
                     delete draft.pages[pageId];
                     
-                    // Cleanup index
                     Object.keys(draft.nodePageIndex).forEach(nodeId => {
                         if (draft.nodePageIndex[nodeId] === pageId) delete draft.nodePageIndex[nodeId];
                     });
@@ -273,20 +276,15 @@ export const useBuilderStore = create<BuilderState>()(
                     
                     draft.nodes[newId] = newNodes;
                     draft.hasUnsavedChanges = true;
-                    // Note: Task says NOT to set as active page
                 }));
             },
 
             reorderPages: (_from, _to) => {
-                // Reordering keys in a JS object is not strictly preserved, 
-                // but we can manage a 'pageOrder' array if needed.
-                // For now, we'll assume the list is derived and we just mark change.
                 set({ hasUnsavedChanges: true }); 
             },
 
             setActivePageId: (id) => set({ activePageId: id, selectedNodeId: null }),
 
-            // --- NODE ACTIONS ---
             addNode: (node) => {
                 const activeId = get().activePageId;
                 if (!activeId) return;
@@ -376,19 +374,35 @@ export const useBuilderStore = create<BuilderState>()(
                     if (!node) return;
 
                     const keys = path.split('.');
-                    let current: Record<string, unknown> = node.props as Record<string, unknown>;
+                    let current: Record<string, unknown> = node.props;
                     const actualKeys = keys[0] === 'props' ? keys.slice(1) : keys;
                     
                     for (let i = 0; i < actualKeys.length - 1; i++) {
                         if (current[actualKeys[i]] === undefined) current[actualKeys[i]] = {};
-                        current = current[actualKeys[i]];
+                        current = current[actualKeys[i]] as Record<string, unknown>;
                     }
                     current[actualKeys[actualKeys.length - 1]] = value;
                     draft.hasUnsavedChanges = true;
                 }));
             },
 
-            // --- UI & THEME ---
+            // OSTT FIX: Add strict implementation for setNodes
+            setNodes: (nodesObj: Record<string, unknown>) => {
+                const activeId = get().activePageId;
+                if (!activeId) return;
+                
+                set(produce((draft: BuilderState) => {
+                    // Reconstruct nodes array from object structure
+                    const newNodesArray: BuilderNode[] = Object.values(nodesObj) as BuilderNode[];
+                    draft.nodes[activeId] = newNodesArray;
+                    
+                    // Rebuild indices safely
+                    newNodesArray.forEach(n => {
+                        draft.nodePageIndex[n.id] = activeId;
+                    });
+                }));
+            },
+
             setSelectedNodeId: (id) => set({ selectedNodeId: id }),
             setIsPreviewMode: (val) => set({ isPreviewMode: val }),
             setPreviewDevice: (device) => set({ previewDevice: device }),
@@ -396,12 +410,18 @@ export const useBuilderStore = create<BuilderState>()(
             setIsHydrating: (val) => set({ isHydrating: val }),
             setPublishStatus: (status) => set({ publishStatus: status }),
             setPublishError: (error) => set({ publishError: error }),
+            
+            // OSTT FIX: Missing setters implemented
+            setSaveStatus: (status) => set({ saveStatus: status }),
+            setHasUnsavedChanges: (val) => set({ hasUnsavedChanges: val }),
+            setLastUpdatedRemote: (val) => set({ lastUpdatedRemote: val }),
+            setIsDragging: (val) => set({ isDragging: val }),
 
             updateTheme: (path, value) => set(produce((draft: BuilderState) => {
                 const keys = path.split('.');
                 let current: Record<string, unknown> = draft.themeSettings as unknown as Record<string, unknown>;
                 for (let i = 0; i < keys.length - 1; i++) {
-                    current = current[keys[i]];
+                    current = current[keys[i]] as Record<string, unknown>;
                 }
                 current[keys[keys.length - 1]] = value;
                 draft.hasUnsavedChanges = true;
@@ -412,7 +432,7 @@ export const useBuilderStore = create<BuilderState>()(
                 if (historyIndex < 0) return;
 
                 set(produce((draft: BuilderState) => {
-                    applyPatches(draft, historyStack[historyIndex].undo);
+                    applyPatches(draft as BuilderState, historyStack[historyIndex].undo);
                     draft.historyIndex -= 1;
                 }));
             },
@@ -422,14 +442,13 @@ export const useBuilderStore = create<BuilderState>()(
                 if (historyIndex >= historyStack.length - 1) return;
 
                 set(produce((draft: BuilderState) => {
-                    applyPatches(draft, historyStack[historyIndex + 1].redo);
+                    applyPatches(draft as BuilderState, historyStack[historyIndex + 1].redo);
                     draft.historyIndex += 1;
                 }));
             },
 
             resetPageNodes: (pageId) => set(produce((draft: BuilderState) => {
                 draft.nodes[pageId] = [];
-                // Cleanup index for nodes that were in this page
                 Object.keys(draft.nodePageIndex).forEach(nid => {
                     if (draft.nodePageIndex[nid] === pageId) delete draft.nodePageIndex[nid];
                 });
@@ -440,7 +459,7 @@ export const useBuilderStore = create<BuilderState>()(
             skipHydration: true,
             onRehydrateStorage: () => (state, error) => {
                 if (error) {
-                    state?.resetPageNodes(state.activePageId); // Fallback: try to clear active
+                    state?.resetPageNodes(state.activePageId);
                     return;
                 }
                 state?.setIsHydrating(false);

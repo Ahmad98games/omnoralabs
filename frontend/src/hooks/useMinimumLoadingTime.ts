@@ -20,15 +20,12 @@ export function useMinimumLoadingTime(
             const elapsed = Date.now() - startTime;
             const remaining = Math.max(0, minDisplayTime - elapsed);
 
-            if (remaining > 0) {
-                const timer = setTimeout(() => {
-                    setDisplayLoading(false);
-                }, remaining);
-
-                return () => clearTimeout(timer);
-            } else {
+            // OSTT FIX: Always use a timer (even if 0ms) to avoid set-state-in-effect synchronous cascade
+            const timer = setTimeout(() => {
                 setDisplayLoading(false);
-            }
+            }, remaining);
+
+            return () => clearTimeout(timer);
         }
     }, [actualLoading, startTime, minDisplayTime]);
 

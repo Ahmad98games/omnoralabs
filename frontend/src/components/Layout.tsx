@@ -128,6 +128,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                         You are viewing your storefront
                     </span>
                     <button
+                        type="button"
                         onClick={() => navigate('/seller?tab=builder')}
                         style={{
                             background: '#FF6B35',
@@ -150,12 +151,11 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                 <div className="header-container">
                     {/* Brand Sovereignty */}
                     <Link to={getBaseUrl() || ROUTES.HOME} className="brand" onClick={closeMenu}>
-                        <div className="brand-logo">
+                        <div className="brand-logo" style={{ background: 'transparent' }}>
                             <img
-                                src={content?.configuration?.assets?.logo || "/images/omnora.jpg"}
-                                alt={content?.configuration?.name || "Omnora"}
-                                width={24}
-                                height={24}
+                                src="/images/omnoralabs_brand.png"
+                                alt="Omnora Labs"
+                                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                             />
                         </div>
                         <span className="brand-name">
@@ -166,8 +166,8 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                     {/* Desktop Navigation (Sovereign Aware) */}
                     <nav className="nav-desktop">
                         {isInsideTerritory ? (
-                            // DYNAMIC TERRITORY MENU
-                            Object.entries(content?.pages || {}).map(([slug, page]: [string, { heroHeadline?: string; title?: string }]) => {
+                            // DYNAMIC TERRITORY MENU (OSTT FIX: Strictly typed object entries mapping)
+                            Object.entries((content?.pages as Record<string, { heroHeadline?: string; title?: string }>) || {}).map(([slug, page]) => {
                                 const targetPath = slug === 'home' ? getBaseUrl() : `${getBaseUrl()}/${slug}`;
                                 return (
                                     <Link
@@ -226,7 +226,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                                     <Link to="/profile" className="icon-btn" title="Profile">
                                         <User size={20} />
                                     </Link>
-                                    <button onClick={handleLogout} className="icon-btn" title="Logout">
+                                    <button type="button" onClick={handleLogout} className="icon-btn" title="Logout">
                                         <LogOut size={20} />
                                     </button>
                                 </>
@@ -237,7 +237,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                             )}
 
                             {/* Cart */}
-                            <button onClick={() => setCartOpen(true)} className="icon-btn cart-icon" title="Shopping Cart">
+                            <button type="button" onClick={() => setCartOpen(true)} className="icon-btn cart-icon" title="Shopping Cart">
                                 <ShoppingCart size={20} />
                                 {isHydrated && itemCount > 0 && (
                                     <span className="cart-count">{itemCount}</span>
@@ -246,6 +246,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 
                             {/* Mobile Menu Toggle */}
                             <button
+                                type="button"
                                 className="menu-toggle"
                                 onClick={() => setMenuOpen(!menuOpen)}
                                 aria-label="Toggle menu"
@@ -297,10 +298,10 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                                     <Link to="/admin" onClick={closeMenu}>Admin Dashboard</Link>
                                 )}
                                 <Link to="/profile" onClick={closeMenu}>My Profile</Link>
-                                <button onClick={() => { closeMenu(); setCartOpen(true); }} className="nav-link text-left w-full h-auto py-3 mt-0 mb-0">
+                                <button type="button" onClick={() => { closeMenu(); setCartOpen(true); }} className="nav-link text-left w-full h-auto py-3 mt-0 mb-0">
                                     Cart {isHydrated && itemCount > 0 && `(${itemCount})`}
                                 </button>
-                                <button onClick={handleLogout} className="mobile-logout">
+                                <button type="button" onClick={handleLogout} className="mobile-logout">
                                     Logout
                                 </button>
                             </>

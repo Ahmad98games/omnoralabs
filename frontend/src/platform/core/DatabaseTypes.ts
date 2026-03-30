@@ -75,7 +75,8 @@ export interface CustomPage {
     nodeIds: string[];
     createdAt: string;
     updatedAt: string;
-    lastUpdated?: any;
+    // OSTT FIX: Removed Any
+    lastUpdated?: string;
     seoMeta?: {
         title?: string;
         description?: string;
@@ -83,7 +84,8 @@ export interface CustomPage {
     };
     type?: 'system' | 'template' | 'custom';
     isLocked?: boolean;
-    content?: any;
+    // OSTT FIX: Replaced any with structured layout record
+    content?: Record<string, unknown>;
 }
 
 export interface NavLink {
@@ -105,7 +107,7 @@ export interface DiscountCode {
     id: string;
     merchantId: string;
     code: string;
-    type: 'percentage' | 'fixed';
+    type: 'percentage' | 'fixed_amount' | 'free_shipping';
     value: number;
     isActive: boolean;
     usageLimit?: number;
@@ -118,7 +120,8 @@ export interface Order {
     merchantId: string;
     customerEmail: string;
     customerName: string;
-    items: any[];
+    // OSTT FIX: Remove any
+    items: Record<string, unknown>[];
     totalAmount: number;
     status: 'PENDING' | 'PAID' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
     createdAt: string;
@@ -144,7 +147,8 @@ export interface IDatabaseClient {
 
     // Merchant Settings
     updateMerchantPaymentSettings(updates: { stripePublicKey?: string; stripeSecretKey?: string; stripeWebhookSecret?: string; }): Promise<void>;
-    getMerchantPaymentSettings(merchantId: string): Promise<any>;
+    // OSTT FIX: Replaced any with structured Record
+    getMerchantPaymentSettings(merchantId: string): Promise<Record<string, unknown> | null>;
 
     // Store Configs
     saveStoreConfig(merchantId: string, config: StorefrontConfig, domain: string): Promise<StoreConfigRecord>;
@@ -152,14 +156,16 @@ export interface IDatabaseClient {
     getStoreConfigByDomain(domain: string): Promise<StoreConfigRecord | null>;
 
     // Orders
-    createOrder(merchantId: string, customer: any, items: any[], subtotal: number, currency: string): Promise<Order>;
+    // OSTT FIX: Replaced any with structured Record
+    createOrder(merchantId: string, customer: Record<string, unknown>, items: Record<string, unknown>[], subtotal: number, currency: string): Promise<Order>;
     getOrders(merchantId: string): Promise<Order[]>;
     getStoreAnalytics(merchantId: string): Promise<StoreAnalytics>;
     trackInteraction(merchantId: string, event: {
         eventType: 'page_view' | 'product_view' | 'add_to_cart' | 'purchase';
         productId?: string;
         sessionId?: string;
-        metadata?: any;
+        // OSTT FIX: Replaced any with structured Record
+        metadata?: Record<string, unknown>;
     }): Promise<void>;
     updateOrderStatus(orderId: string, status: Order['status']): Promise<void>;
 
@@ -175,7 +181,8 @@ export interface IDatabaseClient {
 
     // Categories
     getCategories(merchantId: string): Promise<Category[]>;
-    upsertCategory(merchantId: string, category: any): Promise<Category>;
+    // OSTT FIX: Replaced any with structured Record
+    upsertCategory(merchantId: string, category: Partial<Category>): Promise<Category>;
     deleteCategory(merchantId: string, categoryId: string): Promise<void>;
 
     // Pages

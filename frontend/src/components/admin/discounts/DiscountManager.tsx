@@ -1,29 +1,51 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../../../lib/supabaseClient';
-import { Ticket, Plus, Search, Trash2, Calendar, Users, BarChart } from 'lucide-react';
+import { Ticket, Plus, Trash2, Users } from 'lucide-react';
+
+interface Discount {
+    id: string;
+    code: string;
+    type: string;
+    value: number;
+    usage_count: number;
+    usage_limit: number | null;
+    is_active: boolean;
+    ends_at: string | null;
+}
 
 export const DiscountManager: React.FC = () => {
-    const [discounts, setDiscounts] = useState<any[]>([]);
+    const [discounts, setDiscounts] = useState<Discount[]>([]);
     const [loading, setLoading] = useState(true);
     const [isCreating, setIsCreating] = useState(false);
     const [newDiscount, setNewDiscount] = useState({
         code: '', type: 'percentage', value: 10, minimum_order_cents: 0, 
-        usage_limit: null, begins_at: new Date().toISOString()
+        usage_limit: null as number | null, begins_at: new Date().toISOString()
     });
 
-    useEffect(() => {
-        fetchDiscounts();
+    const reloadDiscounts = useCallback(async (showLoading = true) => {
+        if (showLoading) setLoading(true);
+        try {
+            const { data, error } = await supabase
+                .from('discounts')
+                .select('*')
+                .order('created_at', { ascending: false });
+            
+            if (!error && data) setDiscounts(data as Discount[]);
+        } catch (err) {
+            console.error('[DiscountManager] reloadDiscounts failed:', err);
+        } finally {
+            setLoading(false);
+        }
     }, []);
 
-    const fetchDiscounts = async () => {
-        setLoading(true);
-        const { data, error } = await supabase
-            .from('discounts')
-            .select('*')
-            .order('created_at', { ascending: false });
-        if (!error) setDiscounts(data || []);
-        setLoading(false);
-    };
+    useEffect(() => {
+        let mounted = true;
+        const init = async () => {
+            if (mounted) await reloadDiscounts(false);
+        };
+        init();
+        return () => { mounted = false; };
+    }, [reloadDiscounts]);
 
     const handleCreate = async () => {
         const { error } = await supabase
@@ -31,13 +53,13 @@ export const DiscountManager: React.FC = () => {
             .insert({ ...newDiscount });
         if (!error) {
             setIsCreating(false);
-            fetchDiscounts();
+            reloadDiscounts();
         }
     };
 
     const toggleStatus = async (id: string, current: boolean) => {
         await supabase.from('discounts').update({ is_active: !current }).eq('id', id);
-        fetchDiscounts();
+        reloadDiscounts();
     };
 
     const InputStyle = { 
@@ -47,14 +69,13 @@ export const DiscountManager: React.FC = () => {
 
     return (
         <div style={{ padding: 24 }}>
-            {/* Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
                 <div>
                     <h1 style={{ fontSize: 24, fontWeight: 700, color: '#fff', marginBottom: 4 }}>Discounts</h1>
                     <p style={{ fontSize: 13, color: '#71717a' }}>Manage promotional codes and coupons</p>
                 </div>
                 {!isCreating && (
-                    <button onClick={() => setIsCreating(true)} style={{ padding: '10px 20px', background: '#FF6B35', color: '#fff', borderRadius: 8, border: 'none', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <button type="button" onClick={() => setIsCreating(true)} style={{ padding: '10px 20px', background: '#FF6B35', color: '#fff', borderRadius: 8, border: 'none', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
                         <Plus size={18} /> Create Discount
                     </button>
                 )}
@@ -86,13 +107,12 @@ export const DiscountManager: React.FC = () => {
                         </div>
                     </div>
                     <div style={{ display: 'flex', gap: 12, marginTop: 32, justifyContent: 'flex-end' }}>
-                        <button onClick={() => setIsCreating(false)} style={{ padding: '10px 20px', background: 'transparent', color: '#71717a', border: 'none', fontWeight: 600, cursor: 'pointer' }}>Cancel</button>
-                        <button onClick={handleCreate} style={{ padding: '10px 24px', background: '#FF6B35', color: '#fff', borderRadius: 8, border: 'none', fontWeight: 600, cursor: 'pointer' }}>Save Discount</button>
+                        <button type="button" onClick={() => setIsCreating(false)} style={{ padding: '10px 20px', background: 'transparent', color: '#71717a', border: 'none', fontWeight: 600, cursor: 'pointer' }}>Cancel</button>
+                        <button type="button" onClick={handleCreate} style={{ padding: '10px 24px', background: '#FF6B35', color: '#fff', borderRadius: 8, border: 'none', fontWeight: 600, cursor: 'pointer' }}>Save Discount</button>
                     </div>
                 </div>
             )}
 
-            {/* List */}
             <div style={{ background: '#131316', border: '1px solid #27272a', borderRadius: 12, overflow: 'hidden' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                     <thead style={{ background: '#09090b', borderBottom: '1px solid #27272a' }}>
@@ -113,13 +133,14 @@ export const DiscountManager: React.FC = () => {
                         ) : discounts.map(d => (
                             <tr key={d.id} style={{ borderBottom: '1px solid #27272a' }}>
                                 <td style={{ padding: '16px' }}>
-                                    <div style={{ display: 'flex', items: 'center', gap: 8 }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                                         <Ticket size={16} color="#FF6B35" />
                                         <span style={{ fontSize: 14, fontWeight: 700, color: '#fff' }}>{d.code}</span>
                                     </div>
                                 </td>
                                 <td style={{ padding: '16px' }}>
                                     <button 
+                                        type="button"
                                         onClick={() => toggleStatus(d.id, d.is_active)}
                                         style={{ 
                                             padding: '4px 12px', borderRadius: 100, fontSize: 10, fontWeight: 800, border: 'none', cursor: 'pointer',
@@ -134,7 +155,7 @@ export const DiscountManager: React.FC = () => {
                                     {d.type === 'percentage' ? `${d.value}% Off` : `$${d.value} Off`}
                                 </td>
                                 <td style={{ padding: '16px', fontSize: 13, color: '#fff' }}>
-                                    <div style={{ display: 'flex', items: 'center', gap: 6 }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                                         <Users size={14} color="#71717a" />
                                         {d.usage_count} used {d.usage_limit ? `/ ${d.usage_limit}` : ''}
                                     </div>
@@ -143,7 +164,7 @@ export const DiscountManager: React.FC = () => {
                                     {d.ends_at ? new Date(d.ends_at).toLocaleDateString() : 'Never'}
                                 </td>
                                 <td style={{ padding: '16px' }}>
-                                    <button style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer' }}><Trash2 size={16} /></button>
+                                    <button type="button" style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer' }}><Trash2 size={16} /></button>
                                 </td>
                             </tr>
                         ))}

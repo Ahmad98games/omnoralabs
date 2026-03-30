@@ -1,0 +1,813 @@
+Date : 2026-03-30 23:40:29
+Directory : c:\omnora OS\frontend
+Total : 620 files,  -104739 codes, -2442 comments, -7884 blanks, all -115065 lines
+
+Languages
++--------------------+------------+------------+------------+------------+------------+
+| language           | files      | code       | comment    | blank      | total      |
++--------------------+------------+------------+------------+------------+------------+
+| JSON with Comments |          1 |          1 |          0 |          0 |          1 |
+| XML                |          1 |        -18 |          0 |         -2 |        -20 |
+| PowerShell         |          3 |        -42 |         -8 |        -14 |        -64 |
+| HTML               |         10 |       -658 |          0 |       -114 |       -772 |
+| TypeScript         |         45 |       -720 |        -82 |       -174 |       -976 |
+| MS SQL             |         17 |     -1,434 |       -233 |       -267 |     -1,934 |
+| Markdown           |         25 |     -2,317 |          0 |       -892 |     -3,209 |
+| CSS                |         14 |     -3,595 |          0 |       -561 |     -4,156 |
+| TypeScript JSX     |        167 |     -5,841 |       -334 |       -710 |     -6,885 |
+| JavaScript         |        305 |    -28,013 |     -1,785 |     -5,142 |    -34,940 |
+| JSON               |         32 |    -62,102 |          0 |         -8 |    -62,110 |
++--------------------+------------+------------+------------+------------+------------+
+
+Directories
++-------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                          | files      | code       | comment    | blank      | total      |
++-------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                             |        620 |   -104,739 |     -2,442 |     -7,884 |   -115,065 |
+| . (Files)                                                                     |          2 |          4 |          0 |          0 |          4 |
+| ..                                                                            |        460 |   -105,653 |     -2,326 |     -7,944 |   -115,923 |
+| .. (Files)                                                                    |         47 |     -2,425 |        -50 |       -370 |     -2,845 |
+| ..\.github                                                                    |          3 |        -67 |          0 |        -42 |       -109 |
+| ..\.github (Files)                                                            |          1 |        -25 |          0 |        -18 |        -43 |
+| ..\.github\ISSUE_TEMPLATE                                                     |          2 |        -42 |          0 |        -24 |        -66 |
+| ..\api                                                                        |          2 |       -103 |        -19 |        -19 |       -141 |
+| ..\app                                                                        |          3 |       -139 |         -7 |        -20 |       -166 |
+| ..\app (Files)                                                                |          1 |        -34 |          0 |         -4 |        -38 |
+| ..\app\[slug]                                                                 |          1 |        -72 |         -5 |        -12 |        -89 |
+| ..\app\auth                                                                   |          1 |        -33 |         -2 |         -4 |        -39 |
+| ..\app\auth\callback                                                          |          1 |        -33 |         -2 |         -4 |        -39 |
+| ..\backend                                                                    |        168 |    -45,390 |       -830 |     -2,854 |    -49,074 |
+| ..\backend (Files)                                                            |         26 |    -10,738 |        -44 |       -356 |    -11,138 |
+| ..\backend\config                                                             |          1 |       -122 |         -5 |        -19 |       -146 |
+| ..\backend\controllers                                                        |         21 |     -5,827 |       -253 |       -956 |     -7,036 |
+| ..\backend\data                                                               |          9 |    -21,266 |         -2 |         -3 |    -21,271 |
+| ..\backend\docs                                                               |          2 |        -74 |          0 |        -37 |       -111 |
+| ..\backend\email-templates                                                    |          5 |       -329 |          0 |        -57 |       -386 |
+| ..\backend\jobs                                                               |          1 |        -96 |         -6 |        -19 |       -121 |
+| ..\backend\middleware                                                         |          6 |       -271 |        -13 |        -58 |       -342 |
+| ..\backend\modules                                                            |         12 |       -520 |        -31 |       -100 |       -651 |
+| ..\backend\modules\ai-forge                                                   |          3 |       -191 |        -15 |        -37 |       -243 |
+| ..\backend\modules\analytics                                                  |          3 |        -81 |         -2 |        -15 |        -98 |
+| ..\backend\modules\checkout                                                   |          3 |       -139 |         -8 |        -23 |       -170 |
+| ..\backend\modules\tenant                                                     |          3 |       -109 |         -6 |        -25 |       -140 |
+| ..\backend\routes                                                             |         24 |       -853 |       -170 |       -197 |     -1,220 |
+| ..\backend\scripts                                                            |         12 |       -779 |        -69 |       -142 |       -990 |
+| ..\backend\services                                                           |         20 |     -2,116 |       -113 |       -378 |     -2,607 |
+| ..\backend\services (Files)                                                   |         17 |     -1,978 |       -110 |       -354 |     -2,442 |
+| ..\backend\services\shipping                                                  |          3 |       -138 |         -3 |        -24 |       -165 |
+| ..\backend\shared                                                             |          5 |       -189 |        -10 |        -44 |       -243 |
+| ..\backend\shared\lib                                                         |          2 |        -76 |         -3 |        -20 |        -99 |
+| ..\backend\shared\middleware                                                  |          3 |       -113 |         -7 |        -24 |       -144 |
+| ..\backend\templates                                                          |          3 |       -201 |          0 |          0 |       -201 |
+| ..\backend\templates\home                                                     |          3 |       -201 |          0 |          0 |       -201 |
+| ..\backend\tests                                                              |          6 |       -822 |        -42 |       -232 |     -1,096 |
+| ..\backend\tests (Files)                                                      |          2 |       -417 |        -10 |       -137 |       -564 |
+| ..\backend\tests\integration                                                  |          2 |       -279 |        -29 |        -61 |       -369 |
+| ..\backend\tests\security                                                     |          1 |        -88 |         -3 |        -24 |       -115 |
+| ..\backend\tests\unit                                                         |          1 |        -38 |          0 |        -10 |        -48 |
+| ..\backend\utils                                                              |          9 |       -809 |        -51 |       -164 |     -1,024 |
+| ..\backend\validators                                                         |          4 |       -128 |          0 |        -29 |       -157 |
+| ..\backend\workers                                                            |          2 |       -250 |        -21 |        -63 |       -334 |
+| ..\database                                                                   |          3 |       -613 |       -117 |       -144 |       -874 |
+| ..\gsgbackend                                                                 |        156 |    -45,332 |       -923 |     -2,920 |    -49,175 |
+| ..\gsgbackend (Files)                                                         |         18 |    -10,800 |        -51 |       -310 |    -11,161 |
+| ..\gsgbackend\config                                                          |          3 |       -155 |         -8 |        -30 |       -193 |
+| ..\gsgbackend\controllers                                                     |         22 |     -5,826 |       -229 |       -972 |     -7,027 |
+| ..\gsgbackend\data                                                            |          9 |    -20,530 |         -2 |         -3 |    -20,535 |
+| ..\gsgbackend\docs                                                            |          2 |        -74 |          0 |        -37 |       -111 |
+| ..\gsgbackend\email-templates                                                 |          5 |       -329 |          0 |        -57 |       -386 |
+| ..\gsgbackend\jobs                                                            |          1 |        -96 |         -6 |        -19 |       -121 |
+| ..\gsgbackend\middleware                                                      |          7 |       -277 |        -23 |        -57 |       -357 |
+| ..\gsgbackend\routes                                                          |         30 |     -1,465 |       -234 |       -325 |     -2,024 |
+| ..\gsgbackend\scripts                                                         |         12 |       -779 |        -69 |       -142 |       -990 |
+| ..\gsgbackend\services                                                        |         24 |     -2,884 |       -193 |       -507 |     -3,584 |
+| ..\gsgbackend\services (Files)                                                |         21 |     -2,746 |       -190 |       -483 |     -3,419 |
+| ..\gsgbackend\services\shipping                                               |          3 |       -138 |         -3 |        -24 |       -165 |
+| ..\gsgbackend\templates                                                       |          3 |       -201 |          0 |          0 |       -201 |
+| ..\gsgbackend\templates\home                                                  |          3 |       -201 |          0 |          0 |       -201 |
+| ..\gsgbackend\tests                                                           |          6 |       -822 |        -42 |       -232 |     -1,096 |
+| ..\gsgbackend\tests (Files)                                                   |          2 |       -417 |        -10 |       -137 |       -564 |
+| ..\gsgbackend\tests\integration                                               |          2 |       -279 |        -29 |        -61 |       -369 |
+| ..\gsgbackend\tests\security                                                  |          1 |        -88 |         -3 |        -24 |       -115 |
+| ..\gsgbackend\tests\unit                                                      |          1 |        -38 |          0 |        -10 |        -48 |
+| ..\gsgbackend\utils                                                           |          9 |       -810 |        -49 |       -163 |     -1,022 |
+| ..\gsgbackend\validators                                                      |          4 |       -128 |          0 |        -29 |       -157 |
+| ..\gsgbackend\workers                                                         |          1 |       -156 |        -17 |        -37 |       -210 |
+| ..\scripts                                                                    |          2 |          0 |          0 |         -2 |         -2 |
+| ..\storefront-export                                                          |         53 |    -10,170 |       -219 |     -1,311 |    -11,700 |
+| ..\storefront-export\components                                               |         27 |     -4,912 |       -154 |       -568 |     -5,634 |
+| ..\storefront-export\components (Files)                                       |          6 |     -1,152 |        -21 |       -168 |     -1,341 |
+| ..\storefront-export\components\cart                                          |          9 |     -2,223 |       -104 |       -205 |     -2,532 |
+| ..\storefront-export\components\home                                          |          9 |     -1,085 |        -18 |       -139 |     -1,242 |
+| ..\storefront-export\components\storefront                                    |          3 |       -452 |        -11 |        -56 |       -519 |
+| ..\storefront-export\context                                                  |          2 |       -546 |        -15 |        -81 |       -642 |
+| ..\storefront-export\pages                                                    |         23 |     -4,678 |        -50 |       -658 |     -5,386 |
+| ..\storefront-export\utils                                                    |          1 |        -34 |          0 |         -4 |        -38 |
+| ..\supabase                                                                   |         22 |     -1,401 |       -161 |       -259 |     -1,821 |
+| ..\supabase\functions                                                         |         12 |       -757 |        -74 |       -174 |     -1,005 |
+| ..\supabase\functions\ai-advisor                                              |          1 |        -58 |         -2 |        -17 |        -77 |
+| ..\supabase\functions\capi-proxy                                              |          1 |        -40 |         -5 |        -12 |        -57 |
+| ..\supabase\functions\create-checkout-session                                 |          1 |        -76 |         -5 |        -13 |        -94 |
+| ..\supabase\functions\fetch-platform-stats                                    |          1 |        -56 |         -6 |        -15 |        -77 |
+| ..\supabase\functions\generate-sitemap                                        |          1 |        -56 |         -7 |        -17 |        -80 |
+| ..\supabase\functions\image-proxy                                             |          1 |        -21 |         -6 |         -7 |        -34 |
+| ..\supabase\functions\merchant-stripe-webhook                                 |          1 |       -100 |         -8 |        -26 |       -134 |
+| ..\supabase\functions\meta-capi-proxy                                         |          1 |        -77 |         -9 |        -17 |       -103 |
+| ..\supabase\functions\og-image                                                |          1 |       -110 |         -5 |         -8 |       -123 |
+| ..\supabase\functions\process-abandoned-carts                                 |          1 |        -38 |         -6 |        -11 |        -55 |
+| ..\supabase\functions\process-merchant-checkout                               |          1 |        -80 |         -6 |        -16 |       -102 |
+| ..\supabase\functions\stripe-webhook                                          |          1 |        -45 |         -9 |        -15 |        -69 |
+| ..\supabase\migrations                                                        |         10 |       -644 |        -87 |        -85 |       -816 |
+| ..\tmp                                                                        |          1 |        -13 |          0 |         -3 |        -16 |
+| src                                                                           |        158 |        910 |       -116 |         60 |        854 |
+| src\api                                                                       |          2 |         19 |          4 |          2 |         25 |
+| src\app                                                                       |          4 |         28 |          8 |          1 |         37 |
+| src\app\api                                                                   |          1 |          1 |          1 |         -1 |          1 |
+| src\app\api\dns-check                                                         |          1 |          1 |          1 |         -1 |          1 |
+| src\app\store                                                                 |          3 |         27 |          7 |          2 |         36 |
+| src\app\store\[merchant_slug]                                                 |          2 |         18 |          3 |          1 |         22 |
+| src\app\store\[merchant_slug]\[page_slug]                                     |          1 |         13 |          2 |          2 |         17 |
+| src\app\store\[merchant_slug]\track                                           |          1 |          5 |          1 |         -1 |          5 |
+| src\app\store\[merchant_slug]\track\[order_id]                                |          1 |          5 |          1 |         -1 |          5 |
+| src\app\store\[slug]                                                          |          1 |          9 |          4 |          1 |         14 |
+| src\components                                                                |         93 |        553 |       -115 |         21 |        459 |
+| src\components (Files)                                                        |          9 |         47 |        -12 |          3 |         38 |
+| src\components\admin                                                          |         18 |        206 |        -12 |          7 |        201 |
+| src\components\admin (Files)                                                  |          5 |         17 |          4 |          0 |         21 |
+| src\components\admin\analytics                                                |          1 |          9 |          0 |          0 |          9 |
+| src\components\admin\blog                                                     |          1 |         19 |         -3 |          1 |         17 |
+| src\components\admin\collections                                              |          1 |         12 |          0 |          0 |         12 |
+| src\components\admin\discounts                                                |          1 |         21 |         -2 |          1 |         20 |
+| src\components\admin\inventory                                                |          1 |         19 |         -3 |          1 |         17 |
+| src\components\admin\marketing                                                |          2 |         33 |         -3 |          1 |         31 |
+| src\components\admin\orders                                                   |          1 |         28 |          0 |          0 |         28 |
+| src\components\admin\products                                                 |          2 |         29 |         -2 |          1 |         28 |
+| src\components\admin\seo                                                      |          1 |          8 |         -3 |          0 |          5 |
+| src\components\admin\settings                                                 |          2 |         11 |          0 |          2 |         13 |
+| src\components\auth                                                           |          1 |          1 |         -1 |          0 |          0 |
+| src\components\blocks                                                         |          6 |        -22 |         -3 |        -10 |        -35 |
+| src\components\builder                                                        |          3 |         21 |          2 |          0 |         23 |
+| src\components\cart                                                           |          8 |          1 |          9 |         -9 |          1 |
+| src\components\cms                                                            |         20 |        109 |       -111 |         18 |         16 |
+| src\components\cms (Files)                                                    |         17 |        100 |       -110 |         20 |         10 |
+| src\components\cms\editors                                                    |          1 |          1 |          0 |          0 |          1 |
+| src\components\cms\help                                                       |          2 |          8 |         -1 |         -2 |          5 |
+| src\components\dashboard                                                      |          3 |         15 |          2 |         -1 |         16 |
+| src\components\fomo                                                           |          1 |          3 |          0 |          1 |          4 |
+| src\components\home                                                           |          1 |          1 |         -1 |          0 |          0 |
+| src\components\merchant                                                       |          1 |          3 |          1 |          0 |          4 |
+| src\components\onboarding                                                     |          1 |         23 |          0 |          2 |         25 |
+| src\components\pwa                                                            |          1 |          1 |          0 |         -1 |          0 |
+| src\components\seller                                                         |         12 |         55 |          5 |         -2 |         58 |
+| src\components\storefront                                                     |          5 |         72 |          3 |          9 |         84 |
+| src\components\storefront (Files)                                             |          2 |         17 |          3 |          2 |         22 |
+| src\components\storefront\checkout                                            |          1 |         13 |          0 |          3 |         16 |
+| src\components\storefront\customer                                            |          1 |         30 |          0 |          2 |         32 |
+| src\components\storefront\search                                              |          1 |         12 |          0 |          2 |         14 |
+| src\components\superadmin                                                     |          1 |          1 |          0 |          0 |          1 |
+| src\components\ui                                                             |          2 |         16 |          3 |          4 |         23 |
+| src\context                                                                   |          5 |         27 |        -15 |          2 |         14 |
+| src\hooks                                                                     |          5 |          2 |          3 |          4 |          9 |
+| src\lib                                                                       |          5 |         10 |         -2 |         -1 |          7 |
+| src\lib (Files)                                                               |          3 |         -2 |         -2 |         -2 |         -6 |
+| src\lib\kernel                                                                |          2 |         12 |          0 |          1 |         13 |
+| src\lib\kernel (Files)                                                        |          1 |          3 |          0 |         -1 |          2 |
+| src\lib\kernel\utils                                                          |          1 |          9 |          0 |          2 |         11 |
+| src\pages                                                                     |         17 |         82 |          1 |         -3 |         80 |
+| src\platform                                                                  |         25 |        167 |          6 |         31 |        204 |
+| src\platform\client                                                           |          2 |         -5 |         -5 |          1 |         -9 |
+| src\platform\components                                                       |          1 |         72 |          4 |         18 |         94 |
+| src\platform\core                                                             |         12 |         31 |         -3 |         -5 |         23 |
+| src\platform\forge                                                            |          1 |         15 |          0 |          2 |         17 |
+| src\platform\library                                                          |          5 |         73 |          7 |         11 |         91 |
+| src\platform\library\modules                                                  |          5 |         73 |          7 |         11 |         91 |
+| src\platform\publish                                                          |          4 |        -19 |          3 |          4 |        -12 |
+| src\stores                                                                    |          2 |         22 |         -6 |          3 |         19 |
++-------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++-------------------------------------------------------------------------------+--------------------+------------+------------+------------+------------+
+| filename                                                                      | language           | code       | comment    | blank      | total      |
++-------------------------------------------------------------------------------+--------------------+------------+------------+------------+------------+
+| c:\omnora OS\.github\ISSUE_TEMPLATE\bug_report.md                             | Markdown           |        -25 |          0 |        -13 |        -38 |
+| c:\omnora OS\.github\ISSUE_TEMPLATE\feature_request.md                        | Markdown           |        -17 |          0 |        -11 |        -28 |
+| c:\omnora OS\.github\pull_request_template.md                                 | Markdown           |        -25 |          0 |        -18 |        -43 |
+| c:\omnora OS\CONTRIBUTING.md                                                  | Markdown           |        -39 |          0 |        -30 |        -69 |
+| c:\omnora OS\QUICK_START.md                                                   | Markdown           |       -142 |          0 |        -78 |       -220 |
+| c:\omnora OS\README.md                                                        | Markdown           |        -72 |          0 |        -33 |       -105 |
+| c:\omnora OS\ROADMAP.md                                                       | Markdown           |        -29 |          0 |        -17 |        -46 |
+| c:\omnora OS\api\index.js                                                     | JavaScript         |         -2 |         -3 |         -2 |         -7 |
+| c:\omnora OS\api\storefront.js                                                | JavaScript         |       -101 |        -16 |        -17 |       -134 |
+| c:\omnora OS\app\[slug]\page.tsx                                              | TypeScript JSX     |        -72 |         -5 |        -12 |        -89 |
+| c:\omnora OS\app\auth\callback\route.ts                                       | TypeScript         |        -33 |         -2 |         -4 |        -39 |
+| c:\omnora OS\app\layout.tsx                                                   | TypeScript JSX     |        -34 |          0 |         -4 |        -38 |
+| c:\omnora OS\audit-routes.js                                                  | JavaScript         |        -24 |          0 |         -8 |        -32 |
+| c:\omnora OS\backend\BULLMQ_STATUS.md                                         | Markdown           |       -104 |          0 |        -32 |       -136 |
+| c:\omnora OS\backend\COLLECTION_PAGE_FIX.md                                   | Markdown           |        -99 |          0 |        -22 |       -121 |
+| c:\omnora OS\backend\MONGODB_SETUP.md                                         | Markdown           |       -112 |          0 |        -53 |       -165 |
+| c:\omnora OS\backend\PRODUCTION_READINESS.md                                  | Markdown           |       -112 |          0 |        -34 |       -146 |
+| c:\omnora OS\backend\README.md                                                | Markdown           |        -82 |          0 |        -29 |       -111 |
+| c:\omnora OS\backend\SECURITY_FIXES.md                                        | Markdown           |        -86 |          0 |        -22 |       -108 |
+| c:\omnora OS\backend\bootstrap.js                                             | JavaScript         |        -76 |        -11 |        -19 |       -106 |
+| c:\omnora OS\backend\check_products.js                                        | JavaScript         |        -30 |         -1 |        -10 |        -41 |
+| c:\omnora OS\backend\check_status.js                                          | JavaScript         |         -7 |          0 |         -1 |         -8 |
+| c:\omnora OS\backend\check_users.js                                           | JavaScript         |        -14 |          0 |         -4 |        -18 |
+| c:\omnora OS\backend\config\env.js                                            | JavaScript         |       -122 |         -5 |        -19 |       -146 |
+| c:\omnora OS\backend\controllers\adminController.js                           | JavaScript         |       -194 |         -4 |        -30 |       -228 |
+| c:\omnora OS\backend\controllers\analyticsController.js                       | JavaScript         |        -75 |         -3 |        -16 |        -94 |
+| c:\omnora OS\backend\controllers\authController.js                            | JavaScript         |       -212 |        -30 |        -30 |       -272 |
+| c:\omnora OS\backend\controllers\cartController.js                            | JavaScript         |       -217 |          0 |        -32 |       -249 |
+| c:\omnora OS\backend\controllers\contactController.js                         | JavaScript         |        -64 |         -3 |        -14 |        -81 |
+| c:\omnora OS\backend\controllers\domainController.js                          | JavaScript         |       -100 |         -2 |        -15 |       -117 |
+| c:\omnora OS\backend\controllers\inventoryController.js                       | JavaScript         |       -354 |         -4 |        -48 |       -406 |
+| c:\omnora OS\backend\controllers\mediaController.js                           | JavaScript         |        -59 |         -1 |        -11 |        -71 |
+| c:\omnora OS\backend\controllers\newsletterController.js                      | JavaScript         |        -59 |         -3 |        -12 |        -74 |
+| c:\omnora OS\backend\controllers\orderController.js                           | JavaScript         |       -606 |        -49 |        -93 |       -748 |
+| c:\omnora OS\backend\controllers\paymentController.js                         | JavaScript         |       -148 |         -8 |        -19 |       -175 |
+| c:\omnora OS\backend\controllers\phase1Controller.js                          | JavaScript         |       -467 |        -12 |        -93 |       -572 |
+| c:\omnora OS\backend\controllers\phase2Controller.js                          | JavaScript         |       -687 |        -36 |       -131 |       -854 |
+| c:\omnora OS\backend\controllers\phase3Controller.js                          | JavaScript         |       -808 |        -54 |       -155 |     -1,017 |
+| c:\omnora OS\backend\controllers\productController.js                         | JavaScript         |       -328 |        -13 |        -42 |       -383 |
+| c:\omnora OS\backend\controllers\recommendationController.js                  | JavaScript         |       -213 |         -1 |        -32 |       -246 |
+| c:\omnora OS\backend\controllers\reviewController.js                          | JavaScript         |       -333 |         -6 |        -51 |       -390 |
+| c:\omnora OS\backend\controllers\searchController.js                          | JavaScript         |       -203 |         -2 |        -24 |       -229 |
+| c:\omnora OS\backend\controllers\userController.js                            | JavaScript         |       -200 |         -2 |        -34 |       -236 |
+| c:\omnora OS\backend\controllers\webhookController.js                         | JavaScript         |       -143 |        -18 |        -22 |       -183 |
+| c:\omnora OS\backend\controllers\wishlistController.js                        | JavaScript         |       -357 |         -2 |        -52 |       -411 |
+| c:\omnora OS\backend\data\admin_action_logs.json                              | JSON               |         -1 |          0 |          0 |         -1 |
+| c:\omnora OS\backend\data\defaultProducts.js                                  | JavaScript         |        -87 |         -2 |         -3 |        -92 |
+| c:\omnora OS\backend\data\event.json                                          | JSON               |     -9,520 |          0 |          0 |     -9,520 |
+| c:\omnora OS\backend\data\orders.json                                         | JSON               |         -1 |          0 |          0 |         -1 |
+| c:\omnora OS\backend\data\product.json                                        | JSON               |    -10,687 |          0 |          0 |    -10,687 |
+| c:\omnora OS\backend\data\products.json                                       | JSON               |        -80 |          0 |          0 |        -80 |
+| c:\omnora OS\backend\data\sitecontent.json                                    | JSON               |       -574 |          0 |          0 |       -574 |
+| c:\omnora OS\backend\data\user.json                                           | JSON               |       -290 |          0 |          0 |       -290 |
+| c:\omnora OS\backend\data\users.json                                          | JSON               |        -26 |          0 |          0 |        -26 |
+| c:\omnora OS\backend\docs\API_OPERATIONS.md                                   | Markdown           |        -42 |          0 |        -18 |        -60 |
+| c:\omnora OS\backend\docs\RUNBOOK_ARCHITECTURE.md                             | Markdown           |        -32 |          0 |        -19 |        -51 |
+| c:\omnora OS\backend\ecosystem.config.js                                      | JavaScript         |        -53 |          0 |         -2 |        -55 |
+| c:\omnora OS\backend\email-templates\order-cancelled.html                     | HTML               |        -60 |          0 |        -11 |        -71 |
+| c:\omnora OS\backend\email-templates\order-delivered.html                     | HTML               |        -60 |          0 |        -10 |        -70 |
+| c:\omnora OS\backend\email-templates\order-placed.html                        | HTML               |        -71 |          0 |        -12 |        -83 |
+| c:\omnora OS\backend\email-templates\order-shipped.html                       | HTML               |        -69 |          0 |        -12 |        -81 |
+| c:\omnora OS\backend\email-templates\payment-approved.html                    | HTML               |        -69 |          0 |        -12 |        -81 |
+| c:\omnora OS\backend\jobs\cleanupInitiatedOrders.js                           | JavaScript         |        -96 |         -6 |        -19 |       -121 |
+| c:\omnora OS\backend\list_merchants.js                                        | JavaScript         |        -18 |          0 |         -7 |        -25 |
+| c:\omnora OS\backend\middleware\auth.js                                       | JavaScript         |       -113 |         -2 |        -22 |       -137 |
+| c:\omnora OS\backend\middleware\authEnhanced.js                               | JavaScript         |         -1 |          0 |         -1 |         -2 |
+| c:\omnora OS\backend\middleware\authMiddleware.js                             | JavaScript         |        -12 |          0 |         -2 |        -14 |
+| c:\omnora OS\backend\middleware\gatekeeper.js                                 | JavaScript         |       -102 |        -11 |        -22 |       -135 |
+| c:\omnora OS\backend\middleware\rateLimiter.js                                | JavaScript         |        -28 |          0 |         -7 |        -35 |
+| c:\omnora OS\backend\middleware\validate.js                                   | JavaScript         |        -15 |          0 |         -4 |        -19 |
+| c:\omnora OS\backend\modules\ai-forge\ai-forge.controller.js                  | JavaScript         |        -47 |          0 |         -6 |        -53 |
+| c:\omnora OS\backend\modules\ai-forge\ai-forge.routes.js                      | JavaScript         |        -14 |         -1 |         -5 |        -20 |
+| c:\omnora OS\backend\modules\ai-forge\ai-forge.service.js                     | JavaScript         |       -130 |        -14 |        -26 |       -170 |
+| c:\omnora OS\backend\modules\analytics\analytics.controller.js                | JavaScript         |        -32 |          0 |         -4 |        -36 |
+| c:\omnora OS\backend\modules\analytics\analytics.routes.js                    | JavaScript         |        -11 |         -2 |         -5 |        -18 |
+| c:\omnora OS\backend\modules\analytics\analytics.service.js                   | JavaScript         |        -38 |          0 |         -6 |        -44 |
+| c:\omnora OS\backend\modules\checkout\checkout.controller.js                  | JavaScript         |        -46 |          0 |         -5 |        -51 |
+| c:\omnora OS\backend\modules\checkout\checkout.routes.js                      | JavaScript         |        -11 |         -2 |         -5 |        -18 |
+| c:\omnora OS\backend\modules\checkout\checkout.service.js                     | JavaScript         |        -82 |         -6 |        -13 |       -101 |
+| c:\omnora OS\backend\modules\tenant\tenant.controller.js                      | JavaScript         |        -39 |         -2 |         -7 |        -48 |
+| c:\omnora OS\backend\modules\tenant\tenant.routes.js                          | JavaScript         |        -12 |         -2 |         -5 |        -19 |
+| c:\omnora OS\backend\modules\tenant\tenant.service.js                         | JavaScript         |        -58 |         -2 |        -13 |        -73 |
+| c:\omnora OS\backend\package-lock.json                                        | JSON               |     -9,330 |          0 |         -1 |     -9,331 |
+| c:\omnora OS\backend\package-production.json                                  | JSON               |        -71 |          0 |         -1 |        -72 |
+| c:\omnora OS\backend\package.json                                             | JSON               |        -57 |          0 |         -1 |        -58 |
+| c:\omnora OS\backend\routes\adminRoutes.js                                    | JavaScript         |        -20 |         -5 |         -7 |        -32 |
+| c:\omnora OS\backend\routes\authRoutes.js                                     | JavaScript         |        -13 |         -2 |         -4 |        -19 |
+| c:\omnora OS\backend\routes\cartRoutes.js                                     | JavaScript         |        -15 |         -1 |         -4 |        -20 |
+| c:\omnora OS\backend\routes\contactRoutes.js                                  | JavaScript         |         -9 |         -2 |         -3 |        -14 |
+| c:\omnora OS\backend\routes\domainRoutes.js                                   | JavaScript         |         -7 |          0 |         -3 |        -10 |
+| c:\omnora OS\backend\routes\healthRoutes.js                                   | JavaScript         |        -57 |         -3 |         -8 |        -68 |
+| c:\omnora OS\backend\routes\inventoryRoutes.js                                | JavaScript         |        -20 |         -3 |         -6 |        -29 |
+| c:\omnora OS\backend\routes\jobRoutes.js                                      | JavaScript         |        -27 |          0 |         -6 |        -33 |
+| c:\omnora OS\backend\routes\mediaRoutes.js                                    | JavaScript         |        -45 |         -4 |         -8 |        -57 |
+| c:\omnora OS\backend\routes\newsletterRoutes.js                               | JavaScript         |         -9 |         -2 |         -3 |        -14 |
+| c:\omnora OS\backend\routes\paymentMethodRoutes.js                            | JavaScript         |        -90 |         -7 |        -16 |       -113 |
+| c:\omnora OS\backend\routes\performanceHubRoutes.js                           | JavaScript         |        -50 |        -10 |        -13 |        -73 |
+| c:\omnora OS\backend\routes\phase1Routes.js                                   | JavaScript         |        -68 |        -33 |        -23 |       -124 |
+| c:\omnora OS\backend\routes\phase2Routes.js                                   | JavaScript         |        -62 |        -28 |        -14 |       -104 |
+| c:\omnora OS\backend\routes\phase3Routes.js                                   | JavaScript         |        -84 |        -46 |        -20 |       -150 |
+| c:\omnora OS\backend\routes\productRoutes.js                                  | JavaScript         |        -21 |          0 |         -4 |        -25 |
+| c:\omnora OS\backend\routes\recommendationRoutes.js                           | JavaScript         |        -16 |         -3 |         -6 |        -25 |
+| c:\omnora OS\backend\routes\reviewRoutes.js                                   | JavaScript         |        -18 |         -3 |         -6 |        -27 |
+| c:\omnora OS\backend\routes\searchRoutes.js                                   | JavaScript         |        -14 |         -2 |         -5 |        -21 |
+| c:\omnora OS\backend\routes\sellerAnalyticsRoutes.js                          | JavaScript         |        -44 |         -4 |         -7 |        -55 |
+| c:\omnora OS\backend\routes\sellerRoutes.js                                   | JavaScript         |        -69 |         -1 |        -10 |        -80 |
+| c:\omnora OS\backend\routes\userRoutes.js                                     | JavaScript         |        -21 |         -1 |         -4 |        -26 |
+| c:\omnora OS\backend\routes\whatsappTemplateRoutes.js                         | JavaScript         |        -55 |         -7 |        -11 |        -73 |
+| c:\omnora OS\backend\routes\wishlistRoutes.js                                 | JavaScript         |        -19 |         -3 |         -6 |        -28 |
+| c:\omnora OS\backend\scripts\check-env-leaks.js                               | JavaScript         |        -35 |          0 |         -8 |        -43 |
+| c:\omnora OS\backend\scripts\cleanup-port.js                                  | JavaScript         |        -44 |         -5 |         -5 |        -54 |
+| c:\omnora OS\backend\scripts\createAdmin.js                                   | JavaScript         |        -59 |         -6 |        -12 |        -77 |
+| c:\omnora OS\backend\scripts\precheck.js                                      | JavaScript         |        -59 |          0 |        -10 |        -69 |
+| c:\omnora OS\backend\scripts\seed-products-remote.js                          | JavaScript         |        -46 |         -4 |        -11 |        -61 |
+| c:\omnora OS\backend\scripts\seed-remote.js                                   | JavaScript         |        -52 |         -3 |        -10 |        -65 |
+| c:\omnora OS\backend\scripts\seedProducts.js                                  | JavaScript         |       -147 |         -9 |        -13 |       -169 |
+| c:\omnora OS\backend\scripts\set-admin.js                                     | JavaScript         |        -56 |         -1 |        -12 |        -69 |
+| c:\omnora OS\backend\scripts\start-dev.js                                     | JavaScript         |        -15 |         -3 |         -7 |        -25 |
+| c:\omnora OS\backend\scripts\test-approval-system.js                          | JavaScript         |       -130 |        -25 |        -27 |       -182 |
+| c:\omnora OS\backend\scripts\test-whatsapp.js                                 | JavaScript         |        -31 |          0 |         -4 |        -35 |
+| c:\omnora OS\backend\scripts\verify-system.js                                 | JavaScript         |       -105 |        -13 |        -23 |       -141 |
+| c:\omnora OS\backend\server.js                                                | JavaScript         |        -46 |         -5 |        -10 |        -61 |
+| c:\omnora OS\backend\services\analyticsService.js                             | JavaScript         |       -125 |         -9 |        -32 |       -166 |
+| c:\omnora OS\backend\services\cartService.js                                  | JavaScript         |       -299 |         -8 |        -35 |       -342 |
+| c:\omnora OS\backend\services\emailService.js                                 | JavaScript         |       -198 |         -1 |        -23 |       -222 |
+| c:\omnora OS\backend\services\jobService.js                                   | JavaScript         |        -64 |         -2 |        -12 |        -78 |
+| c:\omnora OS\backend\services\logger.js                                       | JavaScript         |        -25 |          0 |         -6 |        -31 |
+| c:\omnora OS\backend\services\mailblusterService.js                           | JavaScript         |        -69 |          0 |        -12 |        -81 |
+| c:\omnora OS\backend\services\manifestService.js                              | JavaScript         |        -34 |         -1 |         -7 |        -42 |
+| c:\omnora OS\backend\services\memoryDbService.js                              | JavaScript         |        -45 |          0 |        -10 |        -55 |
+| c:\omnora OS\backend\services\preflightService.js                             | JavaScript         |        -50 |         -4 |         -7 |        -61 |
+| c:\omnora OS\backend\services\queueService.js                                 | JavaScript         |       -172 |         -9 |        -23 |       -204 |
+| c:\omnora OS\backend\services\recommendationService.js                        | JavaScript         |       -229 |        -13 |        -36 |       -278 |
+| c:\omnora OS\backend\services\searchService.js                                | JavaScript         |       -186 |        -21 |        -44 |       -251 |
+| c:\omnora OS\backend\services\shippingService.js                              | JavaScript         |        -89 |        -10 |        -24 |       -123 |
+| c:\omnora OS\backend\services\shipping\leopardsProvider.js                    | JavaScript         |        -57 |         -1 |         -9 |        -67 |
+| c:\omnora OS\backend\services\shipping\tcsProvider.js                         | JavaScript         |        -23 |         -2 |         -6 |        -31 |
+| c:\omnora OS\backend\services\shipping\traxProvider.js                        | JavaScript         |        -58 |          0 |         -9 |        -67 |
+| c:\omnora OS\backend\services\stateService.js                                 | JavaScript         |       -147 |         -8 |        -29 |       -184 |
+| c:\omnora OS\backend\services\waRateGuard.js                                  | JavaScript         |        -87 |        -11 |        -23 |       -121 |
+| c:\omnora OS\backend\services\whatsappAutomationService.js                    | JavaScript         |       -132 |        -12 |        -27 |       -171 |
+| c:\omnora OS\backend\services\whatsappService.js                              | JavaScript         |        -27 |         -1 |         -4 |        -32 |
+| c:\omnora OS\backend\shared\lib\dbService.js                                  | JavaScript         |        -56 |         -2 |        -13 |        -71 |
+| c:\omnora OS\backend\shared\lib\supabaseClient.js                             | JavaScript         |        -20 |         -1 |         -7 |        -28 |
+| c:\omnora OS\backend\shared\middleware\authGuard.js                           | JavaScript         |        -33 |         -1 |         -8 |        -42 |
+| c:\omnora OS\backend\shared\middleware\errorHandler.js                        | JavaScript         |        -26 |          0 |         -5 |        -31 |
+| c:\omnora OS\backend\shared\middleware\tenantContext.js                       | JavaScript         |        -54 |         -6 |        -11 |        -71 |
+| c:\omnora OS\backend\templates\home\electronics.json                          | JSON               |        -67 |          0 |          0 |        -67 |
+| c:\omnora OS\backend\templates\home\fashion.json                              | JSON               |        -75 |          0 |          0 |        -75 |
+| c:\omnora OS\backend\templates\home\general.json                              | JSON               |        -59 |          0 |          0 |        -59 |
+| c:\omnora OS\backend\test-boundaries.js                                       | JavaScript         |        -93 |         -8 |        -19 |       -120 |
+| c:\omnora OS\backend\test_buckets.cjs                                         | JavaScript         |        -22 |          0 |         -6 |        -28 |
+| c:\omnora OS\backend\test_db.js                                               | JavaScript         |        -19 |         -1 |         -8 |        -28 |
+| c:\omnora OS\backend\test_login_controller_final.js                           | JavaScript         |        -26 |          0 |         -5 |        -31 |
+| c:\omnora OS\backend\test_login_debug.js                                      | JavaScript         |        -26 |         -2 |         -9 |        -37 |
+| c:\omnora OS\backend\test_merchants.cjs                                       | JavaScript         |        -25 |          0 |         -6 |        -31 |
+| c:\omnora OS\backend\test_subscription.js                                     | JavaScript         |        -25 |          0 |         -4 |        -29 |
+| c:\omnora OS\backend\tests\QA-SECURITY-CHECKLIST.md                           | Markdown           |       -315 |          0 |       -117 |       -432 |
+| c:\omnora OS\backend\tests\integration\bootstrap.test.js                      | JavaScript         |        -61 |         -2 |        -10 |        -73 |
+| c:\omnora OS\backend\tests\integration\payment-security.test.js               | JavaScript         |       -218 |        -27 |        -51 |       -296 |
+| c:\omnora OS\backend\tests\security\jwt.test.js                               | JavaScript         |        -88 |         -3 |        -24 |       -115 |
+| c:\omnora OS\backend\tests\test_approval_flow.js                              | JavaScript         |       -102 |        -10 |        -20 |       -132 |
+| c:\omnora OS\backend\tests\unit\config.test.js                                | JavaScript         |        -38 |          0 |        -10 |        -48 |
+| c:\omnora OS\backend\utils\LocalDB.js                                         | JavaScript         |       -230 |        -17 |        -46 |       -293 |
+| c:\omnora OS\backend\utils\inventoryService.js                                | JavaScript         |       -136 |         -4 |        -23 |       -163 |
+| c:\omnora OS\backend\utils\modelFactory.js                                    | JavaScript         |        -66 |        -15 |        -18 |        -99 |
+| c:\omnora OS\backend\utils\orderHashService.js                                | JavaScript         |        -40 |         -3 |         -8 |        -51 |
+| c:\omnora OS\backend\utils\phoneFormatter.js                                  | JavaScript         |        -56 |        -10 |        -17 |        -83 |
+| c:\omnora OS\backend\utils\retryWithBackoff.js                                | JavaScript         |        -62 |          0 |        -10 |        -72 |
+| c:\omnora OS\backend\utils\tenantStorage.js                                   | JavaScript         |         -3 |          0 |         -3 |         -6 |
+| c:\omnora OS\backend\utils\tokenService.js                                    | JavaScript         |        -74 |         -2 |        -11 |        -87 |
+| c:\omnora OS\backend\utils\whatsappService.js                                 | JavaScript         |       -142 |          0 |        -28 |       -170 |
+| c:\omnora OS\backend\validators\orderValidators.js                            | JavaScript         |        -36 |          0 |         -8 |        -44 |
+| c:\omnora OS\backend\validators\productValidators.js                          | JavaScript         |        -28 |          0 |         -8 |        -36 |
+| c:\omnora OS\backend\validators\userValidator.js                              | JavaScript         |        -23 |          0 |         -5 |        -28 |
+| c:\omnora OS\backend\validators\userValidators.js                             | JavaScript         |        -41 |          0 |         -8 |        -49 |
+| c:\omnora OS\backend\verify-mongodb.js                                        | JavaScript         |        -95 |         -4 |        -23 |       -122 |
+| c:\omnora OS\backend\verify-order-fix.js                                      | JavaScript         |        -42 |         -1 |         -9 |        -52 |
+| c:\omnora OS\backend\verify-serverless.js                                     | JavaScript         |        -68 |        -11 |        -19 |        -98 |
+| c:\omnora OS\backend\workers\notificationWorker.js                            | JavaScript         |       -156 |        -17 |        -37 |       -210 |
+| c:\omnora OS\backend\workers\taskWorker.js                                    | JavaScript         |        -94 |         -4 |        -26 |       -124 |
+| c:\omnora OS\boot-audit.js                                                    | JavaScript         |        -26 |         -2 |         -7 |        -35 |
+| c:\omnora OS\check_cms.js                                                     | JavaScript         |        -21 |          0 |         -2 |        -23 |
+| c:\omnora OS\check_cms_deep.js                                                | JavaScript         |        -37 |          0 |         -5 |        -42 |
+| c:\omnora OS\check_cms_dump.js                                                | JavaScript         |        -17 |          0 |         -5 |        -22 |
+| c:\omnora OS\check_cms_native.js                                              | JavaScript         |        -28 |          0 |         -2 |        -30 |
+| c:\omnora OS\check_cms_raw.js                                                 | JavaScript         |        -10 |          0 |         -2 |        -12 |
+| c:\omnora OS\check_products.js                                                | JavaScript         |        -25 |          0 |         -2 |        -27 |
+| c:\omnora OS\check_products_full.js                                           | JavaScript         |        -23 |          0 |         -4 |        -27 |
+| c:\omnora OS\check_products_raw.js                                            | JavaScript         |        -17 |          0 |         -2 |        -19 |
+| c:\omnora OS\database\analytics.sql                                           | MS SQL             |        -70 |         -9 |         -6 |        -85 |
+| c:\omnora OS\database\omnora_schema.sql                                       | MS SQL             |       -469 |        -99 |       -133 |       -701 |
+| c:\omnora OS\database\seeds.sql                                               | MS SQL             |        -74 |         -9 |         -5 |        -88 |
+| c:\omnora OS\diag.js                                                          | JavaScript         |        -18 |          0 |         -6 |        -24 |
+| c:\omnora OS\dump_imports.js                                                  | JavaScript         |        -43 |          0 |         -4 |        -47 |
+| c:\omnora OS\find_all_requires.js                                             | JavaScript         |        -31 |          0 |         -4 |        -35 |
+| c:\omnora OS\find_dist_require.js                                             | JavaScript         |        -31 |         -1 |         -4 |        -36 |
+| c:\omnora OS\find_escaping_imports.js                                         | JavaScript         |        -36 |         -1 |         -4 |        -41 |
+| c:\omnora OS\find_leak.js                                                     | JavaScript         |        -40 |         -1 |         -5 |        -46 |
+| c:\omnora OS\find_real_dist_require.js                                        | JavaScript         |        -35 |          0 |         -5 |        -40 |
+| c:\omnora OS\find_require.js                                                  | JavaScript         |        -34 |         -2 |         -4 |        -40 |
+| c:\omnora OS\find_require_raw.js                                              | JavaScript         |        -30 |          0 |         -5 |        -35 |
+| c:\omnora OS\find_side_effect.js                                              | JavaScript         |        -36 |          0 |         -4 |        -40 |
+| c:\omnora OS\frontend\.eslintrc.json                                          | JSON with Comments |          1 |          0 |          0 |          1 |
+| c:\omnora OS\frontend\library_lint_report.json                                | JSON               |          3 |          0 |          0 |          3 |
+| c:\omnora OS\frontend\src\api\PixelManager.ts                                 | TypeScript         |         11 |          1 |          0 |         12 |
+| c:\omnora OS\frontend\src\api\Publisher.ts                                    | TypeScript         |          8 |          3 |          2 |         13 |
+| c:\omnora OS\frontend\src\app\api\dns-check\route.ts                          | TypeScript         |          1 |          1 |         -1 |          1 |
+| c:\omnora OS\frontend\src\app\store\[merchant_slug]\[page_slug]\page.tsx      | TypeScript JSX     |         13 |          2 |          2 |         17 |
+| c:\omnora OS\frontend\src\app\store\[merchant_slug]\track\[order_id]\page.tsx | TypeScript JSX     |          5 |          1 |         -1 |          5 |
+| c:\omnora OS\frontend\src\app\store\[slug]\page.tsx                           | TypeScript JSX     |          9 |          4 |          1 |         14 |
+| c:\omnora OS\frontend\src\components\AdPlacementZone.tsx                      | TypeScript JSX     |         -1 |          0 |          0 |         -1 |
+| c:\omnora OS\frontend\src\components\AdminLayout.tsx                          | TypeScript JSX     |          0 |         -1 |          0 |         -1 |
+| c:\omnora OS\frontend\src\components\DynamicSection.tsx                       | TypeScript JSX     |         53 |         -4 |          5 |         54 |
+| c:\omnora OS\frontend\src\components\HostnameInterceptor.tsx                  | TypeScript JSX     |        -12 |          0 |         -1 |        -13 |
+| c:\omnora OS\frontend\src\components\Layout.tsx                               | TypeScript JSX     |          2 |          0 |         -1 |          1 |
+| c:\omnora OS\frontend\src\components\PosterGallery.tsx                        | TypeScript JSX     |          1 |         -1 |          0 |          0 |
+| c:\omnora OS\frontend\src\components\SmartImage.tsx                           | TypeScript JSX     |          3 |         -3 |         -1 |         -1 |
+| c:\omnora OS\frontend\src\components\StripePayment.tsx                        | TypeScript JSX     |          1 |          0 |          0 |          1 |
+| c:\omnora OS\frontend\src\components\admin\AdminDashboard.tsx                 | TypeScript JSX     |          3 |          1 |          0 |          4 |
+| c:\omnora OS\frontend\src\components\admin\IndustrialDashboard.tsx            | TypeScript JSX     |          5 |          0 |          1 |          6 |
+| c:\omnora OS\frontend\src\components\admin\Layout.tsx                         | TypeScript JSX     |          4 |          0 |         -1 |          3 |
+| c:\omnora OS\frontend\src\components\admin\OrderManager.tsx                   | TypeScript JSX     |          1 |          3 |         -1 |          3 |
+| c:\omnora OS\frontend\src\components\admin\Sidebar.tsx                        | TypeScript JSX     |          4 |          0 |          1 |          5 |
+| c:\omnora OS\frontend\src\components\admin\analytics\SellerAnalytics.tsx      | TypeScript JSX     |          9 |          0 |          0 |          9 |
+| c:\omnora OS\frontend\src\components\admin\blog\BlogManager.tsx               | TypeScript JSX     |         19 |         -3 |          1 |         17 |
+| c:\omnora OS\frontend\src\components\admin\collections\CollectionManager.tsx  | TypeScript JSX     |         12 |          0 |          0 |         12 |
+| c:\omnora OS\frontend\src\components\admin\discounts\DiscountManager.tsx      | TypeScript JSX     |         21 |         -2 |          1 |         20 |
+| c:\omnora OS\frontend\src\components\admin\inventory\InventoryManager.tsx     | TypeScript JSX     |         19 |         -3 |          1 |         17 |
+| c:\omnora OS\frontend\src\components\admin\marketing\EmailMarketing.tsx       | TypeScript JSX     |         24 |         -3 |          1 |         22 |
+| c:\omnora OS\frontend\src\components\admin\marketing\SocialMarketing.tsx      | TypeScript JSX     |          9 |          0 |          0 |          9 |
+| c:\omnora OS\frontend\src\components\admin\orders\AdminOrderManager.tsx       | TypeScript JSX     |         28 |          0 |          0 |         28 |
+| c:\omnora OS\frontend\src\components\admin\products\AdminProductManager.tsx   | TypeScript JSX     |         16 |         -1 |          0 |         15 |
+| c:\omnora OS\frontend\src\components\admin\products\ProductEditor.tsx         | TypeScript JSX     |         13 |         -1 |          1 |         13 |
+| c:\omnora OS\frontend\src\components\admin\seo\SEOManager.tsx                 | TypeScript JSX     |          8 |         -3 |          0 |          5 |
+| c:\omnora OS\frontend\src\components\admin\settings\DomainSettings.tsx        | TypeScript JSX     |          5 |          0 |          1 |          6 |
+| c:\omnora OS\frontend\src\components\admin\settings\PaymentSettings.tsx       | TypeScript JSX     |          6 |          0 |          1 |          7 |
+| c:\omnora OS\frontend\src\components\auth\AuthModal.tsx                       | TypeScript JSX     |          1 |         -1 |          0 |          0 |
+| c:\omnora OS\frontend\src\components\blocks\CustomerReviews.tsx               | TypeScript JSX     |         -1 |          0 |          0 |         -1 |
+| c:\omnora OS\frontend\src\components\blocks\FAQAccordion.tsx                  | TypeScript JSX     |         -3 |         -5 |         -7 |        -15 |
+| c:\omnora OS\frontend\src\components\blocks\HeroBanner.tsx                    | TypeScript JSX     |          2 |          0 |          1 |          3 |
+| c:\omnora OS\frontend\src\components\blocks\SiteFooter.tsx                    | TypeScript JSX     |        -32 |         -1 |         -5 |        -38 |
+| c:\omnora OS\frontend\src\components\blocks\TrustBadges.tsx                   | TypeScript JSX     |         13 |          3 |          1 |         17 |
+| c:\omnora OS\frontend\src\components\blocks\UpsellWidget.tsx                  | TypeScript JSX     |         -1 |          0 |          0 |         -1 |
+| c:\omnora OS\frontend\src\components\builder\AICopilotModal.tsx               | TypeScript JSX     |          9 |          2 |          1 |         12 |
+| c:\omnora OS\frontend\src\components\builder\AddPageModal.tsx                 | TypeScript JSX     |          7 |          0 |         -2 |          5 |
+| c:\omnora OS\frontend\src\components\builder\DomainManager.tsx                | TypeScript JSX     |          5 |          0 |          1 |          6 |
+| c:\omnora OS\frontend\src\components\cart\CartDrawer.tsx                      | TypeScript JSX     |          6 |          1 |          0 |          7 |
+| c:\omnora OS\frontend\src\components\cart\CheckoutBlock.tsx                   | TypeScript JSX     |         27 |          7 |          2 |         36 |
+| c:\omnora OS\frontend\src\components\cart\FeaturedProduct.tsx                 | TypeScript JSX     |         17 |          2 |          1 |         20 |
+| c:\omnora OS\frontend\src\components\cart\ProductCard.tsx                     | TypeScript JSX     |          2 |          2 |         -1 |          3 |
+| c:\omnora OS\frontend\src\components\cart\ProductGrid.tsx                     | TypeScript JSX     |        -70 |          1 |         -6 |        -75 |
+| c:\omnora OS\frontend\src\components\cart\ProductOptions.tsx                  | TypeScript JSX     |         -2 |         -5 |         -4 |        -11 |
+| c:\omnora OS\frontend\src\components\cart\RecentlyViewed.tsx                  | TypeScript JSX     |         20 |          1 |          2 |         23 |
+| c:\omnora OS\frontend\src\components\cart\SearchBar.tsx                       | TypeScript JSX     |          1 |          0 |         -3 |         -2 |
+| c:\omnora OS\frontend\src\components\cms\BlockFloatingToolbar.tsx             | TypeScript JSX     |          4 |          0 |          1 |          5 |
+| c:\omnora OS\frontend\src\components\cms\BuilderRegistry.ts                   | TypeScript         |         -1 |          0 |          0 |         -1 |
+| c:\omnora OS\frontend\src\components\cms\BuilderToolbar.tsx                   | TypeScript JSX     |        -19 |        -29 |         -7 |        -55 |
+| c:\omnora OS\frontend\src\components\cms\CanvasBlock.tsx                      | TypeScript JSX     |         12 |         -6 |          2 |          8 |
+| c:\omnora OS\frontend\src\components\cms\CanvasOverlay.tsx                    | TypeScript JSX     |         21 |        -63 |         -1 |        -43 |
+| c:\omnora OS\frontend\src\components\cms\ComponentRegistry.tsx                | TypeScript JSX     |         -1 |          0 |          0 |         -1 |
+| c:\omnora OS\frontend\src\components\cms\ComponentWrapper.tsx                 | TypeScript JSX     |         11 |         -1 |          2 |         12 |
+| c:\omnora OS\frontend\src\components\cms\ConversionScore.tsx                  | TypeScript JSX     |         -3 |          1 |          0 |         -2 |
+| c:\omnora OS\frontend\src\components\cms\DevicePresetPanel.tsx                | TypeScript JSX     |          1 |          0 |          1 |          2 |
+| c:\omnora OS\frontend\src\components\cms\DynamicSection.tsx                   | TypeScript JSX     |         -1 |          0 |          0 |         -1 |
+| c:\omnora OS\frontend\src\components\cms\EditModeOverlay.tsx                  | TypeScript JSX     |         19 |          2 |          5 |         26 |
+| c:\omnora OS\frontend\src\components\cms\EditableComponents.tsx               | TypeScript JSX     |         31 |        -14 |         14 |         31 |
+| c:\omnora OS\frontend\src\components\cms\ElementLibrary.tsx                   | TypeScript JSX     |          3 |          0 |         -1 |          2 |
+| c:\omnora OS\frontend\src\components\cms\MediaLibraryModal.tsx                | TypeScript JSX     |          8 |          0 |          2 |         10 |
+| c:\omnora OS\frontend\src\components\cms\OmnoraRenderer.tsx                   | TypeScript JSX     |          7 |          0 |          1 |          8 |
+| c:\omnora OS\frontend\src\components\cms\SEOHead.tsx                          | TypeScript JSX     |          1 |          0 |          0 |          1 |
+| c:\omnora OS\frontend\src\components\cms\SafeRenderer.tsx                     | TypeScript JSX     |          7 |          0 |          1 |          8 |
+| c:\omnora OS\frontend\src\components\cms\editors\ProductGridEditor.tsx        | TypeScript JSX     |          1 |          0 |          0 |          1 |
+| c:\omnora OS\frontend\src\components\cms\help\SuggestionBubble.tsx            | TypeScript JSX     |          6 |          1 |         -1 |          6 |
+| c:\omnora OS\frontend\src\components\cms\help\TourOverlay.tsx                 | TypeScript JSX     |          2 |         -2 |         -1 |         -1 |
+| c:\omnora OS\frontend\src\components\dashboard\MerchantStats.tsx              | TypeScript JSX     |          9 |          0 |          1 |         10 |
+| c:\omnora OS\frontend\src\components\dashboard\OrderListTable.tsx             | TypeScript JSX     |          0 |          1 |         -1 |          0 |
+| c:\omnora OS\frontend\src\components\dashboard\PaymentMethodBuilder.tsx       | TypeScript JSX     |          6 |          1 |         -1 |          6 |
+| c:\omnora OS\frontend\src\components\fomo\FomoCounter.tsx                     | TypeScript JSX     |          3 |          0 |          1 |          4 |
+| c:\omnora OS\frontend\src\components\home\tech.tsx                            | TypeScript JSX     |          1 |         -1 |          0 |          0 |
+| c:\omnora OS\frontend\src\components\merchant\RecoveryList.tsx                | TypeScript JSX     |          3 |          1 |          0 |          4 |
+| c:\omnora OS\frontend\src\components\onboarding\StoreSetupWizard.tsx          | TypeScript JSX     |         23 |          0 |          2 |         25 |
+| c:\omnora OS\frontend\src\components\pwa\PwaInstallPrompt.tsx                 | TypeScript JSX     |          1 |          0 |         -1 |          0 |
+| c:\omnora OS\frontend\src\components\seller\AiContentPanel.tsx                | TypeScript JSX     |          5 |          0 |          0 |          5 |
+| c:\omnora OS\frontend\src\components\seller\AiInsights.tsx                    | TypeScript JSX     |          7 |          3 |          1 |         11 |
+| c:\omnora OS\frontend\src\components\seller\CategoryPicker.tsx                | TypeScript JSX     |         -2 |          2 |         -1 |         -1 |
+| c:\omnora OS\frontend\src\components\seller\InstallButton.tsx                 | TypeScript JSX     |          4 |          0 |          1 |          5 |
+| c:\omnora OS\frontend\src\components\seller\MerchantStats.tsx                 | TypeScript JSX     |         11 |         -7 |         -1 |          3 |
+| c:\omnora OS\frontend\src\components\seller\PaymentSettingsPanel.tsx          | TypeScript JSX     |          4 |          0 |          0 |          4 |
+| c:\omnora OS\frontend\src\components\seller\PaymentVerificationQueue.tsx      | TypeScript JSX     |          7 |          1 |         -1 |          7 |
+| c:\omnora OS\frontend\src\components\seller\SellerAnalytics.tsx               | TypeScript JSX     |          4 |          0 |          1 |          5 |
+| c:\omnora OS\frontend\src\components\seller\SellerAnalyticsDashboard.tsx      | TypeScript JSX     |          6 |          1 |          0 |          7 |
+| c:\omnora OS\frontend\src\components\seller\SellerInventory.tsx               | TypeScript JSX     |          1 |          1 |         -1 |          1 |
+| c:\omnora OS\frontend\src\components\seller\StoreGenerator.tsx                | TypeScript JSX     |         -3 |          3 |         -1 |         -1 |
+| c:\omnora OS\frontend\src\components\seller\WhatsAppTemplatesPanel.tsx        | TypeScript JSX     |         11 |          1 |          0 |         12 |
+| c:\omnora OS\frontend\src\components\storefront\CartDrawer.tsx                | TypeScript JSX     |         -1 |          0 |          0 |         -1 |
+| c:\omnora OS\frontend\src\components\storefront\OmnoraBanner.tsx              | TypeScript JSX     |         18 |          3 |          2 |         23 |
+| c:\omnora OS\frontend\src\components\storefront\checkout\CheckoutFlow.tsx     | TypeScript JSX     |         13 |          0 |          3 |         16 |
+| c:\omnora OS\frontend\src\components\storefront\customer\CustomerProfile.tsx  | TypeScript JSX     |         30 |          0 |          2 |         32 |
+| c:\omnora OS\frontend\src\components\storefront\search\SearchOverlay.tsx      | TypeScript JSX     |         12 |          0 |          2 |         14 |
+| c:\omnora OS\frontend\src\components\superadmin\MerchantLedger.tsx            | TypeScript JSX     |          1 |          0 |          0 |          1 |
+| c:\omnora OS\frontend\src\components\ui\FloatingParticles.tsx                 | TypeScript JSX     |         17 |          3 |          4 |         24 |
+| c:\omnora OS\frontend\src\components\ui\RadixSelect.tsx                       | TypeScript JSX     |         -1 |          0 |          0 |         -1 |
+| c:\omnora OS\frontend\src\components\useMinimumLoadingTime.ts                 | TypeScript         |          0 |         -3 |          1 |         -2 |
+| c:\omnora OS\frontend\src\context\AuthContext.tsx                             | TypeScript JSX     |         14 |        -13 |          0 |          1 |
+| c:\omnora OS\frontend\src\context\BuilderContext.tsx                          | TypeScript JSX     |          9 |         -3 |          1 |          7 |
+| c:\omnora OS\frontend\src\context\MediaStoreContext.tsx                       | TypeScript JSX     |          2 |          0 |          0 |          2 |
+| c:\omnora OS\frontend\src\context\OmnoraContext.tsx                           | TypeScript JSX     |          1 |          0 |          1 |          2 |
+| c:\omnora OS\frontend\src\context\StorefrontContext.tsx                       | TypeScript JSX     |          1 |          1 |          0 |          2 |
+| c:\omnora OS\frontend\src\hooks\BindResolver.ts                               | TypeScript         |         -2 |          0 |          0 |         -2 |
+| c:\omnora OS\frontend\src\hooks\useImageLoader.ts                             | TypeScript         |          1 |          1 |          1 |          3 |
+| c:\omnora OS\frontend\src\hooks\useMinimumLoadingTime.ts                      | TypeScript         |         -4 |          1 |          0 |         -3 |
+| c:\omnora OS\frontend\src\hooks\useNodeSelector.ts                            | TypeScript         |          1 |          1 |          0 |          2 |
+| c:\omnora OS\frontend\src\hooks\useStoreHydration.ts                          | TypeScript         |          6 |          0 |          3 |          9 |
+| c:\omnora OS\frontend\src\lib\CommandExecutor.ts                              | TypeScript         |          5 |          0 |          1 |          6 |
+| c:\omnora OS\frontend\src\lib\LocalAIEngine.ts                                | TypeScript         |         -3 |         -2 |         -3 |         -8 |
+| c:\omnora OS\frontend\src\lib\kernel\Kernel.ts                                | TypeScript         |          3 |          0 |         -1 |          2 |
+| c:\omnora OS\frontend\src\lib\kernel\utils\MigrationScript.ts                 | TypeScript         |          9 |          0 |          2 |         11 |
+| c:\omnora OS\frontend\src\lib\supabaseClient.ts                               | TypeScript         |         -4 |          0 |          0 |         -4 |
+| c:\omnora OS\frontend\src\pages\About.tsx                                     | TypeScript JSX     |         -1 |          0 |          0 |         -1 |
+| c:\omnora OS\frontend\src\pages\AdminApprove.tsx                              | TypeScript JSX     |          2 |          1 |          1 |          4 |
+| c:\omnora OS\frontend\src\pages\AdminOrders.tsx                               | TypeScript JSX     |          2 |          0 |          0 |          2 |
+| c:\omnora OS\frontend\src\pages\AdminProducts.tsx                             | TypeScript JSX     |          4 |          0 |          0 |          4 |
+| c:\omnora OS\frontend\src\pages\AdminUsers.tsx                                | TypeScript JSX     |         12 |          0 |          1 |         13 |
+| c:\omnora OS\frontend\src\pages\Cart.tsx                                      | TypeScript JSX     |          3 |          1 |         -6 |         -2 |
+| c:\omnora OS\frontend\src\pages\Collection.tsx                                | TypeScript JSX     |          4 |          2 |          0 |          6 |
+| c:\omnora OS\frontend\src\pages\HomeWithAds.tsx                               | TypeScript JSX     |          2 |         -1 |          0 |          1 |
+| c:\omnora OS\frontend\src\pages\Login.tsx                                     | TypeScript JSX     |         12 |          0 |          0 |         12 |
+| c:\omnora OS\frontend\src\pages\OmnoraContact.tsx                             | TypeScript JSX     |          1 |          0 |          0 |          1 |
+| c:\omnora OS\frontend\src\pages\OrderConfirmation.tsx                         | TypeScript JSX     |          0 |         -1 |          0 |         -1 |
+| c:\omnora OS\frontend\src\pages\OrderDetail.tsx                               | TypeScript JSX     |         -1 |          0 |          0 |         -1 |
+| c:\omnora OS\frontend\src\pages\PaymentSuccess.tsx                            | TypeScript JSX     |          0 |         -1 |          0 |         -1 |
+| c:\omnora OS\frontend\src\pages\Product.tsx                                   | TypeScript JSX     |         -4 |         -1 |         -2 |         -7 |
+| c:\omnora OS\frontend\src\pages\Profile.tsx                                   | TypeScript JSX     |          3 |          1 |          0 |          4 |
+| c:\omnora OS\frontend\src\pages\SellerDashboard.tsx                           | TypeScript JSX     |         34 |          4 |          4 |         42 |
+| c:\omnora OS\frontend\src\pages\Wishlist.tsx                                  | TypeScript JSX     |          9 |         -4 |         -1 |          4 |
+| c:\omnora OS\frontend\src\platform\client\OmnoraContext.tsx                   | TypeScript JSX     |          1 |          0 |          1 |          2 |
+| c:\omnora OS\frontend\src\platform\client\bootstrap.tsx                       | TypeScript JSX     |         -6 |         -5 |          0 |        -11 |
+| c:\omnora OS\frontend\src\platform\components\OmnoraBlocks.tsx                | TypeScript JSX     |         72 |          4 |         18 |         94 |
+| c:\omnora OS\frontend\src\platform\core\AnalyticsClient.ts                    | TypeScript         |          0 |         -2 |         -2 |         -4 |
+| c:\omnora OS\frontend\src\platform\core\CartStore.ts                          | TypeScript         |          2 |          0 |          0 |          2 |
+| c:\omnora OS\frontend\src\platform\core\DataLink.ts                           | TypeScript         |         -1 |          0 |         -1 |         -2 |
+| c:\omnora OS\frontend\src\platform\core\DatabaseClient.ts                     | TypeScript         |         -9 |         -2 |         -2 |        -13 |
+| c:\omnora OS\frontend\src\platform\core\DatabaseTypes.ts                      | TypeScript         |          0 |          7 |         -1 |          6 |
+| c:\omnora OS\frontend\src\platform\core\Dispatcher.ts                         | TypeScript         |         11 |          0 |          0 |         11 |
+| c:\omnora OS\frontend\src\platform\core\Registry.ts                           | TypeScript         |          1 |          3 |         -1 |          3 |
+| c:\omnora OS\frontend\src\platform\core\SupabaseDatabaseClient.ts             | TypeScript         |        -10 |        -13 |         -2 |        -25 |
+| c:\omnora OS\frontend\src\platform\core\SupabaseStorageClient.ts              | TypeScript         |          0 |          0 |         -1 |         -1 |
+| c:\omnora OS\frontend\src\platform\core\SymbolManager.ts                      | TypeScript         |          0 |          0 |         -1 |         -1 |
+| c:\omnora OS\frontend\src\platform\core\normalize.ts                          | TypeScript         |          4 |          1 |          1 |          6 |
+| c:\omnora OS\frontend\src\platform\core\types.ts                              | TypeScript         |         33 |          3 |          5 |         41 |
+| c:\omnora OS\frontend\src\platform\forge\ForgeController.ts                   | TypeScript         |         15 |          0 |          2 |         17 |
+| c:\omnora OS\frontend\src\platform\library\modules\HeroModule.tsx             | TypeScript JSX     |         14 |          0 |          2 |         16 |
+| c:\omnora OS\frontend\src\platform\library\modules\IntelligenceModules.tsx    | TypeScript JSX     |         22 |          1 |          4 |         27 |
+| c:\omnora OS\frontend\src\platform\library\modules\ProductModule.tsx          | TypeScript JSX     |         14 |          0 |          2 |         16 |
+| c:\omnora OS\frontend\src\platform\library\modules\SelectionEngine.tsx        | TypeScript JSX     |          9 |          5 |          1 |         15 |
+| c:\omnora OS\frontend\src\platform\library\modules\TrustModule.tsx            | TypeScript JSX     |         14 |          1 |          2 |         17 |
+| c:\omnora OS\frontend\src\platform\publish\CleanRenderer.tsx                  | TypeScript JSX     |        -24 |          0 |          0 |        -24 |
+| c:\omnora OS\frontend\src\platform\publish\Publisher.ts                       | TypeScript         |          5 |          0 |          3 |          8 |
+| c:\omnora OS\frontend\src\platform\publish\RobustRenderer.tsx                 | TypeScript JSX     |          0 |          1 |          1 |          2 |
+| c:\omnora OS\frontend\src\platform\publish\StorefrontApp.tsx                  | TypeScript JSX     |          0 |          2 |          0 |          2 |
+| c:\omnora OS\frontend\src\stores\SyncManager.ts                               | TypeScript         |          0 |          1 |          0 |          1 |
+| c:\omnora OS\frontend\src\stores\useBuilderStore.ts                           | TypeScript         |         22 |         -7 |          3 |         18 |
+| c:\omnora OS\gsgbackend\BULLMQ_STATUS.md                                      | Markdown           |       -104 |          0 |        -32 |       -136 |
+| c:\omnora OS\gsgbackend\COLLECTION_PAGE_FIX.md                                | Markdown           |        -99 |          0 |        -22 |       -121 |
+| c:\omnora OS\gsgbackend\MONGODB_SETUP.md                                      | Markdown           |       -112 |          0 |        -53 |       -165 |
+| c:\omnora OS\gsgbackend\PRODUCTION_READINESS.md                               | Markdown           |       -112 |          0 |        -34 |       -146 |
+| c:\omnora OS\gsgbackend\README.md                                             | Markdown           |        -82 |          0 |        -29 |       -111 |
+| c:\omnora OS\gsgbackend\SECURITY_FIXES.md                                     | Markdown           |        -86 |          0 |        -22 |       -108 |
+| c:\omnora OS\gsgbackend\bootstrap.js                                          | JavaScript         |        -80 |        -14 |        -19 |       -113 |
+| c:\omnora OS\gsgbackend\check_status.js                                       | JavaScript         |         -7 |          0 |         -1 |         -8 |
+| c:\omnora OS\gsgbackend\config\env.js                                         | JavaScript         |       -121 |         -6 |        -18 |       -145 |
+| c:\omnora OS\gsgbackend\config\supabaseAdmin.js                               | JavaScript         |        -16 |          0 |         -5 |        -21 |
+| c:\omnora OS\gsgbackend\config\supabaseClient.js                              | JavaScript         |        -18 |         -2 |         -7 |        -27 |
+| c:\omnora OS\gsgbackend\controllers\adminController.js                        | JavaScript         |       -194 |         -4 |        -30 |       -228 |
+| c:\omnora OS\gsgbackend\controllers\aiController.js                           | JavaScript         |        -58 |         -3 |        -11 |        -72 |
+| c:\omnora OS\gsgbackend\controllers\analyticsController.js                    | JavaScript         |        -82 |         -4 |        -12 |        -98 |
+| c:\omnora OS\gsgbackend\controllers\authController.js                         | JavaScript         |       -184 |        -26 |        -36 |       -246 |
+| c:\omnora OS\gsgbackend\controllers\cartController.js                         | JavaScript         |       -217 |          0 |        -32 |       -249 |
+| c:\omnora OS\gsgbackend\controllers\contactController.js                      | JavaScript         |        -64 |         -3 |        -14 |        -81 |
+| c:\omnora OS\gsgbackend\controllers\domainController.js                       | JavaScript         |        -62 |         -3 |         -9 |        -74 |
+| c:\omnora OS\gsgbackend\controllers\inventoryController.js                    | JavaScript         |       -354 |         -4 |        -48 |       -406 |
+| c:\omnora OS\gsgbackend\controllers\mediaController.js                        | JavaScript         |        -72 |         -2 |        -13 |        -87 |
+| c:\omnora OS\gsgbackend\controllers\newsletterController.js                   | JavaScript         |        -59 |         -3 |        -12 |        -74 |
+| c:\omnora OS\gsgbackend\controllers\orderController.js                        | JavaScript         |       -616 |        -43 |        -96 |       -755 |
+| c:\omnora OS\gsgbackend\controllers\paymentController.js                      | JavaScript         |        -96 |         -2 |        -10 |       -108 |
+| c:\omnora OS\gsgbackend\controllers\phase1Controller.js                       | JavaScript         |       -467 |        -12 |        -93 |       -572 |
+| c:\omnora OS\gsgbackend\controllers\phase2Controller.js                       | JavaScript         |       -687 |        -36 |       -131 |       -854 |
+| c:\omnora OS\gsgbackend\controllers\phase3Controller.js                       | JavaScript         |       -808 |        -54 |       -155 |     -1,017 |
+| c:\omnora OS\gsgbackend\controllers\productController.js                      | JavaScript         |       -296 |         -2 |        -41 |       -339 |
+| c:\omnora OS\gsgbackend\controllers\recommendationController.js               | JavaScript         |       -213 |         -1 |        -32 |       -246 |
+| c:\omnora OS\gsgbackend\controllers\reviewController.js                       | JavaScript         |       -333 |         -6 |        -51 |       -390 |
+| c:\omnora OS\gsgbackend\controllers\searchController.js                       | JavaScript         |       -248 |         -3 |        -29 |       -280 |
+| c:\omnora OS\gsgbackend\controllers\userController.js                         | JavaScript         |       -243 |         -3 |        -48 |       -294 |
+| c:\omnora OS\gsgbackend\controllers\webhookController.js                      | JavaScript         |       -116 |        -13 |        -17 |       -146 |
+| c:\omnora OS\gsgbackend\controllers\wishlistController.js                     | JavaScript         |       -357 |         -2 |        -52 |       -411 |
+| c:\omnora OS\gsgbackend\data\admin_action_logs.json                           | JSON               |         -1 |          0 |          0 |         -1 |
+| c:\omnora OS\gsgbackend\data\defaultProducts.js                               | JavaScript         |        -87 |         -2 |         -3 |        -92 |
+| c:\omnora OS\gsgbackend\data\event.json                                       | JSON               |     -8,872 |          0 |          0 |     -8,872 |
+| c:\omnora OS\gsgbackend\data\orders.json                                      | JSON               |         -1 |          0 |          0 |         -1 |
+| c:\omnora OS\gsgbackend\data\product.json                                     | JSON               |    -10,686 |          0 |          0 |    -10,686 |
+| c:\omnora OS\gsgbackend\data\products.json                                    | JSON               |        -80 |          0 |          0 |        -80 |
+| c:\omnora OS\gsgbackend\data\sitecontent.json                                 | JSON               |       -520 |          0 |          0 |       -520 |
+| c:\omnora OS\gsgbackend\data\user.json                                        | JSON               |       -257 |          0 |          0 |       -257 |
+| c:\omnora OS\gsgbackend\data\users.json                                       | JSON               |        -26 |          0 |          0 |        -26 |
+| c:\omnora OS\gsgbackend\docs\API_OPERATIONS.md                                | Markdown           |        -42 |          0 |        -18 |        -60 |
+| c:\omnora OS\gsgbackend\docs\RUNBOOK_ARCHITECTURE.md                          | Markdown           |        -32 |          0 |        -19 |        -51 |
+| c:\omnora OS\gsgbackend\ecosystem.config.js                                   | JavaScript         |        -53 |          0 |         -2 |        -55 |
+| c:\omnora OS\gsgbackend\email-templates\order-cancelled.html                  | HTML               |        -60 |          0 |        -11 |        -71 |
+| c:\omnora OS\gsgbackend\email-templates\order-delivered.html                  | HTML               |        -60 |          0 |        -10 |        -70 |
+| c:\omnora OS\gsgbackend\email-templates\order-placed.html                     | HTML               |        -71 |          0 |        -12 |        -83 |
+| c:\omnora OS\gsgbackend\email-templates\order-shipped.html                    | HTML               |        -69 |          0 |        -12 |        -81 |
+| c:\omnora OS\gsgbackend\email-templates\payment-approved.html                 | HTML               |        -69 |          0 |        -12 |        -81 |
+| c:\omnora OS\gsgbackend\jobs\cleanupInitiatedOrders.js                        | JavaScript         |        -96 |         -6 |        -19 |       -121 |
+| c:\omnora OS\gsgbackend\middleware\auth.js                                    | JavaScript         |        -79 |         -3 |        -13 |        -95 |
+| c:\omnora OS\gsgbackend\middleware\authEnhanced.js                            | JavaScript         |         -1 |          0 |         -1 |         -2 |
+| c:\omnora OS\gsgbackend\middleware\authMiddleware.js                          | JavaScript         |         -1 |          0 |          0 |         -1 |
+| c:\omnora OS\gsgbackend\middleware\gatekeeper.js                              | JavaScript         |        -99 |        -12 |        -21 |       -132 |
+| c:\omnora OS\gsgbackend\middleware\rateLimiter.js                             | JavaScript         |        -28 |          0 |         -7 |        -35 |
+| c:\omnora OS\gsgbackend\middleware\tenantContext.js                           | JavaScript         |        -54 |         -8 |        -11 |        -73 |
+| c:\omnora OS\gsgbackend\middleware\validate.js                                | JavaScript         |        -15 |          0 |         -4 |        -19 |
+| c:\omnora OS\gsgbackend\package-lock.json                                     | JSON               |     -9,501 |          0 |         -1 |     -9,502 |
+| c:\omnora OS\gsgbackend\package-production.json                               | JSON               |        -71 |          0 |         -1 |        -72 |
+| c:\omnora OS\gsgbackend\package.json                                          | JSON               |        -58 |          0 |         -1 |        -59 |
+| c:\omnora OS\gsgbackend\routes\adminRoutes.js                                 | JavaScript         |        -20 |         -5 |         -7 |        -32 |
+| c:\omnora OS\gsgbackend\routes\aiContentRoutes.js                             | JavaScript         |        -42 |         -4 |        -10 |        -56 |
+| c:\omnora OS\gsgbackend\routes\analyticsRoutes.js                             | JavaScript         |         -6 |          0 |         -4 |        -10 |
+| c:\omnora OS\gsgbackend\routes\authRoutes.js                                  | JavaScript         |        -12 |         -3 |         -3 |        -18 |
+| c:\omnora OS\gsgbackend\routes\cartRoutes.js                                  | JavaScript         |        -15 |         -1 |         -4 |        -20 |
+| c:\omnora OS\gsgbackend\routes\cmsRoutes.js                                   | JavaScript         |       -291 |        -26 |        -55 |       -372 |
+| c:\omnora OS\gsgbackend\routes\contactRoutes.js                               | JavaScript         |         -9 |         -2 |         -3 |        -14 |
+| c:\omnora OS\gsgbackend\routes\domainRoutes.js                                | JavaScript         |         -7 |          0 |         -3 |        -10 |
+| c:\omnora OS\gsgbackend\routes\healthRoutes.js                                | JavaScript         |        -57 |         -3 |         -8 |        -68 |
+| c:\omnora OS\gsgbackend\routes\inventoryRoutes.js                             | JavaScript         |        -20 |         -3 |         -6 |        -29 |
+| c:\omnora OS\gsgbackend\routes\mediaRoutes.js                                 | JavaScript         |        -45 |         -4 |         -8 |        -57 |
+| c:\omnora OS\gsgbackend\routes\newsletterRoutes.js                            | JavaScript         |         -9 |         -2 |         -3 |        -14 |
+| c:\omnora OS\gsgbackend\routes\onboardingRoutes.js                            | JavaScript         |        -65 |        -10 |        -11 |        -86 |
+| c:\omnora OS\gsgbackend\routes\orderRoutes.js                                 | JavaScript         |        -90 |        -17 |        -21 |       -128 |
+| c:\omnora OS\gsgbackend\routes\paymentMethodRoutes.js                         | JavaScript         |       -117 |         -7 |        -24 |       -148 |
+| c:\omnora OS\gsgbackend\routes\paymentRoutes.js                               | JavaScript         |        -13 |         -5 |         -7 |        -25 |
+| c:\omnora OS\gsgbackend\routes\performanceHubRoutes.js                        | JavaScript         |        -97 |        -11 |        -19 |       -127 |
+| c:\omnora OS\gsgbackend\routes\phase1Routes.js                                | JavaScript         |        -68 |        -33 |        -23 |       -124 |
+| c:\omnora OS\gsgbackend\routes\phase2Routes.js                                | JavaScript         |        -62 |        -28 |        -14 |       -104 |
+| c:\omnora OS\gsgbackend\routes\phase3Routes.js                                | JavaScript         |        -84 |        -46 |        -20 |       -150 |
+| c:\omnora OS\gsgbackend\routes\productRoutes.js                               | JavaScript         |        -21 |          0 |         -4 |        -25 |
+| c:\omnora OS\gsgbackend\routes\recommendationRoutes.js                        | JavaScript         |        -16 |         -3 |         -6 |        -25 |
+| c:\omnora OS\gsgbackend\routes\reviewRoutes.js                                | JavaScript         |        -18 |         -3 |         -6 |        -27 |
+| c:\omnora OS\gsgbackend\routes\searchRoutes.js                                | JavaScript         |        -15 |         -2 |         -5 |        -22 |
+| c:\omnora OS\gsgbackend\routes\sellerAnalyticsRoutes.js                       | JavaScript         |        -44 |         -4 |         -7 |        -55 |
+| c:\omnora OS\gsgbackend\routes\sellerRoutes.js                                | JavaScript         |        -89 |         -1 |        -13 |       -103 |
+| c:\omnora OS\gsgbackend\routes\userRoutes.js                                  | JavaScript         |        -21 |         -1 |         -4 |        -26 |
+| c:\omnora OS\gsgbackend\routes\webhookRoutes.js                               | JavaScript         |         -6 |          0 |         -3 |         -9 |
+| c:\omnora OS\gsgbackend\routes\whatsappTemplateRoutes.js                      | JavaScript         |        -87 |         -7 |        -18 |       -112 |
+| c:\omnora OS\gsgbackend\routes\wishlistRoutes.js                              | JavaScript         |        -19 |         -3 |         -6 |        -28 |
+| c:\omnora OS\gsgbackend\scripts\check-env-leaks.js                            | JavaScript         |        -35 |          0 |         -8 |        -43 |
+| c:\omnora OS\gsgbackend\scripts\cleanup-port.js                               | JavaScript         |        -44 |         -5 |         -5 |        -54 |
+| c:\omnora OS\gsgbackend\scripts\createAdmin.js                                | JavaScript         |        -59 |         -6 |        -12 |        -77 |
+| c:\omnora OS\gsgbackend\scripts\precheck.js                                   | JavaScript         |        -59 |          0 |        -10 |        -69 |
+| c:\omnora OS\gsgbackend\scripts\seed-products-remote.js                       | JavaScript         |        -46 |         -4 |        -11 |        -61 |
+| c:\omnora OS\gsgbackend\scripts\seed-remote.js                                | JavaScript         |        -52 |         -3 |        -10 |        -65 |
+| c:\omnora OS\gsgbackend\scripts\seedProducts.js                               | JavaScript         |       -147 |         -9 |        -13 |       -169 |
+| c:\omnora OS\gsgbackend\scripts\set-admin.js                                  | JavaScript         |        -56 |         -1 |        -12 |        -69 |
+| c:\omnora OS\gsgbackend\scripts\start-dev.js                                  | JavaScript         |        -15 |         -3 |         -7 |        -25 |
+| c:\omnora OS\gsgbackend\scripts\test-approval-system.js                       | JavaScript         |       -130 |        -25 |        -27 |       -182 |
+| c:\omnora OS\gsgbackend\scripts\test-whatsapp.js                              | JavaScript         |        -31 |          0 |         -4 |        -35 |
+| c:\omnora OS\gsgbackend\scripts\verify-system.js                              | JavaScript         |       -105 |        -13 |        -23 |       -141 |
+| c:\omnora OS\gsgbackend\server.js                                             | JavaScript         |       -112 |        -13 |        -19 |       -144 |
+| c:\omnora OS\gsgbackend\services\aiContentService.js                          | JavaScript         |       -191 |        -13 |        -37 |       -241 |
+| c:\omnora OS\gsgbackend\services\aiQuotaService.js                            | JavaScript         |        -75 |         -7 |        -16 |        -98 |
+| c:\omnora OS\gsgbackend\services\analyticsService.js                          | JavaScript         |       -131 |        -11 |        -35 |       -177 |
+| c:\omnora OS\gsgbackend\services\cartService.js                               | JavaScript         |       -318 |         -7 |        -39 |       -364 |
+| c:\omnora OS\gsgbackend\services\dbService.js                                 | JavaScript         |        -20 |         -1 |         -5 |        -26 |
+| c:\omnora OS\gsgbackend\services\emailService.js                              | JavaScript         |       -198 |         -1 |        -23 |       -222 |
+| c:\omnora OS\gsgbackend\services\logger.js                                    | JavaScript         |        -25 |          0 |         -6 |        -31 |
+| c:\omnora OS\gsgbackend\services\mailblusterService.js                        | JavaScript         |        -69 |          0 |        -12 |        -81 |
+| c:\omnora OS\gsgbackend\services\manifestService.js                           | JavaScript         |        -34 |         -1 |         -7 |        -42 |
+| c:\omnora OS\gsgbackend\services\memoryDbService.js                           | JavaScript         |        -45 |          0 |        -10 |        -55 |
+| c:\omnora OS\gsgbackend\services\onboardingService.js                         | JavaScript         |       -108 |         -3 |        -15 |       -126 |
+| c:\omnora OS\gsgbackend\services\paymentService.js                            | JavaScript         |       -328 |        -55 |        -57 |       -440 |
+| c:\omnora OS\gsgbackend\services\preflightService.js                          | JavaScript         |        -50 |         -4 |         -7 |        -61 |
+| c:\omnora OS\gsgbackend\services\queueService.js                              | JavaScript         |       -169 |         -9 |        -23 |       -201 |
+| c:\omnora OS\gsgbackend\services\recommendationService.js                     | JavaScript         |       -229 |        -13 |        -36 |       -278 |
+| c:\omnora OS\gsgbackend\services\searchService.js                             | JavaScript         |       -254 |        -21 |        -47 |       -322 |
+| c:\omnora OS\gsgbackend\services\shippingService.js                           | JavaScript         |        -89 |        -10 |        -24 |       -123 |
+| c:\omnora OS\gsgbackend\services\shipping\leopardsProvider.js                 | JavaScript         |        -57 |         -1 |         -9 |        -67 |
+| c:\omnora OS\gsgbackend\services\shipping\tcsProvider.js                      | JavaScript         |        -23 |         -2 |         -6 |        -31 |
+| c:\omnora OS\gsgbackend\services\shipping\traxProvider.js                     | JavaScript         |        -58 |          0 |         -9 |        -67 |
+| c:\omnora OS\gsgbackend\services\stateService.js                              | JavaScript         |       -146 |         -9 |        -29 |       -184 |
+| c:\omnora OS\gsgbackend\services\waRateGuard.js                               | JavaScript         |        -87 |        -11 |        -23 |       -121 |
+| c:\omnora OS\gsgbackend\services\whatsappAutomationService.js                 | JavaScript         |       -153 |        -13 |        -28 |       -194 |
+| c:\omnora OS\gsgbackend\services\whatsappService.js                           | JavaScript         |        -27 |         -1 |         -4 |        -32 |
+| c:\omnora OS\gsgbackend\templates\home\electronics.json                       | JSON               |        -67 |          0 |          0 |        -67 |
+| c:\omnora OS\gsgbackend\templates\home\fashion.json                           | JSON               |        -75 |          0 |          0 |        -75 |
+| c:\omnora OS\gsgbackend\templates\home\general.json                           | JSON               |        -59 |          0 |          0 |        -59 |
+| c:\omnora OS\gsgbackend\test-boundaries.js                                    | JavaScript         |        -93 |         -8 |        -19 |       -120 |
+| c:\omnora OS\gsgbackend\test_subscription.js                                  | JavaScript         |        -25 |          0 |         -4 |        -29 |
+| c:\omnora OS\gsgbackend\tests\QA-SECURITY-CHECKLIST.md                        | Markdown           |       -315 |          0 |       -117 |       -432 |
+| c:\omnora OS\gsgbackend\tests\integration\bootstrap.test.js                   | JavaScript         |        -61 |         -2 |        -10 |        -73 |
+| c:\omnora OS\gsgbackend\tests\integration\payment-security.test.js            | JavaScript         |       -218 |        -27 |        -51 |       -296 |
+| c:\omnora OS\gsgbackend\tests\security\jwt.test.js                            | JavaScript         |        -88 |         -3 |        -24 |       -115 |
+| c:\omnora OS\gsgbackend\tests\test_approval_flow.js                           | JavaScript         |       -102 |        -10 |        -20 |       -132 |
+| c:\omnora OS\gsgbackend\tests\unit\config.test.js                             | JavaScript         |        -38 |          0 |        -10 |        -48 |
+| c:\omnora OS\gsgbackend\utils\LocalDB.js                                      | JavaScript         |       -230 |        -17 |        -46 |       -293 |
+| c:\omnora OS\gsgbackend\utils\inventoryService.js                             | JavaScript         |       -137 |         -2 |        -22 |       -161 |
+| c:\omnora OS\gsgbackend\utils\modelFactory.js                                 | JavaScript         |        -66 |        -15 |        -18 |        -99 |
+| c:\omnora OS\gsgbackend\utils\orderHashService.js                             | JavaScript         |        -40 |         -3 |         -8 |        -51 |
+| c:\omnora OS\gsgbackend\utils\phoneFormatter.js                               | JavaScript         |        -56 |        -10 |        -17 |        -83 |
+| c:\omnora OS\gsgbackend\utils\retryWithBackoff.js                             | JavaScript         |        -62 |          0 |        -10 |        -72 |
+| c:\omnora OS\gsgbackend\utils\tenantStorage.js                                | JavaScript         |         -3 |          0 |         -3 |         -6 |
+| c:\omnora OS\gsgbackend\utils\tokenService.js                                 | JavaScript         |        -74 |         -2 |        -11 |        -87 |
+| c:\omnora OS\gsgbackend\utils\whatsappService.js                              | JavaScript         |       -142 |          0 |        -28 |       -170 |
+| c:\omnora OS\gsgbackend\validators\orderValidators.js                         | JavaScript         |        -36 |          0 |         -8 |        -44 |
+| c:\omnora OS\gsgbackend\validators\productValidators.js                       | JavaScript         |        -28 |          0 |         -8 |        -36 |
+| c:\omnora OS\gsgbackend\validators\userValidator.js                           | JavaScript         |        -23 |          0 |         -5 |        -28 |
+| c:\omnora OS\gsgbackend\validators\userValidators.js                          | JavaScript         |        -41 |          0 |         -8 |        -49 |
+| c:\omnora OS\gsgbackend\verify-mongodb.js                                     | JavaScript         |        -95 |         -4 |        -23 |       -122 |
+| c:\omnora OS\gsgbackend\verify-order-fix.js                                   | JavaScript         |        -42 |         -1 |         -9 |        -52 |
+| c:\omnora OS\gsgbackend\verify-serverless.js                                  | JavaScript         |        -68 |        -11 |        -19 |        -98 |
+| c:\omnora OS\gsgbackend\workers\notificationWorker.js                         | JavaScript         |       -156 |        -17 |        -37 |       -210 |
+| c:\omnora OS\list_all_events.js                                               | JavaScript         |        -19 |          0 |         -2 |        -21 |
+| c:\omnora OS\list_all_imports.js                                              | JavaScript         |        -40 |          0 |         -5 |        -45 |
+| c:\omnora OS\list_errors.js                                                   | JavaScript         |        -19 |          0 |         -2 |        -21 |
+| c:\omnora OS\list_merchants.js                                                | JavaScript         |        -20 |          0 |         -7 |        -27 |
+| c:\omnora OS\log-awaits.js                                                    | JavaScript         |        -31 |          0 |         -7 |        -38 |
+| c:\omnora OS\package-lock.json                                                | JSON               |       -881 |          0 |         -1 |       -882 |
+| c:\omnora OS\package.json                                                     | JSON               |        -25 |          0 |         -1 |        -26 |
+| c:\omnora OS\scan-frontend-await.js                                           | JavaScript         |        -29 |         -2 |         -7 |        -38 |
+| c:\omnora OS\scripts\check-environment.ps1                                    | PowerShell         |          0 |          0 |         -1 |         -1 |
+| c:\omnora OS\scripts\start-backend.ps1                                        | PowerShell         |          0 |          0 |         -1 |         -1 |
+| c:\omnora OS\sitemap.xml                                                      | XML                |        -18 |          0 |         -2 |        -20 |
+| c:\omnora OS\spawn-esbuild-frontend.js                                        | JavaScript         |        -12 |          0 |         -2 |        -14 |
+| c:\omnora OS\spawn-esbuild.js                                                 | JavaScript         |        -12 |          0 |         -2 |        -14 |
+| c:\omnora OS\start-dev.ps1                                                    | PowerShell         |        -42 |         -8 |        -12 |        -62 |
+| c:\omnora OS\storefront-export\components\Footer.css                          | CSS                |       -248 |          0 |        -39 |       -287 |
+| c:\omnora OS\storefront-export\components\Footer.tsx                          | TypeScript JSX     |       -126 |         -6 |        -15 |       -147 |
+| c:\omnora OS\storefront-export\components\GlobalErrorBoundary.tsx             | TypeScript JSX     |        -60 |         -1 |        -12 |        -73 |
+| c:\omnora OS\storefront-export\components\Layout.css                          | CSS                |       -379 |          0 |        -58 |       -437 |
+| c:\omnora OS\storefront-export\components\Layout.tsx                          | TypeScript JSX     |       -257 |        -12 |        -31 |       -300 |
+| c:\omnora OS\storefront-export\components\StripePayment.tsx                   | TypeScript JSX     |        -82 |         -2 |        -13 |        -97 |
+| c:\omnora OS\storefront-export\components\cart\BuyButton.tsx                  | TypeScript JSX     |       -187 |         -2 |        -20 |       -209 |
+| c:\omnora OS\storefront-export\components\cart\CartDrawer.tsx                 | TypeScript JSX     |       -392 |        -22 |        -30 |       -444 |
+| c:\omnora OS\storefront-export\components\cart\CheckoutBlock.tsx              | TypeScript JSX     |       -417 |        -16 |        -42 |       -475 |
+| c:\omnora OS\storefront-export\components\cart\OrderConfirmationBlock.tsx     | TypeScript JSX     |       -225 |        -16 |        -22 |       -263 |
+| c:\omnora OS\storefront-export\components\cart\ProductCard.tsx                | TypeScript JSX     |       -208 |         -9 |        -17 |       -234 |
+| c:\omnora OS\storefront-export\components\cart\ProductGrid.tsx                | TypeScript JSX     |       -150 |        -10 |        -18 |       -178 |
+| c:\omnora OS\storefront-export\components\cart\ProductOptions.tsx             | TypeScript JSX     |       -237 |        -13 |        -22 |       -272 |
+| c:\omnora OS\storefront-export\components\cart\SearchBar.tsx                  | TypeScript JSX     |       -204 |         -6 |        -16 |       -226 |
+| c:\omnora OS\storefront-export\components\cart\StoreHeader.tsx                | TypeScript JSX     |       -203 |        -10 |        -18 |       -231 |
+| c:\omnora OS\storefront-export\components\home\ErrorBoundary.css              | CSS                |       -124 |          0 |        -17 |       -141 |
+| c:\omnora OS\storefront-export\components\home\HowItWorks.tsx                 | TypeScript JSX     |        -40 |         -4 |         -5 |        -49 |
+| c:\omnora OS\storefront-export\components\home\Newsletter.tsx                 | TypeScript JSX     |        -69 |         -1 |         -8 |        -78 |
+| c:\omnora OS\storefront-export\components\home\TechStack.css                  | CSS                |       -389 |          0 |        -54 |       -443 |
+| c:\omnora OS\storefront-export\components\home\Testimonials.tsx               | TypeScript JSX     |        -71 |         -4 |         -7 |        -82 |
+| c:\omnora OS\storefront-export\components\home\TrustSection.tsx               | TypeScript JSX     |        -32 |          0 |         -2 |        -34 |
+| c:\omnora OS\storefront-export\components\home\WhyUs.tsx                      | TypeScript JSX     |        -28 |          0 |         -3 |        -31 |
+| c:\omnora OS\storefront-export\components\home\tech.tsx                       | TypeScript JSX     |       -147 |         -9 |        -18 |       -174 |
+| c:\omnora OS\storefront-export\components\home\testimonials.css               | CSS                |       -185 |          0 |        -25 |       -210 |
+| c:\omnora OS\storefront-export\components\storefront\CustomerDashboard.tsx    | TypeScript JSX     |       -206 |         -6 |        -24 |       -236 |
+| c:\omnora OS\storefront-export\components\storefront\OmnoraBanner.tsx         | TypeScript JSX     |        -47 |         -3 |         -9 |        -59 |
+| c:\omnora OS\storefront-export\components\storefront\ThankYouPage.tsx         | TypeScript JSX     |       -199 |         -2 |        -23 |       -224 |
+| c:\omnora OS\storefront-export\context\CustomerAuthContext.tsx                | TypeScript JSX     |       -125 |         -6 |        -26 |       -157 |
+| c:\omnora OS\storefront-export\context\StorefrontContext.tsx                  | TypeScript JSX     |       -421 |         -9 |        -55 |       -485 |
+| c:\omnora OS\storefront-export\pages\About.css                                | CSS                |       -202 |          0 |        -39 |       -241 |
+| c:\omnora OS\storefront-export\pages\About.tsx                                | TypeScript JSX     |       -146 |         -5 |        -15 |       -166 |
+| c:\omnora OS\storefront-export\pages\Cart.css                                 | CSS                |       -222 |          0 |        -36 |       -258 |
+| c:\omnora OS\storefront-export\pages\Cart.tsx                                 | TypeScript JSX     |       -212 |          0 |        -27 |       -239 |
+| c:\omnora OS\storefront-export\pages\Checkout.css                             | CSS                |       -322 |          0 |        -41 |       -363 |
+| c:\omnora OS\storefront-export\pages\Checkout.tsx                             | TypeScript JSX     |       -493 |         -3 |        -45 |       -541 |
+| c:\omnora OS\storefront-export\pages\Collection.css                           | CSS                |       -554 |          0 |        -91 |       -645 |
+| c:\omnora OS\storefront-export\pages\Collection.tsx                           | TypeScript JSX     |       -172 |         -9 |        -28 |       -209 |
+| c:\omnora OS\storefront-export\pages\Home.tsx                                 | TypeScript JSX     |       -283 |         -6 |        -33 |       -322 |
+| c:\omnora OS\storefront-export\pages\HomeWithAds.tsx                          | TypeScript JSX     |        -12 |         -4 |         -6 |        -22 |
+| c:\omnora OS\storefront-export\pages\OmnoraContact.css                        | CSS                |       -201 |          0 |        -36 |       -237 |
+| c:\omnora OS\storefront-export\pages\OmnoraContact.tsx                        | TypeScript JSX     |       -190 |         -5 |        -22 |       -217 |
+| c:\omnora OS\storefront-export\pages\OmnoraFAQ.css                            | CSS                |       -192 |          0 |        -35 |       -227 |
+| c:\omnora OS\storefront-export\pages\OmnoraFAQ.tsx                            | TypeScript JSX     |       -135 |         -5 |        -18 |       -158 |
+| c:\omnora OS\storefront-export\pages\OrderConfirmation.css                    | CSS                |       -210 |          0 |        -33 |       -243 |
+| c:\omnora OS\storefront-export\pages\OrderConfirmation.tsx                    | TypeScript JSX     |       -167 |         -6 |        -22 |       -195 |
+| c:\omnora OS\storefront-export\pages\Privacy.tsx                              | TypeScript JSX     |        -41 |          0 |         -5 |        -46 |
+| c:\omnora OS\storefront-export\pages\Product.css                              | CSS                |       -241 |          0 |        -37 |       -278 |
+| c:\omnora OS\storefront-export\pages\Product.tsx                              | TypeScript JSX     |       -275 |         -7 |        -40 |       -322 |
+| c:\omnora OS\storefront-export\pages\SizeGuide.tsx                            | TypeScript JSX     |        -78 |          0 |         -5 |        -83 |
+| c:\omnora OS\storefront-export\pages\Terms.tsx                                | TypeScript JSX     |        -45 |          0 |         -6 |        -51 |
+| c:\omnora OS\storefront-export\pages\Wishlist.css                             | CSS                |       -126 |          0 |        -20 |       -146 |
+| c:\omnora OS\storefront-export\pages\Wishlist.tsx                             | TypeScript JSX     |       -159 |          0 |        -18 |       -177 |
+| c:\omnora OS\storefront-export\utils\OmnoraLogger.ts                          | TypeScript         |        -34 |          0 |         -4 |        -38 |
+| c:\omnora OS\supabase\functions\ai-advisor\index.ts                           | TypeScript         |        -58 |         -2 |        -17 |        -77 |
+| c:\omnora OS\supabase\functions\capi-proxy\index.ts                           | TypeScript         |        -40 |         -5 |        -12 |        -57 |
+| c:\omnora OS\supabase\functions\create-checkout-session\index.ts              | TypeScript         |        -76 |         -5 |        -13 |        -94 |
+| c:\omnora OS\supabase\functions\fetch-platform-stats\index.ts                 | TypeScript         |        -56 |         -6 |        -15 |        -77 |
+| c:\omnora OS\supabase\functions\generate-sitemap\index.ts                     | TypeScript         |        -56 |         -7 |        -17 |        -80 |
+| c:\omnora OS\supabase\functions\image-proxy\index.ts                          | TypeScript         |        -21 |         -6 |         -7 |        -34 |
+| c:\omnora OS\supabase\functions\merchant-stripe-webhook\index.ts              | TypeScript         |       -100 |         -8 |        -26 |       -134 |
+| c:\omnora OS\supabase\functions\meta-capi-proxy\index.ts                      | TypeScript         |        -77 |         -9 |        -17 |       -103 |
+| c:\omnora OS\supabase\functions\og-image\index.ts                             | TypeScript         |       -110 |         -5 |         -8 |       -123 |
+| c:\omnora OS\supabase\functions\process-abandoned-carts\index.ts              | TypeScript         |        -38 |         -6 |        -11 |        -55 |
+| c:\omnora OS\supabase\functions\process-merchant-checkout\index.ts            | TypeScript         |        -80 |         -6 |        -16 |       -102 |
+| c:\omnora OS\supabase\functions\stripe-webhook\index.ts                       | TypeScript         |        -45 |         -9 |        -15 |        -69 |
+| c:\omnora OS\supabase\migrations\20260313_pim_schema.sql                      | MS SQL             |        -84 |        -15 |        -10 |       -109 |
+| c:\omnora OS\supabase\migrations\20260328_final_hardening.sql                 | MS SQL             |        -84 |        -10 |        -12 |       -106 |
+| c:\omnora OS\supabase\migrations\20260328_inventory_recovery.sql              | MS SQL             |        -16 |         -5 |         -3 |        -24 |
+| c:\omnora OS\supabase\migrations\20260328_marketing_analytics.sql             | MS SQL             |       -117 |         -8 |        -10 |       -135 |
+| c:\omnora OS\supabase\migrations\20260328_shopify_parity.sql                  | MS SQL             |       -162 |         -9 |        -11 |       -182 |
+| c:\omnora OS\supabase\migrations\20260329_auth_hardening.sql                  | MS SQL             |         -4 |         -6 |         -5 |        -15 |
+| c:\omnora OS\supabase\migrations\20260330_customer_schema.sql                 | MS SQL             |        -24 |         -6 |         -6 |        -36 |
+| c:\omnora OS\supabase\migrations\20260331_auth_rls_fix.sql                    | MS SQL             |        -31 |         -5 |         -7 |        -43 |
+| c:\omnora OS\supabase\migrations\20260331_industrial_kernel_patch.sql         | MS SQL             |        -83 |         -7 |        -13 |       -103 |
+| c:\omnora OS\supabase\migrations\20260401_industrial_telemetry.sql            | MS SQL             |        -39 |        -16 |         -8 |        -63 |
+| c:\omnora OS\supabase_migrations.sql                                          | MS SQL             |       -149 |        -26 |        -31 |       -206 |
+| c:\omnora OS\supabase_migrations_billing.sql                                  | MS SQL             |        -16 |         -1 |         -3 |        -20 |
+| c:\omnora OS\supabase_migrations_capi.sql                                     | MS SQL             |        -10 |         -1 |         -2 |        -13 |
+| c:\omnora OS\supabase_migrations_variants.sql                                 | MS SQL             |         -2 |         -1 |         -2 |         -5 |
+| c:\omnora OS\syntax-audit.js                                                  | JavaScript         |        -28 |         -1 |         -5 |        -34 |
+| c:\omnora OS\test-parser.js                                                   | JavaScript         |        -34 |         -2 |         -6 |        -42 |
+| c:\omnora OS\test_api.js                                                      | JavaScript         |        -41 |          0 |         -7 |        -48 |
+| c:\omnora OS\test_db.js                                                       | JavaScript         |        -18 |          0 |         -8 |        -26 |
+| c:\omnora OS\test_login_controller.js                                         | JavaScript         |        -29 |         -1 |         -7 |        -37 |
+| c:\omnora OS\test_login_debug.js                                              | JavaScript         |        -19 |          0 |         -7 |        -26 |
+| c:\omnora OS\tmp\verify_fix.js                                                | JavaScript         |        -13 |          0 |         -3 |        -16 |
+| c:\omnora OS\vercel.json                                                      | JSON               |        -87 |          0 |          0 |        -87 |
+| Total                                                                         |                    |   -104,739 |     -2,442 |     -7,884 |   -115,065 |
++-------------------------------------------------------------------------------+--------------------+------------+------------+------------+------------+

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import client from '../../api/client';
 import { useToast } from '../../context/ToastContext';
-import { Plus, Edit3, Trash2, X, Image as ImageIcon, Package } from 'lucide-react';
+import { Plus, Edit3, Trash2, X, Package } from 'lucide-react';
 import './SellerInventory.css';
 
 interface Variant {
@@ -48,7 +48,7 @@ export default function SellerInventory() {
             setLoading(true);
             const { data } = await client.get('/seller/inventory');
             if (data.success) setProducts(data.data);
-        } catch (error) {
+        } catch {
             showToast('Failed to load inventory', 'error');
         } finally {
             setLoading(false);
@@ -73,8 +73,9 @@ export default function SellerInventory() {
             setEditingId(null);
             setFormData(INITIAL_FORM_STATE);
             fetchInventory();
-        } catch (error: any) {
-            showToast(error.response?.data?.error || 'Operation failed', 'error');
+        } catch (error: unknown) {
+            const msg = (error as { response?: { data?: { error?: string } } }).response?.data?.error || 'Operation failed';
+            showToast(msg, 'error');
         }
     };
 
@@ -84,7 +85,7 @@ export default function SellerInventory() {
             await client.delete(`/seller/inventory/${id}`);
             showToast('Product removed', 'success');
             fetchInventory();
-        } catch (error) {
+        } catch {
             showToast('Deletion failed', 'error');
         }
     };
@@ -103,7 +104,7 @@ export default function SellerInventory() {
                     <h2>INVENTORY MANAGER</h2>
                     <p>Manage your stock levels and product details</p>
                 </div>
-                <button className="btn-luxury-primary" onClick={() => { setEditingId(null); setFormData(INITIAL_FORM_STATE); setIsModalOpen(true); }}>
+                <button type="button" className="btn-luxury-primary" onClick={() => { setEditingId(null); setFormData(INITIAL_FORM_STATE); setIsModalOpen(true); }}>
                     <Plus size={18} /> LIST NEW PRODUCT
                 </button>
             </div>
@@ -151,8 +152,8 @@ export default function SellerInventory() {
                                         </td>
                                         <td>
                                             <div className="actions">
-                                                <button onClick={() => handleEdit(product)}><Edit3 size={16} /></button>
-                                                <button onClick={() => handleDelete(product._id)} className="delete"><Trash2 size={16} /></button>
+                                                <button type="button" onClick={() => handleEdit(product)}><Edit3 size={16} /></button>
+                                                <button type="button" onClick={() => handleDelete(product._id)} className="delete"><Trash2 size={16} /></button>
                                             </div>
                                         </td>
                                     </tr>
@@ -168,7 +169,7 @@ export default function SellerInventory() {
                     <div className="modal-content">
                         <header>
                             <h3>{editingId ? 'EDIT PRODUCT' : 'NEW LISTING'}</h3>
-                            <button onClick={() => setIsModalOpen(false)}><X size={20} /></button>
+                            <button type="button" onClick={() => setIsModalOpen(false)}><X size={20} /></button>
                         </header>
                         <form onSubmit={handleSubmit}>
                             <div className="form-group">
@@ -241,7 +242,8 @@ export default function SellerInventory() {
                                             checked={formData.showLowStockWarning}
                                             onChange={e => setFormData({ ...formData, showLowStockWarning: e.target.checked })}
                                         />
-                                        <span>Show "Only X left" pulse</span>
+                                        {/* OSTT FIX: Escaped quotes */}
+                                        <span>Show &quot;Only X left&quot; pulse</span>
                                     </label>
                                 </div>
                             </div>
@@ -249,15 +251,15 @@ export default function SellerInventory() {
                             <div className="variants-editor">
                                 <label>LEAN VARIANTS (Optional)</label>
                                 <div className="variant-list">
-                                    {(formData as any).variants?.map((v: any, i: number) => (
+                                    {formData.variants?.map((v, i) => (
                                         <div key={i} className="variant-row">
                                             <input
                                                 placeholder="e.g. Size: M"
                                                 value={v.label}
                                                 onChange={e => {
-                                                    const newV = [...(formData as any).variants];
+                                                    const newV = [...(formData.variants || [])];
                                                     newV[i].label = e.target.value;
-                                                    setFormData({ ...formData, variants: newV } as any);
+                                                    setFormData({ ...formData, variants: newV });
                                                 }}
                                             />
                                             <input
@@ -266,21 +268,21 @@ export default function SellerInventory() {
                                                 style={{ width: '80px' }}
                                                 value={v.stock}
                                                 onChange={e => {
-                                                    const newV = [...(formData as any).variants];
+                                                    const newV = [...(formData.variants || [])];
                                                     newV[i].stock = Number(e.target.value);
-                                                    setFormData({ ...formData, variants: newV } as any);
+                                                    setFormData({ ...formData, variants: newV });
                                                 }}
                                             />
                                             <button type="button" onClick={() => {
-                                                const newV = (formData as any).variants.filter((_: any, idx: number) => idx !== i);
-                                                setFormData({ ...formData, variants: newV } as any);
+                                                const newV = (formData.variants || []).filter((_, idx) => idx !== i);
+                                                setFormData({ ...formData, variants: newV });
                                             }}><X size={14} /></button>
                                         </div>
                                     ))}
                                     <button
                                         type="button"
                                         className="btn-add-variant"
-                                        onClick={() => setFormData({ ...formData, variants: [...((formData as any).variants || []), { label: '', stock: 0 }] } as any)}
+                                        onClick={() => setFormData({ ...formData, variants: [...(formData.variants || []), { label: '', stock: 0 }] })}
                                     >
                                         + Add Variant
                                     </button>

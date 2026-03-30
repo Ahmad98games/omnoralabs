@@ -1,5 +1,5 @@
-﻿import React, { memo } from 'react';
-import { Monitor, Tablet, Smartphone, RotateCcw, Box, Eye, EyeOff, ZoomIn, ZoomOut, Maximize } from 'lucide-react';
+import React, { memo } from 'react';
+import { Monitor, Tablet, Smartphone, Box, Eye, EyeOff, ZoomIn, ZoomOut, Maximize } from 'lucide-react';
 
 // ─── Device Definitions ───────────────────────────────────────────────────────
 export interface DevicePreset {
@@ -63,10 +63,10 @@ interface Props {
     onClose: () => void;
 }
 
-export const DevicePresetPanel: React.FC<Props> = memo(({
+export const DevicePresetPanel = memo(({
     activePresetId, orientation, zoomLevel, showDeviceFrame, showSafeAreaOverlay,
     onSelectPreset, onSetOrientation, onSetZoom, onToggleFrame, onToggleSafeArea, onClose
-}) => {
+}: Props) => {
     const active = getPreset(activePresetId);
     const categories = ['phone', 'tablet', 'desktop'] as const;
 
@@ -103,7 +103,7 @@ export const DevicePresetPanel: React.FC<Props> = memo(({
                             <div key={cat}>
                                 <div style={{ padding: '8px 16px 4px', display: 'flex', alignItems: 'center', gap: '6px', position: 'sticky', top: 0, background: '#13131f', zIndex: 1 }}>
                                     {CATEGORY_ICONS[cat]}
-                                    <span style={{ fontSize: '8px', fontWeight: 900, color: '#5a5a7e', letterSpacing: '0.12em' }}>{CATEGORY_LABELS[cat].toUpperCase().replace(/[📱📟🖥️] /g, '')}</span>
+                                    <span style={{ fontSize: '8px', fontWeight: 900, color: '#5a5a7e', letterSpacing: '0.12em' }}>{CATEGORY_LABELS[cat].toUpperCase().replace(/[^\w\s]/gu, '').trim()}</span>
                                 </div>
                                 {devices.map(device => {
                                     const isActive = device.id === activePresetId;
@@ -209,3 +209,5 @@ export const DevicePresetPanel: React.FC<Props> = memo(({
         </>
     );
 });
+
+DevicePresetPanel.displayName = 'DevicePresetPanel';

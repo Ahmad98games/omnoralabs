@@ -14,7 +14,11 @@ interface BeforeInstallPromptEvent extends Event {
 export const PwaInstallPrompt: React.FC = () => {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isVisible, setIsVisible] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  // OSTT FIX: Initialize in state to avoid set-state-in-effect
+  const [isMobile] = useState(() => {
+    if (typeof navigator === 'undefined') return false;
+    return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  });
 
   useEffect(() => {
     const handleBeforeInstallPrompt = (e: Event) => {
@@ -27,9 +31,6 @@ export const PwaInstallPrompt: React.FC = () => {
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-
-    // Check if it is mobile
-    setIsMobile(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -60,7 +61,6 @@ export const PwaInstallPrompt: React.FC = () => {
     setIsVisible(false);
   };
 
-  if (!isVisible) return null;
 
   return (
     <AnimatePresence>

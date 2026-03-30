@@ -1,14 +1,15 @@
-import React from 'react';
-import { useOmnora } from '../../client/OmnoraContext';
-import { TextBlock, ImageBlock } from '../../components/OmnoraBlocks';
-import { BLOCK_TYPES as SECTION_TYPES, RegistryEntry, BlockProps } from '../../core/Registry';
-import { useNodeSelector } from '../../../hooks/useNodeSelector';
-
 /**
  * FEATURE_GRID_V5
  * A production-grade, hardened grid component for SaaS ecommerce builders.
  * Follows Level 5 Architecture: Pure Platform Implementation.
+ * OSTT Refactor: Removed unused vars, fixed prop types, and cleared 'any'.
  */
+
+import React from 'react';
+import PropTypes from 'prop-types';
+import { TextBlock, ImageBlock } from '../../components/OmnoraBlocks';
+import { BLOCK_TYPES as SECTION_TYPES, RegistryEntry, BlockProps } from '../../core/Registry';
+import { useNodeSelector } from '../../../hooks/useNodeSelector';
 
 // 1. Default Props Constants
 export const FEATURE_GRID_V5_DEFAULTS = {
@@ -55,8 +56,16 @@ export const FEATURE_GRID_V5_SCHEMA: RegistryEntry['propSchema'] = {
     'props.styles.paddingBottom': { type: 'text', label: 'Padding Bottom' }
 };
 
+interface FeatureItem {
+    id?: string;
+    title?: string;
+    desc?: string;
+    image?: string;
+}
+
 // 3. Component Implementation
-export const FeatureGridv5: React.FC<BlockProps> = React.memo(({ nodeId }) => {
+export const FeatureGridv5 = React.memo((props: BlockProps) => {
+    const { nodeId } = props;
     const node = useNodeSelector(nodeId, (n) => ({
         props: n.props,
         styles: n.styles,
@@ -65,7 +74,8 @@ export const FeatureGridv5: React.FC<BlockProps> = React.memo(({ nodeId }) => {
 
     if (!node) return null;
 
-    const { title, subtitle, columns = 3, gap = 32, features = [] } = node.props || {};
+    // FIX: Removed unused 'title' and 'subtitle' destructuring
+    const { columns = 3, gap = 32, features = [] } = node.props || {};
     const styles = node.props?.styles || {};
 
     return (
@@ -103,14 +113,15 @@ export const FeatureGridv5: React.FC<BlockProps> = React.memo(({ nodeId }) => {
                     gridTemplateColumns: `repeat(${columns}, 1fr)`,
                     gap: `${gap}px`,
                 }}>
-                    {features.map((feature: any, index: number) => (
+                    {/* FIX: Removed 'any' and applied FeatureItem interface */}
+                    {(features as FeatureItem[]).map((feature, index) => (
                         <div key={feature.id || index} style={{
                             padding: '24px',
                             background: '#F9FAFB',
                             borderRadius: '16px',
                             border: '1px solid #F3F4F6',
                             transition: 'transform 0.2s ease'
-                        }}>
+                        }} className="feature-grid-v5-card">
                             <div style={{ width: '48px', height: '48px', marginBottom: '20px' }}>
                                 <ImageBlock
                                     nodeId={nodeId}
@@ -145,8 +156,15 @@ export const FeatureGridv5: React.FC<BlockProps> = React.memo(({ nodeId }) => {
     );
 });
 
+// FIX: Added Display Name and PropTypes for React.memo
+FeatureGridv5.displayName = 'FeatureGridv5';
+FeatureGridv5.propTypes = {
+    nodeId: PropTypes.string.isRequired
+};
+
 // 4. Instance Factory
-export const createFeatureGridv5 = (overrides = {}): any => ({
+// FIX: Replaced 'any' with Record<string, unknown> to satisfy the linter
+export const createFeatureGridv5 = (overrides: Record<string, unknown> = {}): Record<string, unknown> => ({
     type: SECTION_TYPES.FEATURE_GRID_V5,
     props: {
         ...FEATURE_GRID_V5_DEFAULTS,
@@ -167,7 +185,8 @@ export const FeatureGridv5_Definition: RegistryEntry = {
         category: 'Marketing'
     },
     schemaVersion: 1,
-    migrate: (oldNode) => {
+    // FIX: Typed oldNode as a generic block object to avoid 'any'
+    migrate: (oldNode: Record<string, unknown> & { schemaVersion?: number, props?: Record<string, unknown> }) => {
         if (!oldNode.schemaVersion || oldNode.schemaVersion < 1) {
             return {
                 ...oldNode,

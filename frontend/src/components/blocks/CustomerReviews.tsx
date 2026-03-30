@@ -56,7 +56,6 @@ const T = {
 
 export const CustomerReviews: React.FC<CustomerReviewsProps> = ({
     nodeId,
-    isBuilder = false,
     headline = 'What Our Customers Say',
     layout = 'grid',
     starColor = '#fbbf24',
@@ -172,7 +171,7 @@ const ReviewCard: React.FC<{
                 fontSize: 13, color: T.textDim, lineHeight: 1.7,
                 margin: 0, fontWeight: 400, flex: 1,
             }}>
-                "{review.content}"
+                &quot;{review.content}&quot;
             </p>
 
             {/* Author */}

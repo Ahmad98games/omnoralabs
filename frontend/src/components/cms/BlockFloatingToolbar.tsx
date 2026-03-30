@@ -1,5 +1,3 @@
-/* eslint-disable react/prop-types */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from 'react';
 import { useBuilderStore } from '../../stores/useBuilderStore';
 import { ChevronUp, ChevronDown, Copy, Trash2, GripVertical } from 'lucide-react';
@@ -14,7 +12,7 @@ interface BlockFloatingToolbarProps {
  * 🛠️ BLOCK FLOATING TOOLBAR (Task 3.1)
  * High-performance pill that appears above the selected block.
  */
-export const BlockFloatingToolbar: React.FC<BlockFloatingToolbarProps> = ({ nodeId, _index, isSelected }) => {
+export const BlockFloatingToolbar = ({ nodeId, index, isSelected }: BlockFloatingToolbarProps) => {
     // 🛡️ High-Performance Store Action Selection (Industrial Rule)
     const moveNode = useBuilderStore(s => s.moveNode);
     const duplicateNode = useBuilderStore(s => s.duplicateNode);
@@ -40,7 +38,7 @@ export const BlockFloatingToolbar: React.FC<BlockFloatingToolbarProps> = ({ node
             <ToolbarButton 
                 onClick={() => moveNode(nodeId, 'down')} 
                 icon={<ChevronDown size={16} />} 
-                tooltip="Move Down" 
+                tooltip={`Move Down (Block ${index + 1})`} 
             />
 
             <div className="w-px h-6 bg-zinc-800 mx-1" />
@@ -61,7 +59,14 @@ export const BlockFloatingToolbar: React.FC<BlockFloatingToolbarProps> = ({ node
     );
 };
 
-const ToolbarButton = ({ onClick, icon, tooltip, className = "" }: any) => (
+interface ToolbarButtonProps {
+    onClick: () => void;
+    icon: React.ReactNode;
+    tooltip: string;
+    className?: string;
+}
+
+const ToolbarButton = ({ onClick, icon, tooltip, className = "" }: ToolbarButtonProps) => (
     <button
         onClick={(e) => { e.stopPropagation(); onClick(); }}
         className={`p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-all duration-200 group relative ${className}`}

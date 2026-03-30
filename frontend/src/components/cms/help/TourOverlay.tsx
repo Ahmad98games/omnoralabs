@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ArrowRight, CheckCircle2, AlertCircle } from 'lucide-react';
+import { ArrowRight, AlertCircle } from 'lucide-react';
 
 interface TourStep {
-    target: string; // Selector for element to highlight
+    target: string;
     title: string;
     content: string;
     position: 'top' | 'bottom' | 'left' | 'right';
@@ -47,8 +47,9 @@ export const TourOverlay: React.FC<TourOverlayProps> = ({ isOpen, onClose }) => 
 
     useEffect(() => {
         if (!isOpen) {
-            setCurrentStep(0);
-            return;
+            // OSTT FIX: Run state reset outside synchronous render phase
+            const timer = setTimeout(() => setCurrentStep(0), 10);
+            return () => clearTimeout(timer);
         }
 
         const updateRect = () => {
@@ -62,7 +63,7 @@ export const TourOverlay: React.FC<TourOverlayProps> = ({ isOpen, onClose }) => 
         };
 
         updateRect();
-        const interval = setInterval(updateRect, 500); // Poll for layout changes
+        const interval = setInterval(updateRect, 500); 
         return () => clearInterval(interval);
     }, [isOpen, currentStep]);
 
@@ -78,7 +79,6 @@ export const TourOverlay: React.FC<TourOverlayProps> = ({ isOpen, onClose }) => 
             zIndex: 100000,
             pointerEvents: 'none'
         }}>
-            {/* Dark Backdrop with Hole */}
             <div style={{
                 position: 'absolute',
                 inset: 0,
@@ -89,7 +89,6 @@ export const TourOverlay: React.FC<TourOverlayProps> = ({ isOpen, onClose }) => 
                 transition: 'clip-path 0.3s ease'
             }} />
 
-            {/* Tooltip */}
             <AnimatePresence mode="wait">
                 <motion.div
                     key={currentStep}
@@ -129,6 +128,7 @@ export const TourOverlay: React.FC<TourOverlayProps> = ({ isOpen, onClose }) => 
                         </div>
                         <div style={{ display: 'flex', gap: 8 }}>
                             <button
+                                type="button"
                                 onClick={onClose}
                                 style={{
                                     background: 'none',
@@ -142,6 +142,7 @@ export const TourOverlay: React.FC<TourOverlayProps> = ({ isOpen, onClose }) => 
                                 Skip
                             </button>
                             <button
+                                type="button"
                                 onClick={() => isLastStep ? onClose() : setCurrentStep(s => s + 1)}
                                 style={{
                                     background: '#6366F1',
@@ -164,7 +165,6 @@ export const TourOverlay: React.FC<TourOverlayProps> = ({ isOpen, onClose }) => 
                 </motion.div>
             </AnimatePresence>
 
-            {/* Target Highlight Ring */}
             {targetRect && (
                 <div style={{
                     position: 'absolute',

@@ -4,18 +4,20 @@ import { BindingResolver } from './BindResolver';
 import { useStorefrontBinding } from '../context/StorefrontContext';
 
 // Local Type definition for flexibility
-export type BuilderNode = any;
+export type BuilderNode = Record<string, unknown>;
 
 /**
  * Deep resolution utility to process bindings recursively.
  * Skips non-string values for performance.
  */
-function deepResolve(obj: any, context: any): any {
+function deepResolve(obj: unknown, context: Record<string, unknown>): unknown {
     if (typeof obj === 'string') return BindingResolver.resolve(obj, context);
     if (Array.isArray(obj)) return obj.map(v => deepResolve(v, context));
     if (obj !== null && typeof obj === 'object') {
-        const out: any = {};
-        for (const k in obj) out[k] = deepResolve(obj[k], context);
+        const out: Record<string, unknown> = {};
+        for (const k in obj) {
+            out[k] = deepResolve((obj as Record<string, unknown>)[k], context);
+        }
         return out;
     }
     return obj;
@@ -23,19 +25,18 @@ function deepResolve(obj: any, context: any): any {
 
 /**
  * useNodeSelector: Granular subscription to a single node in NodeStore.
- * 
- * Integrates with StorefrontContext for reactive data binding.
+ * * Integrates with StorefrontContext for reactive data binding.
  * Uses version counter (not JSON.stringify) for cheap change detection.
  */
 export function useNodeSelector<T>(
     nodeId: string,
-    selector: (node: any) => T
+    selector: (node: BuilderNode) => T
 ): T | undefined {
     // Cheap change detection via version counter — no JSON.stringify overhead
     const { bindingContext, version: storefrontVersion } = useStorefrontBinding();
 
     const cacheRef = useRef<{
-        node: any | undefined;
+        node: BuilderNode | undefined;
         revision: number;
         resolvedSelection: T | undefined;
         storefrontVersion: number;
@@ -47,7 +48,8 @@ export function useNodeSelector<T>(
 
     const getSnapshot = useCallback(() => {
         const node = nodeStore.getNode(nodeId);
-        const currentRevision = node?.revision || 0;
+        // OSTT FIX: Using unknown casting to strictly define the nested node object structure
+        const currentRevision = node ? Number((node as Record<string, unknown>).revision) || 0 : 0;
 
         // Cache hit: same node identity, same revision, same storefront version
         if (
@@ -64,13 +66,13 @@ export function useNodeSelector<T>(
         }
 
         // 1. Get raw data from store
-        const rawSelection = selector(node);
+        const rawSelection = selector(node as unknown as BuilderNode);
 
         // 2. Resolve bindings using StorefrontContext data
-        const resolvedSelection = deepResolve(rawSelection, bindingContext);
+        const resolvedSelection = deepResolve(rawSelection, bindingContext) as T;
 
         cacheRef.current = {
-            node,
+            node: node as unknown as BuilderNode,
             revision: currentRevision,
             resolvedSelection,
             storefrontVersion,
@@ -82,6 +84,6 @@ export function useNodeSelector<T>(
     return useSyncExternalStore(subscribe, getSnapshot);
 }
 
-export function useNode(nodeId: string): any | undefined {
+export function useNode(nodeId: string): BuilderNode | undefined {
     return useNodeSelector(nodeId, (node) => node);
 }

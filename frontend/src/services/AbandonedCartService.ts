@@ -5,7 +5,10 @@ export interface AbandonedCartInfo {
     merchant_id: string;
     customer_name: string;
     customer_phone: string;
-    cart_json: any;
+    /**
+     * FIX: Replaced 'any' with a safe object type for JSON storage.
+     */
+    cart_json: Record<string, unknown> | Array<Record<string, unknown>>;
     cart_value: number;
 }
 
@@ -15,7 +18,6 @@ export const AbandonedCartService = {
      */
     saveDraft: async (info: AbandonedCartInfo) => {
         try {
-            // Upsert based on cart_id
             const { error } = await supabase
                 .from('abandoned_carts')
                 .upsert({
@@ -104,12 +106,8 @@ export const AbandonedCartService = {
      * Generate WhatsApp Recovery Message & Link
      */
     generateRecoveryLink: (phone: string, name: string, storeSlug: string, cartId: string) => {
-        // Build the deep link for checkout prefill
         const checkoutUrl = `${window.location.origin}/store/${storeSlug}/checkout?cart_id=${cartId}`;
-        
         const message = `Hi ${name || 'there'}, aapne apni shopping puri nahi ki! Click here to complete your order and get 5% OFF: ${checkoutUrl}`;
-        
-        // Ensure clean phone number
         const cleanPhone = phone.replace(/[^0-9]/g, '');
         return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
     }

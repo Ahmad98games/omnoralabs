@@ -1,6 +1,12 @@
-import { CopilotAction } from './LocalAIEngine';
+import { CopilotAction } from '../platform/core/types';
 
-export const executeCopilotCommands = (commands: CopilotAction[], dispatcher: any, targetNodeId: string | null) => {
+interface Dispatcher {
+    addNode: (type: string, props: Record<string, unknown>, parentId: string | null, index: number | null) => void;
+    updateNode: (id: string, path: string, value: unknown) => void;
+    deleteNode: (id: string) => void;
+}
+
+export const executeCopilotCommands = (commands: CopilotAction[], dispatcher: Dispatcher, targetNodeId: string | null) => {
     commands.forEach((command) => {
         try {
             switch (command.action) {
@@ -43,7 +49,7 @@ export const executeCopilotCommands = (commands: CopilotAction[], dispatcher: an
                     break;
 
                 default:
-                    console.warn(`[Copilot] Unknown action type: ${(command as any).action}`);
+                    console.warn(`[Copilot] Unknown action type: ${command.action}`);
                     break;
             }
         } catch (error) {

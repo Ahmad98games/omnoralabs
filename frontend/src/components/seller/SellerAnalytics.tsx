@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import client from '../../api/client';
 import {
     TrendingUp,
-    BarChart2,
-    MousePointer2,
     Target,
     Save,
     Activity,
@@ -31,7 +29,7 @@ const mockChartData = [
     { name: 'Sun', views: 349, conv: 430 },
 ];
 
-const CustomTooltip = ({ active, payload, label }: any) => {
+const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: { value: number | string }[]; label?: string }) => {
     if (active && payload && payload.length) {
         return (
             <div style={{
@@ -74,8 +72,15 @@ const EmptyState = ({ title, message }: { title: string, message: string }) => (
     </div>
 );
 
+interface AnalyticsStats {
+    views?: number;
+    clicks?: number;
+    conversions?: number;
+    recentEvents?: { createdAt: string; type?: string; path?: string }[];
+}
+
 export default function SellerAnalytics() {
-    const [stats, setStats] = useState<any>(null);
+    const [stats, setStats] = useState<AnalyticsStats | null>(null);
     const [config, setConfig] = useState({ targetMonthlySales: 10000 });
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -88,7 +93,7 @@ export default function SellerAnalytics() {
                     setStats(data.stats);
                     setConfig(data.config);
                 }
-            } catch (err) {
+            } catch {
                 console.error('Failed to load performance data');
             } finally {
                 // Shimmer visibility sync
@@ -103,7 +108,7 @@ export default function SellerAnalytics() {
         try {
             await client.post('/cms/performance-hub/targets', config);
             alert('PERFORMANCE SYNC: Targets updated in DRAFT state.');
-        } catch (err) {
+        } catch {
             alert('Update failed');
         } finally {
             setSaving(false);
@@ -242,7 +247,7 @@ export default function SellerAnalytics() {
                     </div>
                     <div className="event-stream">
                         {hasEvents ? (
-                            stats.recentEvents.map((event: any, idx: number) => (
+                            stats.recentEvents.map((event: { createdAt: string; type?: string; path?: string }, idx: number) => (
                                 <div key={idx} className="event-item" style={{ borderRadius: '6px', background: 'rgba(255,255,255,0.02)' }}>
                                     <span className="event-time data-monospace" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem' }}>{new Date(event.createdAt).toLocaleTimeString()}</span>
                                     <span className="event-type" style={{ fontWeight: 800 }}>{(event.type || 'unknown').replace('_', ' ').toUpperCase()}</span>

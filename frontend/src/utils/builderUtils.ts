@@ -1,22 +1,52 @@
 import { SectionType, getRegistryEntry, getRegistry } from '../components/cms/BuilderRegistry';
 
 /**
- * Schema-Driven Deep Merge.
- * Prevents prop loss during hydration by respecting the registry schema.
+ * Omnora OS: Core Type Definitions
+ * 'any' is strictly forbidden to maintain engine integrity.
  */
-export const deepMergeProps = (type: SectionType | string, initial: any, incoming: any): any => {
-    const entry = getRegistryEntry(type);
-    const schema = entry?.propSchema || {};
+type BuilderValue = string | number | boolean | null | undefined | { [key: string]: BuilderValue } | BuilderValue[];
+type BuilderNodeProps = Record<string, BuilderValue>;
 
-    const result = { ...initial };
+interface BuilderNode {
+    type: string;
+    parentId: string | null;
+    children?: string[];
+    [key: string]: BuilderValue | string[] | string | null | undefined;
+}
 
-    Object.keys(incoming).forEach(key => {
-        const val = incoming[key];
+/**
+ * Schema-Driven Deep Merge.
+ * Logic: Inline 'any' removed. Using double-casting (unknown -> T) to satisfy the linter
+ * while maintaining the deep merge logic.
+ */
+export const deepMergeProps = <T extends BuilderNodeProps>(
+    type: SectionType | string,
+    initial: T,
+    incoming: Partial<T>
+): T => {
+    getRegistryEntry(type);
 
-        if (val && typeof val === 'object' && !Array.isArray(val) && initial[key]) {
-            result[key] = { ...initial[key], ...val };
+    const result = { ...initial } as T;
+
+    Object.keys(incoming).forEach((key) => {
+        const incomingVal = incoming[key];
+        const initialVal = initial[key];
+
+        if (
+            incomingVal && 
+            typeof incomingVal === 'object' && 
+            !Array.isArray(incomingVal) && 
+            initialVal && 
+            typeof initialVal === 'object' &&
+            !Array.isArray(initialVal)
+        ) {
+            // FIX: Using unknown as an intermediate step to avoid 'any'
+            (result as Record<string, unknown>)[key] = { 
+                ...(initialVal as Record<string, unknown>), 
+                ...(incomingVal as Record<string, unknown>) 
+            };
         } else {
-            result[key] = val;
+            (result as Record<string, unknown>)[key] = incomingVal;
         }
     });
 
@@ -25,27 +55,34 @@ export const deepMergeProps = (type: SectionType | string, initial: any, incomin
 
 /**
  * SafeStateEngine: Narrow-Path Updates.
- * Enforces O(1) identity stability for structural sharing.
- * Only clones objects along the required path.
+ * Logic: Path-based cloning with structural sharing.
  */
-export const safeDeepUpdate = (obj: any, path: string, value: any): any => {
+export const safeDeepUpdate = <T extends Record<string, unknown>>(
+    obj: T,
+    path: string,
+    value: unknown
+): T => {
     const keys = path.split('.');
     const result = { ...obj };
-    let current = result;
+    let current = result as Record<string, unknown>;
 
     for (let i = 0; i < keys.length - 1; i++) {
         const key = keys[i];
-        current[key] = { ...current[key] };
-        current = current[key];
+        const nextTarget = current[key];
+        
+        current[key] = (typeof nextTarget === 'object' && nextTarget !== null)
+            ? { ...(nextTarget as Record<string, unknown>) } 
+            : {};
+            
+        current = current[key] as Record<string, unknown>;
     }
 
     current[keys[keys.length - 1]] = value;
-    return result;
+    return result as T;
 };
 
 /**
  * InvariantWatcher: OS.POLICER.
- * Audits document integrity at runtime.
  */
 export interface SystemHealthReport {
     status: 'STABLE' | 'DEGRADED' | 'CORRUPTED';
@@ -58,7 +95,10 @@ export interface SystemHealthReport {
     timestamp: string;
 }
 
-export const verifyInvariants = (nodes: Record<string, any>, layouts: Record<string, string[]>): SystemHealthReport => {
+export const verifyInvariants = (
+    nodes: Record<string, BuilderNode>,
+    layouts: Record<string, string[]>
+): SystemHealthReport => {
     const report: SystemHealthReport = {
         status: 'STABLE',
         invariants: { cycles: [], orphans: [], deadReferences: [], registryGaps: [] },
@@ -69,14 +109,14 @@ export const verifyInvariants = (nodes: Record<string, any>, layouts: Record<str
     const referencedIds = new Set<string>();
     const registry = getRegistry();
 
-    // 1. Map all references
     Object.values(layouts).forEach(pageNodes => pageNodes.forEach(id => referencedIds.add(id)));
+    
     Object.values(nodes).forEach(node => {
-        node.children?.forEach((childId: string) => referencedIds.add(childId));
+        const children = node.children as string[] | undefined;
+        children?.forEach((childId: string) => referencedIds.add(childId));
         if (!registry[node.type]) report.invariants.registryGaps.push(node.type);
     });
 
-    // 2. Detect Orphans & Dead Refs
     nodeIds.forEach(id => {
         if (!referencedIds.has(id)) report.invariants.orphans.push(id);
     });
@@ -85,13 +125,13 @@ export const verifyInvariants = (nodes: Record<string, any>, layouts: Record<str
         if (!nodes[id]) report.invariants.deadReferences.push(id);
     });
 
-    // 3. Simple Cycle Detection (Recursive Check for Parent-Child Loops)
     const checkCycle = (id: string, visited = new Set<string>()): boolean => {
         if (visited.has(id)) return true;
         visited.add(id);
         const node = nodes[id];
-        if (node?.children) {
-            for (const childId of node.children) {
+        const children = node?.children as string[] | undefined;
+        if (children) {
+            for (const childId of children) {
                 if (checkCycle(childId, new Set(visited))) return true;
             }
         }

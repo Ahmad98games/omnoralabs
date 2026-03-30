@@ -1,13 +1,8 @@
 /**
  * SearchBar: Collection Product Filter Block
- *
- * Takes user input and filters the current collection's fullProducts
- * by title, vendor, or tags. Updates a local filtered list.
- * Registered in BuilderRegistry as 'search_bar'.
  */
 import React, { useState, useMemo, useCallback } from 'react';
 import { useStorefront, type Product } from '../../context/StorefrontContext';
-import { ProductCard } from './ProductCard';
 
 // ─── Design Tokens ────────────────────────────────────────────────────────────
 
@@ -22,8 +17,6 @@ const T = {
     textMuted: '#5a5a70',
 };
 
-// ─── Props ────────────────────────────────────────────────────────────────────
-
 export interface SearchBarProps {
     nodeId: string;
     placeholder?: string;
@@ -31,8 +24,6 @@ export interface SearchBarProps {
     maxResults?: number;
     children?: React.ReactNode;
 }
-
-// ─── Component ────────────────────────────────────────────────────────────────
 
 export const SearchBar: React.FC<SearchBarProps> = ({
     nodeId,
@@ -45,6 +36,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     const [query, setQuery] = useState('');
     const [isFocused, setIsFocused] = useState(false);
 
+    // OSTT FIX: Hook must not be conditionally bypassed. Array bounds checking moved inside.
     const results = useMemo<Product[]>(() => {
         if (!query.trim() || !collection) return [];
         const q = query.toLowerCase().trim();
@@ -53,7 +45,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                 p.title.toLowerCase().includes(q) ||
                 p.vendor.toLowerCase().includes(q) ||
                 p.type.toLowerCase().includes(q) ||
-                p.tags.some(t => t.toLowerCase().includes(q))
+                (p.tags && p.tags.some(t => t.toLowerCase().includes(q)))
             )
             .slice(0, maxResults);
     }, [query, collection, maxResults]);
@@ -106,6 +98,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                 />
                 {query && (
                     <button
+                        type="button"
                         onClick={handleClear}
                         style={{
                             position: 'absolute', right: 12, top: '50%',
@@ -144,7 +137,8 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                             color: T.textMuted,
                             fontSize: 13,
                         }}>
-                            No products match "{query}"
+                            {/* OSTT FIX: Escaped quotes */}
+                            No products match &quot;{query}&quot;
                         </div>
                     ) : (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -168,6 +162,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
         </div>
     );
 };
+SearchBar.displayName = 'SearchBar';
 
 // ─── Search Result Row ────────────────────────────────────────────────────────
 
@@ -176,6 +171,9 @@ const SearchResultRow: React.FC<{ product: Product }> = ({ product }) => {
 
     return (
         <div
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => { if (e.key === 'Enter') console.log('Navigate to product', product.id); }}
             onMouseEnter={() => setHov(true)}
             onMouseLeave={() => setHov(false)}
             style={{
@@ -221,5 +219,6 @@ const SearchResultRow: React.FC<{ product: Product }> = ({ product }) => {
         </div>
     );
 };
+SearchResultRow.displayName = 'SearchResultRow';
 
 export default SearchBar;

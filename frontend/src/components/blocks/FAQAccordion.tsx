@@ -1,21 +1,10 @@
-/**
- * FAQAccordion: Interactive FAQ Section
- *
- * Smooth expand/collapse with optional multi-open mode.
- * Each item has animated height transition.
- * Registered in BuilderRegistry as 'faq_accordion'.
- */
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import DOMPurify from 'dompurify';
-
-// ─── Interfaces ───────────────────────────────────────────────────────────────
 
 export interface FAQItem {
     question: string;
     answer: string;
 }
-
-// ─── Props ────────────────────────────────────────────────────────────────────
 
 export interface FAQAccordionProps {
     nodeId: string;
@@ -30,8 +19,6 @@ export interface FAQAccordionProps {
     children?: React.ReactNode;
 }
 
-// ─── Default Data ─────────────────────────────────────────────────────────────
-
 const DEFAULT_ITEMS: FAQItem[] = [
     { question: 'What is your return policy?', answer: 'We offer a 30-day hassle-free return policy. If you are not satisfied with your purchase, simply return it in its original condition for a full refund or exchange.' },
     { question: 'How long does shipping take?', answer: 'Standard shipping takes 5-7 business days. Express shipping (2-3 business days) is available at checkout for an additional fee. Free shipping on all orders over $50.' },
@@ -39,8 +26,6 @@ const DEFAULT_ITEMS: FAQItem[] = [
     { question: 'How can I track my order?', answer: 'Once your order ships, you will receive a confirmation email with a tracking number. You can use this number on our website or the carrier\'s website to track your package in real-time.' },
     { question: 'What payment methods do you accept?', answer: 'We accept all major credit cards (Visa, Mastercard, American Express), PayPal, Apple Pay, and Google Pay. All transactions are secured with 256-bit SSL encryption.' },
 ];
-
-// ─── Tokens ───────────────────────────────────────────────────────────────────
 
 const T = {
     surface: '#13131a',
@@ -50,8 +35,6 @@ const T = {
     textDim: '#8b8ba0',
     textMuted: '#5a5a70',
 };
-
-// ─── Component ────────────────────────────────────────────────────────────────
 
 export const FAQAccordion: React.FC<FAQAccordionProps> = ({
     nodeId,
@@ -113,8 +96,6 @@ export const FAQAccordion: React.FC<FAQAccordionProps> = ({
     );
 };
 
-// ─── Accordion Item ───────────────────────────────────────────────────────────
-
 const AccordionItem: React.FC<{
     item: FAQItem; 
     isOpen: boolean; 
@@ -130,8 +111,12 @@ const AccordionItem: React.FC<{
     const isBottom = borderStyle === 'bottom-only';
 
     useEffect(() => {
+        // OSTT FIX: Placed inside requestAnimationFrame to run after paint
         if (contentRef.current) {
-            setHeight(isOpen ? contentRef.current.scrollHeight : 0);
+            const scrollHeight = contentRef.current.scrollHeight;
+            requestAnimationFrame(() => {
+                setHeight(isOpen ? scrollHeight : 0);
+            });
         }
     }, [isOpen]);
 
@@ -146,6 +131,7 @@ const AccordionItem: React.FC<{
             marginBottom: isFull ? 8 : 0,
         }}>
             <button
+                type="button"
                 onClick={onToggle}
                 style={{
                     width: '100%', padding: '16px 20px',

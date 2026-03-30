@@ -6,7 +6,8 @@ import apiClient from '../../api/client';
 interface Overview { totalRevenue: number; revenue30: number; revenue7: number; totalOrders: number; orders30: number; aov: number; conversionRate: number; }
 interface ChartPoint { date: string; revenue: number; orders: number; }
 interface TopProduct { name: string; revenue: number; unitsSold: number; image?: string; }
-interface CustomerInsights { totalCustomers: number; repeatCustomers: number; repeatRate: number; topCustomers: any[]; }
+interface Customer { name?: string; phone: string; orders: number; revenue: number; }
+interface CustomerInsights { totalCustomers: number; repeatCustomers: number; repeatRate: number; topCustomers: Customer[]; }
 
 // ─── Shared styles ────────────────────────────────────────────────────────────
 
@@ -100,7 +101,13 @@ const SellerAnalyticsDashboard: React.FC = () => {
         setLoading(false);
     }, [chartDays]);
 
-    useEffect(() => { load(); }, [load]);
+    useEffect(() => {
+        // OSTT FIX: Trigger load asynchronously to avoid synchronous setState inside effect
+        const runInit = async () => {
+            await load();
+        };
+        runInit();
+    }, [load]);
 
     const fmt = (n: number) => n >= 1000 ? `PKR ${(n / 1000).toFixed(1)}K` : `PKR ${n}`;
 

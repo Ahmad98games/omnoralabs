@@ -276,31 +276,19 @@ export function toCSSVariables(theme: GlobalTheme): Record<string, string> {
     };
 }
 
-/**
- * Resolves inline style for a single element, merging:
- * 1. Global theme CSS variables (as fallback via var())
- * 2. Local overrides directly as inline style values
- *
- * Usage:
- *   const style = resolveInlineStyle(
- *     { bgColor: '#FF0000', borderRadius: '20px' }, // local overrides
- *     globalTheme                                      // global fallback
- *   );
- */
 export function resolveInlineStyle(
     localOverrides: Record<string, string | number | undefined>,
-    globalFallback: GlobalTheme
+    _globalFallback: GlobalTheme // Prefixed with underscore
 ): React.CSSProperties {
     const style: Record<string, string | number> = {};
 
-    // Map local override keys to CSS properties with global var() fallbacks
     const keyMap: Record<string, { cssProp: string; varName: string }> = {
-        bgColor:       { cssProp: 'backgroundColor', varName: '--omnora-color-primary' },
-        textColor:     { cssProp: 'color',           varName: '--omnora-color-text' },
-        borderRadius:  { cssProp: 'borderRadius',    varName: '--omnora-radius-button' },
-        shadow:        { cssProp: 'boxShadow',       varName: '--omnora-shadow-button' },
-        fontFamily:    { cssProp: 'fontFamily',       varName: '--omnora-font-body' },
-        borderColor:   { cssProp: 'borderColor',     varName: '--omnora-color-border' },
+        bgColor:      { cssProp: 'backgroundColor', varName: '--omnora-color-primary' },
+        textColor:    { cssProp: 'color',           varName: '--omnora-color-text' },
+        borderRadius: { cssProp: 'borderRadius',    varName: '--omnora-radius-button' },
+        shadow:       { cssProp: 'boxShadow',       varName: '--omnora-shadow-button' },
+        fontFamily:   { cssProp: 'fontFamily',      varName: '--omnora-font-body' },
+        borderColor:  { cssProp: 'borderColor',     varName: '--omnora-color-border' },
     };
 
     for (const [key, mapping] of Object.entries(keyMap)) {

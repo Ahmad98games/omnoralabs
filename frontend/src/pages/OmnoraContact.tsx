@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { MapPin, Mail, Phone, Send, Globe, MessageSquare, ArrowRight } from 'lucide-react';
+import { MapPin, Mail, Phone, ArrowRight } from 'lucide-react';
 import './OmnoraContact.css';
 
 const Footer = () => (
@@ -16,7 +16,7 @@ export default function Contact() {
   const [form, setForm] = useState({
     name: '',
     email: '',
-    subject: '',
+    subject: '',  
     message: ''
   });
 
@@ -45,6 +45,7 @@ export default function Contact() {
         alert('Transmission failed. Please retry.');
       }
     } catch (error) {
+      console.error('Transmission failure:', error);
       alert('Signal lost. Please check connection.');
     } finally {
       setSubmitting(false);

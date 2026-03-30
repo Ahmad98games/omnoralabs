@@ -5,7 +5,6 @@ import App from './App'
 import './index.css'
 
 import { MediaStoreProvider } from './context/MediaStoreContext'
-import { BuilderProvider } from './context/BuilderContext'
 import { ElementControlProvider } from './platform/library/modules/ElementControlLayer'
 
 // Session ID — safe, runs client-side only
@@ -141,16 +140,9 @@ if (!rootElement) {
       <RootErrorBoundary>
         <BrowserRouter>
           <MediaStoreProvider>
-            {/*
-              BuilderProvider is kept here so builder context is available app-wide.
-              App.tsx must NOT re-wrap with BuilderProvider — doing so creates
-              a double context that causes state desync between builder and storefront.
-            */}
-            <BuilderProvider initialData={{}} isPreview={false}>
-              <ElementControlProvider>
-                <App />
-              </ElementControlProvider>
-            </BuilderProvider>
+            <ElementControlProvider>
+              <App />
+            </ElementControlProvider>
           </MediaStoreProvider>
         </BrowserRouter>
       </RootErrorBoundary>

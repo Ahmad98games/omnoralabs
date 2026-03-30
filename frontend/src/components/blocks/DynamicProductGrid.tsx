@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { ShoppingBag, Eye, Heart, Star, AlertCircle, Loader2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ShoppingBag, Eye, Heart, Star, AlertCircle } from 'lucide-react';
 
 interface Product {
     id: string;

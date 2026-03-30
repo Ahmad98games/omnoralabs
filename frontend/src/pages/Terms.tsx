@@ -32,7 +32,7 @@ export default function Terms() {
                         <span className="section-num-lux">SEC. 03</span>
                         <h2 className="section-title-serif">Artisanal Disclaimer</h2>
                         <p className="legal-text-lux">
-                            The materials on our boutique website are provided as an invitation to experience our craftsmanship. While we strive for perfection, all digital representation of our physical pieces is provided on an 'as is' basis.
+                            The materials on our boutique website are provided as an invitation to experience our craftsmanship. While we strive for perfection, all digital representation of our physical pieces is provided on an &apos;as is&apos; basis.
                         </p>
                     </section>
 

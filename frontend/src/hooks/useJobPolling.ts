@@ -6,7 +6,7 @@ export interface JobStatusResponse {
     jobId: string;
     status: 'queued' | 'processing' | 'completed' | 'failed' | 'not_found' | 'error';
     progress: number;
-    result: any;
+    result: unknown;
     error: string | null;
 }
 
@@ -22,7 +22,7 @@ export interface JobStatusResponse {
  */
 export const useJobPolling = (
     jobId: string | null, 
-    onComplete?: (result: any) => void,
+    onComplete?: (result: unknown) => void,
     onError?: (error: string) => void
 ) => {
     return useQuery<JobStatusResponse>({

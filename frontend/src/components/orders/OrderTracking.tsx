@@ -14,7 +14,7 @@ interface OrderTrackingProps {
     auditTrail: AuditEntry[];
 }
 
-const statusMap: Record<string, { icon: any, color: string }> = {
+const statusMap: Record<string, { icon: React.ElementType, color: string }> = {
     'pending': { icon: Clock, color: '#ffd600' },
     'processing': { icon: Package, color: '#00f0ff' },
     'shipped': { icon: Truck, color: '#3b82f6' },
@@ -47,7 +47,7 @@ export default function OrderTracking({ status, auditTrail }: OrderTrackingProps
                                     <span className="timeline-time">{new Date(entry.timestamp).toLocaleString()}</span>
                                 </div>
                                 <p className="timeline-actor">Processor: {entry.actorName}</p>
-                                {entry.note && <p className="timeline-note italic">"{entry.note}"</p>}
+                                {entry.note && <p className="timeline-note italic">&quot;{entry.note}&quot;</p>}
                             </div>
                         </div>
                     )).reverse() : (

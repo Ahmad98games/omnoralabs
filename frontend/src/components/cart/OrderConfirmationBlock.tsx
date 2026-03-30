@@ -39,7 +39,7 @@ export const OrderConfirmationBlock: React.FC<OrderConfirmationBlockProps> = ({
     orderId: propOrderId,
 }) => {
     // Subscribe to OrderStore for reactivity
-    const version = useSyncExternalStore(
+    useSyncExternalStore(
         useCallback((cb: () => void) => orderStore.subscribe(cb), []),
         () => orderStore.getVersion(),
     );

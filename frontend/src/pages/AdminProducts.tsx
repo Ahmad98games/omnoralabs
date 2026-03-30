@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import client from '../api/client';
 import { useToast } from '../context/ToastContext';
-import { Plus, Edit3, Trash2, X, Image as ImageIcon, Search } from 'lucide-react';
+import { Plus, Edit3, Trash2, X, Image as ImageIcon } from 'lucide-react';
 import './AdminProducts.css';
 
 interface Product {
@@ -29,7 +29,6 @@ const INITIAL_FORM_STATE: Omit<Product, 'id'> = {
 
 const AdminProducts: React.FC = () => {
     const [products, setProducts] = useState<Product[]>([]);
-    const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [formData, setFormData] = useState<Omit<Product, 'id'>>(INITIAL_FORM_STATE);
@@ -40,19 +39,22 @@ const AdminProducts: React.FC = () => {
             const { data } = await client.get('/products?limit=100');
             if (data.success) setProducts(data.data);
         } catch (error) {
+            console.error('Fetch error:', error);
             showToast('Failed to load inventory', 'error');
-        } finally {
-            setLoading(false);
         }
     }, [showToast]);
 
     useEffect(() => {
-        fetchProducts();
+        const timer = setTimeout(() => {
+            fetchProducts();
+        }, 0);
+        return () => clearTimeout(timer);
     }, [fetchProducts]);
 
     const handleEdit = (product: Product) => {
         setEditingId(product.id);
         const { id, ...rest } = product;
+        void id; // Explicitly ignore to satisfy linter
         setFormData(rest);
         setIsModalOpen(true);
     };
@@ -64,6 +66,7 @@ const AdminProducts: React.FC = () => {
             showToast('Product removed from database', 'success');
             setProducts(prev => prev.filter(p => p.id !== id));
         } catch (error) {
+            console.error('Deletion error:', error);
             showToast('Deletion failed', 'error');
         }
     };
@@ -86,8 +89,9 @@ const AdminProducts: React.FC = () => {
             }
             resetForm();
             fetchProducts();
-        } catch (error: any) {
-            const msg = error.response?.data?.message || 'Operation failed';
+        } catch (error: unknown) {
+            const err = error as { response?: { data?: { message?: string } } };
+            const msg = err.response?.data?.message || 'Operation failed';
             showToast(msg, 'error');
         }
     };

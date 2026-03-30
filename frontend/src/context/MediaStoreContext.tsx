@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import React, { createContext, useContext, useState, useCallback } from 'react';
 import axios from 'axios';
 
 interface ImageAsset {
@@ -42,8 +42,9 @@ export const MediaStoreProvider: React.FC<{ children: React.ReactNode }> = ({ ch
                 setAssets(response.data.assets);
                 setPagination(response.data.pagination);
             }
-        } catch (err: any) {
-            setError(err.response?.data?.error || 'Failed to fetch gallery');
+        } catch (err: unknown) {
+            const errorData = (err as { response?: { data?: { error?: string } } })?.response?.data;
+            setError(errorData?.error || 'Failed to fetch gallery');
         } finally {
             setLoading(false);
         }
@@ -68,8 +69,9 @@ export const MediaStoreProvider: React.FC<{ children: React.ReactNode }> = ({ ch
                 return newAsset;
             }
             return null;
-        } catch (err: any) {
-            setError(err.response?.data?.error || 'Upload failed');
+        } catch (err: unknown) {
+            const errorData = (err as { response?: { data?: { error?: string } } })?.response?.data;
+            setError(errorData?.error || 'Upload failed');
             return null;
         } finally {
             setLoading(false);

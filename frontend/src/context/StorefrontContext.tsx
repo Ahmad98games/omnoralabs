@@ -54,7 +54,7 @@ export interface Product {
     variants: ProductVariant[];
     available: boolean;
     selectedVariantId?: string;
-    metafields?: Record<string, any>;
+    metafields?: Record<string, unknown>;
 }
 
 export interface CollectionProduct {
@@ -118,7 +118,7 @@ class StorefrontStore {
     }
 
     /** Flat context for BindingResolver — includes selectedVariant for {{product.selectedVariant.price}} */
-    getBindingContext(): Record<string, any> {
+    getBindingContext(): Record<string, unknown> {
         const product = this.state.product;
         return {
             product: product ? {
@@ -372,7 +372,7 @@ export const storefrontStore = new StorefrontStore({
 
 interface StorefrontContextValue {
     state: StorefrontState;
-    bindingContext: Record<string, any>;
+    bindingContext: Record<string, unknown>;
     version: number;
     setMerchantId: (id: string) => void;
     setProduct: (product: Product | null) => void;
@@ -407,6 +407,8 @@ export const StorefrontProvider: React.FC<{
     );
 
     const bindingContext = useMemo(() => {
+        // Explicitly reference version to ensure re-calculation on store updates
+        if (version === -1) return null; 
         const base = storefrontStore.getBindingContext();
         if (scopedProduct) {
             // Micro-Context: override product in binding context
@@ -472,7 +474,7 @@ export function useStorefront(): StorefrontContextValue {
     return ctx;
 }
 
-export function useStorefrontBinding(): { bindingContext: Record<string, any>; version: number } {
+export function useStorefrontBinding(): { bindingContext: Record<string, unknown>; version: number } {
     const ctx = useContext(StorefrontContext);
     if (!ctx) {
         return {

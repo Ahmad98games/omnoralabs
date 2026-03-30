@@ -4,7 +4,6 @@ import {
   Feather,
   Clock,
   ShieldCheck,
-  Globe,
   ArrowRight
 } from 'lucide-react';
 import './About.css';
@@ -13,7 +12,7 @@ interface AboutComponentProps {
   onBack: () => void;
 }
 
-const AboutComponent: React.FC<AboutComponentProps> = ({ onBack }) => {
+const AboutComponent: React.FC<AboutComponentProps> = ({ onBack: _onBack }) => {
   const revealRefs = useRef<(HTMLElement | null)[]>([]);
 
   useEffect(() => {
@@ -60,8 +59,8 @@ const AboutComponent: React.FC<AboutComponentProps> = ({ onBack }) => {
             <span className="font-serif italic text-gold">Universal Kernel</span>
           </h1>
           <p className="description">
-            Engineered for high-fidelity commerce and global scale, Omnora Labs is the division behind the world's most modular commerce OS.
-            We don't just build stores; we build the infrastructure for the next generation of digital distribution.
+            Engineered for high-fidelity commerce and global scale, Omnora Labs is the division behind the world&apos;s most modular commerce OS.
+            We don&apos;t just build stores; we build the infrastructure for the next generation of digital distribution.
           </p>
         </div>
       </section>
@@ -121,8 +120,8 @@ const AboutComponent: React.FC<AboutComponentProps> = ({ onBack }) => {
             <h2 className="h2 subtitle-serif">Ahmad Mahboob</h2>
             <span className="role-tag">Founder & Creative Director</span>
             <p className="text-muted mt-6">
-              "Logic is the ultimate form of art. With Omnora Labs,
-              I wanted to create an engine where speed is a standard, and modularity is the soul of commerce."
+              &quot;Logic is the ultimate form of art. With Omnora Labs,
+              I wanted to create an engine where speed is a standard, and modularity is the soul of commerce.&quot;
             </p>
           </div>
           <div className="founder-image">

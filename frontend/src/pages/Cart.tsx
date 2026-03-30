@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 
 import { Link, useNavigate } from 'react-router-dom'
 
@@ -18,23 +18,21 @@ type CartItem = { id: string; name: string; price: number; image?: string; quant
 
 export default function Cart() {
 
-  const [items, setItems] = useState<CartItem[]>([])
+  // OSTT FIX: Initialize items from storage directly to avoid set-state-in-effect
+  const [items, setItems] = useState<CartItem[]>(() => {
+    if (typeof window === 'undefined') return [];
+    try {
+      return JSON.parse(localStorage.getItem('cart') || '[]') as CartItem[];
+    } catch {
+      return [];
+    }
+  });
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
-  const { showToast } = useToast()
+  const { showToast } = useToast();
 
-  const contentRef = useScrollReveal()
-
-
-
-  useEffect(() => {
-
-    const data = JSON.parse(localStorage.getItem('cart') || '[]') as CartItem[]
-
-    setItems(data)
-
-  }, [])
+  const contentRef = useScrollReveal();
 
 
 

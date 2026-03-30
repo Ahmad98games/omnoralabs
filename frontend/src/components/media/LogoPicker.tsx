@@ -1,5 +1,5 @@
 import React, { useRef, useState, useCallback } from 'react';
-import { Upload, X, RefreshCw, AlertCircle, Loader2, CheckCircle2, Info } from 'lucide-react';
+import { X, RefreshCw, AlertCircle, Loader2, CheckCircle2, Info } from 'lucide-react';
 import { useMediaStore } from '../../context/MediaStoreContext';
 import { analyzeImage, ImageAnalysisResult } from '../../utils/imageAnalysis';
 
@@ -77,7 +77,7 @@ export const LogoPicker: React.FC<LogoPickerProps> = ({
             } else {
                 setStage('error');
             }
-        } catch (err: any) {
+        } catch {
             setStage('error');
             setError('An unexpected error occurred during processing.');
         } finally {
