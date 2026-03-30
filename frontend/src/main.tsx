@@ -5,7 +5,6 @@ import App from './App'
 import './index.css'
 
 import { MediaStoreProvider } from './context/MediaStoreContext'
-import { ElementControlProvider } from './platform/library/modules/ElementControlLayer'
 
 // Session ID — safe, runs client-side only
 function ensureSessionId() {
@@ -140,9 +139,7 @@ if (!rootElement) {
       <RootErrorBoundary>
         <BrowserRouter>
           <MediaStoreProvider>
-            <ElementControlProvider>
-              <App />
-            </ElementControlProvider>
+            <App />
           </MediaStoreProvider>
         </BrowserRouter>
       </RootErrorBoundary>
