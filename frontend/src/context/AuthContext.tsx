@@ -36,7 +36,7 @@ export interface AuthContextValue {
     isAuthModalOpen: boolean;
     authModalMode: 'login' | 'signup';
     setAuthModalOpen: (open: boolean, mode?: 'login' | 'signup') => void;
-    login: (email: string, password: string) => Promise<unknown>;
+    login: (email: string, password: string, role?: string) => Promise<unknown>;
     register: (name: string, email: string, password: string, role?: string, storeName?: string) => Promise<unknown>;
     loginWithGoogle: () => Promise<void>;
     signOut: () => Promise<void>;
@@ -107,6 +107,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             
             const { data: altCustomer } = await supabase.from('customers').select('*').eq('id', sbUser.id).maybeSingle();
             if (altCustomer) { 
+                if (targetRole === 'seller' || targetRole === 'admin' || targetRole === 'super-admin') {
+                    console.log(`[Auth Profile] Upgrading CUSTOMER to ${targetRole}`);
+                    const finalStoreName = storeName || `${fallbackName}'s Store`;
+                    const { data: upgradedMerchant, error } = await supabase.from('merchants').insert({
+                        id: sbUser.id,
+                        email: sbUser.email,
+                        password_hash: altCustomer.password_hash || 'auth-managed',
+                        full_name: altCustomer.full_name,
+                        store_name: finalStoreName,
+                        role: targetRole,
+                    }).select().maybeSingle();
+                    if (!error && upgradedMerchant) {
+                        setProfile(upgradedMerchant as MerchantProfile);
+                        return upgradedMerchant;
+                    }
+                }
                 console.log('[Auth Profile] Cross-Check Match: CUSTOMER');
                 setProfile({ ...altCustomer, role: 'customer' } as CustomerProfile); return altCustomer; 
             }
@@ -222,12 +238,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         };
     }, [ensureProfile]);
 
-    const login = async (email: string, password: string) => {
+    const login = async (email: string, password: string, requestedRole?: string) => {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         if (data.user) {
             setUser(data.user);
-            const prof = await ensureProfile(data.user);
+            const prof = await ensureProfile(data.user, undefined, requestedRole);
             return { ...data.user, ...(prof as Record<string, unknown>) };
         }
         return data.user;

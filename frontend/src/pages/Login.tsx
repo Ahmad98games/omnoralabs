@@ -53,7 +53,7 @@ const Login: React.FC = () => {
                 await register(formData.name, formData.email, formData.password, selectedRole);
                 // Note: We DO NOT navigate here anymore. The useEffect above handles it once the state is securely synced.
             } else {
-                await login(formData.email, formData.password);
+                await login(formData.email, formData.password, selectedRole);
                 // Note: We DO NOT navigate here anymore. The useEffect above handles it once the state is securely synced.
             }
         } catch (err: unknown) {
