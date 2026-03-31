@@ -25,9 +25,10 @@ const CONVERSION_SIGNALS: Signal[] = [
  * 📈 CONVERSION SCORE WIDGET (Task 3.2)
  */
 export const ConversionScore: React.FC = () => {
-    const nodes = useBuilderStore(s => s.nodes[s.activePageId] ?? []);
+    const storeNodes = useBuilderStore(s => s.nodes[s.activePageId]);
 
     const audit = useMemo(() => {
+        const nodes = storeNodes || [];
         const foundTypes = new Set(nodes.map(n => n.type));
         
         // OSTT FIX: Removed mutable variable inside useMemo loop
@@ -40,7 +41,7 @@ export const ConversionScore: React.FC = () => {
         const score = results.reduce((acc, curr) => curr.isPresent ? acc + curr.weight : acc, 0);
 
         return { score, results };
-    }, [nodes]);
+    }, [storeNodes]);
 
     const getScoreColor = (score: number) => {
         if (score > 80) return 'text-white';

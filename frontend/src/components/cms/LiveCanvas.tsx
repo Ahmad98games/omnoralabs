@@ -16,7 +16,7 @@ import { EmptyState } from '../ui/EmptyState';
  */
 
 export const LiveCanvas: React.FC = React.memo(() => {
-    const blocks = useBuilderStore(s => s.nodes[s.activePageId] ?? []);
+    const blocks = useBuilderStore(s => s.nodes[s.activePageId]) ?? [];
     const isHydrating = useBuilderStore(s => s.isHydrating);
     const activePageId = useBuilderStore(s => s.activePageId);
 
