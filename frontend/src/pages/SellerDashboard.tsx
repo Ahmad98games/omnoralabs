@@ -196,7 +196,7 @@ export default function SellerDashboard() {
         } catch (err: unknown) {
             if (axios.isCancel(err)) return;
             
-            const axiosError = err as AxiosError; 
+            const axiosError = err as AxiosError<unknown>; 
             if (axiosError.response?.status === 401) {
                 console.error('[Omnora Auth] Unauthorized Access. Redirecting to Login.');
                 await supabase.auth.signOut();
@@ -250,7 +250,7 @@ export default function SellerDashboard() {
                     <div className="sidebar-brand">
                         <div className="brand-wrapper">
                             <img 
-                                src="/logo.png" 
+                                src="/omnoralabs.png" 
                                 alt="Omnora Logo" 
                                 style={{ width: '24px', height: '24px', objectFit: 'contain', marginRight: '12px' }} 
                             />
