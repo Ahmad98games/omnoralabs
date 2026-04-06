@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useBuilderStore } from '../../stores/useBuilderStore';
+import React, { useCallback, useState } from 'react';
+import { useBuilder } from '../../context/BuilderContext';
 import { Plus } from 'lucide-react';
 
 interface CanvasDropZoneProps {
@@ -8,60 +8,83 @@ interface CanvasDropZoneProps {
 }
 
 /**
- * 📍 CANVAS DROP ZONE (Task 3.1)
- * Renders between blocks and handles drag-and-drop insertion.
- * Shows horizontal line on dragOver.
+ * 📍 CANVAS DROP ZONE
+ *
+ * Handles drag-and-drop insertion of blocks between existing canvas nodes.
+ * Previously broken: it called useBuilderStore(s => s.addNode) which expects
+ * a full BuilderNode shape, but was passed { type, pageId, index } — causing
+ * a silent no-op and a crash when nodes[activeId] was undefined on empty pages.
+ *
+ * Fix: delegate entirely to BuilderContext.addNode which:
+ *   1. Resolves the type through COMPONENT_ALIASES
+ *   2. Validates against the registry (reportRegistryError on miss)
+ *   3. Hydrates default props from the registered schema
+ *   4. Inserts at the correct index in pageLayouts
+ *   5. Commits to history for undo/redo
  */
 export const CanvasDropZone: React.FC<CanvasDropZoneProps> = ({ index, pageId }) => {
     const [isOver, setIsOver] = useState(false);
-    const addNode = useBuilderStore(s => s.addNode);
+    const { addNode } = useBuilder();
 
-    const handleDragOver = (e: React.DragEvent) => {
+    const handleDragOver = useCallback((e: React.DragEvent) => {
         e.preventDefault();
-        e.dataTransfer.dropEffect = 'move';
+        e.stopPropagation();
+        e.dataTransfer.dropEffect = 'copy';
         setIsOver(true);
-    };
+    }, []);
 
-    const handleDragLeave = () => {
-        setIsOver(false);
-    };
+    const handleDragLeave = useCallback((e: React.DragEvent) => {
+        // Only fire leave when the cursor exits the actual zone div,
+        // not when it crosses a child element boundary.
+        if (!(e.currentTarget as HTMLElement).contains(e.relatedTarget as Node)) {
+            setIsOver(false);
+        }
+    }, []);
 
-    const handleDrop = (e: React.DragEvent) => {
+    const handleDrop = useCallback((e: React.DragEvent) => {
         e.preventDefault();
+        e.stopPropagation();
         setIsOver(false);
-        
-        const type = e.dataTransfer.getData('text/plain');
-        if (!type) return;
 
-        // 🛡️ INDUSTRIAL HYDRATION (Task 3.1)
-        // addNode in store handles default props via Registry
-        addNode({
-            type,
-            pageId,
-            index,
-        });
-    };
+        const type = e.dataTransfer.getData('text/plain');
+        if (!type?.trim()) return;
+
+        // addNode(type, props, parentId, insertionIndex)
+        // parentId = null → root-level page block
+        // insertionIndex = index → position in pageLayouts[activePageId]
+        addNode(type, {}, null, index);
+    }, [addNode, index]);
 
     return (
-        <div 
+        <div
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
-            className={`w-full transition-all duration-300 relative group
-                ${isOver ? 'h-32 my-4' : 'h-4 hover:h-8'}
+            data-drop-index={index}
+            data-page-id={pageId}
+            className={`w-full transition-all duration-200 relative group
+                ${isOver ? 'h-24 my-3' : 'h-3 hover:h-6'}
             `}
         >
-            {/* Insertion Line */}
-            <div 
-                className={`absolute left-0 right-0 top-1/2 -translate-y-1/2 h-1 rounded-full transition-all duration-300
-                    ${isOver ? 'bg-orange-500 scale-x-100 opacity-100' : 'bg-orange-500/20 scale-x-[0.9] opacity-0 group-hover:opacity-100'}
-                `} 
+            {/* Insertion rail */}
+            <div
+                className={`absolute left-4 right-4 top-1/2 -translate-y-1/2 h-[2px] rounded-full transition-all duration-200
+                    ${isOver
+                        ? 'bg-orange-500 opacity-100 scale-x-100'
+                        : 'bg-orange-500/25 opacity-0 group-hover:opacity-100 scale-x-95 group-hover:scale-x-100'
+                    }`}
             />
 
-            {/* Insertion Indicator Pill */}
+            {/* Drop indicator pill — only when actively dragging over */}
             {isOver && (
-                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-zinc-900 border border-orange-500/50 text-orange-400 px-4 py-2 rounded-full flex items-center gap-2 text-xs font-bold animate-in zoom-in duration-300 shadow-2xl">
-                    <Plus size={14} /> Insert Block Here
+                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10
+                    bg-zinc-900 border border-orange-500/60 text-orange-400
+                    px-4 py-1.5 rounded-full flex items-center gap-1.5
+                    text-[11px] font-bold tracking-wide shadow-2xl
+                    animate-in zoom-in-90 duration-150 pointer-events-none"
+                >
+                    <Plus size={12} strokeWidth={2.5} />
+                    Drop to insert
                 </div>
             )}
         </div>

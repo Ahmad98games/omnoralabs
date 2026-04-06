@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Sparkles, X, Wand2, Loader2, CheckCircle2 } from 'lucide-react';
 import { localAIEngine } from '../../lib/LocalAIEngine';
-import { useBuilder } from '../../context/BuilderContext';
+import { useBuilderStore } from '../../stores/useBuilderStore';
 import { useToast } from '../../context/ToastContext';
 import { InitProgressReport } from '@mlc-ai/web-llm';
 import { supabase } from '../../lib/supabaseClient';
@@ -13,7 +13,8 @@ interface Props {
 }
 
 export const AICopilotModal: React.FC<Props> = ({ isOpen, onClose }) => {
-    const { nodes, updateNode } = useBuilder();
+    const nodes = useBuilderStore(state => state.nodes[state.activePageId] || []);
+    const updateNode = useBuilderStore(state => state.updateNodeProperty);
     const { showToast } = useToast();
     const [brandDescription, setBrandDescription] = useState('');
     const [refinement, setRefinement] = useState('');
@@ -65,10 +66,8 @@ export const AICopilotModal: React.FC<Props> = ({ isOpen, onClose }) => {
         if (!generatedContent) return;
 
         // Phase 32: Safe Canvas Injection
-        // OSTT FIX: Replace any with structured Record
-        const nodeArray = Object.values(nodes) as Record<string, unknown>[];
-        const heroNode = nodeArray.find(n => n.type === 'HeroBanner');
-        const productGrid = nodeArray.find(n => n.type === 'ProductGrid' || n.type === 'Grid'); 
+        const heroNode = nodes.find(n => n.type === 'HeroBanner');
+        const productGrid = nodes.find(n => n.type === 'ProductGrid' || n.type === 'Grid'); 
 
         if (!heroNode) {
             showToast('Magic Failed: No HeroBanner found on canvas to inject text.', 'error');
@@ -76,8 +75,8 @@ export const AICopilotModal: React.FC<Props> = ({ isOpen, onClose }) => {
         }
 
         try {
-            updateNode(heroNode.id as string, 'props', { 
-                ...(heroNode.props as Record<string, unknown>), 
+            updateNode(heroNode.id, 'props', { 
+                ...heroNode.props, 
                 headline: generatedContent.heroHeadline,
                 subtext: generatedContent.heroSubtext
             });

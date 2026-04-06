@@ -76,22 +76,11 @@
   <script type="module" src="/src/main.tsx"></script>
   <script>
     if ('serviceWorker' in navigator) {
-      // Clear all existing registrations from broken SW state
-      navigator.serviceWorker.getRegistrations().then(regs => {
-        regs.forEach(reg => {
-          // Only unregister if the SW is stuck in a bad state or redundantly active
-          if (reg.active && reg.active.state === 'redundant') {
-            reg.unregister()
-          }
-          // Aggressive unregister for every open to break the loop
-          reg.unregister()
-        })
-      })
-      // Clear caches that may have cached the missing offline.html
-      caches.keys().then(keys => {
-        keys.filter(k => k.includes('omnora') || k.includes('workbox'))
-            .forEach(k => caches.delete(k))
-      })
+      caches.keys().then(keys =>
+        keys
+          .filter(k => k.includes('workbox') || k.includes('omnora'))
+          .forEach(k => caches.delete(k))
+      )
     }
   </script>
 </body>

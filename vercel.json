@@ -1,7 +1,7 @@
 {
   "buildCommand": "cd frontend && npm install && npm run build",
   "outputDirectory": "frontend/dist",
-  "installCommand": "npm install && cd backend && npm install && cd ../gsgbackend && npm install",
+  "installCommand": "npm install && cd backend && npm install",
   "routes": [
     {
       "src": "/api/storefront/(.*)",
@@ -17,7 +17,11 @@
     },
     {
       "src": "/manifest.webmanifest",
-      "dest": "/manifest.webmanifest"
+      "dest": "/manifest.webmanifest",
+      "headers": {
+        "Cache-Control": "public, max-age=0",
+        "Access-Control-Allow-Origin": "*"
+      }
     },
     {
       "src": "/sw.js",
@@ -28,60 +32,24 @@
       "dest": "/registerSW.js"
     },
     {
-      "src": "/favicon.ico",
-      "dest": "/favicon.ico"
-    },
-    {
       "src": "/(.*)",
       "dest": "/index.html"
     }
   ],
   "headers": [
     {
-      "source": "/manifest.webmanifest",
-      "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=0" },
-        { "key": "Access-Control-Allow-Origin", "value": "*" }
-      ]
-    },
-    {
-      "source": "/sw.js",
-      "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" },
-        { "key": "Access-Control-Allow-Origin", "value": "*" }
-      ]
-    },
-    {
       "source": "/api/(.*)",
       "headers": [
-        { "key": "Access-Control-Allow-Credentials", "value": "true" },
         { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Access-Control-Allow-Methods", "value": "GET,DELETE,PATCH,POST,PUT,OPTIONS" },
-        { "key": "Access-Control-Allow-Headers", "value": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, x-tenant-id" }
+        { "key": "Access-Control-Allow-Methods", "value": "GET,POST,PUT,DELETE,OPTIONS" },
+        { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization, x-tenant-id" }
       ]
     },
     {
-      "source": "/assets/(.*)",
+      "source": "/manifest.webmanifest",
       "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
-      ]
-    },
-    {
-      "source": "/(.*)",
-      "headers": [
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "X-Frame-Options", "value": "SAMEORIGIN" }
+        { "key": "Access-Control-Allow-Origin", "value": "*" }
       ]
     }
-  ],
-  "functions": {
-    "api/index.js": {
-      "maxDuration": 10,
-      "memory": 1024
-    },
-    "api/storefront.js": {
-      "maxDuration": 10,
-      "memory": 512
-    }
-  }
+  ]
 }

@@ -507,18 +507,51 @@ export const ComponentRegistry: Record<
   ),
 };
 // ─── ALIAS BRIDGE MAPPINGS ──────────────────────────────────────────────────
+//
+// Maps the public-facing BLOCK_TYPES keys (used in ElementLibrary, drag data,
+// and the AST) to the internal registry/component keys.
+//
+// Rule: if BLOCK_TYPES.FOO !== the key used in registerComponent('bar', …)
+// or ComponentRegistry['bar'], add a mapping here.
+//
+// Missing aliases were the primary cause of "block inserted but never rendered"
+// — addNode would call getRegistryEntry(type) → undefined → silent return ''.
+//
 export const COMPONENT_ALIASES: Record<string, string> = {
-  "hero_split": "split_hero",
-  "header": "store_header",
-  "review_block": "customer_reviews",
-  "policy_block": "policy_strip",
-  "text_block": "text_section",
-  "feature_block": "features_grid",
-  "faq_block": "faq_accordion",
-  "footer": "site_footer",
-  "countdown_banner": "countdown_timer",
-  "promo_banner": "promo_strip",
-  "newsletter": "newsletter_signup"
+  // ── Navigation / Header ─────────────────────────────────────────
+  "header":            "store_header",       // BLOCK_TYPES.HEADER → registered as store_header
+
+  // ── Hero / Banners ──────────────────────────────────────────────
+  "hero":              "hero_banner",        // BLOCK_TYPES.HERO   → registered as hero_banner  ← WAS MISSING
+  "hero_split":        "split_hero",         // BLOCK_TYPES.HERO_SPLIT
+  "promo_banner":      "promo_strip",        // BLOCK_TYPES.PROMO_BANNER
+  "countdown_banner":  "countdown_timer",    // BLOCK_TYPES.COUNTDOWN_BANNER
+
+  // ── Commerce ────────────────────────────────────────────────────
+  "cart_drawer":       "cart_drawer",        // explicit passthrough — stub registered below
+  "checkout_block":    "checkout_form",      // BLOCK_TYPES.CHECKOUT_BLOCK
+  "upsell_widget":     "upsell_widget",      // passthrough (already registered)
+  "upsell_bundle":     "upsell_widget",      // legacy alias
+
+  // ── Trust / Authority ───────────────────────────────────────────
+  "trust_seals":       "trust_badges",       // Registry alias for trust_seals
+  "review_block":      "customer_reviews",   // BLOCK_TYPES.REVIEW_BLOCK
+  "policy_block":      "policy_strip",       // BLOCK_TYPES.POLICY_BLOCK
+
+  // ── Content ─────────────────────────────────────────────────────
+  "text_block":        "text_section",       // BLOCK_TYPES.TEXT_BLOCK
+  "feature_block":     "features_grid",      // BLOCK_TYPES.FEATURE_BLOCK
+  "faq_block":         "faq_accordion",      // BLOCK_TYPES.FAQ_BLOCK
+  "image_block":       "image_block",        // explicit passthrough — registered below  ← WAS MISSING
+
+  // ── Products ────────────────────────────────────────────────────
+  "best_sellers":      "best_sellers",       // passthrough — registered below           ← WAS MISSING
+  "recently_viewed":   "recently_viewed",    // passthrough — registered below           ← WAS MISSING
+
+  // ── Footer / Misc ───────────────────────────────────────────────
+  "footer":            "site_footer",        // BLOCK_TYPES.FOOTER
+  "newsletter":        "newsletter_signup",  // BLOCK_TYPES.NEWSLETTER
+  "whatsapp_button":   "whatsapp_button",    // BLOCK_TYPES.WHATSAPP_BUTTON — registered below  ← WAS MISSING
 };
 
 /**

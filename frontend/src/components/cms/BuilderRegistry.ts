@@ -539,3 +539,210 @@ registerComponent('split_hero', {
         showCta: { label: 'Show CTA', type: 'boolean' },
     },
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FIX: Missing Registry Entries
+//
+// These blocks existed as React components and were exposed in ElementLibrary
+// but were never registered, so getRegistryEntry() returned undefined and
+// addNode() silently returned '' — meaning the block was never inserted.
+//
+// Each entry below: imports the component, registers it with full defaultProps
+// and propSchema, so the Properties panel can immediately edit every field.
+// ─────────────────────────────────────────────────────────────────────────────
+
+// 24. Promo Strip (was aliased but never registered)
+import { PromoStrip } from '../blocks/PromoStrip';
+registerComponent('promo_strip', {
+    component: PromoStrip as unknown as React.ComponentType<BlockProps>,
+    defaultProps: {
+        items: [
+            { text: '🚚 Free shipping on orders over $50', link: '' },
+            { text: '🔒 100% Secure Checkout', link: '' },
+            { text: '↩️ 30-Day Returns — No Questions Asked', link: '' },
+        ],
+        rotationInterval: 4000,
+        backgroundColor: '#7c6dfa',
+        textColor: '#ffffff',
+        height: 44,
+        animationType: 'slide',
+    },
+    propSchema: {
+        backgroundColor: { label: 'Background Color', type: 'color' },
+        textColor: { label: 'Text Color', type: 'color' },
+        height: { label: 'Bar Height (px)', type: 'slider', min: 28, max: 80, step: 2 },
+        rotationInterval: { label: 'Rotation Speed (ms)', type: 'number' },
+        animationType: { label: 'Animation', type: 'select', options: ['slide', 'fade', 'none'] },
+    },
+});
+
+// 25. Policy Strip (aliased from policy_block, now registered)
+import { PolicyStrip } from '../blocks/PolicyStrip';
+registerComponent('policy_strip', {
+    component: PolicyStrip as unknown as React.ComponentType<BlockProps>,
+    defaultProps: {
+        policies: [
+            { label: 'Refund Policy', icon: 'return-arrow', linkUrl: '/refunds' },
+            { label: 'Terms of Service', icon: 'lock', linkUrl: '/terms' },
+            { label: 'Privacy Policy', icon: 'shield-check', linkUrl: '/privacy' },
+        ],
+        layout: 'row',
+        separator: 'dot',
+        fontSize: 'sm',
+    },
+    propSchema: {
+        layout: { label: 'Layout', type: 'select', options: ['row', 'stacked'] },
+        separator: { label: 'Separator', type: 'select', options: ['divider', 'dot', 'none'] },
+        fontSize: { label: 'Font Size', type: 'select', options: ['sm', 'md'] },
+    },
+});
+
+// 26. Text Section (aliased from text_block, now registered)
+import { TextSection } from '../blocks/TextSection';
+registerComponent('text_section', {
+    component: TextSection as unknown as React.ComponentType<BlockProps>,
+    defaultProps: {
+        heading: 'Our Story',
+        headingSize: 'lg',
+        body: 'We believe in crafting products that stand the test of time — built with precision, designed with purpose.',
+        ctaLabel: 'Learn More',
+        ctaUrl: '#',
+        ctaStyle: 'button',
+        alignment: 'center',
+        maxWidth: 720,
+        paddingY: 80,
+    },
+    propSchema: {
+        heading: { label: 'Heading', type: 'text' },
+        headingSize: { label: 'Heading Size', type: 'select', options: ['sm', 'md', 'lg', 'xl'] },
+        body: { label: 'Body Text', type: 'text' },
+        ctaLabel: { label: 'CTA Label', type: 'text' },
+        ctaUrl: { label: 'CTA URL', type: 'link' },
+        ctaStyle: { label: 'CTA Style', type: 'select', options: ['button', 'link'] },
+        alignment: { label: 'Text Alignment', type: 'select', options: ['left', 'center', 'right'] },
+        maxWidth: { label: 'Max Width (px)', type: 'slider', min: 480, max: 1200, step: 40 },
+        paddingY: { label: 'Vertical Padding (px)', type: 'slider', min: 20, max: 160, step: 10 },
+    },
+});
+
+// 27. Image Block (was completely unregistered)
+import { ImageBlock } from '../blocks/ImageBlock';
+registerComponent('image_block', {
+    component: ImageBlock as unknown as React.ComponentType<BlockProps>,
+    defaultProps: {
+        src: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1600&q=80',
+        alt: 'Featured image',
+        width: 'contained',
+        height: 480,
+        objectFit: 'cover',
+        link: '',
+        caption: '',
+        borderRadius: 0,
+    },
+    propSchema: {
+        src: { label: 'Image URL', type: 'image' },
+        alt: { label: 'Alt Text', type: 'text' },
+        width: { label: 'Width Mode', type: 'select', options: ['full', 'contained', 'narrow'] },
+        height: { label: 'Height (px)', type: 'slider', min: 100, max: 900, step: 20 },
+        objectFit: { label: 'Object Fit', type: 'select', options: ['cover', 'contain', 'fill'] },
+        link: { label: 'Link URL (optional)', type: 'link' },
+        caption: { label: 'Caption (optional)', type: 'text' },
+        borderRadius: { label: 'Border Radius (px)', type: 'slider', min: 0, max: 32, step: 2 },
+    },
+});
+
+// 28. WhatsApp Button (was unregistered)
+import { WhatsAppFloating } from '../blocks/WhatsAppFloating';
+registerComponent('whatsapp_button', {
+    component: WhatsAppFloating as unknown as React.ComponentType<BlockProps>,
+    defaultProps: {
+        phoneNumber: '+1234567890',
+        welcomeMessage: 'Hi! I have a question about your products.',
+        position: 'bottom-right',
+        buttonLabel: 'Chat on WhatsApp',
+        showPulse: true,
+        buttonColor: '#25D366',
+        onlyShowOn: 'all',
+    },
+    propSchema: {
+        phoneNumber: { label: 'WhatsApp Phone Number', type: 'text' },
+        welcomeMessage: { label: 'Pre-filled Message', type: 'text' },
+        position: { label: 'Button Position', type: 'select', options: ['bottom-right', 'bottom-left', 'inline'] },
+        buttonLabel: { label: 'Button Label', type: 'text' },
+        buttonColor: { label: 'Button Color', type: 'color' },
+        showPulse: { label: 'Show Pulse Animation', type: 'boolean' },
+        onlyShowOn: { label: 'Show On', type: 'select', options: ['all', 'mobile', 'desktop'] },
+    },
+});
+
+// 29. Best Sellers (product_grid variant — reuses ProductGrid with preset filter)
+import { ProductGrid } from '../cart/ProductGrid';
+registerComponent('best_sellers', {
+    component: ProductGrid as unknown as React.ComponentType<BlockProps>,
+    defaultProps: {
+        columns: 4,
+        gap: 20,
+        limit: 8,
+        showFilter: false,
+        cardStyle: 'minimal',
+        imageAspect: 'portrait',
+        selectionMode: 'best_sellers',
+        categorySlug: '',
+        productIds: [],
+        sectionTitle: 'Best Sellers',
+        showSectionTitle: true,
+    },
+    propSchema: {
+        sectionTitle: { label: 'Section Title', type: 'text' },
+        showSectionTitle: { label: 'Show Title', type: 'boolean' },
+        columns: { label: 'Columns', type: 'number', min: 2, max: 6 },
+        limit: { label: 'Products to Show', type: 'number', min: 4, max: 24 },
+        cardStyle: { label: 'Card Style', type: 'select', options: ['minimal', 'cinematic-dark', 'outlined'] },
+        imageAspect: { label: 'Image Aspect', type: 'select', options: ['portrait', 'square', 'widescreen'] },
+    },
+});
+
+// 30. Recently Viewed (product_grid variant with session-based filter)
+registerComponent('recently_viewed', {
+    component: ProductGrid as unknown as React.ComponentType<BlockProps>,
+    defaultProps: {
+        columns: 4,
+        gap: 16,
+        limit: 6,
+        showFilter: false,
+        cardStyle: 'minimal',
+        imageAspect: 'portrait',
+        selectionMode: 'recently_viewed',
+        categorySlug: '',
+        productIds: [],
+        sectionTitle: 'Recently Viewed',
+        showSectionTitle: true,
+    },
+    propSchema: {
+        sectionTitle: { label: 'Section Title', type: 'text' },
+        showSectionTitle: { label: 'Show Title', type: 'boolean' },
+        columns: { label: 'Columns', type: 'number', min: 2, max: 6 },
+        limit: { label: 'Products to Show', type: 'number', min: 2, max: 12 },
+        cardStyle: { label: 'Card Style', type: 'select', options: ['minimal', 'cinematic-dark', 'outlined'] },
+    },
+});
+
+// 31. Cart Drawer stub (full commerce implementation lives in CartContext)
+//     Registered here so the builder can place and configure the toggle trigger.
+registerComponent('cart_drawer', {
+    component: (() => null) as unknown as React.ComponentType<BlockProps>,
+    defaultProps: {
+        accentColor: '#7c6dfa',
+        showUpsells: true,
+        drawerSide: 'right',
+        showShippingBar: true,
+        freeShippingThreshold: 50,
+    },
+    propSchema: {
+        accentColor: { label: 'Accent Color', type: 'color' },
+        showUpsells: { label: 'Show Upsell Products', type: 'boolean' },
+        drawerSide: { label: 'Drawer Side', type: 'select', options: ['right', 'left'] },
+        showShippingBar: { label: 'Show Free Shipping Bar', type: 'boolean' },
+        freeShippingThreshold: { label: 'Free Shipping Threshold ($)', type: 'number' },
+    },
+});

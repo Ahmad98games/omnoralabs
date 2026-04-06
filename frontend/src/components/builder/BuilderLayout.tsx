@@ -108,6 +108,7 @@ class BuilderLayoutErrorBoundary extends React.Component<
                         </p>
                         <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
                             <button
+                                type="button"
                                 onClick={() => {
                                     this.setState({ hasError: false, errorMessage: null });
                                 }}
@@ -125,6 +126,7 @@ class BuilderLayoutErrorBoundary extends React.Component<
                                 Retry Component
                             </button>
                             <button
+                                type="button"
                                 onClick={() => {
                                     localStorage.clear();
                                     window.location.reload();
@@ -153,10 +155,10 @@ class BuilderLayoutErrorBoundary extends React.Component<
 
 const BuilderLayoutContent: React.FC = () => {
     const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
-    const isMobileSheet = window.innerWidth < 768; // Derived state to avoid setState warning if not needed reactively
+    const isMobileSheet = window.innerWidth < 768; 
     const isSidebarOpenGlobal = useBuilderStore(state => state.isSidebarOpen);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-    const [snapIndex, setSnapIndex] = useState(1); // 0=hidden, 1=40%, 2=90%
+    const [snapIndex, setSnapIndex] = useState(1); 
     
     const [isZombie, setIsZombie] = useState(false);
     
@@ -166,79 +168,32 @@ const BuilderLayoutContent: React.FC = () => {
         useBuilderStore.getState().setSidebarOpen(nextVal);
     };
     const activePageId = useBuilderStore(state => state.activePageId);
-    const [lastValidPageId, setLastValidPageId] = useState<'home' | string>(activePageId || 'home');
-
-    // 👁️ Preview Sync States
+    const pages = useBuilderStore(state => state.pages);
+    const setActivePageId = useBuilderStore(state => state.setActivePageId);
     const isPreviewMode = useBuilderStore(state => state.isPreviewMode);
     const previewDevice = useBuilderStore(state => state.previewDevice);
     const nodes = useBuilderStore(state => state.nodes);
     const iframeRef = React.useRef<HTMLIFrameElement>(null);
 
-    // 👁️ Live Preview postMessage Dispatcher (Debounced 300ms)
+    // FIXED — debounced, nodes read from ref (Rule: useEffect deps must never include objects)
+    const nodesRef = useRef(nodes);
+    useEffect(() => { nodesRef.current = nodes; }, [nodes]);
+
     useEffect(() => {
         if (!isPreviewMode) return;
-        const nodesVersion = JSON.stringify(nodes).length; 
         const timer = setTimeout(() => {
-            if (iframeRef.current?.contentWindow) {
-                console.log('[Preview] Dispatching sync at version:', nodesVersion);
-                iframeRef.current.contentWindow.postMessage(
-                    { type: 'OMNORA_PREVIEW_UPDATE', nodes, activePageId },
-                    window.location.origin
-                );
-            }
+            iframeRef.current?.contentWindow?.postMessage(
+                { type: 'OMNORA_PREVIEW_UPDATE', nodes: nodesRef.current, activePageId },
+                window.location.origin
+            );
         }, 300);
         return () => clearTimeout(timer);
-    }, [nodes, isPreviewMode, activePageId]);
+    }, [isPreviewMode, activePageId]);
+    // nodes intentionally excluded — read from ref to prevent loop
 
-    // 🛡️ Page Switch Guard & Safety Net
+    // REHYDRATION EFFECT (Stable and single-purpose)
     useEffect(() => {
-        try {
-            if (activePageId && activePageId !== lastValidPageId) {
-                // Defer state update to next tick to avoid cascading render warnings
-                const timer = setTimeout(() => {
-                    setLastValidPageId((prev) => {
-                        if (prev !== activePageId) {
-                            try { localStorage.setItem('omnora_last_valid_page', activePageId); } catch (e) { console.warn(e); }
-                            return activePageId;
-                        }
-                        return prev;
-                    });
-                }, 0);
-                return () => clearTimeout(timer);
-            }
-        } catch (e) {
-            console.error('[BuilderLayout] Page Switch Failure caught:', e);
-            useBuilderStore.getState().setIsHydrating(false);
-        }
-    }, [activePageId, lastValidPageId]);
-    
-    // 🛡️ Auto-select first page if none selected
-    const pages = useBuilderStore(state => state.pages);
-    const setActivePageId = useBuilderStore(state => state.setActivePageId);
-
-    useEffect(() => {
-        const pageIds = Object.keys(pages || {});
-        if (pageIds.length > 0 && !activePageId) {
-            const pageList = Object.values(pages);
-            const homePage = pageList.find(p => p.slug === 'home' || p.slug === 'index');
-            const firstPage = pageList[0];
-            const pageToSelect = homePage || firstPage;
-            
-            if (pageToSelect) {
-                console.log('[BuilderLayout] Auto-selecting active page:', pageToSelect.id);
-                // Wrap in a microtask to ensure we don't trigger cascading render error
-                Promise.resolve().then(() => {
-                    setActivePageId(pageToSelect.id);
-                });
-            }
-        }
-    }, [pages, activePageId, setActivePageId]);
-
-    useEffect(() => {
-        const handleResize = () => setIsMobile(window.innerWidth < 1024);
-        window.addEventListener('resize', handleResize);
-        
-        // 🛡️ Safe rehydration — only if persist middleware is configured
+        let cancelled = false;
         const rehydrate = async () => {
             try {
                 if (useBuilderStore.persist?.rehydrate) {
@@ -246,34 +201,55 @@ const BuilderLayoutContent: React.FC = () => {
                 }
             } catch (e) {
                 console.error('[BuilderLayout] Hydration failed:', e);
-                useBuilderStore.getState().setIsHydrating(false);
             } finally {
-                useBuilderStore.getState().setIsHydrating(false);
+                if (!cancelled) {
+                    useBuilderStore.getState().setIsHydrating(false);
+                }
             }
         };
         rehydrate();
-
-        // 🛡️ Zombie Detection (4s Safety Net)
-        const zombieTimer = setTimeout(() => {
+        // Zombie detection — clear stuck hydration after 4s
+        const zombie = setTimeout(() => {
             if (useBuilderStore.getState().isHydrating) {
-                console.warn('[BuilderLayout] Zombie hydration detected. Forcing clear.');
-                setIsZombie(true);
-                // We don't force clear yet, let the user decide via UI
+                useBuilderStore.getState().setIsHydrating(false);
             }
         }, 4000);
-
         return () => {
-            window.removeEventListener('resize', handleResize);
-            clearTimeout(zombieTimer);
+            cancelled = true;
+            clearTimeout(zombie);
         };
-    }, []);
+    }, []); // empty deps — runs once on mount only
 
-    // ── Not-Supported Guard Removed ───────────────────────────────────────
-    // Enabled full-width Canvas for viewports < 768px natively.
+    // PAGE SWITCH GUARD (Stable using refs)
+    const activePageIdRef = useRef(activePageId);
+    useEffect(() => { activePageIdRef.current = activePageId; }, [activePageId]);
+
+    useEffect(() => {
+        if (!activePageId) return;
+        // Safe to save — reads from ref, not reactive dep
+        try { localStorage.setItem('omnora_last_valid_page', activePageId); } catch (e) { console.warn(e); }
+    }, [activePageId]); // only activePageId — not nodes or pages
+
+    // AUTO-SELECT FIRST PAGE (Stable guard)
+    useEffect(() => {
+        const pageIds = Object.keys(pages ?? {});
+        if (pageIds.length === 0 || activePageId) return;
+        // Page exists but none selected — pick home or first
+        const pageList = Object.values(pages);
+        const home = pageList.find(
+            p => p.slug === 'home' || p.slug === 'index'
+        );
+        setActivePageId((home ?? pageList[0]).id);
+    }, [pages, activePageId, setActivePageId]);
+
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth < 1024);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden', position: 'relative' }}>
-            {/* 🧟 Zombie State UI Overlay */}
             <AnimatePresence>
                 {isZombie && (
                     <motion.div 
@@ -301,6 +277,7 @@ const BuilderLayoutContent: React.FC = () => {
                             </p>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                                 <button 
+                                    type="button"
                                     onClick={() => {
                                         useBuilderStore.getState().setIsHydrating(false);
                                         setIsZombie(false);
@@ -313,6 +290,7 @@ const BuilderLayoutContent: React.FC = () => {
                                     Force Bypass Hydration
                                 </button>
                                 <button 
+                                    type="button"
                                     onClick={() => {
                                         localStorage.clear();
                                         window.location.reload();
@@ -330,14 +308,11 @@ const BuilderLayoutContent: React.FC = () => {
                     </motion.div>
                 )}
             </AnimatePresence>
-            {/* Toolbar always on top (Z-INDEX 100) */}
             <div style={{ zIndex: 100 }}>
                 <BuilderToolbar onToggleLibrary={() => setLibraryOpen(o => !o)} libraryOpen={libraryOpen} />
             </div>
 
             <div style={{ display: 'flex', flex: 1, overflow: 'hidden', position: 'relative' }}>
-                
-                {/* Element Library (Z-INDEX 85) */}
                 <div style={{ 
                     zIndex: 85,
                     width: libraryOpen ? '280px' : '0px',
@@ -346,10 +321,9 @@ const BuilderLayoutContent: React.FC = () => {
                     flexShrink: 0,
                     borderRight: libraryOpen ? '1px solid var(--border-subtle, #27272a)' : 'none'
                 }}>
-                    <ElementLibrary isOpen={libraryOpen} onClose={() => setLibraryOpen(false)} />
+                    <ElementLibrary />
                 </div>
 
-                {/* Main Canvas Area (Z-INDEX 10) */}
                 <div style={{ 
                     flex: isPreviewMode ? '1 1 50%' : 1, 
                     overflow: 'hidden', 
@@ -364,11 +338,12 @@ const BuilderLayoutContent: React.FC = () => {
                 }}>
                     {isMobile && (
                         <button 
+                            type="button"
                             onClick={() => setIsSidebarOpen(true)}
                             style={{ 
                                 position: 'absolute', 
                                 right: 16, 
-                                bottom: 16, // Moved to bottom for thumb reachability
+                                bottom: 16, 
                                 zIndex: 80, 
                                 background: 'rgba(18,18,20,0.85)', 
                                 backdropFilter: 'blur(8px)',
@@ -391,7 +366,6 @@ const BuilderLayoutContent: React.FC = () => {
                     <LiveCanvas />
                 </div>
 
-                {/* 👁️ Live Preview IFrame Area (Z-INDEX 10) */}
                 {isPreviewMode && (
                     <div style={{ 
                         flex: 1, 
@@ -403,6 +377,7 @@ const BuilderLayoutContent: React.FC = () => {
                         zIndex: 10
                     }}>
                         <iframe 
+                            title="Preview Iframe"
                             ref={iframeRef}
                             src={`/?preview=true`} 
                             style={{ 
@@ -417,7 +392,6 @@ const BuilderLayoutContent: React.FC = () => {
                     </div>
                 )}
 
-                {/* SmartSidebar (Z-INDEX 90 / 200) */}
                 {isMobileSheet ? (
                     <AnimatePresence>
                         {isSidebarOpen && (
@@ -441,7 +415,7 @@ const BuilderLayoutContent: React.FC = () => {
                                     drag="y"
                                     dragConstraints={{ top: 0, bottom: 0 }}
                                     dragElastic={0.15}
-                                    onDragEnd={(e, info) => {
+                                    onDragEnd={(_e, info) => {
                                          if (info.offset.y > 120) {
                                               if (snapIndex === 2) setSnapIndex(1);
                                               else { setSnapIndex(0); setIsSidebarOpen(false); }
@@ -457,7 +431,6 @@ const BuilderLayoutContent: React.FC = () => {
                                         display: 'flex', flexDirection: 'column'
                                     }}
                                 >
-                                     {/* Drag Handle trigger */}
                                      <div style={{ width: 45, height: 5, background: '#27272a', borderRadius: 3, margin: '0 auto 16px', cursor: 'grab', flexShrink: 0 }} />
                                      <div style={{ flex: 1, overflowY: 'auto' }}>
                                           <SmartSidebar />

@@ -1,9 +1,8 @@
-import React, { useState, useEffect, Suspense } from 'react';
+import * as React from 'react';
+import { useState, useEffect, Suspense, useMemo } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import axios, { AxiosError } from 'axios';
-import client from '../api/client';
 import { supabase } from '../lib/supabaseClient';
 import {
     LayoutDashboard,
@@ -31,8 +30,6 @@ import SellerProfile from './seller/SellerProfile';
 const ProductEditor = React.lazy(() => import('../components/seller/ProductEditor'));
 import { BuilderProvider } from '../context/BuilderContext';
 import { BuilderLayout } from '../components/builder/BuilderLayout';
-import { useBuilder } from '../context/BuilderContext';
-import cmsApi from '../api/cmsApi';
 import { TourOverlay } from '../components/cms/help/TourOverlay';
 import { BuilderHelpPage } from './builder/BuilderHelpPage';
 import AdminBillingManager from '../components/admin/AdminBillingManager';
@@ -41,8 +38,10 @@ const DomainSettings = React.lazy(() => import('../components/seller/DomainSetti
 import { InstallButton } from '../components/seller/InstallButton';
 import { RecoveryList } from '../components/merchant/RecoveryList';
 import { StoreGenerator } from '../components/seller/StoreGenerator';
+import { AutoSaveManager } from '../components/builder/AutoSaveManager';
+import { GlobalKeyboardShortcuts } from '../components/builder/GlobalKeyboardShortcuts';
+import { BuilderNode, PageMetadata } from '../context/BuilderContext';
 
-// OSTT FIX: Add missing types
 interface DashboardPageNode {
     title: string;
     layout: string[];
@@ -59,7 +58,6 @@ const DEFAULT_CONTENT: DashboardContent = {
     pages: { home: { title: 'Home', layout: [] } } 
 };
 
-// ─── Loading Component ────────────────────────────────────────────────────────
 const OmnoraLoading: React.FC = () => (
     <div style={{
         display: 'flex',
@@ -79,38 +77,6 @@ const OmnoraLoading: React.FC = () => (
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
 );
-
-// ─── Auto-save manager ────────────────────────────────────────────────────────
-const AutoSaveManager: React.FC = () => {
-    const { hasUnsavedChanges, saveDraft } = useBuilder();
-    useEffect(() => {
-        if (!hasUnsavedChanges) return;
-        const id = setInterval(async () => {
-            await saveDraft();
-        }, 30_000);
-        return () => clearInterval(id);
-    }, [hasUnsavedChanges, saveDraft]);
-    return null;
-};
-
-// ─── Global Keyboard Shortcuts ────────────────────────────────────────────────
-const GlobalKeyboardShortcuts: React.FC = () => {
-    // OSTT FIX: removed unused canUndo, canRedo from destructor to bypass missing type error
-    const { undo, redo } = useBuilder();
-    useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if ((e.metaKey || e.ctrlKey) && e.key === 'z') {
-                if (e.shiftKey) { e.preventDefault(); redo(); }
-                else { e.preventDefault(); undo(); }
-            } else if ((e.metaKey || e.ctrlKey) && e.key === 'y') {
-                e.preventDefault(); redo();
-            }
-        };
-        window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [undo, redo]);
-    return null;
-};
 
 const NAV = [
     { id: 'overview',        label: 'Analytics Console', icon: LayoutDashboard },
@@ -168,15 +134,44 @@ export default function SellerDashboard() {
     const [forgeOpen, setForgeOpen] = useState(false);
     const [forgePrompt, setForgePrompt] = useState('');
     const [error, setError] = useState<string | null>(null);
-    const hasFetchedRef = React.useRef(false);
+    const isBuilder = activeTab === 'builder';
 
-    // OSTT FIX: Move hook out of conditional block to satisfy rule of hooks
-    const initialDataMemo = React.useMemo(() => {
-        const homeNode = localContent?.pages?.home as DashboardPageNode | undefined;
+    // 🏗️ Gated Identity Bridge
+    const initialBuilderData = useMemo(() => {
+        if (!localContent?.pages?.home) return undefined;
+        
+        const homeNode = localContent.pages.home as DashboardPageNode;
+        
+        // If data is already in new normalized format
+        const possibleNewData = homeNode as unknown as { nodes: Record<string, BuilderNode>; pages: Record<string, PageMetadata>; activePageId: string };
+        if (possibleNewData.nodes && possibleNewData.pages) {
+            return possibleNewData;
+        }
+
+        // Migration Path: Bridge legacy array-based layout into Registry format
+        const layoutArray = Array.isArray(homeNode.layout) ? homeNode.layout : [];
+        const nodesRegistry: Record<string, BuilderNode> = {};
+        
+        layoutArray.forEach((node: unknown) => {
+            const bNode = node as BuilderNode;
+            if (bNode && bNode.id) nodesRegistry[bNode.id] = bNode;
+        });
+
         return {
-            id: localContent?.id || 'home-root',
-            layout: homeNode?.layout || [],
-            configuration: (localContent as { configuration?: Record<string, unknown> })?.configuration || {}
+            nodes: nodesRegistry,
+            pages: {
+                'home': { 
+                    id: 'home', 
+                    title: 'Home', 
+                    slug: 'home', 
+                    status: 'draft', 
+                    type: 'system', 
+                    lastUpdated: new Date().toISOString(),
+                    createdAt: new Date().toISOString(),
+                    seoMeta: { title: 'Home', description: '' }
+                } as PageMetadata
+            },
+            activePageId: 'home'
         };
     }, [localContent]);
 
@@ -185,63 +180,75 @@ export default function SellerDashboard() {
         if (tab && tab !== activeTab && NAV.some(n => n.id === tab)) setActiveTab(tab);
     }, [searchParams, activeTab]);
 
-    const fetchContent = React.useCallback(async (signal?: AbortSignal) => {
-        if (!isInitialized || !user) return;
+    const fetchContent = React.useCallback(async (_signal?: AbortSignal) => {
+        if (!user) return;
         try {
-            const cmsResult = await cmsApi.get('/cms/dashboard', { signal });
-            if (cmsResult.data?.success) {
-                setLocalContent(cmsResult.data.content);
+            // Atomic Fetch from Kernel Manifest
+            const { data, error: fetchError } = await supabase
+                .from('store_pages')
+                .select('ast_manifest')
+                .eq('tenant_id', user.id)
+                .eq('slug', 'home')
+                .order('is_published', { ascending: false }) // Prefer published
+                .limit(1)
+                .maybeSingle();
+
+            if (fetchError) throw fetchError;
+
+            if (data?.ast_manifest) {
+                // Bridge: Use the ast_manifest as the local content
+                setLocalContent(data.ast_manifest as unknown as DashboardContent);
                 setError(null);
+            } else {
+                // Initialize default if missing
+                console.log('[Omnora OS] No manifest found. Initializing skeleton...');
+                setLocalContent(DEFAULT_CONTENT);
             }
         } catch (err: unknown) {
-            if (axios.isCancel(err)) return;
-            
-            const axiosError = err as AxiosError<unknown>; 
-            if (axiosError.response?.status === 401) {
-                console.error('[Omnora Auth] Unauthorized Access. Redirecting to Login.');
-                await supabase.auth.signOut();
-                window.location.replace('/login');
-                return;
-            }
-
-            console.error('[Omnora CMS] Fetch Failure:', err);
-            setLocalContent(DEFAULT_CONTENT);
-            setError(`Kernel Sync Failure (${err.response?.status || 'Network Error'})`);
+             console.error('[Omnora OS] Kernel Sync Failure:', err);
+             setLocalContent(DEFAULT_CONTENT);
+             setError(`Kernel Link Error`);
         } finally {
             setLoading(false);
         }
-    }, [isInitialized, user]);
+    }, [user]);
 
     useEffect(() => { 
-        if (hasFetchedRef.current) return;
-        hasFetchedRef.current = true;
-
-        const controller = new AbortController();
-        fetchContent(controller.signal); 
-
-        return () => controller.abort();
-    }, [fetchContent]);
+        if (user) {
+            const controller = new AbortController();
+            fetchContent(controller.signal); 
+            return () => controller.abort();
+        }
+    }, [user, fetchContent]);
 
     const save = async () => {
+        if (!user) return;
         setSaveStatus('saving');
         try {
-            await client.put('/cms/content', { content: localContent });
+            const { error: upsertError } = await supabase
+                .from('store_pages')
+                .upsert({
+                    tenant_id: user.id,
+                    slug: 'home',
+                    ast_manifest: localContent,
+                    is_published: true
+                }, { onConflict: 'tenant_id, slug, is_published' });
+
+            if (upsertError) throw upsertError;
+            
             setSaveStatus('saved');
             setTimeout(() => setSaveStatus('idle'), 3000);
-        } catch {
+        } catch (err) {
+            console.error('[Omnora OS] Deployment Failure:', err);
             setSaveStatus('error');
         }
     };
+    if (!isInitialized || loading) return <div style={{ height: '100vh', background: '#050505', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '12px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em' }}>Initializing Omnora Kernel...</div>;
 
-    if (!isInitialized || loading) return <div style={{ height: '100vh', background: '#050505', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>Initializing Omnora Kernel...</div>;
-
-    // OSTT FIX: Standardized profile property extraction and fallback
-    const storeName = (profile && 'store_name' in profile ? profile.store_name : undefined) 
+    const storeName = profile?.display_name 
                     || user?.user_metadata?.store_name 
                     || user?.user_metadata?.full_name 
                     || 'Omnora Store';
-    
-    const isBuilder = activeTab === 'builder';
 
     return (
         <div className={`seller-dashboard ${isBuilder ? 'builder-active' : ''}`}>
@@ -325,21 +332,55 @@ export default function SellerDashboard() {
                         {activeTab === 'help' && <TabErrorBoundary tabName="Guide"><BuilderHelpPage /></TabErrorBoundary>}
                     </div>
 
-                    {isBuilder && (
-                        <div style={{ position: 'fixed', inset: 0, zIndex: 1000, background: '#050505' }}>
-                            <BuilderProvider
-                                initialData={initialDataMemo}
-                                isPreview={false}
-                                tenantId={user?.id}
-                                userName={user?.user_metadata?.full_name || 'Your'}
-                            >
-                                <AutoSaveManager />
-                                <GlobalKeyboardShortcuts />
-                                <BuilderLayout />
-                                <TourOverlay isOpen={tourOpen} onClose={() => { setTourOpen(false); const p = new URLSearchParams(searchParams); p.delete('tour'); setSearchParams(p); }} />
-                                <button type="button" onClick={() => setActiveTab('overview')} style={{ position: 'fixed', bottom: '32px', left: '50%', transform: 'translateX(-50%)', zIndex: 1001, padding: '12px 24px', background: 'rgba(5, 5, 5, 0.8)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: '100px', color: 'rgba(255, 255, 255, 0.6)', fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', cursor: 'pointer' }} className="exit-builder-btn">Exit Designer</button>
-                                <style>{`.exit-builder-btn:hover { background: #fff !important; color: #000 !important; }`}</style>
-                            </BuilderProvider>
+                    {activeTab === 'builder' && (
+                        <div style={{ position: 'fixed', inset: 0, zIndex: 1000, background: '#09090b', overflow: 'hidden' }}>
+                            {!isInitializing && user ? (
+                                <BuilderProvider
+                                    initialData={initialBuilderData}
+                                    isPreview={false}
+                                    tenantId={user?.id || ''}
+                                    userName={profile?.display_name || 'Your Store'}
+                                >
+                                    <AutoSaveManager />
+                                    <GlobalKeyboardShortcuts />
+                                    <BuilderLayout />
+                                    <TourOverlay 
+                                        isOpen={tourOpen} 
+                                        onClose={() => { 
+                                            setTourOpen(false); 
+                                            const p = new URLSearchParams(searchParams); 
+                                            p.delete('tour'); 
+                                            setSearchParams(p); 
+                                        }} 
+                                    />
+                                    <button 
+                                        type="button" 
+                                        onClick={() => setActiveTab('overview')} 
+                                        style={{ 
+                                            position: 'fixed', 
+                                            bottom: '24px', 
+                                            left: '50%', 
+                                            transform: 'translateX(-50%)', 
+                                            zIndex: 1001, 
+                                            padding: '8px 20px', 
+                                            background: 'rgba(15, 16, 17, 0.9)', 
+                                            backdropFilter: 'blur(10px)', 
+                                            border: '1px solid rgba(255, 255, 255, 0.08)', 
+                                            borderRadius: '20px', 
+                                            color: '#8B8F97', 
+                                            fontSize: '12px', 
+                                            fontWeight: 800, 
+                                            cursor: 'pointer' 
+                                        }}
+                                    >
+                                        ← Exit Builder
+                                    </button>
+                                </BuilderProvider>
+                            ) : (
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'rgba(255,255,255,0.4)', fontSize: '12px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em' }}>
+                                    Initializing Omnora Designer...
+                                </div>
+                            )}
                         </div>
                     )}
 

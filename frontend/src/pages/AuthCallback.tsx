@@ -20,7 +20,7 @@ const AuthCallback: React.FC = () => {
             // Await full hydration of the user profile from AuthContext
             if (profile) {
                 // Priority: Use the resolved profile role, defaulting to customer
-                const targetRole = profile.role || 'customer';
+                const targetRole = profile.metadata?.role || 'customer';
                 console.log(`[AuthCallback] Terminal Intent for ${user.email}: ${targetRole}`);
 
                 // Clean up transition state

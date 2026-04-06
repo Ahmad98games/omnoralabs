@@ -39,7 +39,7 @@ export default defineConfig({
           /^\/registerSW\.js$/,
           /supabase\.co/,
           /stripe\.com/,
-          /^\/static\//,
+          /vercel\.app/,
         ],
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
         globIgnores: [

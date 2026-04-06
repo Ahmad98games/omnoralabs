@@ -289,7 +289,20 @@ export const useBuilderStore = create<BuilderState>()(
                 const activeId = get().activePageId;
                 if (!activeId) return;
 
+                // Validate the node has the minimum required shape before mutating state.
+                // Catches any caller passing a partial shape (e.g. { type, pageId, index }).
+                if (!node.id || !node.type) {
+                    console.error('[BuilderStore.addNode] Malformed node — missing id or type. Insertion aborted.', node);
+                    return;
+                }
+
                 set(produce((draft: BuilderState) => {
+                    // Guard: nodes[activeId] may be undefined if the page was
+                    // created moments ago or loaded from a blank/corrupted state.
+                    // Initialize to an empty array rather than crashing on .push().
+                    if (!Array.isArray(draft.nodes[activeId])) {
+                        draft.nodes[activeId] = [];
+                    }
                     draft.nodes[activeId].push(node);
                     draft.nodePageIndex[node.id] = activeId;
                     draft.lastDroppedNodeId = node.id;

@@ -1,46 +1,36 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import * as React from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabaseClient';
 import { CinematicLoader } from '../components/ui/CinematicLoader';
 
-export interface CustomerProfile {
-    id: string;
-    email: string;
-    full_name: string;
-    avatar_url?: string;
-    role: 'customer';
-    created_at: string;
-}
-
 export interface MerchantProfile {
     id: string;
+    display_name: string;
     email: string;
-    store_name: string;
-    theme_settings?: Record<string, unknown>;
-    role: 'seller' | 'admin' | 'super-admin';
-    created_at: string;
-    full_name?: string; 
-    avatar_url?: string; 
+    store_slug?: string;
+    subscription?: string;
+    metadata?: {
+        role?: string;
+        firstName?: string;
+        lastName?: string;
+    };
+    created_at?: string;
 }
 
 export interface AuthContextValue {
     user: User | null;
-    profile: MerchantProfile | CustomerProfile | null;
+    profile: MerchantProfile | null;
     isInitializing: boolean;
     isInitialized: boolean;
-    loading: boolean;
     isAuthenticated: boolean;
-    isAdmin: boolean;
-    isSeller: boolean;
-    isCustomer: boolean;
-    isAuthModalOpen: boolean;
-    authModalMode: 'login' | 'signup';
-    setAuthModalOpen: (open: boolean, mode?: 'login' | 'signup') => void;
-    login: (email: string, password: string, role?: string) => Promise<unknown>;
-    register: (name: string, email: string, password: string, role?: string, storeName?: string) => Promise<unknown>;
+    signIn: (email: string, password: string) => Promise<void>;
+    signUp: (email: string, password: string, storeName: string) => Promise<void>;
+    login: (email: string, password: string, role?: string) => Promise<void>;
+    register: (name: string, email: string, password: string, role?: string, storeName?: string) => Promise<void>;
     loginWithGoogle: () => Promise<void>;
     signOut: () => Promise<void>;
-    logout: () => Promise<void>; 
+    logout: () => Promise<void>;
     resetPassword: (email: string) => Promise<void>;
     updateProfile: (data: Partial<MerchantProfile>) => Promise<void>;
     resetAuth: () => void;
@@ -50,225 +40,193 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
-    const [profile, setProfile] = useState<MerchantProfile | CustomerProfile | null>(null);
+    const [profile, setProfile] = useState<MerchantProfile | null>(null);
     const [isInitializing, setIsInitializing] = useState(true);
-    const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-    const [authModalMode, setAuthModalMode] = useState<'login' | 'signup'>('login');
+    const [isProfileLoading, setIsProfileLoading] = useState(false);
+    const alreadyRedirectingRef = useRef(false);
 
-    const setAuthModalOpenCallback = useCallback((open: boolean, mode: 'login' | 'signup' = 'login') => {
-        setAuthModalMode(mode);
-        setIsAuthModalOpen(open);
-    }, []);
+    const ensuresMerchantProfile = async (sbUser: User, storeName?: string) => {
+        console.log('[AuthContext] Checking merchant profile for:', sbUser.id);
+        const { data: existing, error: fetchError } = await supabase
+            .from('merchants')
+            .select('id')
+            .eq('id', sbUser.id)
+            .maybeSingle();
 
-    const resetAuth = useCallback(async () => {
-        await supabase.auth.signOut();
-        Object.keys(localStorage).forEach(key => {
-            if (key.startsWith('omnora-')) localStorage.removeItem(key);
-        });
-        window.location.href = '/login';
-    }, []);
-
-    const ensureProfile = useCallback(async (
-        sbUser: User | { id: string; email?: string; user_metadata: Record<string, unknown> }, 
-        name?: string, 
-        role: string | null = null, 
-        storeName?: string
-    ) => {
-        try {
-            const savedRole = localStorage.getItem('omnora_selected_role');
-            const targetRole = role || sbUser.user_metadata?.role || savedRole || 'customer';
-            
-            console.log(`[Auth Profile] Commencing Convergence for ${sbUser.email} as ${targetRole}`);
-
-            const fallbackName = name || (sbUser.user_metadata?.full_name as string) || sbUser.email?.split('@')[0] || '';
-
-            if (targetRole === 'seller' || targetRole === 'admin' || targetRole === 'super-admin') {
-                const { data: merchant } = await supabase.from('merchants').select('*').eq('id', sbUser.id).maybeSingle();
-                if (merchant) {
-                    console.log(`[Auth Profile] Merchant Record Found: ${merchant.store_name}`);
-                    setProfile(merchant as MerchantProfile);
-                    return merchant;
-                }
-            } else {
-                const { data: customer } = await supabase.from('customers').select('*').eq('id', sbUser.id).maybeSingle();
-                if (customer) {
-                    console.log(`[Auth Profile] Customer Record Found: ${customer.full_name}`);
-                    setProfile({ ...customer, role: 'customer' } as CustomerProfile);
-                    return customer;
-                }
-            }
-
-            console.log('[Auth Profile] No record found in target table. Performing global cross-check...');
-            const { data: altMerchant } = await supabase.from('merchants').select('*').eq('id', sbUser.id).maybeSingle();
-            if (altMerchant) { 
-                console.log('[Auth Profile] Cross-Check Match: MERCHANT');
-                setProfile(altMerchant as MerchantProfile); return altMerchant; 
-            }
-            
-            const { data: altCustomer } = await supabase.from('customers').select('*').eq('id', sbUser.id).maybeSingle();
-            if (altCustomer) { 
-                if (targetRole === 'seller' || targetRole === 'admin' || targetRole === 'super-admin') {
-                    console.log(`[Auth Profile] Upgrading CUSTOMER to ${targetRole}`);
-                    const finalStoreName = storeName || `${fallbackName}'s Store`;
-                    const { data: upgradedMerchant, error } = await supabase.from('merchants').insert({
-                        id: sbUser.id,
-                        email: sbUser.email,
-                        password_hash: altCustomer.password_hash || 'auth-managed',
-                        full_name: altCustomer.full_name,
-                        store_name: finalStoreName,
-                        role: targetRole,
-                    }).select().maybeSingle();
-                    if (!error && upgradedMerchant) {
-                        setProfile(upgradedMerchant as MerchantProfile);
-                        return upgradedMerchant;
-                    }
-                }
-                console.log('[Auth Profile] Cross-Check Match: CUSTOMER');
-                setProfile({ ...altCustomer, role: 'customer' } as CustomerProfile); return altCustomer; 
-            }
-
-            console.log(`[Auth Profile] Initializing new ${targetRole} record for ${sbUser.id}...`);
-            if (targetRole === 'seller' || targetRole === 'admin' || targetRole === 'super-admin') {
-                const finalStoreName = storeName || (sbUser.user_metadata?.store_name as string) || `${fallbackName}'s Store`;
-                const { data: newMerchant, error } = await supabase.from('merchants').insert({
-                    id: sbUser.id,
-                    email: sbUser.email,
-                    password_hash: 'auth-managed',
-                    full_name: fallbackName,
-                    store_name: finalStoreName,
-                    role: targetRole,
-                }).select().maybeSingle();
-                
-                if (error) {
-                    console.error('[Auth Profile] Merchant Provisioning Failed:', error);
-                    throw error;
-                }
-                
-                console.log(`[Auth Profile] Provisioned MERCHANT: ${newMerchant?.id}`);
-                if (newMerchant) setProfile(newMerchant as MerchantProfile);
-                return newMerchant;
-            } else {
-                const { data: newCustomer, error } = await supabase.from('customers').insert({
-                    id: sbUser.id,
-                    email: sbUser.email,
-                    password_hash: 'auth-managed',
-                    full_name: fallbackName,
-                }).select().maybeSingle();
-                
-                if (error) {
-                    console.error('[Auth Profile] Customer Provisioning Failed:', error);
-                    throw error;
-                }
-                
-                console.log(`[Auth Profile] Provisioned CUSTOMER: ${newCustomer?.id}`);
-                const fullCustomer = newCustomer ? { ...newCustomer, role: 'customer' } as CustomerProfile : null;
-                if (fullCustomer) setProfile(fullCustomer);
-                return fullCustomer;
-            }
-        } catch (err) {
-            console.error('[Auth Profile] CONVERGENCE_ERROR:', err);
-            return null;
+        if (fetchError) {
+            console.error('[AuthContext] Profile fetch error:', fetchError);
         }
-    }, []);
 
-    const loginWithGoogle = async () => {
-        const { error } = await supabase.auth.signInWithOAuth({
-            provider: 'google',
-            options: {
-                redirectTo: `${window.location.origin}/auth/callback`,
-            },
-        });
-        if (error) throw error;
+        if (!existing) {
+            console.log('[AuthContext] No profile found. Creating...');
+            const finalDisplayName = storeName || 
+                             sbUser.user_metadata?.store_name || 
+                             sbUser.user_metadata?.full_name ||
+                             sbUser.email?.split('@')[0] || 
+                             'My Omnora Store';
+
+            const slug = finalDisplayName.toLowerCase().replace(/\s+/g, '-');
+
+            const { error: insertError } = await supabase.from('merchants').insert({
+                id: sbUser.id,
+                display_name: finalDisplayName,
+                email: sbUser.email ?? '',
+                store_slug: slug,
+                subscription: 'basic',
+                metadata: {
+                    role: sbUser.user_metadata?.role || 'seller'
+                }
+            });
+
+            if (insertError) {
+                console.error('[AuthContext] Profile creation failed:', insertError);
+            } else {
+                console.log('[AuthContext] Profile created successfully.');
+            }
+        } else {
+             console.log('[AuthContext] Existing profile found.');
+        }
     };
 
     useEffect(() => {
-        let isMounted = true; 
+        let mounted = true;
 
-        const emergencyTimeout = setTimeout(() => {
-            if (isMounted) {
-                console.warn('[Auth Shield] EMERGENCY_RESET: Forcing Kernel to settle.');
-                setIsInitializing(false);
-            }
-        }, 8000);
-
-        const initialize = async () => {
+        const init = async () => {
+            console.log('[AuthContext] Initializing Kernel Auth...');
             try {
-                const { data: { session }, error } = await supabase.auth.getSession();
-                if (error) throw error;
+                // getUser() verifies with Supabase server every time (essential for Vercel)
+                const { data: { user: verifiedUser }, error } = await supabase.auth.getUser();
+
+                if (!mounted) return;
+
+                if (error || !verifiedUser) {
+                    console.log('[AuthContext] No active session found.');
+                    setUser(null);
+                    setProfile(null);
+                    return;
+                }
+
+                console.log('[AuthContext] User verified:', verifiedUser.id);
+                setUser(verifiedUser);
                 
-                if (isMounted) {
-                    if (session?.user) {
-                        setUser(session.user);
-                        await ensureProfile(session.user);
-                    } else {
-                        setUser(null);
-                        setProfile(null);
-                    }
-                }
-            } catch (err) {
-                console.error('[Auth Shield] Initialization Failure:', err);
+                // 🛡️ NON-BLOCKING HYDRATION: Start profile work but don't hold up the app
+                setIsProfileLoading(true);
+                ensuresMerchantProfile(verifiedUser).then(async () => {
+                   if (!mounted) return;
+                   console.log('[AuthContext] Fetching full profile...');
+                   const { data: merchantProfile } = await supabase
+                        .from('merchants')
+                        .select('*')
+                        .eq('id', verifiedUser.id)
+                        .maybeSingle();
+
+                   if (mounted) setProfile(merchantProfile);
+                }).catch(() => {
+                    // Fail silently but log internally if needed
+                }).finally(() => {
+                   if (mounted) setIsProfileLoading(false);
+                });
+            } catch {
+                if (mounted) { setUser(null); setProfile(null); }
             } finally {
-                if (isMounted) {
-                    setIsInitializing(false);
-                    clearTimeout(emergencyTimeout);
-                }
+                if (mounted) setIsInitializing(false);
             }
         };
 
-        initialize();
+        init();
 
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-            console.log(`[Auth Pulse] ${event} detected.`);
-            
-            if (isMounted) {
-                if (session?.user) {
+        // 🛡️ KERNEL SAFETY TIMEOUT (Task 8.2)
+        // Ensure the app NEVER hangs on the loader indefinitely, even if Supabase is slow/blocked.
+        const safetyTimeout = setTimeout(() => {
+            if (mounted && isInitializing) {
+                console.warn('[AuthContext] Kernel Boot Timeout. Forcing transition...');
+                setIsInitializing(false);
+            }
+        }, 12000); // 12-second grace period
+
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(
+            async (event, session) => {
+                if (!mounted) return;
+
+                if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session?.user) {
                     setUser(session.user);
-                    await ensureProfile(session.user);
-                } else if (event === 'SIGNED_OUT') {
+                    await ensuresMerchantProfile(session.user);
+                    const { data: p } = await supabase
+                        .from('merchants').select('*').eq('id', session.user.id).single();
+                    if (mounted) setProfile(p);
+                    setIsInitializing(false);
+                }
+
+                if (event === 'SIGNED_OUT') {
                     setUser(null);
                     setProfile(null);
                 }
             }
-        });
+        );
 
         return () => {
-            isMounted = false;
-            clearTimeout(emergencyTimeout);
+            mounted = false;
+            clearTimeout(safetyTimeout);
             subscription.unsubscribe();
         };
-    }, [ensureProfile]);
+    }, []); 
 
-    const login = async (email: string, password: string, requestedRole?: string) => {
+    const signIn = async (email: string, password: string) => {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        if (data.user) {
-            setUser(data.user);
-            const prof = await ensureProfile(data.user, undefined, requestedRole);
-            return { ...data.user, ...(prof as Record<string, unknown>) };
-        }
-        return data.user;
+
+        await ensuresMerchantProfile(data.user);
+        const { data: p } = await supabase
+            .from('merchants').select('*').eq('id', data.user.id).single();
+        setUser(data.user);
+        setProfile(p);
+
+        // Explicit physical redirect (essential for Vercel SPA state)
+        window.location.href = '/seller';
     };
 
-    const register = async (name: string, email: string, password: string, role = 'customer', storeName?: string) => {
+    const signUp = async (email: string, password: string, storeName: string) => {
         const { data, error } = await supabase.auth.signUp({
             email,
             password,
-            options: { 
-                data: { 
-                    full_name: name,
-                    store_name: storeName || (role === 'seller' ? `${name}'s Store` : null),
-                    role: role 
-                } 
-            }
+            options: { data: { store_name: storeName } }
         });
         if (error) throw error;
-        if (data.user) {
-            setUser(data.user);
-            const prof = await ensureProfile(data.user, name, role, storeName);
-            return { ...data.user, ...(prof as Record<string, unknown>) };
-        }
-        return data.user;
+        if (!data.user) throw new Error('Sign up failed — no user returned');
+
+        await supabase.from('merchants').upsert({
+            id: data.user.id,
+            store_name: storeName,
+            email,
+            role: 'seller',
+            created_at: new Date().toISOString(),
+        });
+
+        window.location.href = '/seller';
     };
+
+    const loginWithGoogle = async () => {
+        const { error } = await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: { redirectTo: `${window.location.origin}/auth/callback` }
+        });
+        if (error) throw error;
+    };
+
+    const resetAuth = useCallback(async () => {
+        if (alreadyRedirectingRef.current) return;
+        alreadyRedirectingRef.current = true;
+
+        await supabase.auth.signOut();
+
+        Object.keys(localStorage)
+            .filter(k => k.startsWith('omnora-'))
+            .forEach(k => localStorage.removeItem(k));
+
+        setUser(null);
+        setProfile(null);
+        window.location.href = '/login';
+    }, []);
 
     const resetPassword = async (email: string) => {
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
@@ -277,43 +235,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (error) throw error;
     };
 
-    const signOut = async () => {
-        await supabase.auth.signOut();
-    };
-
     const updateProfile = async (data: Partial<MerchantProfile>) => {
         if (!user) return;
-        const { error } = await supabase
-            .from('merchants')
-            .update(data)
-            .eq('id', user.id);
+        const { error } = await supabase.from('merchants').update(data).eq('id', user.id);
         if (error) throw error;
-        
-        setProfile(prev => {
-            if (!prev) return null;
-            if (prev.role === 'customer') return prev;
-            return { ...prev, ...data } as MerchantProfile;
-        });
+        setProfile(prev => prev ? { ...prev, ...data } : null);
     };
+
+    // --- Component Compatibility Mappings ---
+    const login = async (email: string, password: string) => signIn(email, password);
+    const register = async (name: string, email: string, password: string, _role?: string, storeName?: string) => 
+        signUp(email, password, storeName || `${name}'s Store`);
 
     if (isInitializing) return <CinematicLoader />;
 
     return (
-        <AuthContext.Provider value={{ 
-            user, profile, 
-            isInitializing, 
+        <AuthContext.Provider value={{
+            user, profile,
+            isInitializing,
+            isProfileLoading,
             isInitialized: !isInitializing,
-            loading: isInitializing,
             isAuthenticated: !!user,
-            isAdmin: profile?.role === 'admin' || profile?.role === 'super-admin',
-            isSeller: profile?.role === 'seller',
-            isCustomer: !profile || profile?.role === 'customer',
-            isAuthModalOpen,
-            authModalMode,
-            setAuthModalOpen: setAuthModalOpenCallback,
-            login, loginWithGoogle, register, signOut, 
-            logout: signOut, 
-            resetPassword, updateProfile, resetAuth 
+            isSeller: (profile?.metadata?.role === 'seller' || profile?.metadata?.role === 'admin'),
+            isAdmin: profile?.metadata?.role === 'admin',
+            loading: isInitializing || (!!user && isProfileLoading), // 🛡️ Smart Loading
+            signIn, signUp, 
+            login, register, // Internal compatibility
+            loginWithGoogle,
+            signOut: resetAuth,
+            logout: resetAuth,
+            resetPassword,
+            updateProfile,
+            resetAuth
         }}>
             {children}
         </AuthContext.Provider>
