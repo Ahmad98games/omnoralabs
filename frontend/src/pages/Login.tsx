@@ -21,22 +21,44 @@ const Login: React.FC = () => {
     const [error, setError] = useState<string>('');
     const [loadingState, setLoadingState] = useState(false);
 
-    // OSTT FIX: React Context Propagation Listener
-    // Wait for the AuthContext to fully hydrate 'user' and 'profile' BEFORE navigating.
+    // ─── Post-auth redirect guard ─────────────────────────────────────────────
+    // Waits for AuthContext to hydrate both user + profile before navigating.
+    // BUG this fixed: if ensureProfile() returned null (DB error, RLS, network),
+    // profile stayed null forever, loadingState was never reset (it only reset
+    // in the catch block), and the user saw an infinite "Verifying..." spinner
+    // with no error message and no way to recover.
+    //
+    // Fix:
+    //   - If user + profile both arrive → navigate immediately (happy path)
+    //   - If user arrives but profile is still null after 6s → bail with error
     useEffect(() => {
         if (user && profile) {
             const role = profile.role || 'customer';
-            console.log("[Login Guard] Identity established. Redirecting role:", role);
-            
+            console.log('[Login Guard] Identity established. Redirecting role:', role);
+            localStorage.removeItem('omnora_selected_role');
             if (role === 'admin' || role === 'super-admin') {
-                navigate('/admin/dashboard');
+                navigate('/admin/dashboard', { replace: true });
             } else if (role === 'seller') {
-                navigate('/seller/dashboard?tab=builder');
+                navigate('/seller/dashboard?tab=builder', { replace: true });
             } else {
-                navigate('/');
+                navigate('/', { replace: true });
             }
         }
     }, [user, profile, navigate]);
+
+    // Safety net: if user authenticated but profile never arrived within 6s,
+    // reset the loading state and show a recoverable error.
+    useEffect(() => {
+        if (!user || profile) return; // Nothing to watch, or already resolved
+
+        const timeout = setTimeout(() => {
+            console.error('[Login Guard] Profile hydration timeout. Resetting.');
+            setLoadingState(false);
+            setError('Profile sync timed out. Please try again or contact support.');
+        }, 6000);
+
+        return () => clearTimeout(timeout);
+    }, [user, profile]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;

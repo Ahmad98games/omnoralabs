@@ -15,13 +15,30 @@ export const AuthModal: React.FC = () => {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
-    // Sync mode when modal opens
+    // Sync mode when modal opens (Adjust state when prop changes - React recommendation)
+    const [prevOpen, setPrevOpen] = useState(isAuthModalOpen);
+    if (isAuthModalOpen && !prevOpen) {
+        setPrevOpen(true);
+        setIsLogin(authModalMode === 'login');
+        setError('');
+    } else if (!isAuthModalOpen && prevOpen) {
+        setPrevOpen(false);
+    }
+
+    // Profile arrives asynchronously via onAuthStateChange → AuthContext.
+    // Watch it here to navigate once hydrated. login() now returns raw User (no role).
+    const { user, profile: authProfile } = useAuth();
     useEffect(() => {
-        if (isAuthModalOpen) {
-            setIsLogin(authModalMode === 'login');
-            setError('');
+        if (!isAuthModalOpen || !user || !authProfile) return;
+        setAuthModalOpen(false);
+        // Modal will unrender; no need to setLoading(false) here.
+        if (authProfile.role === 'admin' || authProfile.role === 'super-admin') {
+            navigate('/admin/dashboard', { replace: true });
+        } else if (authProfile.role === 'seller') {
+            navigate('/seller/dashboard?tab=builder', { replace: true });
         }
-    }, [isAuthModalOpen, authModalMode]);
+        // Customers stay on the storefront page they were on
+    }, [user, authProfile, isAuthModalOpen, navigate, setAuthModalOpen]);
 
     if (!isAuthModalOpen) return null;
 
@@ -31,28 +48,15 @@ export const AuthModal: React.FC = () => {
         setLoading(true);
 
         try {
-            let authenticatedUser;
             if (isLogin) {
-                authenticatedUser = await login(email, password);
+                await login(email, password);
             } else {
-                authenticatedUser = await signUp(name, email, password, 'seller', storeName); 
+                await signUp(name, email, password, 'seller', storeName);
             }
-            
-            setAuthModalOpen(false);
-
-            // Precision Post-Login Redirection based on Role
-            if (authenticatedUser?.role === 'admin' || authenticatedUser?.role === 'super-admin') {
-                navigate('/admin/dashboard');
-            } else if (authenticatedUser?.role === 'seller') {
-                navigate('/seller/dashboard?tab=builder');
-            } else {
-                navigate('/');
-            }
-
+            // Navigation handled by the useEffect above once profile hydrates.
         } catch (err: unknown) {
             const msg = (err as { message?: string }).message || 'Authentication failed. Please try again.';
             setError(msg);
-        } finally {
             setLoading(false);
         }
     };
